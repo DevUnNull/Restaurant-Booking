@@ -1,3 +1,6 @@
+## 📊 Link Sheet
+[Xem Google Sheet tại đây](https://url-shortener.me/4PMR)
+
 # Restaurant-Booking#
 Hướng dẫn quy ước và quy trình làm việc với Git cho team.
 ---
