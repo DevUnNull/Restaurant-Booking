@@ -2,7 +2,7 @@
 [Xem Google Sheet phân chia công việc tại đây](https://url-shortener.me/4PMR)
 
 ## 📊 Context Diagram
-[Google Sheet Link](https://url-shortener.me/4UAL)
+[Google Sheet Link Context diagram](https://url-shortener.me/4UAL)
 
 # Restaurant-Booking#
 Hướng dẫn quy ước và quy trình làm việc với Git cho team.
