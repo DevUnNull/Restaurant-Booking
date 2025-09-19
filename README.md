@@ -4,6 +4,9 @@
 ## 📊 Context Diagram
 [Google Sheet Link Context diagram](https://url-shortener.me/4UAL)
 
+## 📊 UseCase
+[Link sơ đồ UseCase](https://drive.google.com/file/d/1pGkV6XPxAEofac2WvJl8cBxqgSiHDlr8/view?usp=sharing)
+
 # Restaurant-Booking#
 Hướng dẫn quy ước và quy trình làm việc với Git cho team.
 ---
