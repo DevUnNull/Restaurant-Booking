@@ -7,6 +7,10 @@
 ## 📊 UseCase
 [Link sơ đồ UseCase](https://drive.google.com/file/d/1pGkV6XPxAEofac2WvJl8cBxqgSiHDlr8/view?usp=sharing)
 
+## 📊 Database
+[Link DB](https://dbdiagram.io/d/68ceace1960f6d821a071a95)
+
+
 # Restaurant-Booking#
 Hướng dẫn quy ước và quy trình làm việc với Git cho team.
 ---
