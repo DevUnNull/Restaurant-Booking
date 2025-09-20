@@ -8,7 +8,7 @@
 [Link sơ đồ UseCase](https://drive.google.com/file/d/1pGkV6XPxAEofac2WvJl8cBxqgSiHDlr8/view?usp=sharing)
 
 ## 📊 Database
-[Link DB](https://dbdiagram.io/d/68ceace1960f6d821a071a95)
+[Link DB](https://dbdiagram.io/d/68cecd0a960f6d821a093740)
 
 
 # Restaurant-Booking#
