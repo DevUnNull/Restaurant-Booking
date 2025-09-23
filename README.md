@@ -1,8 +1,8 @@
 ## 📊 Link Sheet chia công việc
-[Xem Google Sheet phân chia công việc tại đây](https://url-shortener.me/4PMR)
+[Google Sheet Link phân chia công việc tại đây](https://docs.google.com/spreadsheets/d/1atsNKm6Y-JRcvNQi7eG9-CXlm_pNgXvSGurxGQ6UhsI/edit?gid=1883777943#gid=1883777943)
 
 ## 📊 Context Diagram
-[Google Sheet Link Context diagram](https://url-shortener.me/4UAL)
+[Google Sheet Link Context diagram](https://docs.google.com/spreadsheets/d/1atsNKm6Y-JRcvNQi7eG9-CXlm_pNgXvSGurxGQ6UhsI/edit?gid=1639159076#gid=1639159076)
 
 ## 📊 UseCase
 [Link sơ đồ UseCase](https://drive.google.com/file/d/1pGkV6XPxAEofac2WvJl8cBxqgSiHDlr8/view?usp=sharing)
