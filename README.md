@@ -13,6 +13,9 @@
 ## 📊 UI
 [Link giao diện phác thảo](https://www.figma.com/design/iE6EyCehhRPNBPADefjhcz/Untitled?node-id=2-3770&t=cdVCvv1pVdqxcqDg-1)
 
+## 📊 SRD
+[Link SRD](https://docs.google.com/document/d/1NGVhm4wpiW2xgVnAT0Xw9Cm6M1-uhOuG/edit)
+
 # Restaurant-Booking#
 Hướng dẫn quy ước và quy trình làm việc với Git cho team.
 ---
