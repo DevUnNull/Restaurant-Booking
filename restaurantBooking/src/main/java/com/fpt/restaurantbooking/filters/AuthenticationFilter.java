@@ -27,24 +27,26 @@ public class AuthenticationFilter implements Filter {
     
     // URLs that don't require authentication
     private static final List<String> PUBLIC_URLS = Arrays.asList(
-        "/login",
-        "/register",
-        "/",
-        "/home",
-        "/email-verification",
-        "/verify-email",
-        "/verify-otp",
-        "/resend-otp",
-        "/resend-verification",
-        "/logout",
-        "/restaurant-detail",
-        "/api/public/",
-        "/static/",
-        "/css/",
-        "/js/",
-        "/images/",
-        "/uploads/",
-        "/error"
+            "/login",
+            "/register",
+            "/",
+            "/home",
+            "/forgot-password",
+            "/reset-password",
+            "/email-verification",
+            "/verify-email",
+            "/verify-otp",
+            "/resend-otp",
+            "/resend-verification",
+            "/logout",
+            "/restaurant-detail",
+            "/api/public/",
+            "/static/",
+            "/css/",
+            "/js/",
+            "/images/",
+            "/uploads/",
+            "/error"
     );
     
     // URLs that require admin role
