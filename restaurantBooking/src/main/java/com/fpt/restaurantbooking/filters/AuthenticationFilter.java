@@ -32,6 +32,7 @@ public class AuthenticationFilter implements Filter {
             "/",
             "/home",
             "/forgot-password",
+            "/reset-password",
             "/email-verification",
             "/verify-email",
             "/verify-otp",
