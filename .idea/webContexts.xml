@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebContextManager">
+    <option name="state">
+      <map>
+        <entry key="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/adminlte/index.html" value="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/adminlte" />
+        <entry key="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/index.html" value="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF" />
+        <entry key="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/sidebar.jsp" value="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views" />
+        <entry key="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/adminlte/index.html" value="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/adminlte" />
+        <entry key="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/dashboard.jsp" value="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp" />
+        <entry key="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp/index.html" value="file://$PROJECT_DIR$/restaurantBooking/src/main/webapp" />
+      </map>
+    </option>
+  </component>
+</project>

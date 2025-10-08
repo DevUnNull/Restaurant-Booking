@@ -221,3 +221,76 @@ CREATE INDEX idx_user_id ON Email_Verification (user_id);
 CREATE INDEX idx_otp_code ON Email_Verification (otp_code);
 CREATE INDEX idx_reset_token ON Email_Verification (reset_token);
 CREATE INDEX idx_expiration_time ON Email_Verification (expiration_time);
+
+
+-- Create Payments table
+CREATE TABLE Payments (
+                          payment_id INT AUTO_INCREMENT PRIMARY KEY,
+                          reservation_id INT NOT NULL,
+                          payment_method VARCHAR(50) NOT NULL,   -- Ví dụ: Cash, Credit Card, E-Wallet
+                          payment_status VARCHAR(20) NOT NULL,   -- Pending, Completed, Failed, Refunded
+                          payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                          amount BIGINT NOT NULL,
+                          promotion_id INT,
+                          transaction_id VARCHAR(100),           -- Mã giao dịch (nếu có từ cổng thanh toán)
+                          notes TEXT,
+                          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                          updated_at DATETIME,
+
+                          FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id) ON DELETE CASCADE,
+                          FOREIGN KEY (promotion_id) REFERENCES Promotions(promotion_id)
+);
+
+-- Indexes for faster queries
+CREATE INDEX idx_reservation_id ON Payments (reservation_id);
+CREATE INDEX idx_promotion_id ON Payments (promotion_id);
+CREATE INDEX idx_payment_status ON Payments (payment_status);
+CREATE INDEX idx_payment_method ON Payments (payment_method);
+
+
+CREATE TABLE report_statistics (
+                                   id INT AUTO_INCREMENT PRIMARY KEY,
+                                   report_date DATE NOT NULL,               -- ngày thống kê
+                                   month INT NOT NULL,                      -- tháng (1–12)
+                                   year INT NOT NULL,                       -- năm (vd: 2025)
+                                   total_bookings INT DEFAULT 0,            -- tổng số lịch đặt
+                                   successful_bookings INT DEFAULT 0,       -- số lịch thành công
+                                   cancelled_bookings INT DEFAULT 0,        -- số lịch bị hủy
+                                   total_revenue DECIMAL(15,2) DEFAULT 0    -- tổng doanh thu
+);
+
+-- ==============================================
+-- Tạo dữ liệu giả lập cho bảng report_statistics
+-- ==============================================
+
+DELIMITER //
+
+CREATE PROCEDURE generate_daily_report_data()
+BEGIN
+    DECLARE d DATE DEFAULT '2025-01-01';
+    DECLARE today DATE DEFAULT CURDATE();
+
+    WHILE d <= today DO
+            INSERT INTO report_statistics (
+                report_date, month, year, total_bookings,
+                successful_bookings, cancelled_bookings, total_revenue
+            )
+            VALUES (
+                       d,
+                       MONTH(d),
+                       YEAR(d),
+                       FLOOR(40 + RAND() * 100),          -- tổng số lịch đặt (40–140)
+                       FLOOR(38 + RAND() * 95),           -- số lịch thành công (38–133)
+                       FLOOR(1 + RAND() * 5),             -- số lịch bị hủy (1–5)
+                       FLOOR(3000000 + RAND() * 7000000)  -- doanh thu (3–10 triệu VNĐ)
+                   );
+
+            SET d = DATE_ADD(d, INTERVAL 1 DAY);
+        END WHILE;
+END //
+
+DELIMITER ;
+
+-- Gọi procedure để sinh dữ liệu
+CALL generate_daily_report_data();
+
