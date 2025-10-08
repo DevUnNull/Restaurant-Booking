@@ -12,7 +12,32 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
-            <li><a href="${pageContext.request.contextPath}/reservation">Đặt Bàn</a></li>
+            <c:if test="${sessionScope.userRole == 3}"><li><a href="${pageContext.request.contextPath}/#">Đặt Bàn</a></li></c:if>
+           <c:if test="${sessionScope.userRole == 2}">
+               <li class="user-dropdown">
+                   <div class="user-button" onclick="toggleUserDropdown()">
+                       <span class="user-name">Booking Management</span>
+                       <i class="fas fa-chevron-down"></i>
+                   </div>
+                   <div id="userDropdown" class="dropdown-content">
+                       <a href="${pageContext.request.contextPath}/ServiceList">
+                           <i class="fas fa-user"></i>Service Management
+                       </a>
+                       <a href="${pageContext.request.contextPath}/my-reservations">
+                           <i class="fas fa-calendar-alt"></i>Menu Management
+                       </a>
+                       <a href="${pageContext.request.contextPath}/change-password">
+                           <i class="fas fa-key"></i>Deal Management
+                       </a><a href="${pageContext.request.contextPath}/BlogController">
+                       <i class="fas fa-key"></i>Blog Management
+                   </a><a href="${pageContext.request.contextPath}/change-password">
+                       <i class="fas fa-key"></i>Customer Loyalty Management
+                   </a>
+
+
+                   </div>
+               </li>
+           </c:if>
             <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>
             <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
             
