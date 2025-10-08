@@ -16,6 +16,9 @@
 ## 📊 SRD
 [Link SRD](https://docs.google.com/document/d/1NGVhm4wpiW2xgVnAT0Xw9Cm6M1-uhOuG/edit)
 
+## 📊 Commit
+[Link Commit]([https://docs.google.com/document/d/1NGVhm4wpiW2xgVnAT0Xw9Cm6M1-uhOuG/edit](https://docs.google.com/document/d/1LJazZoksIOOlJ6nCn5Zqq3p5CDD7ozOYd2rMHLN9esI/edit?hl=vi&tab=t.0))
+
 # Restaurant-Booking#
 Hướng dẫn quy ước và quy trình làm việc với Git cho team.
 ---
