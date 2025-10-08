@@ -6,92 +6,161 @@ import java.time.LocalDate;
 /**
  * Service entity representing services
  */
-public class Service extends BaseEntity {
-    private Integer serviceId;
-    private String serviceName;
-    private String serviceCode;
-    private String description;
-    private BigDecimal price;
-    private String promotionInfo;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private String status;
-
+public class Service {
+    private int ServiceId;
+    private String ServiceName;
+    private String ServiceCode;
+    private String Description;
+    private String Price;
+    private String PromotionInfo;
+    private String StartDate;
+    private String EndDate;
+    private String Status;
+    private int CreatedBy;
+    private int UpdatedBy;
+    private String NameCreated;
+    private String NameUpdated;
     public Service() {
-        super();
-        this.status = "ACTIVE";
     }
 
-    // Getters and Setters
-    public Integer getServiceId() {
-        return serviceId;
+    public Service(int ServiceId, String ServiceName, String ServiceCode, String Description, String Price, String PromotionInfo, String StartDate, String EndDate, String Status, String NameCreated, String NameUpdated) {
+        this.ServiceId = ServiceId;
+        this.ServiceName = ServiceName;
+        this.ServiceCode = ServiceCode;
+        this.Description = Description;
+        this.Price = Price;
+        this.PromotionInfo = PromotionInfo;
+        this.StartDate = StartDate;
+        this.EndDate = EndDate;
+        this.Status = Status;
+        this.NameCreated = NameCreated;
+        this.NameUpdated = NameUpdated;
     }
 
-    public void setServiceId(Integer serviceId) {
-        this.serviceId = serviceId;
+    public Service(int ServiceId, String ServiceName, String ServiceCode, String Description, String Price, String PromotionInfo, String StartDate, String EndDate, String Status) {
+        this.ServiceId = ServiceId;
+        this.ServiceName = ServiceName;
+        this.ServiceCode = ServiceCode;
+        this.Description = Description;
+        this.Price = Price;
+        this.PromotionInfo = PromotionInfo;
+        this.StartDate = StartDate;
+        this.EndDate = EndDate;
+        this.Status = Status;
+    }
+
+    public String getNameCreated() {
+        return NameCreated;
+    }
+
+    public void setNameCreated(String NameCreated) {
+        this.NameCreated = NameCreated;
+    }
+
+    public String getNameUpdated() {
+        return NameUpdated;
+    }
+
+    public void setNameUpdated(String NameUpdated) {
+        this.NameUpdated = NameUpdated;
+    }
+
+    public void setUpdatedBy(int UpdatedBy) {
+        this.UpdatedBy = UpdatedBy;
+    }
+
+    public int getServiceId() {
+        return ServiceId;
+    }
+
+
+    public void setServiceId(int ServiceId) {
+        this.ServiceId = ServiceId;
     }
 
     public String getServiceName() {
-        return serviceName;
+        return ServiceName;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setServiceName(String ServiceName) {
+        this.ServiceName = ServiceName;
     }
 
     public String getServiceCode() {
-        return serviceCode;
+        return ServiceCode;
     }
 
-    public void setServiceCode(String serviceCode) {
-        this.serviceCode = serviceCode;
+    public void setServiceCode(String ServiceCode) {
+        this.ServiceCode = ServiceCode;
     }
 
     public String getDescription() {
-        return description;
+        return Description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescription(String Description) {
+        this.Description = Description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public String getPrice() {
+        return Price;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setPrice(String Price) {
+        this.Price = Price;
     }
 
     public String getPromotionInfo() {
-        return promotionInfo;
+        return PromotionInfo;
     }
 
-    public void setPromotionInfo(String promotionInfo) {
-        this.promotionInfo = promotionInfo;
+    public void setPromotionInfo(String PromotionInfo) {
+        this.PromotionInfo = PromotionInfo;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public String getStartDate() {
+        return StartDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
+    public void setStartDate(String StartDate) {
+        this.StartDate = StartDate;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
+    public String getEndDate() {
+        return EndDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
+    public void setEndDate(String EndDate) {
+        this.EndDate = EndDate;
     }
 
     public String getStatus() {
-        return status;
+        return Status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setStatus(String Status) {
+        this.Status = Status;
     }
+
+    public int getCreatedBy() {
+        return CreatedBy;
+    }
+
+    public void setCreatedBy(int CreatedBy) {
+        this.CreatedBy = CreatedBy;
+    }
+
+    public int getUpdatedBy() {
+        return UpdatedBy;
+    }
+
+    public void setUpdated_by(int updated_by) {
+        this.UpdatedBy = updated_by;
+    }
+
+
+
+
+
+
 }
