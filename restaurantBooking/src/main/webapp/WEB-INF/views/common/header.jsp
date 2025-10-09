@@ -33,8 +33,6 @@
                    </a><a href="${pageContext.request.contextPath}/change-password">
                        <i class="fas fa-key"></i>Customer Loyalty Management
                    </a>
-
-
                    </div>
                </li>
            </c:if>

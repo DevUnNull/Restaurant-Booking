@@ -73,7 +73,7 @@ public class ServiceUpdate extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         String serviceCode = request.getParameter("serviceId");
         String serviceName = request.getParameter("serviceName");
         String description = request.getParameter("description");
@@ -82,11 +82,62 @@ public class ServiceUpdate extends HttpServlet {
         String startDate = request.getParameter("startDate");
         String endDate = request.getParameter("endDate");
         ServiceRepository dao = new ServiceRepository();
+        String erkaka;
+
+
+        if(serviceName.isEmpty()){
+            erkaka = "Service name must not be empty";
+            request.setAttribute("erkaka", erkaka);
+            request.getRequestDispatcher("ServiceManage").forward(request, response);
+            return;
+        }else if(description.isEmpty()){
+            erkaka = "Description must not be empty";
+            request.setAttribute("erkaka", erkaka);
+            request.getRequestDispatcher("ServiceManage").forward(request, response);
+            return;
+        }else if(price.isEmpty()){
+            erkaka = "Price must not be empty";
+            request.setAttribute("erkaka", erkaka);
+            request.getRequestDispatcher("ServiceManage").forward(request, response);
+            return;
+        }else if(status.isEmpty()){
+            erkaka = "Status must not be empty";
+            request.setAttribute("erkaka", erkaka);
+            request.getRequestDispatcher("ServiceManage").forward(request, response);
+            return;
+        }else if(startDate.isEmpty()){
+            erkaka = "Start date must not be empty";
+            request.setAttribute("erkaka", erkaka);
+            request.getRequestDispatcher("ServiceManage").forward(request, response);
+            return;
+        }else if(endDate.isEmpty()){
+            erkaka = "End date must not be empty";
+            request.setAttribute("erkaka", erkaka);
+            request.getRequestDispatcher("ServiceManage").forward(request, response);
+            return;
+        }
+
         try {
             dao.updateService(serviceName, description, price, status, startDate, endDate, serviceCode);
             response.sendRedirect("ServiceManage");
         } catch (SQLException ex) {
-            Logger.getLogger(ServiceUpdate.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+
+            // In ra trình duyệt để dễ debug
+            response.setContentType("text/html;charset=UTF-8");
+            PrintWriter out = response.getWriter();
+
+            out.println("<html><body style='font-family:monospace;background:#111;color:#f55;'>");
+            out.println("<h2>Lỗi SQL xảy ra!</h2>");
+            out.println("<p><strong>Message:</strong> " + ex.getMessage() + "</p>");
+            out.println("<p><strong>SQLState:</strong> " + ex.getSQLState() + "</p>");
+            out.println("<p><strong>Error Code:</strong> " + ex.getErrorCode() + "</p>");
+            out.println("<hr>");
+            out.println("<pre>");
+            ex.printStackTrace(out);
+            out.println("</pre>");
+            out.println("</body></html>");
+            out.close();
         }
     }
 
