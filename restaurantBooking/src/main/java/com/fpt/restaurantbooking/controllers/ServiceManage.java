@@ -36,9 +36,10 @@ public class ServiceManage extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-       response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         ServiceRepository serviceDao = new ServiceRepository();
-String er = (String) request.getAttribute("errorMessageAdd");
+        String er = (String) request.getAttribute("errorMessageAdd");
+        String erkaka = (String) request.getAttribute("erkaka");
         int page = 1;
         int recordsPerPage = 8;
 
@@ -53,25 +54,25 @@ String er = (String) request.getAttribute("errorMessageAdd");
         int offset = (page - 1) * recordsPerPage;
 
         try {
-            
+
             // ✅ Lấy danh sách theo trang
             List<Service> paginatedList = serviceDao.getServicesByPage(offset, recordsPerPage);
             int totalRecords = serviceDao.getAllService().size();
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
-      request.setAttribute("errorMessage", er);
-      
-request.setAttribute("kakao", paginatedList);
+            request.setAttribute("errorMessage", er);
+            request.setAttribute("erkaka", erkaka);
+            request.setAttribute("kakao", paginatedList);
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
-            
+
 
         } catch (Exception e) {
             logger.warning("Lỗi lấy danh sách dịch vụ: " + e.getMessage());
-          
+
         }
- request.getRequestDispatcher("/WEB-INF/Service/ManageService.jsp").forward(request, response);
-       
+        request.getRequestDispatcher("/WEB-INF/Service/ManageService.jsp").forward(request, response);
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
