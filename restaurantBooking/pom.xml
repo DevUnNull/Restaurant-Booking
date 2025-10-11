@@ -58,7 +58,7 @@
             <version>5.1.0</version>
         </dependency>
 
-        <!-- JSON Processing -->
+        <!-- GSON Processing -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -145,6 +145,21 @@
             <artifactId>mockito-core</artifactId>
             <version>5.8.0</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>10.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- MySQL Connector -->
+        <!-- Servlet API (Tomcat cung cấp, scope provided) -->
+        <!-- JSON lib -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20250517</version>
         </dependency>
     </dependencies>
 

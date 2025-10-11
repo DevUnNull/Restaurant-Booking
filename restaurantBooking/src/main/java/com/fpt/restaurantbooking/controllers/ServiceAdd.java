@@ -6,6 +6,7 @@
 package com.fpt.restaurantbooking.controllers;
 
 
+import com.fpt.restaurantbooking.repositories.impl.ServiceRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,7 +36,6 @@ public class ServiceAdd extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
     } 
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -61,30 +61,41 @@ public class ServiceAdd extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-       String serviceName= request.getParameter("serviceName");
-       String serviceCode= request.getParameter("serviceCode");
-       String description = request.getParameter("description");
-       String price = request.getParameter("price");
-       String status = request.getParameter("status");
-       String startDate= request.getParameter("startDate");
-       String endDate = request.getParameter("endDate");
+            throws ServletException, IOException {
+        String serviceName= request.getParameter("serviceName");
+        String serviceCode= request.getParameter("serviceCode");
+        String description = request.getParameter("description");
+        String price = request.getParameter("price");
+        String status = request.getParameter("status");
+        String startDate= request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
         HttpSession session = request.getSession();
-       int id = (Integer) session.getAttribute("userId");
-       ServiceRepository dao = new ServiceRepository();
-       
+        int id = (Integer) session.getAttribute("userId");
+        ServiceRepository dao = new ServiceRepository();
+
         try {
             if(serviceName.isEmpty() || price.isEmpty() || status.isEmpty() || startDate.isEmpty()||endDate.isEmpty() ){
                 request.setAttribute("errorMessageAdd", "Vui lòng nhập đầy đủ thông tin (trừ mô tả có thể để trống).");
-                 request.getRequestDispatcher("ServiceManage").forward(request, response);
+                request.getRequestDispatcher("ServiceManage").forward(request, response);
+                return;
             }else{
-                            dao.addService(serviceName,serviceCode, description, price, status, startDate, endDate, id);
-      response.sendRedirect("ServiceManage");
-
+                dao.addService(serviceName,serviceCode, description, price, status, startDate, endDate, id);
+                response.sendRedirect("ServiceManage");
+                return;
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(ServiceAdd.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+
+            // In ra trình duyệt (debug tạm thời)
+            response.setContentType("text/html;charset=UTF-8");
+            response.getWriter().println("<h3>Lỗi SQL:</h3>");
+            response.getWriter().println("<pre>" + ex.getMessage() + "</pre>");
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            response.setContentType("text/html;charset=UTF-8");
+            response.getWriter().println("<h3>Lỗi khác:</h3>");
+            response.getWriter().println("<pre>" + ex.getMessage() + "</pre>");
         }
     }
 
