@@ -19,7 +19,6 @@ import java.util.List;
  */
 @WebServlet(name="VoucherController", urlPatterns={"/VoucherController"})
 public class VoucherController extends HttpServlet {
-
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
      * @param request servlet request
@@ -29,20 +28,14 @@ public class VoucherController extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         response.setContentType("text/html;charset=UTF-8");
-
         VoucherRepository vrepo = new VoucherRepository();
         try {
             List<Promotions> promotions = vrepo.getAllPromotions(1);
             request.setAttribute("promotions", promotions);
             request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
         }catch (Exception ex){
-
         }
-
-
-
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
