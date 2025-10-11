@@ -248,49 +248,10 @@ CREATE INDEX idx_payment_status ON Payments (payment_status);
 CREATE INDEX idx_payment_method ON Payments (payment_method);
 
 
-CREATE TABLE report_statistics (
-                                   id INT AUTO_INCREMENT PRIMARY KEY,
-                                   report_date DATE NOT NULL,               -- ngày thống kê
-                                   month INT NOT NULL,                      -- tháng (1–12)
-                                   year INT NOT NULL,                       -- năm (vd: 2025)
-                                   total_bookings INT DEFAULT 0,            -- tổng số lịch đặt
-                                   successful_bookings INT DEFAULT 0,       -- số lịch thành công
-                                   cancelled_bookings INT DEFAULT 0,        -- số lịch bị hủy
-                                   total_revenue DECIMAL(15,2) DEFAULT 0    -- tổng doanh thu
-);
 
--- ==============================================
--- Tạo dữ liệu giả lập cho bảng report_statistics
--- ==============================================
 
-DELIMITER //
 
-CREATE PROCEDURE generate_daily_report_data()
-BEGIN
-    DECLARE d DATE DEFAULT '2025-01-01';
-    DECLARE today DATE DEFAULT CURDATE();
 
-    WHILE d <= today DO
-            INSERT INTO report_statistics (
-                report_date, month, year, total_bookings,
-                successful_bookings, cancelled_bookings, total_revenue
-            )
-            VALUES (
-                       d,
-                       MONTH(d),
-                       YEAR(d),
-                       FLOOR(40 + RAND() * 100),          -- tổng số lịch đặt (40–140)
-                       FLOOR(38 + RAND() * 95),           -- số lịch thành công (38–133)
-                       FLOOR(1 + RAND() * 5),             -- số lịch bị hủy (1–5)
-                       FLOOR(3000000 + RAND() * 7000000)  -- doanh thu (3–10 triệu VNĐ)
-                   );
 
-            SET d = DATE_ADD(d, INTERVAL 1 DAY);
-        END WHILE;
-END //
 
-DELIMITER ;
-
--- Gọi procedure để sinh dữ liệu
-CALL generate_daily_report_data();
 
