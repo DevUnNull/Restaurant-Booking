@@ -1,5 +1,7 @@
 package com.fpt.restaurantbooking.controllers;
 
+
+import com.fpt.restaurantbooking.repositories.impl.ReportRepository;
 import com.fpt.restaurantbooking.repositories.impl.ServiceRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,8 +28,8 @@ import java.util.Map;
 
             try {
 
-                categoryReport = serviceRepository.getServiceCategoryReport();
-                topSellingItems = serviceRepository.getTopSellingItems(10);
+                categoryReport = reportRepository.getServiceCategoryReport();
+                topSellingItems =reportRepository.getTopSellingItems(10);
 
                 // Lưu kết quả vào request để chuyển sang JSP
                 request.setAttribute("categoryReport", categoryReport);
@@ -52,12 +54,11 @@ import java.util.Map;
             processRequest(request, response);
         }
 
-    private final ServiceRepository serviceRepository = new ServiceRepository();
+    private final ReportRepository reportRepository = new ReportRepository();
 
         @Override
         protected void doPost(HttpServletRequest request, HttpServletResponse response)
                 throws ServletException, IOException {
-
 
         }
 
