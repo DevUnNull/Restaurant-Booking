@@ -316,7 +316,7 @@
 <div class="container">
     <h2><i class="fas fa-map-marked-alt"></i> Sơ đồ Bàn Nhà hàng</h2>
 
-    <form action="findTable" method="get" class="controls">
+    <form action="findTableMap" method="get" class="controls">
         <input type="hidden" name="date" value="<%= request.getAttribute("requiredDate") %>">
         <input type="hidden" name="time" value="<%= request.getAttribute("requiredTime") %>">
 
