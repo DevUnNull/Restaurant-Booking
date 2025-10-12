@@ -316,22 +316,29 @@
 <div class="container">
     <h2><i class="fas fa-map-marked-alt"></i> Sơ đồ Bàn Nhà hàng</h2>
 
-    <form action="" method="get" class="controls">
+    <form action="findTable" method="get" class="controls">
+        <input type="hidden" name="date" value="<%= request.getAttribute("requiredDate") %>">
+        <input type="hidden" name="time" value="<%= request.getAttribute("requiredTime") %>">
+
         <label for="floorSelect"><i class="fas fa-layer-group"></i> Chọn tầng:</label>
         <select name="floor" id="floorSelect" onchange="this.form.submit()">
-            <option value="all">Tất cả tầng</option>
-            <option value="indoor" <%= "indoor".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 1</option>
-            <option value="upper_outdoor" <%= "upper_outdoor".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 2</option>
-            <option value="lower_outdoor" <%= "lower_outdoor".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 3</option>
-            <option value="office" <%= "office".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 4</option>
+            <option value="all" <%= "all".equals(request.getParameter("floor")) ? "selected" : "" %>>Tất cả tầng</option>
+            <option value="1" <%= "1".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 1</option>
+            <option value="2" <%= "2".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 2</option>
+            <option value="3" <%= "3".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 3</option>
+            <option value="4" <%= "4".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 4</option>
         </select>
 
         <label for="capacityInput"><i class="fas fa-users"></i> Số người:</label>
-        <input type="number" name="capacity" id="capacityInput" min="1" max="20"
-               value="<%= request.getParameter("capacity") != null ? request.getParameter("capacity") : "2" %>"
+        <input type="number" name="guests" id="capacityInput" min="1" max="20"
+               value="<%= request.getAttribute("guestCount") != null ? request.getAttribute("guestCount") : "2" %>"
                required readonly>
+        <button type="submit" class="btn-search"><i class="fas fa-search"></i> Tìm kiếm</button>
     </form>
-    <div id="error-message" class="error-message" style="display: none;"></div>
+
+    <div id="error-message" class="error-message" style="display: <%= request.getAttribute("errorMessage") != null ? "block" : "none" %>;">
+        <%= request.getAttribute("errorMessage") != null ? request.getAttribute("errorMessage") : "" %>
+    </div>
 
     <div class="legend">
         <div class="legend-item"><span class="legend-color red"></span> Đã có người đặt</div>
@@ -341,152 +348,54 @@
     </div>
 
     <div class="restaurant-map">
-        <%
-            // Dữ liệu bàn
-            Map<String, Map<String, Object>> tableConfigurations = new LinkedHashMap<>();
-            List<String> indoor = Arrays.asList("11:4","12:4", "13:2", "14:6", "15:4", "16:4",    "17:2", "18:6", "19:8", "110:8", "111:4", "112:2");
-            List<String> upper = Arrays.asList("21:4", "22:4", "23:2", "24:6", "25:4", "26:4","27:2", "28:6", "29:8", "210:8", "211:4", "212:2");
-            List<String> lower = Arrays.asList("41:4","42:4","43:2","44:6","45:4","46:4","47:2","48:6","49:8","410:8","411:4","412:2");
-            List<String> office = Arrays.asList("31:4", "32:4", "33:2", "34:6", "35:4", "36:4","37:2", "38:6", "39:8", "310:8", "311:4", "312:2");
-
-
-            for (String s : indoor) {
-                String[] p = s.split(":");
-                Map<String, Object> c = new LinkedHashMap<>();
-                c.put("floor", "indoor");
-                c.put("capacity", Integer.parseInt(p[1]));
-                tableConfigurations.put(p[0], c);
-            }
-            for (String s : upper) {
-                String[] p = s.split(":");
-                Map<String, Object> c = new LinkedHashMap<>();
-                c.put("floor", "upper_outdoor");
-                c.put("capacity", Integer.parseInt(p[1]));
-                tableConfigurations.put(p[0], c);
-            }
-            for (String s : lower) {
-                String[] p = s.split(":");
-                Map<String, Object> c = new LinkedHashMap<>();
-                c.put("floor", "lower_outdoor");
-                c.put("capacity", Integer.parseInt(p[1]));
-                tableConfigurations.put(p[0], c);
-            }
-            for (String s : office) {
-                String[] p = s.split(":");
-                Map<String, Object> c = new LinkedHashMap<>();
-                c.put("floor", "office");
-                c.put("capacity", Integer.parseInt(p[1]));
-                tableConfigurations.put(p[0], c);
-            }
-
-            // Bàn đã đặt với thông tin chi tiết
-            Map<String, Map<String, String>> currentBookings = new LinkedHashMap<>();
-            Map<String, String> booking1 = new LinkedHashMap<>();
-            booking1.put("date", "01/10/2025");
-            booking1.put("time", "18:00 - 20:00");
-            currentBookings.put("11", booking1);
-
-            Map<String, String> booking2 = new LinkedHashMap<>();
-            booking2.put("date", "01/10/2025");
-            booking2.put("time", "19:00 - 21:00");
-            currentBookings.put("14", booking2);
-
-            Map<String, String> booking3 = new LinkedHashMap<>();
-            booking3.put("date", "02/10/2025");
-            booking3.put("time", "17:30 - 19:30");
-            currentBookings.put("22", booking3);
-
-            Map<String, String> booking4 = new LinkedHashMap<>();
-            booking4.put("date", "01/10/2025");
-            booking4.put("time", "20:00 - 22:00");
-            currentBookings.put("34", booking4);
-
-            Map<String, String> booking5 = new LinkedHashMap<>();
-            booking5.put("date", "03/10/2025");
-            booking5.put("time", "18:30 - 20:30");
-            currentBookings.put("412", booking5);
-
-            // Xử lý tham số
-            String selectedFloor = request.getParameter("floor");
-            if (selectedFloor == null || selectedFloor.isEmpty()) {
-                selectedFloor = "all";
-            }
-            int requiredCapacity = 2;
-            String errorMessage = "";
-            try {
-                String capacityParam = request.getParameter("capacity");
-                if (capacityParam != null && !capacityParam.isEmpty()) {
-                    requiredCapacity = Integer.parseInt(capacityParam);
-                    if (requiredCapacity < 1) {
-                        errorMessage = "Số người phải lớn hơn 0.";
-                    }
-                }
-            } catch (NumberFormatException e) {
-                errorMessage = "Vui lòng nhập số người hợp lệ.";
-            }
-        %>
-
         <div class="dining-area indoor-dining">Tầng 1</div>
         <div class="dining-area upper-outdoor-dining">Tầng 2</div>
         <div class="dining-area lower-outdoor-dining">Tầng 3</div>
         <div class="office">Tầng 4</div>
 
         <%
-            if (!errorMessage.isEmpty()) {
-                out.println("<script>document.getElementById('error-message').style.display = 'block';");
-                out.println("document.getElementById('error-message').innerText = '" + errorMessage + "';</script>");
-            }
+            Map<Integer, Map<String, Object>> tableStatusMap = (Map<Integer, Map<String, Object>>) request.getAttribute("tableStatusMap");
+            String selectedFloorParam = request.getParameter("floor");
+            String requiredCapacityParam = request.getAttribute("guestCount") != null ? request.getAttribute("guestCount").toString() : "2";
 
-            for (Map.Entry<String, Map<String, Object>> entry : tableConfigurations.entrySet()) {
-                String tableId = entry.getKey();
-                String tableFloor = (String) entry.getValue().get("floor");
-                int tableCapacity = (Integer) entry.getValue().get("capacity");
-                String tableClass = "table table-" + tableId;
+            if (tableStatusMap != null) {
+                for (Map.Entry<Integer, Map<String, Object>> entry : tableStatusMap.entrySet()) {
+                    int tableId = entry.getKey();
+                    Map<String, Object> tableDetails = entry.getValue();
+                    String status = (String) tableDetails.get("status");
+                    boolean match = (Boolean) tableDetails.get("match");
+                    int capacity = (Integer) tableDetails.get("capacity");
+                    int floor = (Integer) tableDetails.get("floor");
 
-                String status = "default";
-                String bookingDate = "";
-                String bookingTime = "";
+                    String tableClass = "table table-" + tableId;
 
-                if (currentBookings.containsKey(tableId)) {
-                    tableClass += " booked";
-                    status = "booked";
-                    bookingDate = currentBookings.get(tableId).get("date");
-                    bookingTime = currentBookings.get(tableId).get("time");
-                } else if (errorMessage.isEmpty()) {
-                    if (selectedFloor.equals("all") || tableFloor.equals(selectedFloor)) {
-                        if (tableCapacity >= requiredCapacity) {
-                            tableClass += " available-match";
-                            status = "available-match";
-                        } else {
-                            tableClass += " available-nomatch";
-                            status = "available-nomatch";
-                        }
+                    // Determine CSS class based on status and match
+                    if ("booked".equals(status)) {
+                        tableClass += " booked";
+                    } else if (match) {
+                        tableClass += " available-match";
                     } else {
-                        tableClass += " default";
+                        tableClass += " available-nomatch";
                     }
-                } else {
-                    tableClass += " default";
-                }
 
-                boolean show = selectedFloor.equals("all") || tableFloor.equals(selectedFloor);
-                if (show) {
-                    out.println("<div class='" + tableClass + "' " +
-                            "data-table-id='" + tableId + "' " +
-                            "data-capacity='" + tableCapacity + "' " +
-                            "data-status='" + status + "' " +
-                            "data-booking-date='" + bookingDate + "' " +
-                            "data-booking-time='" + bookingTime + "' " +
-                            "data-required-capacity='" + requiredCapacity + "'>" +
-                            tableId + " (" + tableCapacity + ")</div>");
+                    // Check if the table should be displayed based on selected floor
+                    boolean show = "all".equals(selectedFloorParam) || String.valueOf(floor).equals(selectedFloorParam);
+
+                    if (show) {
+                        out.println("<div class='" + tableClass + "' " +
+                                "data-table-id='" + tableId + "' " +
+                                "data-capacity='" + capacity + "' " +
+                                "data-status='" + status + "' " +
+                                "data-required-capacity='" + requiredCapacityParam + "'>" +
+                                "Bàn " + tableId + " (" + capacity + ")</div>");
+                    }
                 }
             }
         %>
     </div>
 </div>
 
-<!-- Tooltip Element -->
 <div class="table-tooltip" id="tableTooltip"></div>
-
 <script>
     const tooltip = document.getElementById('tableTooltip');
     const tables = document.querySelectorAll('.table');

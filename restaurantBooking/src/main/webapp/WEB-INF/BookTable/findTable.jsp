@@ -202,7 +202,7 @@
 <div class="bg-container">
     <div class="booking-box">
         <h2>FIND A TABLE</h2>
-        <form class="search-form" method="get" action="sodoban.jsp">
+        <form class="search-form" method="get" action="findTable">
 
             <div class="form-group">
                 <label for="date">Date:</label>
