@@ -12,7 +12,7 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
-            <c:if test="${sessionScope.userRole == 3}"><li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li></c:if>
+            <c:if test="${sessionScope.userRole == 3}"><li><a href="${pageContext.request.contextPath}/findViewTable">Đặt Bàn</a></li></c:if>
             <c:if test="${sessionScope.userRole == 2}">
                <li class="user-dropdown">
                    <div class="user-button" onclick="toggleUserDropdown()">

@@ -16,7 +16,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
-@WebServlet("/findTable")
+@WebServlet(name="findTableMap", urlPatterns={"/findTableMap"})
 public class TableServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(TableServlet.class);
     private final TableService tableService = new TableService();
@@ -62,6 +62,6 @@ public class TableServlet extends HttpServlet {
         request.setAttribute("requiredTime", timeParam);
         request.setAttribute("guestCount", guestCount);
 
-        request.getRequestDispatcher("/mapTable.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/BookTable/mapTable.jsp").forward(request, response);
     }
 }
