@@ -10,13 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35bce3f7-41c0-48fb-9a80-609f150a99f2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/ReservationDAO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/TableDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/services/TableService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/DatabaseUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/DatabaseUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/resources/database.properties" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/resources/database.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/header.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/header.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,6 +181,7 @@
       <option name="presentableId" value="Default" />
       <updated>1760188003573</updated>
       <workItem from="1760188004143" duration="3439000" />
+      <workItem from="1760260628490" duration="237000" />
     </task>
     <servers />
   </component>
