@@ -192,54 +192,54 @@
         .table.available-match { background-color: #28a745; border-color: #218838; }
         .table.available-nomatch { background-color: #ffc107; border-color: #e0a800; }
         .table.default { background-color: rgba(108,117,125,0.5); }
-        .table-11 { top: 5%; left: 5%; }
-        .table-12 { top: 5%; left: 15%; }
-        .table-13 { top: 5%; left: 29%; }
-        .table-14 { top: 5%; left: 39%; }
-        .table-15 { top: 15%; left: 5%; }
-        .table-16 { top: 15%; left: 15%; }
-        .table-17 { top: 15%; left: 29%; }
-        .table-18 { top: 15%; left: 39%; }
-        .table-19 { top: 25%; left: 5%; }
-        .table-110 { top: 25%; left: 15%; }
-        .table-111 { top: 25%; left: 29%; }
-        .table-112 { top: 25%; left: 39%; }
-        .table-21 { top: 5%; left: 56%; }
-        .table-22 { top: 5%; left: 66%; }
-        .table-23 { top: 5%; left: 80%; }
-        .table-24 { top: 5%; left: 90%; }
-        .table-25 { top: 15%; left: 56%; }
-        .table-26 { top: 15%; left: 66%; }
-        .table-27 { top: 15%; left: 80%; }
-        .table-28 { top: 15%; left: 90%; }
-        .table-29 { top: 25%; left: 56%; }
-        .table-210 { top: 25%; left: 66%; }
-        .table-211 { top: 25%; left: 80%; }
-        .table-212 { top: 25%; left: 90%; }
-        .table-41 { bottom: 25%; left: 56%; }
-        .table-42 { bottom: 25%; left: 66%; }
-        .table-43 { bottom: 25%; left: 80%; }
-        .table-44 { bottom: 25%; left: 90%; }
-        .table-45 { bottom: 15%; left: 56%; }
-        .table-46 { bottom: 15%; left: 66%; }
-        .table-47 { bottom: 15%; left: 80%; }
-        .table-48 { bottom: 15%; left: 90%; }
-        .table-49 { bottom: 5%; left: 56%; }
-        .table-410 { bottom: 5%; left: 66%; }
-        .table-411 { bottom: 5%; left: 80%; }
-        .table-412 { bottom: 5%; left: 90%; }
-        .table-31 { bottom: 25%; left: 5%; }
-        .table-32 { bottom: 25%; left: 15%; }
-        .table-33 { bottom: 25%; left: 29%; }
-        .table-34 { bottom: 25%; left: 39%; }
-        .table-35 { bottom: 15%; left: 5%; }
-        .table-36 { bottom: 15%; left: 15%; }
-        .table-37 { bottom: 15%; left: 29%; }
-        .table-38 { bottom: 15%; left: 39%; }
-        .table-39 { bottom: 5%; left: 5%; }
-        .table-310 { bottom: 5%; left: 15%; }
-        .table-311 { bottom: 5%; left: 29%; }
-        .table-312 { bottom: 5%; left: 39%; }
+        .table-1 { top: 5%; left: 5%; }
+        .table-2 { top: 5%; left: 15%; }
+        .table-3 { top: 5%; left: 29%; }
+        .table-4 { top: 5%; left: 39%; }
+        .table-5 { top: 15%; left: 5%; }
+        .table-6 { top: 15%; left: 15%; }
+        .table-7 { top: 15%; left: 29%; }
+        .table-8 { top: 15%; left: 39%; }
+        .table-9 { top: 25%; left: 5%; }
+        .table-10 { top: 25%; left: 15%; }
+        .table-11 { top: 25%; left: 29%; }
+        .table-12 { top: 25%; left: 39%; }
+        .table-13 { top: 5%; left: 56%; }
+        .table-14 { top: 5%; left: 66%; }
+        .table-15 { top: 5%; left: 80%; }
+        .table-16 { top: 5%; left: 90%; }
+        .table-17 { top: 15%; left: 56%; }
+        .table-18 { top: 15%; left: 66%; }
+        .table-19 { top: 15%; left: 80%; }
+        .table-20 { top: 15%; left: 90%; }
+        .table-21 { top: 25%; left: 56%; }
+        .table-22 { top: 25%; left: 66%; }
+        .table-23 { top: 25%; left: 80%; }
+        .table-24 { top: 25%; left: 90%; }
+        .table-37 { bottom: 25%; left: 56%; }
+        .table-38 { bottom: 25%; left: 66%; }
+        .table-39 { bottom: 25%; left: 80%; }
+        .table-40 { bottom: 25%; left: 90%; }
+        .table-41 { bottom: 15%; left: 56%; }
+        .table-42 { bottom: 15%; left: 66%; }
+        .table-43 { bottom: 15%; left: 80%; }
+        .table-44 { bottom: 15%; left: 90%; }
+        .table-45 { bottom: 5%; left: 56%; }
+        .table-46 { bottom: 5%; left: 66%; }
+        .table-47 { bottom: 5%; left: 80%; }
+        .table-48 { bottom: 5%; left: 90%; }
+        .table-25 { bottom: 25%; left: 5%; }
+        .table-26 { bottom: 25%; left: 15%; }
+        .table-27 { bottom: 25%; left: 29%; }
+        .table-28 { bottom: 25%; left: 39%; }
+        .table-29 { bottom: 15%; left: 5%; }
+        .table-30 { bottom: 15%; left: 15%; }
+        .table-31 { bottom: 15%; left: 29%; }
+        .table-32 { bottom: 15%; left: 39%; }
+        .table-33 { bottom: 5%; left: 5%; }
+        .table-34 { bottom: 5%; left: 15%; }
+        .table-35 { bottom: 5%; left: 29%; }
+        .table-36 { bottom: 5%; left: 39%; }
 
         /* TOOLTIP STYLES */
         .table-tooltip {
@@ -333,8 +333,12 @@
         <input type="number" name="guests" id="capacityInput" min="1" max="20"
                value="<%= request.getAttribute("guestCount") != null ? request.getAttribute("guestCount") : "2" %>"
                required readonly>
-        <button type="submit" class="btn-search"><i class="fas fa-search"></i> Tìm kiếm</button>
+
     </form>
+    <form action="findViewTable" method="get">
+        <button  type="submit" class="btn-search"><i class="fas fa-search"></i> Quay lại</button>
+    </form>
+
 
     <div id="error-message" class="error-message" style="display: <%= request.getAttribute("errorMessage") != null ? "block" : "none" %>;">
         <%= request.getAttribute("errorMessage") != null ? request.getAttribute("errorMessage") : "" %>
@@ -350,8 +354,8 @@
     <div class="restaurant-map">
         <div class="dining-area indoor-dining">Tầng 1</div>
         <div class="dining-area upper-outdoor-dining">Tầng 2</div>
-        <div class="dining-area lower-outdoor-dining">Tầng 3</div>
-        <div class="office">Tầng 4</div>
+        <div class="dining-area lower-outdoor-dining">Tầng 4</div>
+        <div class="office">Tầng 3</div>
 
         <%
             Map<Integer, Map<String, Object>> tableStatusMap = (Map<Integer, Map<String, Object>>) request.getAttribute("tableStatusMap");
