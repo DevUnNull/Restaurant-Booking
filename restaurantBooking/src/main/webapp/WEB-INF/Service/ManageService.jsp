@@ -70,14 +70,14 @@
         <div class="sidebar">
             <ul>
                 <li><a href="#">Dashboard</a></li>
-                <li><a href="ServiceList">Danh sách dịch vụ</a></li>
+                <li><a href="ServiceList">Dịch vụ</a></li>
+                <!-- nếu quyền là admin Restaurant thì hiện  -->
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-                <li><a href="MenuList">Menu</a></li>
-                <li><a href="#">Quản lý Menu</a></li>
-                <li><a href="VoucherController">Quản lý Voucher khuyến mãi </a></li>
-                <li><a href="#">Quản lý khách hàng thân thiết </a></li>
-                <li><a href="BlogController">BlogList</a></li>
+                <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
 
+                <li><a href="#">Quản lý Menu</a></li>
+                <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+                <li><a href="#">Quản lý khách hàng thân thiết </a></li>
             </ul>
         </div>
 

@@ -13,7 +13,7 @@ body {
 .header {
     background-color: #b23627;
     color: white;
-    padding: 12px 20px;
+    padding: 15px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -156,7 +156,7 @@ tr:hover {
 /* Action buttons */
 .action-btn {
     padding: 6px 12px;
-    margin: 0 3px;
+    margin: 4px 3px;
     border: none;
     border-radius: 4px;
     font-size: 13px;
@@ -166,6 +166,7 @@ tr:hover {
 
 .btn-update {
     background-color: #007bff;
+
 }
 .btn-update:hover {
     background-color: #0056b3;
@@ -173,6 +174,7 @@ tr:hover {
 
 .btn-delete {
     background-color: #dc3545;
+
 }
 .btn-delete:hover {
     background-color: #a71d2a;

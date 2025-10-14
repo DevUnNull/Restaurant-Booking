@@ -15,13 +15,63 @@ public class MenuItem extends BaseEntity {
     private String category;
     private Integer calories;
     private String status;
+    private String created_By;
+    private String updated_By;
+    private String created_At;
+    private String updated_At;
+
 
     public MenuItem() {
         super();
         this.status = "ACTIVE";
     }
+    public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl, String category, String status, String created_By, String updated_By, String created_At, String updated_At) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemCode = itemCode;
+        this.description = description;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.category = category;
+        this.status = status;
+        this.created_By = created_By;
+        this.updated_By = updated_By;
+        this.created_At = created_At;
+        this.updated_At = updated_At;
+    }
+
 
     // Getters and Setters
+
+
+    public String getCreated_By() {
+        return created_By;
+    }
+
+    public void setCreated_By(String created_By) {
+        this.created_By = created_By;
+    }
+    public String getUpdated_By() {
+        return updated_By;
+    }
+
+    public void setUpdated_By(String updated_By) {
+        this.updated_By = updated_By;
+    }
+    public String getCreated_At() {
+        return created_At;
+    }
+
+    public void setCreated_At(String created_At) {
+        this.created_At = created_At;
+    }
+    public String getUpdated_At() {
+        return updated_At;
+    }
+
+    public void setUpdated_At(String updated_At) {
+        this.updated_At = updated_At;
+    }
     public Integer getItemId() {
         return itemId;
     }

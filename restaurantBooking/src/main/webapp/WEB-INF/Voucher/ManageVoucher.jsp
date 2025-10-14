@@ -13,39 +13,86 @@
       font-family: 'Segoe UI', sans-serif;
     }
     .header {
-      background: linear-gradient(45deg, #8b0000, #a52a2a);
+      background-color: #b23627;
       color: #fff;
-      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 15px 40px;
       position: fixed;
       top: 0;
+      left: 0;
       width: 100%;
       z-index: 1000;
     }
-    .header h1 {
-      font-size: 1.5rem;
+
+    .header .logo {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header nav ul {
+      list-style: none;
+      display: flex;
       margin: 0;
+      padding: 0;
+    }
+
+    .header nav ul li {
+      margin-left: 25px;
+    }
+
+    .header nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .header nav ul li a:hover {
+      text-decoration: underline;
+      color: #ffcccb;
     }
     .sidebar {
       width: 250px;
-      background-color: #8b0000;
+      background-color: #8c2a1f;
       position: fixed;
-      top: 60px;
+      top: 65px;
       bottom: 0;
-      padding-top: 20px;
+      left: 0;
       color: #fff;
+      padding-top: 20px;
       overflow-y: auto;
     }
-    .sidebar a {
+
+    .sidebar h2 {
+      font-size: 1.2rem;
+      text-align: center;
+      margin-bottom: 20px;
       color: #fff;
-      display: block;
-      padding: 10px 20px;
-      text-decoration: none;
     }
-    .sidebar a:hover, .sidebar a.active {
-      background-color: #a52a2a;
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar ul li {
+      margin-bottom: 5px;
+    }
+
+    .sidebar ul li a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 20px;
+      transition: 0.3s;
+    }
+
+    .sidebar ul li a:hover, .sidebar ul li a.active {
+      background-color: #91291e;
     }
     .content {
       margin-left: 250px;
@@ -70,6 +117,9 @@
       font-weight: 600;
     }
     .voucher-select {
+      position: relative;
+      top: -9px;
+      left: 27px;
       border: 2px solid #a52a2a;
       border-radius: 6px;
       padding: 8px 12px;
@@ -111,28 +161,89 @@
       border-color: #dc3545 !important;
       box-shadow: 0 0 0 0.1rem rgba(220,53,69,.25);
     }
+    .card-voucher {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform .2s ease;
+      background: #fff;
+      height: 100%; /* Chiều cao đầy đủ trong cột */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-voucher .card-body {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card-voucher .card-text {
+      flex-grow: 1; /* đẩy các nút xuống cuối */
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .card-voucher:hover {
+      transform: translateY(-4px);
+    }
+
+    .card-voucher h5 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #8b0000;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
 
 <!-- Header -->
+<%--<div class="header">--%>
+<%--  <h1>Restaurant Booking - Quản lý Voucher</h1>--%>
+<%--  <div>--%>
+<%--    <a href="#" style="color:#fff; text-decoration:none; margin-right:15px;">Trang chủ</a>--%>
+<%--    <a href="#" style="color:#fff; text-decoration:none; margin-right:15px;">Đặt bàn</a>--%>
+<%--    <a href="#" style="color:#fff; text-decoration:none;">Menu</a>--%>
+<%--    <a href="#" style="color:#fff; text-decoration:none;">Voucher</a>--%>
+<%--  </div>--%>
+<%--</div>--%>
 <div class="header">
-  <h1>Restaurant Booking - Quản lý Voucher</h1>
-  <div>
-    <a href="#" style="color:#fff; text-decoration:none; margin-right:15px;">Trang chủ</a>
-    <a href="#" style="color:#fff; text-decoration:none; margin-right:15px;">Đặt bàn</a>
-    <a href="#" style="color:#fff; text-decoration:none;">Menu</a>
-    <a href="#" style="color:#fff; text-decoration:none;">Voucher</a>
-  </div>
+  <div class="logo">Restaurant_Booking</div>
+  <nav>
+    <ul>
+      <li><a href="#">Trang chủ</a></li>
+      <li><a href="#">Đặt bàn</a></li>
+      <li><a href="#">Menu</a></li>
+      <li><a href="Voucher" class="active">Voucher</a></li>
+    </ul>
+  </nav>
 </div>
 
+<%--<ul>--%>
+<%--  <li><a href="#">Dashboard</a></li>--%>
+<%--  <li><a href="ServiceList">Dịch vụ</a></li>--%>
+<%--  <!-- nếu quyền là admin Restaurant thì hiện  -->--%>
+<%--  <li><a href="ServiceManage">Quản lý dịch vụ</a></li>--%>
+<%--  <li><a href="Comment">Quản lý đánh giá bình luận</a></li>--%>
+
+<%--  <li><a href="#">Quản lý Menu</a></li>--%>
+<%--  <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>--%>
+<%--  <li><a href="#">Quản lý khách hàng thân thiết </a></li>--%>
+<%--  <li><a href="Blog">Quản lý Blog</a></li>--%>
+<%--</ul>--%>
 <!-- Sidebar -->
 <div class="sidebar">
-  <a href="#">Dashboard</a>
-  <a href="#">Quản lý dịch vụ</a>
-  <a href="#">Quản lý Menu</a>
-  <a href="#" class="active">Quản lý Voucher</a>
-  <a href="#">Khách hàng thân thiết</a>
+  <h2>Staff Panel</h2>
+  <ul>
+    <li><a href="#">Dashboard</a></li>
+    <li><a href="ServiceList">Dịch vụ</a></li>
+    <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
+    <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
+    <li><a href="#">Quản lý Menu</a></li>
+    <li><a href="Voucher" class="active">Quản lý Voucher khuyến mãi</a></li>
+    <li><a href="#">Quản lý khách hàng thân thiết</a></li>
+  </ul>
 </div>
 
 <!-- Content -->
@@ -143,7 +254,7 @@
     <h3>Danh sách Voucher</h3>
 
     <div>
-      <form action="VoucherController" method="get">
+      <form action="Voucher" method="get">
         <select name="idlevel"  class="voucher-select" id="voucherLevel" onchange="this.form.submit()">
           <option value="1" ${kaku == 1 ? 'selected' : ''}>Voucher cấp 1</option>
           <option value="2" ${kaku == 2 ? 'selected' : ''}>Voucher cấp 2</option>
@@ -159,7 +270,7 @@
   <div class="modal fade" id="addVoucherModal" tabindex="-1" aria-labelledby="addVoucherLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form action="AddVoucherController" method="post">
+        <form action="AddVoucher" method="post">
           <div class="modal-header">
             <h5 class="modal-title" id="addVoucherLabel">Thêm Voucher Mới</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
@@ -227,46 +338,40 @@
     </div>
   </div>
 
-  <!-- Danh sách Voucher -->
-  <c:forEach var="o" items="${promotions}">
-    <div class="row g-4" id="voucherList">
-      <div class="col-md-4">
-        <div class="card-voucher">
-          <div class="card-body">
+  <div class="row g-4" id="voucherList">
+    <c:forEach var="o" items="${promotions}">
+      <div class="col-md-4 col-sm-6">
+        <div class="card-voucher h-100">
+          <div class="card-body d-flex flex-column">
             <h5 class="card-title">${o.promotionName}</h5>
-            <p class="card-text">${o.description}. Hạn dùng ${o.start_date} - ${o.end_date}</p>
+            <p class="card-text flex-grow-1">
+                ${o.description}. Hạn dùng ${o.start_date} - ${o.end_date}
+            </p>
             <div class="d-flex justify-content-between align-items-center">
               <span class="badge bg-success badge-status">${o.status}</span>
-              <small class="text-muted">${o.discount_percentage}</small>
+              <small class="text-muted">${o.discount_percentage}%</small>
             </div>
             <div class="mt-3 d-flex justify-content-between">
-              <button
-                      class="btn btn-sm btn-primary btn-edit"
+              <button class="btn btn-sm btn-primary btn-edit"
                       data-id="${o.promotion_id}"
                       data-name="${o.promotionName}"
                       data-desc="${o.description}"
                       data-discount="${o.discount_percentage}"
                       data-start="${o.start_date}"
-                      data-end="${o.end_date}"
-              >
+                      data-end="${o.end_date}">
                 Sửa
               </button>
-
-              <button
-                      class="btn btn-sm btn-danger btn-delete"
+              <button class="btn btn-sm btn-danger btn-delete"
                       data-id="${o.promotion_id}"
-                      data-name="${o.promotionName}"
-              >
+                      data-name="${o.promotionName}">
                 Xóa
               </button>
-
             </div>
           </div>
         </div>
       </div>
-      <!-- thêm các card khác -->
-    </div>
-  </c:forEach>
+    </c:forEach>
+  </div>
 
 
 </div>
@@ -342,7 +447,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form action="VoucherController" method="post">
+      <form action="Voucher" method="post">
         <div class="modal-header">
           <h5 class="modal-title" id="editVoucherLabel">Sửa thông tin Voucher</h5>
           <c:if test="${not empty errorMessage}">
@@ -404,7 +509,7 @@
 <div class="modal fade" id="deleteVoucherModal" tabindex="-1" aria-labelledby="deleteVoucherLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form action="DeleteVoucherController" method="post">
+      <form action="DeleteVoucher" method="post">
         <div class="modal-header">
           <h5 class="modal-title text-danger" id="deleteVoucherLabel">Xác nhận xóa voucher</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
@@ -421,6 +526,29 @@
       </form>
     </div>
   </div>
+</div>
+<div class="d-flex justify-content-center mt-4">
+  <nav aria-label="Voucher pagination">
+    <ul class="pagination">
+      <c:if test="${currentPage > 1}">
+        <li class="page-item">
+          <a class="page-link" href="Voucher?page=${currentPage - 1}">Trước</a>
+        </li>
+      </c:if>
+
+      <c:forEach var="i" begin="1" end="${totalPages}">
+        <li class="page-item ${i == currentPage ? 'active' : ''}">
+          <a class="page-link" href="Voucher?page=${i}">${i}</a>
+        </li>
+      </c:forEach>
+
+      <c:if test="${currentPage < totalPages}">
+        <li class="page-item">
+          <a class="page-link" href="Voucher?page=${currentPage + 1}">Sau</a>
+        </li>
+      </c:if>
+    </ul>
+  </nav>
 </div>
 </body>
 </html>

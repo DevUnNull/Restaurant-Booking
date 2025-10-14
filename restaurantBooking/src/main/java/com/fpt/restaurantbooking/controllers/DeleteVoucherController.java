@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author Quandxnunxi28
  */
-@WebServlet(name="DeleteVoucherController", urlPatterns={"/DeleteVoucherController"})
+@WebServlet(name="DeleteVoucherController", urlPatterns={"/DeleteVoucher"})
 public class DeleteVoucherController
     extends HttpServlet {
 
@@ -30,12 +30,26 @@ public class DeleteVoucherController
             throws ServletException, IOException {
 
             response.setContentType("text/html;charset=UTF-8");
+            int page = 1;
+            int recordsPerPage = 6;
+            if (request.getParameter("page") != null) {
+                try {
+                    page = Integer.parseInt(request.getParameter("page"));
+                } catch (NumberFormatException e) {
+                    page = 1;
+                }
+            }
 
+            int offset = (page - 1) * recordsPerPage;
 
 
             VoucherRepository vrepo = new VoucherRepository();
             try {
-                List<Promotions> promotions = vrepo.getAllPromotions(1);
+                List<Promotions> promotions = vrepo.getVouchersByPage(1, offset, recordsPerPage);
+                int totalRecords = vrepo.getAllPromotions(1).size();
+                int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
                 request.setAttribute("promotions", promotions);
                 request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
             }catch (Exception ex){

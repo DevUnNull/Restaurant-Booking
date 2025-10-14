@@ -17,8 +17,8 @@ import java.util.List;
  *
  * @author Quandxnunxi28
  */
-@WebServlet(name="VoucherController", urlPatterns={"/Voucher"})
-public class VoucherController extends HttpServlet {
+@WebServlet(name="Menu", urlPatterns={"/Menu"})
+public class MenuController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -120,34 +120,34 @@ public class VoucherController extends HttpServlet {
         String start_date= request.getParameter("start_date");
         String end_date= request.getParameter("end_date");
         String updated_by = request.getParameter("updated_by");
-         VoucherRepository vrepo = new VoucherRepository();
-         String er;
-if(nameVoucher.isEmpty()){
-     er = "Name must not be empty";
-     request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(description.isEmpty()){
-    er = "Description must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(discount_percentage.isEmpty()){
-    er = "Discount percentage must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(start_date.isEmpty()){
-    er = "Start date must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(end_date.isEmpty()){
-    er = "End date must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}
+        VoucherRepository vrepo = new VoucherRepository();
+        String er;
+        if(nameVoucher.isEmpty()){
+            er = "Name must not be empty";
+            request.setAttribute("errorMessage", er);
+            processRequest(request, response);
+            return;
+        }else if(description.isEmpty()){
+            er = "Description must not be empty";
+            request.setAttribute("errorMessage", er);
+            processRequest(request, response);
+            return;
+        }else if(discount_percentage.isEmpty()){
+            er = "Discount percentage must not be empty";
+            request.setAttribute("errorMessage", er);
+            processRequest(request, response);
+            return;
+        }else if(start_date.isEmpty()){
+            er = "Start date must not be empty";
+            request.setAttribute("errorMessage", er);
+            processRequest(request, response);
+            return;
+        }else if(end_date.isEmpty()){
+            er = "End date must not be empty";
+            request.setAttribute("errorMessage", er);
+            processRequest(request, response);
+            return;
+        }
 
 
 

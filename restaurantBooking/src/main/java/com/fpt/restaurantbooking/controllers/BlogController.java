@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@WebServlet(name="BlogController", urlPatterns={"/BlogController"})
+@WebServlet(name="BlogController", urlPatterns={"/Blog"})
 public class BlogController extends HttpServlet {
    
 

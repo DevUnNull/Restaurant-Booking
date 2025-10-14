@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author Quandxnunxi28
  */
-@WebServlet(name="AddVoucherController", urlPatterns={"/AddVoucherController"})
+@WebServlet(name="AddVoucherController", urlPatterns={"/AddVoucher"})
 public class AddVoucherController
         extends HttpServlet {
 
@@ -30,12 +30,28 @@ public class AddVoucherController
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
+        int page = 1;
+        int recordsPerPage = 6;
+        if (request.getParameter("page") != null) {
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        String idlevel = request.getAttribute("idlevel").toString();
 
+        int offset = (page - 1) * recordsPerPage;
 
 
         VoucherRepository vrepo = new VoucherRepository();
         try {
-            List<Promotions> promotions = vrepo.getAllPromotions(1);
+            List<Promotions> promotions = vrepo.getVouchersByPage(Integer.parseInt(idlevel), offset, recordsPerPage);
+            int totalRecords = vrepo.getAllPromotions(Integer.parseInt(idlevel)).size();
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+            request.setAttribute("kaku", Integer.parseInt(idlevel));
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.setAttribute("promotions", promotions);
             request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
         }catch (Exception ex){
@@ -124,9 +140,12 @@ if(name.isEmpty()){
     processRequest(request, response);
     return;
 }
+
+
         VoucherRepository vrepo = new VoucherRepository();
         try {
             vrepo.addVoucher(name, description,discount_p,discountAmount,start_date,end_date,status,promotion_level_id,created_by );
+            request.setAttribute("idlevel",promotion_level_id);
             processRequest(request, response);
             return;
         } catch (SQLException e) {
