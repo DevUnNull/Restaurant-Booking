@@ -332,4 +332,62 @@ public class UserRepositoryImpl implements UserRepository {
         
         return user;
     }
+    public List<User> searchEmployees(String keyword) {
+        String sql = "SELECT * FROM users WHERE (full_name LIKE ? OR email LIKE ? OR CAST(user_id AS CHAR) LIKE ?) AND (role = 'STAFF' OR role = 'ADMIN')";
+        List<User> users = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setString(3, searchPattern);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error searching employees", e);
+        }
+
+        return users;
+    }
+    public List<User> searchEmployees(String keyword, int offset, int limit) {
+        String sql = "SELECT * FROM users WHERE (full_name LIKE ? OR email LIKE ?) AND (role = 'STAFF' OR role = 'ADMIN') LIMIT ?, ?";
+        List<User> users = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setInt(3, offset);
+            stmt.setInt(4, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error searching employees", e);
+        }
+
+        return users;
+    }
+    public long countSearchEmployees(String keyword) {
+        String sql = "SELECT COUNT(*) FROM users WHERE (full_name LIKE ? OR email LIKE ?) AND (role = 'STAFF' OR role = 'ADMIN')";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error counting search results", e);
+        }
+        return 0;
+    }
 }
