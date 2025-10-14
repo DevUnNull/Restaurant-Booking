@@ -1,3 +1,4 @@
+
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.models.Promotions;
@@ -174,4 +175,5 @@ if(nameVoucher.isEmpty()){
     }// </editor-fold>
 
 }
+
 

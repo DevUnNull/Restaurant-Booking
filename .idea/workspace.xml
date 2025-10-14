@@ -10,12 +10,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="35bce3f7-41c0-48fb-9a80-609f150a99f2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/FindTableController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/TableServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/TableServlet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/findTable.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/findTable.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/mapTable.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/mapTable.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/header.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/header.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,6 +190,8 @@
       <workItem from="1760260628490" duration="1093000" />
       <workItem from="1760270482035" duration="3169000" />
       <workItem from="1760285428085" duration="2820000" />
+      <workItem from="1760332237669" duration="6390000" />
+      <workItem from="1760349328737" duration="3778000" />
     </task>
     <servers />
   </component>
