@@ -12,6 +12,10 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
+        <c:if test="${sessionScope.userRole == 1}">
+            <li><a href="${pageContext.request.contextPath}/EmployeeList">Quản Lý Nhân Sự</a></li>
+        </c:if>
+
             <c:if test="${sessionScope.userRole == 3}"><li><a href="${pageContext.request.contextPath}/#">Đặt Bàn</a></li></c:if>
            <c:if test="${sessionScope.userRole == 2}">
                <li class="user-dropdown">
@@ -55,6 +59,14 @@
                             <a href="${pageContext.request.contextPath}/my-reservations">
                                 <i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi
                             </a>
+                            <c:if test="${sessionScope.userRole == 3}">
+                            <a href="${pageContext.request.contextPath}/apply-job">
+                                <i class="fas fa-briefcase"></i> Đơn Xin Việc
+                            </a>
+                                <a href="${pageContext.request.contextPath}/Debug">
+                                    <i class="fas fa-briefcase"></i>abcd
+                                </a>
+                            </c:if>
                             <a href="${pageContext.request.contextPath}/change-password">
                                 <i class="fas fa-key"></i> Đổi Mật Khẩu
                             </a>
