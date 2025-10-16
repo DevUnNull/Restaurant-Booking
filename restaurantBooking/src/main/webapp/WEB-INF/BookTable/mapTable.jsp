@@ -451,105 +451,98 @@
         const tableId = tableElement.getAttribute('data-table-id');
         const capacity = tableElement.getAttribute('data-capacity');
         const status = tableElement.getAttribute('data-status');
-        const bookingDate = tableElement.getAttribute('data-booking-date');
-        const bookingTime = tableElement.getAttribute('data-booking-time');
         const requiredCapacity = tableElement.getAttribute('data-required-capacity');
+
+        // Debug - XÓA sau khi test xong
+        console.log('tableId:', tableId);
+        console.log('capacity:', capacity);
+        console.log('requiredCapacity:', requiredCapacity);
+
+        // Kiểm tra class thay vì status text
+        const isBooked = tableElement.classList.contains('booked');
+        const isAvailableMatch = tableElement.classList.contains('available-match');
+        const isAvailableNoMatch = tableElement.classList.contains('available-nomatch');
 
         let content = '';
 
-        if (status === 'booked') {
-            // Bàn đã đặt - KHÔNG có nút đặt bàn
-            content = `
-                    <div class="tooltip-header">Bàn ${tableId}</div>
-                    <div class="tooltip-info">
-                        <div class="tooltip-row">
-                            <i class="fas fa-hashtag"></i>
-                            <span>Số bàn: ${tableId}</span>
-                        </div>
-                        <div class="tooltip-row">
-                            <i class="fas fa-user-friends"></i>
-                            <span>Sức chứa: ${capacity} người</span>
-                        </div>
-                        <div class="tooltip-row">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Ngày đặt: ${bookingDate}</span>
-                        </div>
-                        <div class="tooltip-row">
-                            <i class="fas fa-clock"></i>
-                            <span>Thời gian: ${bookingTime}</span>
-                        </div>
-                        <div class="tooltip-row error">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>Bàn này đã được đặt</span>
-                        </div>
-                    </div>
-                `;
-        } else if (status === 'available-match') {
-            // Bàn phù hợp - CÓ nút đặt bàn
-            content = `
-                    <div class="tooltip-header">Bàn ${tableId}</div>
-                    <div class="tooltip-info">
-                        <div class="tooltip-row">
-                            <i class="fas fa-hashtag"></i>
-                            <span>Số bàn: ${tableId}</span>
-                        </div>
-                        <div class="tooltip-row">
-                            <i class="fas fa-user-friends"></i>
-                            <span>Sức chứa: ${capacity} người</span>
-                        </div>
-                        <div class="tooltip-row">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Phù hợp với yêu cầu ${requiredCapacity} người</span>
-                        </div>
-                    </div>
-                    <button class="tooltip-button" onclick="bookTable('${tableId}', ${capacity})">
-                        <i class="fas fa-calendar-check"></i> ĐẶT BÀN
-                    </button>
-                `;
-        } else if (status === 'available-nomatch') {
-            // Bàn không phù hợp - CÓ nút đặt bàn nhưng thông số sai màu đỏ
-            content = `
-                    <div class="tooltip-header">Bàn ${tableId}</div>
-                    <div class="tooltip-info">
-                        <div class="tooltip-row">
-                            <i class="fas fa-hashtag"></i>
-                            <span>Số bàn: ${tableId}</span>
-                        </div>
-                        <div class="tooltip-row error">
-                            <i class="fas fa-user-friends"></i>
-                            <span>Sức chứa: ${capacity} người</span>
-                        </div>
-                        <div class="tooltip-row error">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>Không phù hợp (yêu cầu ${requiredCapacity} người)</span>
-                        </div>
-                    </div>
-                    <button class="tooltip-button disabled" onclick="alert('Bàn này không phù hợp với số lượng khách của bạn!')">
-                        <i class="fas fa-times-circle"></i> ĐẶT BÀN
-                    </button>
-                `;
-        } else {
+        if (isBooked) {
+            // Bàn đã đặt
+            content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
+                '<div class="tooltip-info">' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-hashtag"></i>' +
+                '<span>Số bàn: ' + tableId + '</span>' +
+                '</div>' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-user-friends"></i>' +
+                '<span>Sức chứa: ' + capacity + ' người</span>' +
+                '</div>' +
+                '<div class="tooltip-row error">' +
+                '<i class="fas fa-exclamation-circle"></i>' +
+                '<span>Bàn này đã được đặt</span>' +
+                '</div>' +
+                '</div>';
+        } else if (isAvailableMatch) {
+            // Bàn phù hợp
+            content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
+                '<div class="tooltip-info">' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-hashtag"></i>' +
+                '<span>Số bàn: ' + tableId + '</span>' +
+                '</div>' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-user-friends"></i>' +
+                '<span>Sức chứa: ' + capacity + ' người</span>' +
+                '</div>' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-check-circle"></i>' +
+                '<span>Phù hợp với yêu cầu ' + requiredCapacity + ' người</span>' +
+                '</div>' +
+                '</div>' +
+                '<button class="tooltip-button" onclick="addTableToCart(' + tableId + ', ' + capacity + ')">' +
+                '<i class="fas fa-cart-plus"></i> THÊM BÀN' +
+                '</button>';
+        } else if (isAvailableNoMatch) {
+            // Bàn không phù hợp nhưng vẫn cho phép thêm
+            content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
+                '<div class="tooltip-info">' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-hashtag"></i>' +
+                '<span>Số bàn: ' + tableId + '</span>' +
+                '</div>' +
+                '<div class="tooltip-row error">' +
+                '<i class="fas fa-user-friends"></i>' +
+                '<span>Sức chứa: ' + capacity + ' người</span>' +
+                '</div>' +
+                '<div class="tooltip-row error">' +
+                '<i class="fas fa-exclamation-triangle"></i>' +
+                '<span>Không phù hợp (yêu cầu ' + requiredCapacity + ' người)</span>' +
+                '</div>' +
+                '</div>' +
+                '<button class="tooltip-button" onclick="addTableToCart(' + tableId + ', ' + capacity + ')">' +
+                '<i class="fas fa-cart-plus"></i> VẪN THÊM BÀN' +
+                '</button>';
+        }
+
+        else {
             // Bàn mặc định
-            content = `
-                    <div class="tooltip-header">Bàn ${tableId}</div>
-                    <div class="tooltip-info">
-                        <div class="tooltip-row">
-                            <i class="fas fa-hashtag"></i>
-                            <span>Số bàn: ${tableId}</span>
-                        </div>
-                        <div class="tooltip-row">
-                            <i class="fas fa-user-friends"></i>
-                            <span>Sức chứa: ${capacity} người</span>
-                        </div>
-                    </div>
-                `;
+            content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
+                '<div class="tooltip-info">' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-hashtag"></i>' +
+                '<span>Số bàn: ' + tableId + '</span>' +
+                '</div>' +
+                '<div class="tooltip-row">' +
+                '<i class="fas fa-user-friends"></i>' +
+                '<span>Sức chứa: ' + capacity + ' người</span>' +
+                '</div>' +
+                '</div>';
         }
 
         tooltip.innerHTML = content;
         tooltip.classList.add('show');
         tooltip.style.pointerEvents = 'auto';
 
-        // Đặt vị trí tooltip cố định gần bàn
         const rect = tableElement.getBoundingClientRect();
         const x = rect.right + 15;
         const y = rect.top;
