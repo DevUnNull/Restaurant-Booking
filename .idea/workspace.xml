@@ -12,6 +12,9 @@
     <list default="true" id="35bce3f7-41c0-48fb-9a80-609f150a99f2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/data_source_mapping.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/DatabaseUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/DatabaseUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/resources/database.properties" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/resources/database.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/mapTable.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/mapTable.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,12 +64,10 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Tomcat Server.Tomcat 10.1.34.executor": "Run",
-    "Tomcat Server.Tomcat 9.0.109.executor": "Run",
-    "git-widget-placeholder": "dev",
-    "ignore.virus.scanning.warn.message": "true",
+    "git-widget-placeholder": "feature/FindTableBook",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Restaurant-Booking",
+
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -205,7 +206,9 @@
       <workItem from="1760285428085" duration="2820000" />
       <workItem from="1760332237669" duration="6390000" />
       <workItem from="1760349328737" duration="3778000" />
-      <workItem from="1760463326645" duration="92000" />
+      <workItem from="1760362669888" duration="2865000" />
+      <workItem from="1760603865951" duration="4286000" />
+
     </task>
     <servers />
   </component>
