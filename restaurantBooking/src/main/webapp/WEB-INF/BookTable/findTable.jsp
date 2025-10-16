@@ -1,5 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.time.LocalDate" %>
+<%
+    // --- LẤY DỮ LIỆU TỪ SESSION ---
+    String savedDate = (String) session.getAttribute("requiredDate");
+    String savedTime = (String) session.getAttribute("requiredTime");
+    Integer savedGuestCount = (Integer) session.getAttribute("guestCount");
+    String savedSpecialRequest = (String) session.getAttribute("specialRequest");
+    String savedEventType = (String) session.getAttribute("eventType");
+    String savedPromotion = (String) session.getAttribute("promotion");
+
+    // --- GIÁ TRỊ MẶC ĐỊNH ---
+    if (savedDate == null || savedDate.isEmpty()) savedDate = LocalDate.now().toString();
+    if (savedTime == null || savedTime.isEmpty()) savedTime = "19:00";
+    if (savedGuestCount == null || savedGuestCount <= 0) savedGuestCount = 2;
+    if (savedSpecialRequest == null) savedSpecialRequest = "";
+    if (savedEventType == null || savedEventType.isEmpty()) savedEventType = "regular";
+    if (savedPromotion == null || savedPromotion.isEmpty()) savedPromotion = "none";
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -202,13 +220,13 @@
 <div class="bg-container">
     <div class="booking-box">
         <h2>FIND A TABLE</h2>
-        <form class="search-form" method="get" action="sodoban.jsp">
+        <form class="search-form" method="get" action="findTableMap">
 
             <div class="form-group">
                 <label for="date">Date:</label>
                 <div class="input-with-icon">
                     <i class="fas fa-calendar-alt"></i>
-                    <input type="date" id="date" name="date" required value="<%= LocalDate.now() %>">
+                    <input type="date" id="date" name="date" required value="<%= savedDate %>">
                 </div>
             </div>
 
@@ -217,86 +235,83 @@
                 <div class="input-with-icon">
                     <i class="fas fa-clock"></i>
                     <select id="time" name="time" required>
-                        <option value="17:00">5:00 PM</option>
-                        <option value="17:30">5:30 PM</option>
-                        <option value="18:00">6:00 PM</option>
-                        <option value="18:30">6:30 PM</option>
-                        <option value="19:00" selected>7:00 PM</option>
-                        <option value="19:30">7:30 PM</option>
-                        <option value="20:00">8:00 PM</option>
-                        <option value="20:30">8:30 PM</option>
-                        <option value="21:00">9:00 PM</option>
+                        <option value="17:00" <%= "17:00".equals(savedTime) ? "selected" : "" %>>5:00 PM</option>
+                        <option value="17:30" <%= "17:30".equals(savedTime) ? "selected" : "" %>>5:30 PM</option>
+                        <option value="18:00" <%= "18:00".equals(savedTime) ? "selected" : "" %>>6:00 PM</option>
+                        <option value="18:30" <%= "18:30".equals(savedTime) ? "selected" : "" %>>6:30 PM</option>
+                        <option value="19:00" <%= "19:00".equals(savedTime) ? "selected" : "" %>>7:00 PM</option>
+                        <option value="19:30" <%= "19:30".equals(savedTime) ? "selected" : "" %>>7:30 PM</option>
+                        <option value="20:00" <%= "20:00".equals(savedTime) ? "selected" : "" %>>8:00 PM</option>
+                        <option value="20:30" <%= "20:30".equals(savedTime) ? "selected" : "" %>>8:30 PM</option>
+                        <option value="21:00" <%= "21:00".equals(savedTime) ? "selected" : "" %>>9:00 PM</option>
                     </select>
                 </div>
             </div>
 
-            <div class="form-group full-width">
-                <label for="guests">Guests:</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-user-friends"></i>
-                    <div class="guest-stepper">
-                        <button type="button" id="minus-btn">-</button>
-                        <input type="number" id="guests" name="guests" min="1" max="20" value="2" readonly>
-                        <button type="button" id="plus-btn">+</button>
+                <div class="form-group full-width">
+                    <label for="guests">Guests:</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user-friends"></i>
+                        <div class="guest-stepper">
+                            <button type="button" id="minus-btn">-</button>
+                            <input type="number" id="guests" name="guests" min="1" max="20" value="<%= savedGuestCount %>" readonly>
+                            <button type="button" id="plus-btn">+</button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <!-- LOẠI HÌNH ĐẶT TIỆC -->
-            <div class="form-group full-width">
-                <label for="eventType">Loại hình đặt chỗ:</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-star"></i>
-                    <select id="eventType" name="eventType">
-                        <option value="regular">Ăn thường</option>
-                        <option value="birthday">Sinh nhật</option>
-                        <option value="anniversary">Kỷ niệm</option>
-                        <option value="business">Tiệc công ty</option>
-                        <option value="date">Hẹn hò</option>
-                        <option value="family">Họp gia đình</option>
-                        <option value="other">Khác</option>
-                    </select>
+                <div class="form-group full-width">
+                    <label for="eventType">Loại hình đặt chỗ:</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-star"></i>
+                        <select id="eventType" name="eventType">
+                            <option value="regular" <%= "regular".equals(savedEventType) ? "selected" : "" %>>Ăn thường</option>
+                            <option value="birthday" <%= "birthday".equals(savedEventType) ? "selected" : "" %>>Sinh nhật</option>
+                            <option value="anniversary" <%= "anniversary".equals(savedEventType) ? "selected" : "" %>>Kỷ niệm</option>
+                            <option value="business" <%= "business".equals(savedEventType) ? "selected" : "" %>>Tiệc công ty</option>
+                            <option value="date" <%= "date".equals(savedEventType) ? "selected" : "" %>>Hẹn hò</option>
+                            <option value="family" <%= "family".equals(savedEventType) ? "selected" : "" %>>Họp gia đình</option>
+                            <option value="other" <%= "other".equals(savedEventType) ? "selected" : "" %>>Khác</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
 
             <!-- YÊU CẦU ĐẶC BIỆT -->
-            <div class="form-group full-width">
-                <label for="specialRequest">Yêu cầu đặc biệt (tùy chọn):</label>
-                <div class="input-with-icon" style="align-items: flex-start; padding-top: 5px;">
-                    <i class="fas fa-comment-dots"></i>
-                    <textarea id="specialRequest" name="specialRequest" placeholder="VD: Bàn gần cửa sổ, cần ghế em bé, không dùng hành..."></textarea>
+                <div class="form-group full-width">
+                    <label for="specialRequest">Yêu cầu đặc biệt (tùy chọn):</label>
+                    <div class="input-with-icon" style="align-items:flex-start; padding-top:5px;">
+                        <i class="fas fa-comment-dots"></i>
+                        <textarea id="specialRequest" name="specialRequest"><%= savedSpecialRequest %></textarea>
+                    </div>
                 </div>
-            </div>
 
             <!-- ƯU ĐÃI -->
-            <div class="promotion-section">
-                <h3><i class="fas fa-gift"></i> Chọn ưu đãi (tùy chọn)</h3>
-                <div class="promotion-cards">
-                    <label class="promo-card">
-                        <input type="radio" name="promotion" value="none" checked>
-                        <div class="promo-title">Không áp dụng</div>
-                        <div class="promo-desc">Không sử dụng ưu đãi</div>
-                    </label>
-
-                    <label class="promo-card">
-                        <input type="radio" name="promotion" value="lunch">
-                        <div class="promo-title">Giảm 15% Giờ vàng</div>
-                        <div class="promo-desc">11:00 - 14:00 các ngày trong tuần</div>
-                    </label>
-
-                    <label class="promo-card">
-                        <input type="radio" name="promotion" value="happy_hour">
-                        <div class="promo-title">Happy Hour 20%</div>
-                        <div class="promo-desc">17:00 - 18:30 hàng ngày</div>
-                    </label>
-
-                    <label class="promo-card">
-                        <input type="radio" name="promotion" value="birthday">
-                        <div class="promo-title">Sinh nhật miễn phí</div>
-                        <div class="promo-desc">Tặng bánh sinh nhật + 10% off</div>
-                    </label>
+                <div class="promotion-section">
+                    <h3><i class="fas fa-gift"></i> Chọn ưu đãi (tùy chọn)</h3>
+                    <div class="promotion-cards">
+                        <label class="promo-card <%= "none".equals(savedPromotion) ? "selected" : "" %>">
+                            <input type="radio" name="promotion" value="none" <%= "none".equals(savedPromotion) ? "checked" : "" %>>
+                            <div class="promo-title">Không áp dụng</div>
+                            <div class="promo-desc">Không sử dụng ưu đãi</div>
+                        </label>
+                        <label class="promo-card <%= "lunch".equals(savedPromotion) ? "selected" : "" %>">
+                            <input type="radio" name="promotion" value="lunch" <%= "lunch".equals(savedPromotion) ? "checked" : "" %>>
+                            <div class="promo-title">Giảm 15% Giờ vàng</div>
+                            <div class="promo-desc">11:00 - 14:00 các ngày trong tuần</div>
+                        </label>
+                        <label class="promo-card <%= "happy_hour".equals(savedPromotion) ? "selected" : "" %>">
+                            <input type="radio" name="promotion" value="happy_hour" <%= "happy_hour".equals(savedPromotion) ? "checked" : "" %>>
+                            <div class="promo-title">Happy Hour 20%</div>
+                            <div class="promo-desc">17:00 - 18:30 hàng ngày</div>
+                        </label>
+                        <label class="promo-card <%= "birthday".equals(savedPromotion) ? "selected" : "" %>">
+                            <input type="radio" name="promotion" value="birthday" <%= "birthday".equals(savedPromotion) ? "checked" : "" %>>
+                            <div class="promo-title">Sinh nhật miễn phí</div>
+                            <div class="promo-desc">Tặng bánh sinh nhật + 10% off</div>
+                        </label>
+                    </div>
                 </div>
-            </div>
 
             <button type="submit" class="search-btn">Find Available Tables</button>
         </form>

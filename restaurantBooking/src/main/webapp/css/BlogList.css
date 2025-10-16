@@ -1,0 +1,280 @@
+/* ===== GENERAL ===== */
+body {
+    font-family: "Poppins", sans-serif;
+    background-color: #f7f3f1; /* be nhạt */
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ===== HEADER ===== */
+.topbar {
+    background-color: #9c2f23;
+    color: #fff;
+    padding: 15px 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.topbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* ===== HERO ===== */
+.hero {
+    text-align: center;
+    padding: 70px 20px;
+    background: linear-gradient(to right, #9c2f23, #b9442d);
+    color: #fff;
+}
+
+.hero h2 {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* ===== CATEGORY FILTER ===== */
+.category-nav {
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 15px 0;
+}
+
+.category-list {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    gap: 30px;
+    margin: 0;
+    padding: 0;
+}
+
+.category-list li a {
+    color: #9c2f23;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.category-list li.active a,
+.category-list li a:hover {
+    color: #b9442d;
+    border-bottom: 2px solid #b9442d;
+}
+
+/* ===== BLOG GRID ===== */
+.blog-section {
+    margin: 60px auto;
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+}
+
+.blog-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+}
+
+.blog-img {
+    height: 240px;
+    background-size: cover;
+    background-position: center;
+}
+
+.blog-info {
+    padding: 20px;
+}
+
+.blog-info .meta {
+    font-size: 13px;
+    color: #777;
+}
+
+.blog-info h3 {
+    font-size: 20px;
+    color: #9c2f23;
+    margin: 10px 0;
+}
+
+.blog-info p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    min-height: 60px;
+}
+
+.blog-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.read-more {
+    background-color: #9c2f23;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.read-more:hover {
+    background-color: #b9442d;
+}
+
+.comments {
+    color: #999;
+    font-size: 14px;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    background-color: #9c2f23;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+    margin-top: 60px;
+}
+/* === HEADER CỐ ĐỊNH === */
+.topbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #9c2f23;
+    color: #fff;
+    padding: 15px 0;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.topbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+nav a:hover {
+    opacity: 0.8;
+}
+
+/* Giúp nội dung không bị che bởi header cố định */
+body {
+    padding-top: 80px;
+}
+
+/* === HERO CÓ ẢNH NỀN === */
+.hero {
+    position: relative;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+/* Lớp mờ phủ lên ảnh nền */
+.hero .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(156, 47, 35, 0.5); /* màu đỏ chủ đạo pha mờ */
+    z-index: 1;
+}
+
+/* Nội dung nằm trên overlay */
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero h2 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* === CATEGORY NAV GIỮ NGUYÊN === */
+.category-nav {
+    background: #f7f3f1;
+    padding: 10px 0;
+    border-bottom: 1px solid #e3dcd9;
+}

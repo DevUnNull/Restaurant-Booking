@@ -12,7 +12,7 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
-            <c:if test="${sessionScope.userRole == 3}"><li><a href="${pageContext.request.contextPath}/#">Đặt Bàn</a></li></c:if>
+            <c:if test="${sessionScope.userRole == 3}"><li><a href="${pageContext.request.contextPath}/findViewTable">Đặt Bàn</a></li></c:if>
             <c:if test="${sessionScope.userRole == 2}">
                <li class="user-dropdown">
                    <div class="user-button" onclick="toggleUserDropdown()">
@@ -36,6 +36,20 @@
                    </div>
                </li>
            </c:if>
+            <c:if test="${sessionScope.userRole == 1 }">
+                <li class="user-dropdown">
+                    <div class="user-button" onclick="toggleUserDropdown()">
+                        <span class="user-name">Report</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="userDropdown" class="dropdown-content">
+                        <a href="${pageContext.request.contextPath}/EmployeeList">Quản Lý Nhân Sự</a>
+                        <a href="#">Phân lịch làm việc</a>
+                        <a href="#">Lịch làm việc</a>
+                        <a href="#">Đơn xin việc</a>
+                    </div>
+                </li>
+            </c:if>
             <c:if test="${sessionScope.userRole == 1 || sessionScope.userRole == 4}">
                 <li class="user-dropdown">
                     <div class="user-button" onclick="toggleUserDropdown()">
