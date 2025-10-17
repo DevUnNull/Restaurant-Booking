@@ -1,14 +1,21 @@
 package com.fpt.restaurantbooking.controllers;
 
+import com.fpt.restaurantbooking.models.MenuCategory;
+import com.fpt.restaurantbooking.models.MenuItem;
 import com.fpt.restaurantbooking.models.Promotions;
+import com.fpt.restaurantbooking.repositories.impl.MenuRepository;
 import com.fpt.restaurantbooking.repositories.impl.VoucherRepository;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +24,7 @@ import java.util.List;
  *
  * @author Quandxnunxi28
  */
-@WebServlet(name="Menu", urlPatterns={"/Menu"})
+@WebServlet(name="Menu", urlPatterns={"/Menu_manage"})
 public class MenuController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -35,15 +42,18 @@ public class MenuController extends HttpServlet {
         Promotions promo= (Promotions) request.getAttribute("pro");
         int offset = (page - 1) * recordsPerPage;
         try {
-            VoucherRepository vrepo = new VoucherRepository();
-            List<Promotions> promotions = vrepo.getVouchersByPage(promo.getPromotion_level_id(), offset, recordsPerPage);
-            int totalRecords = vrepo.getAllPromotions(promo.getPromotion_level_id()).size();
+            MenuRepository menuRepo = new MenuRepository();
+            List<MenuCategory> listMenuCategory = new ArrayList<>();
+            listMenuCategory = menuRepo.getCateGory();
+            List<MenuItem> menuItelList = menuRepo.getMenuItems(promo.getPromotion_level_id(), offset, recordsPerPage);
+            int totalRecords = menuRepo.getAllMenuItems(promo.getPromotion_level_id()).size();
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+            request.setAttribute("listMenuCategory", listMenuCategory);
             request.setAttribute("kaku", promo.getPromotion_level_id());
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
-            request.setAttribute("promotions", promotions);
-            request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
+            request.setAttribute("menuList", menuItelList);
+            request.getRequestDispatcher("/WEB-INF/Menu/Menu.jsp").forward(request, response);
         }catch (Exception ex){
         }
     }
@@ -65,33 +75,40 @@ public class MenuController extends HttpServlet {
         int offset = (page - 1) * recordsPerPage;
 
 
-        List<Promotions> promotions = new ArrayList<>();
-        VoucherRepository vrepo = new VoucherRepository();
-        String idLevel = request.getParameter("idlevel");
-        if(idLevel==null){
+        List<MenuItem> menuItemList = new ArrayList<>();
+        MenuRepository menurepo = new MenuRepository();
+        String categoryId = request.getParameter("categoryId");
+        if(categoryId==null){
             try {
-                promotions = vrepo.getVouchersByPage(1, offset, recordsPerPage);
-                int totalRecords = vrepo.getAllPromotions(1).size();
+                List<MenuCategory> listMenuCategory = new ArrayList<>();
+                listMenuCategory = menurepo.getCateGory();
+                menuItemList = menurepo.getMenuItems(1, offset, recordsPerPage);
+                int totalRecords = menurepo.getAllMenuItems(1).size();
                 int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+                request.setAttribute("listMenuCategory", listMenuCategory);
                 request.setAttribute("currentPage", page);
                 request.setAttribute("totalPages", totalPages);
-                request.setAttribute("promotions", promotions);
-                request.setAttribute("kaku",idLevel);
-                request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
+                request.setAttribute("menuList", menuItemList);
+                request.setAttribute("kaku",categoryId);
+                request.getRequestDispatcher("/WEB-INF/Menu/Menu.jsp").forward(request, response);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            request.setAttribute("promotions", promotions);
+
         }else{
             try {
-                promotions = vrepo.getVouchersByPage(Integer.parseInt(idLevel), offset, recordsPerPage);
-                int totalRecords = vrepo.getAllPromotions(Integer.parseInt(idLevel)).size();
+                List<MenuCategory> listMenuCategory = new ArrayList<>();
+                listMenuCategory = menurepo.getCateGory();
+                menuItemList = menurepo.getMenuItems(Integer.parseInt(categoryId), offset, recordsPerPage);
+                int totalRecords = menurepo.getAllMenuItems(Integer.parseInt(categoryId)).size();
                 int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+                request.setAttribute("listMenuCategory", listMenuCategory);
                 request.setAttribute("currentPage", page);
                 request.setAttribute("totalPages", totalPages);
-                request.setAttribute("promotions", promotions);
-                request.setAttribute("kaku",idLevel);
-                request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
+                request.setAttribute("menuList", menuItemList);
+
+                request.setAttribute("kaku",categoryId);
+                request.getRequestDispatcher("/WEB-INF/Menu/Menu.jsp").forward(request, response);
             }catch (Exception ex){
 
             }
@@ -114,15 +131,18 @@ public class MenuController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String id = request.getParameter("id");
-        String nameVoucher = request.getParameter("promotionName");
+        String menuName = request.getParameter("menuName");
         String description = request.getParameter("description");
-        String discount_percentage= request.getParameter("discount_percentage");
-        String start_date= request.getParameter("start_date");
-        String end_date= request.getParameter("end_date");
-        String updated_by = request.getParameter("updated_by");
-        VoucherRepository vrepo = new VoucherRepository();
+        String price= request.getParameter("price");
+        String imageFile =  request.getParameter("imageFile");
+        String updated_by= request.getParameter("updated_by");
+        String status= request.getParameter("status");
+        String categoryId = request.getParameter("categoryId");
+        MenuRepository menuRepo = new MenuRepository();
         String er;
-        if(nameVoucher.isEmpty()){
+
+
+        if(menuName.isEmpty()){
             er = "Name must not be empty";
             request.setAttribute("errorMessage", er);
             processRequest(request, response);
@@ -132,30 +152,31 @@ public class MenuController extends HttpServlet {
             request.setAttribute("errorMessage", er);
             processRequest(request, response);
             return;
-        }else if(discount_percentage.isEmpty()){
-            er = "Discount percentage must not be empty";
+        }else if(price.isEmpty()){
+            er = "price percentage must not be empty";
             request.setAttribute("errorMessage", er);
             processRequest(request, response);
             return;
-        }else if(start_date.isEmpty()){
-            er = "Start date must not be empty";
+        }else if(status.isEmpty()){
+            er = "status date must not be empty";
             request.setAttribute("errorMessage", er);
             processRequest(request, response);
             return;
-        }else if(end_date.isEmpty()){
-            er = "End date must not be empty";
+        }else if(categoryId.isEmpty()){
+            er = "categoryId date must not be empty";
             request.setAttribute("errorMessage", er);
             processRequest(request, response);
             return;
         }
 
-
-
         try {
-            Promotions pro = vrepo.getIdWithUpdate(Integer.parseInt(id));
-            vrepo.UpdatePromotion(id,nameVoucher,description,discount_percentage,start_date,end_date, updated_by);
-            request.setAttribute("pro", pro);
-            processRequest(request, response);
+
+                MenuItem pro = (MenuItem) menuRepo.getIdWithUpdate(Integer.parseInt(id));
+                menuRepo.UpdateMenu(id,menuName,description,price,imageFile,updated_by,status, categoryId);
+                request.setAttribute("pro", pro);
+                processRequest(request, response);
+
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

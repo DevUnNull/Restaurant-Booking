@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class UserServiceImpl implements UserService {
-    
+
     private UserRepository userRepository;
     private EmailVerificationRepository emailVerificationRepository;
     private OTPService otpService;
@@ -121,17 +121,17 @@ public class UserServiceImpl implements UserService {
         user.setPassword(hashPassword(password));
         
         // Set default values
-        user.setStatus("PENDING");
-        user.setRole("CUSTOMER");
+        user.setStatus("ACTIVE");
+        user.setRoleId(3);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         
         // Save user
         User savedUser = userRepository.save(user);
-        
+
         // Send OTP verification email
         sendOTPVerificationEmail(savedUser.getUserId().longValue());
-        
+
         return savedUser;
     }
     

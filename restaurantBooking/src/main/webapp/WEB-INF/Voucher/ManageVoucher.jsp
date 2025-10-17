@@ -441,6 +441,25 @@
     <% } %>
   });
 </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Modal sửa voucher
+    const editModal = new bootstrap.Modal(document.getElementById("editVoucherModal"));
+
+    // Nếu có lỗi từ server, hiển thị lỗi và mở modal
+    <% if (request.getAttribute("errorMessage") != null) { %>
+    const errorMsg = "<%= request.getAttribute("errorMessage") %>";
+    const errorDiv = document.getElementById("editErrorMsg");
+
+    // Hiển thị thông báo lỗi
+    errorDiv.classList.remove("d-none");
+    errorDiv.textContent = errorMsg;
+
+    // Mở modal
+    editModal.show();
+    <% } %>
+  });
+</script>
 
 <!-- Modal Sửa Voucher -->
 <div class="modal fade" id="editVoucherModal" tabindex="-1" aria-labelledby="editVoucherLabel" aria-hidden="true">
@@ -450,20 +469,7 @@
       <form action="Voucher" method="post">
         <div class="modal-header">
           <h5 class="modal-title" id="editVoucherLabel">Sửa thông tin Voucher</h5>
-          <c:if test="${not empty errorMessage}">
-            <script>
-              window.addEventListener("load", function() {
-                // Lấy modal
-                var modal = new bootstrap.Modal(document.getElementById("editVoucherModal"));
-                modal.show(); // Hiển thị popup
 
-                // Hiển thị thông báo lỗi
-                document.getElementById("editErrorMsg").classList.remove("d-none");
-                document.getElementById("editErrorMsg").innerText = "${errorMessage}";
-              });
-            </script>
-
-          </c:if>
 
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>

@@ -328,7 +328,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
         
         user.setStatus(rs.getString("status"));
-        user.setRole(rs.getString("role"));
+
         
         return user;
     }

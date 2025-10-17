@@ -23,7 +23,7 @@
                        <a href="${pageContext.request.contextPath}/ServiceList">
                            <i class="fas fa-user"></i>Service Management
                        </a>
-                       <a href="${pageContext.request.contextPath}/MenuManage">
+                       <a href="${pageContext.request.contextPath}/Menu_manage">
                            <i class="fas fa-calendar-alt"></i>Menu Management
                        </a>
                        <a href="${pageContext.request.contextPath}/Voucher">
@@ -38,7 +38,6 @@
                        <a href="${pageContext.request.contextPath}/Blog">
                        <i class="fas fa-key"></i>Blog Nhà Hàng
                    </a>
-
                    </div>
                </li>
            </c:if>
@@ -67,7 +66,7 @@
                 <c:when test="${not empty sessionScope.currentUser}">
                     <!-- User is logged in - show dropdown -->
                     <li class="user-dropdown">
-                        <div class="user-button" onclick="toggleUserDropdown()">
+                        <div class="user-button" onclick="toggleUserDropdownn()">
                             <span class="user-name">${sessionScope.currentUser.fullName}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
@@ -100,6 +99,12 @@
 
 <script>
 function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    const userButton = document.querySelector('.user-button');
+    dropdown.classList.toggle('show');
+    userButton.classList.toggle('active');
+}
+function toggleUserDropdownn() {
     const dropdown = document.getElementById('userDropdown');
     const userButton = document.querySelector('.user-button');
     dropdown.classList.toggle('show');

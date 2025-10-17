@@ -12,32 +12,48 @@ public class MenuItem extends BaseEntity {
     private String description;
     private BigDecimal price;
     private String imageUrl;
-    private String category;
+    private int category_id;
     private Integer calories;
     private String status;
     private String created_By;
     private String updated_By;
     private String created_At;
     private String updated_At;
-
+    private String category_name;
 
     public MenuItem() {
         super();
         this.status = "ACTIVE";
     }
-    public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl, String category, String status, String created_By, String updated_By, String created_At, String updated_At) {
+    public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
+                    String status, String created_By, String updated_By, String created_At, String updated_At, String category_name) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.itemCode = itemCode;
         this.description = description;
         this.price = price;
         this.imageUrl = imageUrl;
-        this.category = category;
         this.status = status;
         this.created_By = created_By;
         this.updated_By = updated_By;
         this.created_At = created_At;
         this.updated_At = updated_At;
+        this.category_name = category_name;
+    }
+    public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
+                    String status, String created_By, String updated_By, String created_At, String updated_At, int category_id) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemCode = itemCode;
+        this.description = description;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.status = status;
+        this.created_By = created_By;
+        this.updated_By = updated_By;
+        this.created_At = created_At;
+        this.updated_At = updated_At;
+        this.category_id = category_id;
     }
 
 
@@ -50,6 +66,13 @@ public class MenuItem extends BaseEntity {
 
     public void setCreated_By(String created_By) {
         this.created_By = created_By;
+    }
+    public String getCategory_name() {
+        return category_name;
+    }
+
+    public void setCategory_name(String category_name) {
+        this.category_name = category_name;
     }
     public String getUpdated_By() {
         return updated_By;
@@ -120,12 +143,12 @@ public class MenuItem extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategory() {
+        return category_id;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategory(int category_id) {
+        this.category_id = category_id;
     }
 
     public Integer getCalories() {

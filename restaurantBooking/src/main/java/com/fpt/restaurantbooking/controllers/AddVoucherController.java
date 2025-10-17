@@ -39,7 +39,8 @@ public class AddVoucherController
                 page = 1;
             }
         }
-        String idlevel = request.getAttribute("idlevel").toString();
+        Object idLevelObj = request.getAttribute("idlevel");
+        String idlevel = idLevelObj != null ? idLevelObj.toString() : "1"; // "1" là default nếu muốn
 
         int offset = (page - 1) * recordsPerPage;
 

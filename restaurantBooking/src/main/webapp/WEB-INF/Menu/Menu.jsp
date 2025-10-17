@@ -254,80 +254,77 @@
         <h3>Danh sách Voucher</h3>
 
         <div>
-            <form action="Voucher" method="get">
-                <select name="idlevel"  class="voucher-select" id="voucherLevel" onchange="this.form.submit()">
+            <form action="Menu_manage" method="get">
+                <select name="categoryId"  class="voucher-select" id="menuCategorySelect" onchange="this.form.submit()">
+                    <c:forEach var="o" items="${listMenuCategory}">
+                        <option value="${o.id_menuCategory}" ${kaku == o.id_menuCategory ? 'selected' : ''}>${o.categoryName}</option>
+                    </c:forEach>
 
-                    <option value="3" ${kaku == 3 ? 'selected' : ''}>Voucher cấp 3</option>
                 </select>
                 <button type="submit" hidden></button>
             </form>
 
-            <button class="btn btn-add ms-3">+ Thêm voucher mới</button>
+            <button class="btn btn-add ms-3">+ Thêm món mới</button>
         </div>
     </div>
     <!-- Modal Thêm Voucher -->
-    <div class="modal fade" id="addVoucherModal" tabindex="-1" aria-labelledby="addVoucherLabel" aria-hidden="true">
+    <div class="modal fade" id="addMenuModal" tabindex="-1" aria-labelledby="addVoucherLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="AddVoucher" method="post">
+                <form action="AddMenu" method="post" >
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addVoucherLabel">Thêm Voucher Mới</h5>
+                        <h5 class="modal-title" id="addVoucherLabel">Thêm Món Mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                     </div>
-
-
                     <div class="modal-body">
-
-                        <div id="addErrorMsg" class="alert alert-danger d-none"></div>
-                        <input type="hidden" name="action" value="add">
-
-                        <div class="mb-3">
-                            <label for="addVoucherName" class="form-label">Tên voucher</label>
-                            <input type="text" class="form-control" id="addVoucherName" name="promotionName" value="${param.promotionName != null ? param.promotionName : ''}" >
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="addVoucherDescription" class="form-label">Mô tả</label>
-                            <input type="text" class="form-control" id="addVoucherDescription" name="description" value="${param.description != null ? param.description : ''}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="addVoucherDiscount" class="form-label">Phần trăm giảm (%)</label>
-                            <input type="number" class="form-control" id="addVoucherDiscount" name="discount_percentage" min="0" max="100" value="${param.discount_percentage != null ? param.discount_percentage : ''}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="addVoucherAmount" class="form-label">Số tiền giảm (nếu có)</label>
-                            <input type="number" class="form-control" id="addVoucherAmount" name="discount_amount" placeholder="Nhập số tiền giảm..." value="${param.discount_amount != null ? param.discount_amount : ''}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Thời gian hiệu lực</label>
-                            <div class="d-flex gap-2">
-                                <input type="date" class="form-control" id="addVoucherStart" name="start_date" value="${param.start_date != null ? param.start_date : ''}" >
-                                <input type="date" class="form-control" id="addVoucherEnd" name="end_date" value="${param.end_date != null ? param.end_date : ''}" >
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="addVoucherStatus" class="form-label">Trạng thái</label>
-                            <select class="form-select" id="addVoucherStatus" name="status">
-                                <option value="ACTIVE">ACTIVE</option>
-                                <option value="INACTIVE">INACTIVE</option>
-                            </select>
-                        </div>
-                        <input type="hidden" name="created_by" value="${sessionScope.userId}">
-                        <div class="mb-3">
-                            <label for="addVoucherLevel" class="form-label">Cấp độ Voucher</label>
-                            <select class="form-select" id="addVoucherLevel" name="promotion_level_id" >
-                                <option value="1">Cấp 1</option>
-                                <option value="2">Cấp 2</option>
-                                <option value="3">Cấp 3</option>
-                            </select>
-                        </div>
+                        <c:if test="${not empty errorMessageee}">
+                            <div id="addErrorMsg" class="alert alert-danger">${errorMessageee}</div>
+                        </c:if>
+                        <c:if test="${empty errorMessageee}">
+                            <div id="addErrorMsg" class="alert alert-danger d-none"></div>
+                        </c:if>
+                    <input type="hidden" name="action" value="add">
+                    <div class="mb-3">
+                        <label for="addMenuName" class="form-label">Tên món</label>
+                        <input type="text" class="form-control" id="addMenuName" name="itemName" value="${param.itemName != null ? param.itemName : ''}">
                     </div>
-
-
+                    <div class="mb-3">
+                        <label for="addDishCode" class="form-label">Mã món</label>
+                        <input type="text" class="form-control" id="addDishCode" name="code_dish" value="${param.code_dish != null ? param.code_dish : ''}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="addMenuDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="menuDescription" name="description" rows="2">${param.description != null ? param.description : ''}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addMenuPrice" class="form-label">Giá</label>
+                        <input type="number" class="form-control" id="addMenuPrice" name="price" min="0" value="${param.price != null ? param.price : ''}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="addDishImage" class="form-label">Ảnh món ăn</label>
+                        <div class="mb-2 text-center">
+                            <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
+                        </div>
+                        <input type="file" class="form-control" id="addDishImage" name="imageFile" accept="image/*" onchange="previewImage(event)">
+                    </div>
+                    <div class="mb-3">
+                        <label for="addMenuStatus" class="form-label">Trạng thái</label>
+                        <select class="form-select" id="addMenuStatus" name="status">
+                            <option value="AVAILABLE" ${param.status == 'AVAILABLE' ? 'selected' : ''}>AVAILABLE</option>
+                            <option value="UNAVAILABLE" ${param.status == 'UNAVAILABLE' ? 'selected' : ''}>UNAVAILABLE</option>
+                            <option value="ARCHIVED" ${param.status == 'ARCHIVED' ? 'selected' : ''}>ARCHIVED</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addMenuCategory" class="form-label">Thể loại</label>
+                        <select class="form-select" id="addMenuCategory" name="categoryId">
+                            <c:forEach var="o" items="${listMenuCategory}">
+                                <option value="${o.id_menuCategory}">${o.categoryName}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <input type="hidden" name="created_by" value="${sessionScope.userId}">
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                         <button type="submit" class="btn btn-add">Thêm mới</button>
@@ -337,47 +334,49 @@
         </div>
     </div>
 
-    <div class="row g-4" id="voucherList">
-        <c:forEach var="o" items="${promotions}">
-            <div class="col-md-4 col-sm-6">
-                <div class="card-voucher h-100">
-                    <!-- Hình ảnh voucher -->
-                    <img src="${o.imageUrl != null ? o.imageUrl : 'images/default-voucher.jpg'}"
-                         class="card-img-top"
-                         alt="Voucher Image"
-                         style="height:180px; object-fit:cover;">
+        <div class="row g-4" id="voucherList">
+            <c:forEach var="o" items="${menuList}">
+                <div class="col-md-4 col-sm-6">
+                    <div class="card-voucher h-100">
+                        <!-- Hình ảnh voucher -->
+                        <img src="${pageContext.request.contextPath}/images/${o.imageUrl != null ? o.imageUrl : 'no-image.png'}"
+                             class="card-img-top"
+                             alt="Voucher Image"
+                             style="height:180px; object-fit:cover;">
 
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">${o.promotionName}</h5>
-                        <h6 class="card-title">code</h6>
-                        <p class="card-text flex-grow-1">
-                                ${o.description}. Hạn dùng ${o.start_date} - ${o.end_date}
-                        </p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="badge bg-success badge-status">${o.status}</span>
-                            <small class="text-muted">${o.discount_percentage}%</small>
-                        </div>
-                        <div class="mt-3 d-flex justify-content-between">
-                            <button class="btn btn-sm btn-primary btn-edit"
-                                    data-id="${o.promotion_id}"
-                                    data-name="${o.promotionName}"
-                                    data-desc="${o.description}"
-                                    data-discount="${o.discount_percentage}"
-                                    data-start="${o.start_date}"
-                                    data-end="${o.end_date}">
-                                Sửa
-                            </button>
-                            <button class="btn btn-sm btn-danger btn-delete"
-                                    data-id="${o.promotion_id}"
-                                    data-name="${o.promotionName}">
-                                Xóa
-                            </button>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${o.itemName}</h5>
+                            <h6 class="card-title">Mã món: ${o.itemCode}</h6>
+                            <p class="card-text flex-grow-1">
+                                    ${o.description}.  Thời gian tạo:  ${o.created_At}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success badge-status">${o.status}</span>
+                                <small class="text-muted">Giá: <strong>${o.price}</strong> </small>
+                            </div>
+                            <div class="mt-3 d-flex justify-content-between">
+                                <button class="btn btn-sm btn-primary btn-edit"
+                                        data-id="${o.id}"
+                                        data-name="${o.itemName}"
+                                        data-desc="${o.description}"
+                                        data-price="${o.price}"
+                                        data-code="${o.itemCode}"
+                                        data-image="${o.imageUrl}"
+                                        data-status="${o.status}"
+                                        data-category="${o.category_name}">
+                                    Sửa
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-delete"
+                                        data-id="${o.id}"
+                                        data-name="${o.itemName}">
+                                    Xóa
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </c:forEach>
-    </div>
+            </c:forEach>
+        </div>
 
 
 </div>
@@ -386,18 +385,62 @@
         const editButtons = document.querySelectorAll(".btn-edit");
         const deleteButtons = document.querySelectorAll(".btn-delete");
 
-        const editModal = new bootstrap.Modal(document.getElementById('editVoucherModal'));
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteVoucherModal'));
+        const editModal = new bootstrap.Modal(document.getElementById('editMenuModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteMenuModal'));
 
         // Nút SỬA
         editButtons.forEach(btn => {
             btn.addEventListener("click", () => {
-                document.getElementById("voucherId").value = btn.dataset.id;
-                document.getElementById("voucherName").value = btn.dataset.name;
-                document.getElementById("voucherDescription").value = btn.dataset.desc;
-                document.getElementById("voucherDiscount").value = btn.dataset.discount;
-                document.getElementById("voucherStart").value = btn.dataset.start;
-                document.getElementById("voucherEnd").value = btn.dataset.end;
+                const ctx = "${pageContext.request.contextPath}";
+
+                // Lấy dữ liệu từ data-*
+                const id = btn.dataset.id || '';
+                const name = btn.dataset.name || '';
+                const desc = btn.dataset.desc || '';
+                const price = btn.dataset.price || '';
+                const code = btn.dataset.code || '';
+                const image = btn.dataset.image || '';
+                const status = btn.dataset.status || 'AVAILABLE';
+                const category = btn.dataset.category || '';
+
+                // Điền vào form
+                document.getElementById("menuId").value = id;
+                document.getElementById("menuName").value = name;
+                document.getElementById("menuDescription").value = desc;
+                document.getElementById("price").value = price;
+                // trường mã
+                const codeField = document.getElementById("menuCode");
+                if (codeField) codeField.value = code;
+
+                // existingImage hidden
+                const existingImgField = document.getElementById("existingImage");
+                if (existingImgField) existingImgField.value = image;
+
+                // set trạng thái select
+                const statusSelect = document.getElementById("addMenuStatus");
+                if (statusSelect) {
+                    statusSelect.value = status;
+                }
+
+                // set category select
+                const categorySelect = document.getElementById("addMenuCategory");
+                if (categorySelect) {
+                    // nếu option có tương ứng value, set; nếu không, bỏ chọn
+                    for (let opt of categorySelect.options) {
+                        if (opt.value === category || opt.text === category) {
+                            opt.selected = true;
+                            break;
+                        }
+                    }
+                }
+
+
+
+                // Reset input file (nếu có) để tránh giữ file cũ
+                const fileInput = document.getElementById("addDishImage");
+                if (fileInput) {
+                    fileInput.value = "";
+                }
 
                 editModal.show();
             });
@@ -406,17 +449,28 @@
         // Nút XÓA
         deleteButtons.forEach(btn => {
             btn.addEventListener("click", () => {
-                document.getElementById("deleteVoucherId").value = btn.dataset.id;
-                document.getElementById("deleteVoucherName").textContent = btn.dataset.name;
+                document.getElementById("deleteMenuId").value = btn.dataset.id;
+                document.getElementById("deleteMenuName").textContent = btn.dataset.name;
                 deleteModal.show();
             });
         });
     });
 </script>
+<script>
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function(){
+            const output = document.getElementById('imagePreview');
+            output.src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // JavaScript thay đổi nội dung khi chọn cấp voucher
-    document.getElementById("voucherLevel").addEventListener("change", function() {
+    document.getElementById("menuCategorySelect").addEventListener("change", function() {
         const selected = this.value;
         // TODO: thêm code load danh sách voucher tương ứng cấp
         console.log("Đang chọn:", selected);
@@ -425,7 +479,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Modal thêm voucher
-        const addModal = new bootstrap.Modal(document.getElementById("addVoucherModal"));
+        const addModal = new bootstrap.Modal(document.getElementById("addMenuModal"));
         document.querySelector(".btn-add").addEventListener("click", () => {
             addModal.show();
         });
@@ -442,65 +496,90 @@
         errorDiv.textContent = errorMsg;
 
         // Mở lại modal "Thêm voucher"
-        const addModal = new bootstrap.Modal(document.getElementById('addVoucherModal'));
+        const addModal = new bootstrap.Modal(document.getElementById('addMenuModal'));
         addModal.show();
         <% } %>
     });
 </script>
 
 <!-- Modal Sửa Voucher -->
-<div class="modal fade" id="editVoucherModal" tabindex="-1" aria-labelledby="editVoucherLabel" aria-hidden="true">
+<div class="modal fade" id="editMenuModal" tabindex="-1" aria-labelledby="editVoucherLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
 
-            <form action="Voucher" method="post">
+            <!-- CHÚ Ý: enctype để upload file -->
+            <form action="Menu_manage" method="post" >
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editVoucherLabel">Sửa thông tin Voucher</h5>
+                    <h5 class="modal-title" id="editVoucherLabel">Sửa món ăn</h5>
                     <c:if test="${not empty errorMessage}">
                         <script>
                             window.addEventListener("load", function() {
-                                // Lấy modal
-                                var modal = new bootstrap.Modal(document.getElementById("editVoucherModal"));
-                                modal.show(); // Hiển thị popup
-
-                                // Hiển thị thông báo lỗi
+                                var modal = new bootstrap.Modal(document.getElementById("editMenuModal"));
+                                modal.show();
                                 document.getElementById("editErrorMsg").classList.remove("d-none");
                                 document.getElementById("editErrorMsg").innerText = "${errorMessage}";
                             });
                         </script>
-
                     </c:if>
 
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
                     <div id="editErrorMsg" class="alert alert-danger d-none"></div>
+
                     <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="id" id="voucherId" value="${param.id != null ? param.id : ''}">
+                    <input type="hidden" name="id" id="menuId" value="${param.id != null ? param.id : ''}">
+
+
 
                     <div class="mb-3">
-                        <label for="voucherName" class="form-label">Tên voucher</label>
-                        <input type="text" class="form-control" id="voucherName" name="promotionName" value="${param.promotionName != null ? param.promotionName : ''}" >
+                        <label for="menuCode" class="form-label">Mã món</label>
+                        <input type="text" class="form-control" id="menuCode" name="itemCode" value="${param.itemCode != null ? param.itemCode : ''}">
                     </div>
 
                     <div class="mb-3">
-                        <label for="voucherDescription" class="form-label">Mô tả</label>
-                        <input    class="form-control" id="voucherDescription" name="description"  rows="2" value="${param.description != null ? param.description : ''}">
+                        <label for="menuName" class="form-label">Tên món</label>
+                        <input type="text" class="form-control" id="menuName" name="menuName" value="${param.menuName != null ? param.menuName : ''}" >
                     </div>
 
                     <div class="mb-3">
-                        <label for="voucherDiscount" class="form-label">Phần trăm giảm</label>
-                        <input type="number" class="form-control" id="voucherDiscount" name="discount_percentage" min="0" max="100" value="${param.discount_percentage != null ? param.discount_percentage : ''}">
+                        <label for="menuDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="menuDescription" name="description" rows="2">${param.description != null ? param.description : ''}</textarea>
                     </div>
-                    <input type="hidden" name="updated_by" value="${sessionScope.userId}">
+
                     <div class="mb-3">
-                        <label class="form-label">Thời gian hiệu lực</label>
-                        <div class="d-flex gap-2">
-                            <input type="date" class="form-control" id="voucherStart" name="start_date"value="${param.start_date != null ? param.start_date : ''}">
-                            <input type="date" class="form-control" id="voucherEnd" name="end_date" value="${param.end_date != null ? param.end_date : ''}">
+                        <label for="price" class="form-label">Giá</label>
+                        <input type="number" class="form-control" id="price" name="price"  value="${param.price != null ? param.price : ''}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="addDishImage" class="form-label">Ảnh món ăn</label>
+                        <div class="mb-2 text-center">
+                            <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
                         </div>
+                        <input type="file" class="form-control" id="addDishImage" name="imageFile" accept="image/*" onchange="previewImage(event)">
+                        <small class="text-muted">Nếu không chọn file mới, ảnh cũ sẽ được giữ.</small>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="addMenuStatus" class="form-label">Trạng thái</label>
+                        <select class="form-select" id="addMenuStatus" name="status">
+                            <option value="AVAILABLE">AVAILABLE</option>
+                            <option value="UNAVAILABLE">UNAVAILABLE</option>
+                            <option value="ARCHIVED">ARCHIVED</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="addMenuCategory" class="form-label">Thể loại</label>
+                        <select class="form-select" id="addMenuCategory" name="categoryId">
+                            <c:forEach var="o" items="${listMenuCategory}">
+                                <option value="${o.id_menuCategory}">${o.categoryName}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="updated_by" value="${sessionScope.userId}">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -511,8 +590,9 @@
     </div>
 </div>
 
+
 <!-- Modal Xóa Voucher -->
-<div class="modal fade" id="deleteVoucherModal" tabindex="-1" aria-labelledby="deleteVoucherLabel" aria-hidden="true">
+<div class="modal fade" id="deleteMenuModal" tabindex="-1" aria-labelledby="deleteVoucherLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form action="DeleteVoucher" method="post">
@@ -522,8 +602,8 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="id" id="deleteVoucherId">
-                    <p>Bạn có chắc chắn muốn xóa voucher <strong id="deleteVoucherName"></strong> không?</p>
+                    <input type="hidden" name="id" id="deleteMenuId">
+                    <p>Bạn có chắc chắn muốn xóa voucher <strong id="deleteMenuName"></strong> không?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -538,19 +618,19 @@
         <ul class="pagination">
             <c:if test="${currentPage > 1}">
                 <li class="page-item">
-                    <a class="page-link" href="Voucher?page=${currentPage - 1}">Trước</a>
+                    <a class="page-link" href="Menu_manage?categoryId=${kaku}&page=${currentPage - 1}">Trước</a>
                 </li>
             </c:if>
 
             <c:forEach var="i" begin="1" end="${totalPages}">
                 <li class="page-item ${i == currentPage ? 'active' : ''}">
-                    <a class="page-link" href="Voucher?page=${i}">${i}</a>
+                    <a class="page-link" href="Menu_manage?categoryId=${kaku}&page=${i}">${i}</a>
                 </li>
             </c:forEach>
 
             <c:if test="${currentPage < totalPages}">
                 <li class="page-item">
-                    <a class="page-link" href="Voucher?page=${currentPage + 1}">Sau</a>
+                    <a class="page-link" href="Menu_manage?categoryId=${kaku}&page=${currentPage + 1}">Sau</a>
                 </li>
             </c:if>
         </ul>

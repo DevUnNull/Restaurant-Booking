@@ -33,6 +33,7 @@ public class VoucherController extends HttpServlet {
                 page = 1;
             }
         }
+
         Promotions promo= (Promotions) request.getAttribute("pro");
         int offset = (page - 1) * recordsPerPage;
         try {
