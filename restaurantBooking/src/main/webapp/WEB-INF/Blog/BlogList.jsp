@@ -1,4 +1,5 @@
 
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -59,7 +60,7 @@
                     <h3>${o.nameCategoryBlog}</h3>
                     <p>${o.description}</p>
                     <div class="blog-footer">
-                        <a href="BlogSingleListController?id=${o.id}" class="read-more">Đọc thêm</a>
+                        <a href="BlogSingleList?id=${o.id}" class="read-more">Đọc thêm</a>
                         <span class="comments">💬 5</span>
                     </div>
                 </div>

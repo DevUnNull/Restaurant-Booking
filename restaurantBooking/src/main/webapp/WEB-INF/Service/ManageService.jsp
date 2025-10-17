@@ -68,16 +68,17 @@
     <div class="main-wrapper">
         <!-- Sidebar -->
         <div class="sidebar">
+            <h2>Staff Panel</h2>
             <ul>
                 <li><a href="#">Dashboard</a></li>
-                <li><a href="ServiceList">Danh sách dịch vụ</a></li>
+                <li><a href="ServiceList">Dịch vụ</a></li>
+                <!-- nếu quyền là admin Restaurant thì hiện  -->
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-                <li><a href="MenuList">Menu</a></li>
-                <li><a href="#">Quản lý Menu</a></li>
-                <li><a href="VoucherController">Quản lý Voucher khuyến mãi </a></li>
-                <li><a href="#">Quản lý khách hàng thân thiết </a></li>
-                <li><a href="BlogController">BlogList</a></li>
+                <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
 
+                <li><a href="#">Quản lý Menu</a></li>
+                <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+                <li><a href="#">Quản lý khách hàng thân thiết </a></li>
             </ul>
         </div>
 
@@ -94,7 +95,7 @@
                     <c:if test="${not empty errorMessage}">
                         <script>
                             window.onload = function () {
-                                document.getElementById("addModal").style.display = "block";
+                                openAddModal(); // ✅ Gọi lại hàm render mã ngẫu nhiên
                             }
                         </script>
                         <p style="color:red;">${errorMessage}</p>
@@ -117,8 +118,8 @@
 
                         <label>Trạng thái:</label>
                         <select id="add-status" name="status">
-                            <option value="active" ${param.status == 'active' ? 'selected' : ''}>Active</option>
-                            <option value="inactive" ${param.status == 'inactive' ? 'selected' : ''}>Inactive</option>
+                                <option value="ACTIVE" ${param.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+                            <option value="INACTIVE" ${param.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
                         </select>
 
                         <label>Ngày bắt đầu:</label>
@@ -154,7 +155,7 @@
                         <td>${o.serviceCode}</td>
                         <td>${o.description}</td>
                         <td>${o.price} VND</td>
-                        <td class="${o.status eq 'active' ? 'status-active' : 'status-inactive'}">
+                        <td class="${o.status eq 'ACTIVE' ? 'status-active' : 'status-inactive'}">
                                 ${o.status}
                         </td>
                         <td>${o.startDate}</td>
@@ -238,8 +239,8 @@
 
             <label>Trạng thái:</label>
             <select id="update-status" name="status">
-                <option value="active" ${param.status != 'action' ? param.status : ''} >Active</option>
-                <option value="inactive" ${param.status != 'inaction' ? param.status : ''}>Inactive</option>
+                <option value="ACTIVE" ${param.status != 'ACTIVE' ? param.status : ''} >ACTIVE</option>
+                <option value="INACTIVE" ${param.status != 'INACTIVE' ? param.status : ''}>INACTIVE</option>
             </select>
 
             <label>Ngày bắt đầu:</label>

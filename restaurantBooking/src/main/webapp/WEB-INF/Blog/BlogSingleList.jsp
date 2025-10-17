@@ -1,3 +1,4 @@
+
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -216,7 +217,7 @@
     <div class="container">
         <ul class="category-list">
             <c:forEach var="o" items="${blogCate}">
-                <li><a href="BlogSingleListController?id=${o.id}">${o.nameCategoryBlog}</a></li>
+                <li><a href="BlogSingleList?id=${o.id}">${o.nameCategoryBlog}</a></li>
             </c:forEach>
 
 

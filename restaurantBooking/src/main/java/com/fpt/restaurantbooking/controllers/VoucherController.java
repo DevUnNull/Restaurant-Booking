@@ -1,3 +1,4 @@
+
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.models.Promotions;
@@ -17,46 +18,65 @@ import java.util.List;
  *
  * @author Quandxnunxi28
  */
-@WebServlet(name="VoucherController", urlPatterns={"/VoucherController"})
+@WebServlet(name="VoucherController", urlPatterns={"/Voucher"})
 public class VoucherController extends HttpServlet {
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        VoucherRepository vrepo = new VoucherRepository();
+        int page = 1;
+        int recordsPerPage = 6;
+        if (request.getParameter("page") != null) {
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
+        Promotions promo= (Promotions) request.getAttribute("pro");
+        int offset = (page - 1) * recordsPerPage;
         try {
-            List<Promotions> promotions = vrepo.getAllPromotions(1);
+            VoucherRepository vrepo = new VoucherRepository();
+            List<Promotions> promotions = vrepo.getVouchersByPage(promo.getPromotion_level_id(), offset, recordsPerPage);
+            int totalRecords = vrepo.getAllPromotions(promo.getPromotion_level_id()).size();
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+            request.setAttribute("kaku", promo.getPromotion_level_id());
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.setAttribute("promotions", promotions);
             request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
         }catch (Exception ex){
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
+        int page = 1;
+        int recordsPerPage = 6;
+        if (request.getParameter("page") != null) {
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        int offset = (page - 1) * recordsPerPage;
+
+
         List<Promotions> promotions = new ArrayList<>();
         VoucherRepository vrepo = new VoucherRepository();
         String idLevel = request.getParameter("idlevel");
         if(idLevel==null){
             try {
-                promotions = vrepo.getAllPromotions(1);
+                promotions = vrepo.getVouchersByPage(1, offset, recordsPerPage);
+                int totalRecords = vrepo.getAllPromotions(1).size();
+                int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
                 request.setAttribute("promotions", promotions);
                 request.setAttribute("kaku",idLevel);
                 request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
@@ -66,7 +86,11 @@ public class VoucherController extends HttpServlet {
             request.setAttribute("promotions", promotions);
         }else{
             try {
-                promotions = vrepo.getAllPromotions(Integer.parseInt(idLevel));
+                promotions = vrepo.getVouchersByPage(Integer.parseInt(idLevel), offset, recordsPerPage);
+                int totalRecords = vrepo.getAllPromotions(Integer.parseInt(idLevel)).size();
+                int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
                 request.setAttribute("promotions", promotions);
                 request.setAttribute("kaku",idLevel);
                 request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
@@ -127,8 +151,12 @@ if(nameVoucher.isEmpty()){
     return;
 }
 
+
+
         try {
+            Promotions pro = vrepo.getIdWithUpdate(Integer.parseInt(id));
             vrepo.UpdatePromotion(id,nameVoucher,description,discount_percentage,start_date,end_date, updated_by);
+            request.setAttribute("pro", pro);
             processRequest(request, response);
 
         } catch (SQLException e) {
@@ -148,4 +176,5 @@ if(nameVoucher.isEmpty()){
     }// </editor-fold>
 
 }
+
 

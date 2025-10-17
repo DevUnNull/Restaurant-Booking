@@ -40,7 +40,7 @@ public class MenuItemDAO {
                 item.setDescription(resultSet.getString("description"));
                 item.setPrice(resultSet.getBigDecimal("price"));
                 item.setImageUrl(resultSet.getString("image_url"));
-                item.setCategory(resultSet.getString("category"));
+                item.setCategory(resultSet.getInt("category_id"));
                 item.setCalories(resultSet.getObject("calories", Integer.class)); // Dùng getObject cho Integer/null an toàn
                 item.setStatus(resultSet.getString("status"));
                 menuItems.add(item);
@@ -75,7 +75,7 @@ public class MenuItemDAO {
                     item.setDescription(resultSet.getString("description"));
                     item.setPrice(resultSet.getBigDecimal("price"));
                     item.setImageUrl(resultSet.getString("image_url"));
-                    item.setCategory(resultSet.getString("category"));
+                    item.setCategory(resultSet.getInt("category_id"));
                     item.setCalories(resultSet.getObject("calories", Integer.class));
                     item.setStatus(resultSet.getString("status"));
                     return item;
