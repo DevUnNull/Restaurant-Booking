@@ -4,6 +4,7 @@ import com.fpt.restaurantbooking.models.User;
 import com.fpt.restaurantbooking.repositories.UserRepository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,34 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setString(8, user.getAvatar());
             stmt.setInt(9, user.getUserId());
             
+            int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0 ? user : null;
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating user", e);
+        }
+    }
+
+
+    public User update1(User user) {
+        String sql = "UPDATE users SET full_name = ?, email = ?, password = ?, phone_number = ?, role_id = ?, status = ?, updated_at = ?, avatar = ?, gender = ?, dateOfBirth = ? WHERE user_id = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, user.getFullName());
+            stmt.setString(2, user.getEmail());
+            stmt.setString(3, user.getPassword());
+            stmt.setString(4, user.getPhoneNumber());
+            stmt.setInt(5, user.getRoleId());
+            stmt.setString(6, user.getStatus());
+            stmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            stmt.setString(8, user.getAvatar());
+            stmt.setString(9, user.getGender());
+            if (user.getDateOfBirth() != null) {
+                stmt.setDate(10, java.sql.Date.valueOf(user.getDateOfBirth()));
+            } else {
+                stmt.setNull(10, java.sql.Types.DATE);
+            }
+            stmt.setInt(11, user.getUserId());
+
             int affectedRows = stmt.executeUpdate();
             return affectedRows > 0 ? user : null;
         } catch (SQLException e) {
@@ -192,12 +221,12 @@ public class UserRepositoryImpl implements UserRepository {
         // For now, just return false to avoid SQL errors
         return false;
     }
-    
+
     @Override
     public List<User> findAll() {
         String sql = "SELECT * FROM users";
         List<User> users = new ArrayList<>();
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -207,7 +236,7 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error finding all users", e);
         }
-        
+
         return users;
     }
     
@@ -312,11 +341,17 @@ public class UserRepositoryImpl implements UserRepository {
         user.setUserId(rs.getInt("user_id"));
         user.setRoleId(rs.getInt("role_id"));
         user.setFullName(rs.getString("full_name"));
+        user.setGender(rs.getString("gender"));
         user.setEmail(rs.getString("email"));
         user.setPhoneNumber(rs.getString("phone_number"));
         user.setPassword(rs.getString("password"));
         user.setAvatar(rs.getString("avatar"));
-        
+
+        Date dateOfBirth = rs.getDate("date_of_birth");
+        if (dateOfBirth != null) {
+            user.setDateOfBirth(dateOfBirth.toLocalDate());
+        }
+
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
             user.setCreatedAt(createdAt.toLocalDateTime());
@@ -328,33 +363,13 @@ public class UserRepositoryImpl implements UserRepository {
         }
         
         user.setStatus(rs.getString("status"));
-        user.setRole(rs.getString("role"));
+
         
         return user;
     }
-    public List<User> searchEmployees(String keyword) {
-        String sql = "SELECT * FROM users WHERE (full_name LIKE ? OR email LIKE ? OR CAST(user_id AS CHAR) LIKE ?) AND (role = 'STAFF' OR role = 'ADMIN')";
-        List<User> users = new ArrayList<>();
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            String searchPattern = "%" + keyword + "%";
-            stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
-            stmt.setString(3, searchPattern);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    users.add(mapResultSetToUser(rs));
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error searching employees", e);
-        }
-
-        return users;
-    }
     public List<User> searchEmployees(String keyword, int offset, int limit) {
-        String sql = "SELECT * FROM users WHERE (full_name LIKE ? OR email LIKE ?) AND (role = 'STAFF' OR role = 'ADMIN') LIMIT ?, ?";
+        String sql = "SELECT * FROM users WHERE (full_name LIKE ? OR email LIKE ?) LIMIT ?, ?";
         List<User> users = new ArrayList<>();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -376,7 +391,7 @@ public class UserRepositoryImpl implements UserRepository {
         return users;
     }
     public long countSearchEmployees(String keyword) {
-        String sql = "SELECT COUNT(*) FROM users WHERE (full_name LIKE ? OR email LIKE ?) AND (role = 'STAFF' OR role = 'ADMIN')";
+        String sql = "SELECT COUNT(*) FROM users WHERE (full_name LIKE ? OR email LIKE ?) ";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             String searchPattern = "%" + keyword + "%";
             stmt.setString(1, searchPattern);
@@ -390,4 +405,25 @@ public class UserRepositoryImpl implements UserRepository {
         }
         return 0;
     }
+
+    public List<User> findEmployeesByPage(int offset, int limit) {
+        String sql = "SELECT * FROM users LIMIT ?, ?";
+        List<User> users = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, offset);
+            stmt.setInt(2, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding employees by page", e);
+        }
+
+        return users;
+    }
+
 }

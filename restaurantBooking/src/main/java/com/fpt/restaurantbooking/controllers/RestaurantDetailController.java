@@ -9,7 +9,6 @@ import com.fpt.restaurantbooking.repositories.MenuItemRepository;
 import com.fpt.restaurantbooking.repositories.RestaurantInfoRepository;
 import com.fpt.restaurantbooking.repositories.ReviewRepository;
 import com.fpt.restaurantbooking.repositories.impl.GalleryImageRepositoryImpl;
-import com.fpt.restaurantbooking.repositories.impl.MenuItemRepositoryImpl;
 import com.fpt.restaurantbooking.repositories.impl.RestaurantInfoRepositoryImpl;
 import com.fpt.restaurantbooking.repositories.impl.ReviewRepositoryImpl;
 import com.fpt.restaurantbooking.services.GalleryImageService;
@@ -37,7 +36,7 @@ import java.util.List;
 public class RestaurantDetailController extends BaseController {
 
     private final RestaurantInfoService restaurantInfoService;
-    private final MenuItemService menuItemService;
+
     private final GalleryImageService galleryImageService;
     private final ReviewService reviewService;
     
@@ -47,13 +46,13 @@ public class RestaurantDetailController extends BaseController {
             
             // Initialize repositories
             RestaurantInfoRepository restaurantInfoRepository = new RestaurantInfoRepositoryImpl(connection);
-            MenuItemRepository menuItemRepository = new MenuItemRepositoryImpl(connection);
+
             GalleryImageRepository galleryImageRepository = new GalleryImageRepositoryImpl(connection);
             ReviewRepository reviewRepository = new ReviewRepositoryImpl(connection);
             
             // Initialize services with dependency injection
             this.restaurantInfoService = new RestaurantInfoServiceImpl(restaurantInfoRepository);
-            this.menuItemService = new MenuItemServiceImpl(menuItemRepository);
+
             this.galleryImageService = new GalleryImageServiceImpl(galleryImageRepository);
             this.reviewService = new ReviewServiceImpl(reviewRepository);
         } catch (Exception e) {
@@ -69,8 +68,7 @@ public class RestaurantDetailController extends BaseController {
             request.setAttribute("restaurantInfo", restaurantInfo);
             
             // Get all menu items grouped by category
-            List<MenuItem> menuItems = menuItemService.findActiveItems();
-            request.setAttribute("menuItems", menuItems);
+
             
             // Get approved reviews for display
             List<Review> reviews = reviewService.findAllApproved();

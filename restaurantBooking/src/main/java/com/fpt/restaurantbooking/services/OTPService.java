@@ -21,7 +21,9 @@ public class OTPService {
     private static final SecureRandom random = new SecureRandom();
     
     private EmailVerificationRepository emailVerificationRepository;
-    
+    public OTPService(){
+
+    }
     public OTPService(EmailVerificationRepository emailVerificationRepository) {
         this.emailVerificationRepository = emailVerificationRepository;
     }
@@ -51,7 +53,7 @@ public class OTPService {
             // Create new verification record
             EmailVerification verification = new EmailVerification(userId, otpCode);
             verification.setExpirationTime(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES));
-            
+
             // Save to database
             EmailVerification savedVerification = emailVerificationRepository.save(verification);
             

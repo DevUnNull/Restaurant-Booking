@@ -12,7 +12,7 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
-            <c:if test="${sessionScope.userRole == 3}"><li><a href="${pageContext.request.contextPath}/findViewTable">Đặt Bàn</a></li></c:if>
+            <li><a href="${pageContext.request.contextPath}/findViewTable">Đặt Bàn</a></li>
             <c:if test="${sessionScope.userRole == 2}">
                <li class="user-dropdown">
                    <div class="user-button" onclick="toggleUserDropdown()">
@@ -23,15 +23,20 @@
                        <a href="${pageContext.request.contextPath}/ServiceList">
                            <i class="fas fa-user"></i>Service Management
                        </a>
-                       <a href="${pageContext.request.contextPath}/my-reservations">
+                       <a href="${pageContext.request.contextPath}/Menu_manage">
                            <i class="fas fa-calendar-alt"></i>Menu Management
                        </a>
-                       <a href="${pageContext.request.contextPath}/change-password">
-                           <i class="fas fa-key"></i>Deal Management
-                       </a><a href="${pageContext.request.contextPath}/BlogController">
-                       <i class="fas fa-key"></i>Blog Management
-                   </a><a href="${pageContext.request.contextPath}/change-password">
-                       <i class="fas fa-key"></i>Customer Loyalty Management
+                       <a href="${pageContext.request.contextPath}/Voucher">
+                           <i class="fas fa-key"></i>Quản lý Voucher khuyến mãi
+                       </a>
+                       <a href="${pageContext.request.contextPath}/###">
+                           <i class="fas fa-key"></i>Quản lý khách hàng thân tiết
+                       </a>
+                       <a href="${pageContext.request.contextPath}/###">
+                           <i class="fas fa-key"></i>Quản lý khung giờ hoạt động nhà hàng
+                       </a>
+                       <a href="${pageContext.request.contextPath}/Blog">
+                       <i class="fas fa-key"></i>Blog Nhà Hàng
                    </a>
                    </div>
                </li>
@@ -75,7 +80,7 @@
                 <c:when test="${not empty sessionScope.currentUser}">
                     <!-- User is logged in - show dropdown -->
                     <li class="user-dropdown">
-                        <div class="user-button" onclick="toggleUserDropdown()">
+                        <div class="user-button" onclick="toggleUserDropdownn()">
                             <span class="user-name">${sessionScope.currentUser.fullName}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
@@ -108,6 +113,12 @@
 
 <script>
 function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    const userButton = document.querySelector('.user-button');
+    dropdown.classList.toggle('show');
+    userButton.classList.toggle('active');
+}
+function toggleUserDropdownn() {
     const dropdown = document.getElementById('userDropdown');
     const userButton = document.querySelector('.user-button');
     dropdown.classList.toggle('show');

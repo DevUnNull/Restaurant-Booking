@@ -19,14 +19,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import java.util.logging.Logger;
+
+
 /**
  * Controller for handling user registration
  */
 @WebServlet(name = "RegisterController", urlPatterns = {"/register"})
 public class RegisterController extends BaseController {
-
     private UserService userService;
-
+    private static final Logger logger = Logger.getLogger(RegisterController.class.getName());
     @Override
     public void init() throws ServletException {
         try {
@@ -72,7 +74,7 @@ public class RegisterController extends BaseController {
      */
     private void handleRegistration(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+        User newUser = new User();
         try {
             // Get registration parameters
             String fullName = request.getParameter("fullName");
@@ -111,15 +113,16 @@ public class RegisterController extends BaseController {
             }
             
             // Create new user
-            User newUser = new User();
+
             newUser.setFullName(fullName);
             newUser.setEmail(email);
             newUser.setPhoneNumber(phoneNumber);
             // Password will be hashed in service layer
             newUser.setRoleId(3); // Default role for customer
-            newUser.setStatus("PENDING"); // Pending email verification
+            newUser.setStatus("ACTIVE"); // Pending email verification
             
             // Register user (OTP đã được gửi trong service.register)
+
             User registeredUser = userService.register(newUser, password);
             
             if (registeredUser != null) {
@@ -130,9 +133,13 @@ public class RegisterController extends BaseController {
                 forwardToPage(request, response, "/WEB-INF/views/auth/register.jsp");
             }
             
-        } catch (Exception e) {
+        }
+
+
+
+        catch (Exception e) {
             e.printStackTrace();
-            ToastHelper.addErrorToast(request, "Có lỗi xảy ra. Vui lòng thử lại.");
+            ToastHelper.addErrorToast(request, "Có lỗi xảy ra. Vui lòng thử lại. + "+ newUser.toString());
             forwardToPage(request, response, "/WEB-INF/views/auth/register.jsp");
         }
     }
