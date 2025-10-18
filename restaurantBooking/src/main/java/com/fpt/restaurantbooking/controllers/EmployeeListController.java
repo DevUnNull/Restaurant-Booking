@@ -39,23 +39,25 @@ public class EmployeeListController extends HttpServlet {
             UserRepositoryImpl userRepo = new UserRepositoryImpl(connection);
             int offset = (page - 1) * PAGE_SIZE;
 
+            // Nếu có từ khóa tìm kiếm
             if (keyword != null && !keyword.trim().isEmpty()) {
-                // Nếu có từ khóa tìm kiếm
-                employees = userRepo.searchEmployees(keyword.trim(), offset, PAGE_SIZE);
-                totalEmployees = userRepo.countSearchEmployees(keyword.trim());
+                keyword = keyword.trim();
+
+                employees = userRepo.searchEmployees(keyword, offset, PAGE_SIZE);
+                totalEmployees = userRepo.countSearchEmployees(keyword);
+
             } else {
-                // Nếu không có từ khóa lấy toàn bộ nhân viên
-                employees.addAll(userRepo.findByRole(User.UserRole.STAFF));
-                employees.addAll(userRepo.findByRole(User.UserRole.ADMIN));
-                totalEmployees = employees.size();
+                employees = userRepo.findEmployeesByPage(offset, PAGE_SIZE);
+                totalEmployees = userRepo.count();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            request.setAttribute("message", "Lỗi khi tải danh sách nhân viên: " + e.getMessage());
         }
 
-        // Kiểm tra nếu không có kết quả
-        if (employees.isEmpty()) {
+        // Nếu không có nhân viên nào
+        if (employees == null || employees.isEmpty()) {
             request.setAttribute("message", "Không tìm thấy nhân viên nào phù hợp!");
         }
 

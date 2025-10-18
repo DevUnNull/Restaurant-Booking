@@ -7,6 +7,8 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 
 <html>
 <head>
@@ -47,6 +49,8 @@
                 <tr>
                     <th>ID</th>
                     <th>Họ và tên</th>
+                    <th>Giới tính</th>
+                    <th>Ngày sinh</th>
                     <th>Email</th>
                     <th>Số điện thoại</th>
                     <th>Chức vụ</th>
@@ -61,15 +65,25 @@
                     <tr>
                         <td>${u.userId}</td>
                         <td>${u.fullName}</td>
+                        <td>${u.gender}</td>
+                        <td>${u.dateOfBirth}</td>
                         <td>${u.email}</td>
                         <td>${u.phoneNumber}</td>
-                        <td>${u.role}</td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${u.roleId == 1}">Admin</c:when>
+<%--                                <c:when test="${u.roleId == 2}">Customer</c:when>--%>
+                                <c:when test="${u.roleId == 3}">Staff</c:when>
+                                <c:when test="${u.roleId == 4}">Manager</c:when>
+                                <c:otherwise>Unknown</c:otherwise>
+                            </c:choose>
+                        </td>
                         <td>${u.status}</td>
                         <td>${u.createdAt}</td>
                         <td>${u.updatedAt}</td>
                         <td>
                             <a href="#" class="link1"
-                               onclick="openEditModal('${u.userId}', '${u.fullName}', '${u.email}', '${u.phoneNumber}', '${u.status}')">
+                               onclick="openEditModal('${u.userId}', '${u.fullName}', '${u.email}', '${u.phoneNumber}','${u.gender}','${u.dateOfBirth}', '${u.status}')">
                                 Sửa
                             </a>
 
@@ -99,10 +113,21 @@
                         <label>Số điện thoại:</label>
                         <input type="text" name="phoneNumber" id="editPhone" required>
 
+                        <label>Giới tính:</label>
+                        <select name="gender" id="editGender" required>
+                            <option value="Male">Nam</option>
+                            <option value="Female">Nữ</option>
+                            <option value="Other">Khác</option>
+                        </select>
+
+                        <label>Ngày sinh:</label>
+                        <input type="date" name="dateOfBirth" id="editDateOfBirth" required>
+
                         <label>Trạng thái:</label>
                         <select name="status" id="editStatus">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                            <option value="BANNED">Banned</option>
                         </select>
 
                         <div style="text-align:center; margin-top:20px;">
@@ -123,7 +148,9 @@
                                 <span style="font-weight:bold; color:#8b3a3a;">${i}</span>
                             </c:when>
                             <c:otherwise>
-                                <a href="?page=${i}${search != null ? '&search=' + search : ''}">${i}</a>
+                                <a href="?page=${i}${not empty search ? '&search=' : ''}${not empty search ? search : ''}">
+                                        ${i}
+                                </a>
                             </c:otherwise>
                         </c:choose>
                         &nbsp;
@@ -139,17 +166,22 @@
     </div>
 </div>
 
-<!-- popup-->
+<!-- JS điều khiển popup -->
 <script>
-    function openEditModal(id, fullName, email, phone, status) {
+    // Mở popup và đổ dữ liệu vào form
+    function openEditModal(id, fullName, email, phone, gender, dateOfBirth, status) {
         document.getElementById("editUserId").value = id;
         document.getElementById("editFullName").value = fullName;
         document.getElementById("editEmail").value = email;
         document.getElementById("editPhone").value = phone;
+        document.getElementById("editGender").value = gender;
+        document.getElementById("editDateOfBirth").value = dateOfBirth;
         document.getElementById("editStatus").value = status;
+
         document.getElementById("editModal").style.display = "flex";
     }
 
+    // Đóng popup
     function closeModal() {
         document.getElementById("editModal").style.display = "none";
     }
