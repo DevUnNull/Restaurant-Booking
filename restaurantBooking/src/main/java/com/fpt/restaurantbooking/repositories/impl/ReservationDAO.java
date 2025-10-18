@@ -166,27 +166,22 @@ public class ReservationDAO {
     }
 
     private Reservation mapResultSetToReservation(ResultSet rs) throws SQLException {
-        // 1. Sử dụng constructor mặc định, KHÔNG CÓ tham số
-        Reservation reservation = new Reservation();
+        Reservation reservation = new Reservation(
+                rs.getInt("reservation_id"),
+                rs.getInt("user_id"),
+                rs.getInt("table_id"),
+                rs.getInt("guest_count"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getString("status"),
+                rs.getInt("guest_count")
+        );
 
-        // 2. Thiết lập TẤT CẢ các trường bằng setters
         reservation.setReservationId(rs.getInt("reservation_id"));
-        reservation.setUserId(rs.getInt("user_id")); // Cần thiết lập
-        reservation.setTableId(rs.getInt("table_id")); // Cần thiết lập
-        reservation.setGuestCount(rs.getInt("guest_count")); // Cần thiết lập
-        reservation.setStatus(rs.getString("status")); // Cần thiết lập
-
-        // Các trường khác (đã có trong code DAO cũ)
         reservation.setReservationDate(rs.getDate("reservation_date").toLocalDate());
         reservation.setReservationTime(rs.getTime("reservation_time").toLocalTime());
         reservation.setSpecialRequests(rs.getString("special_requests"));
         reservation.setTotalAmount(rs.getBigDecimal("total_amount"));
         reservation.setCancellationReason(rs.getString("cancellation_reason"));
-
-        // Thiết lập các trường từ BaseEntity (created_at, updated_at)
-        reservation.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        // Giả sử BaseEntity có setUpdatedAt
-        // reservation.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
 
         return reservation;
     }

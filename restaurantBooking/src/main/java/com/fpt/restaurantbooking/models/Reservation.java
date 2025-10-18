@@ -2,33 +2,57 @@ package com.fpt.restaurantbooking.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-/**
- * Reservation entity representing table bookings
- */
-public class Reservation extends BaseEntity {
+public class Reservation {
     private Integer reservationId;
     private Integer userId;
     private Integer tableId;
     private LocalDate reservationDate;
     private LocalTime reservationTime;
-    private Integer guestCount;
+    private int guestCount;
     private String specialRequests;
     private String status;
     private BigDecimal totalAmount;
     private String cancellationReason;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public enum ReservationStatus {
-        PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
+    // Constructors
+    public Reservation() {}
+
+    public Reservation(Integer reservationId, Integer userId, Integer tableId, int guestCount,
+                       LocalDateTime createdAt, String status, int guestCountAgain) {
+        this.reservationId = reservationId;
+        this.userId = userId;
+        this.tableId = tableId;
+        this.guestCount = guestCount;
+        this.createdAt = createdAt;
+        this.status = status;
     }
 
-    public Reservation() {
-        super();
-        this.status = "PENDING";
+    // Full constructor
+    public Reservation(Integer reservationId, Integer userId, Integer tableId, LocalDate reservationDate,
+                       LocalTime reservationTime, int guestCount, String specialRequests, String status,
+                       BigDecimal totalAmount, String cancellationReason,
+                       LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.reservationId = reservationId;
+        this.userId = userId;
+        this.tableId = tableId;
+        this.reservationDate = reservationDate;
+        this.reservationTime = reservationTime;
+        this.guestCount = guestCount;
+        this.specialRequests = specialRequests;
+        this.status = status;
+        this.totalAmount = totalAmount;
+        this.cancellationReason = cancellationReason;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getters and Setters
+
     public Integer getReservationId() {
         return reservationId;
     }
@@ -69,11 +93,11 @@ public class Reservation extends BaseEntity {
         this.reservationTime = reservationTime;
     }
 
-    public Integer getGuestCount() {
+    public int getGuestCount() {
         return guestCount;
     }
 
-    public void setGuestCount(Integer guestCount) {
+    public void setGuestCount(int guestCount) {
         this.guestCount = guestCount;
     }
 
@@ -107,5 +131,39 @@ public class Reservation extends BaseEntity {
 
     public void setCancellationReason(String cancellationReason) {
         this.cancellationReason = cancellationReason;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "reservationId=" + reservationId +
+                ", userId=" + userId +
+                ", tableId=" + tableId +
+                ", reservationDate=" + reservationDate +
+                ", reservationTime=" + reservationTime +
+                ", guestCount=" + guestCount +
+                ", specialRequests='" + specialRequests + '\'' +
+                ", status='" + status + '\'' +
+                ", totalAmount=" + totalAmount +
+                ", cancellationReason='" + cancellationReason + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }
