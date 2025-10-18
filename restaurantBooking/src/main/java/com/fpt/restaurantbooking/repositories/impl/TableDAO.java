@@ -7,152 +7,127 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class TableDAO {
-
     private static final Logger logger = LoggerFactory.getLogger(TableDAO.class);
 
-    /**
-     * Lấy tất cả bàn theo tầng
-     */
-    public List<Table> getTablesByFloor(int floor) {
-        List<Table> tables = new ArrayList<>();
-        String sql = "SELECT * FROM Tables WHERE floor = ? AND status != 'MAINTENANCE' ORDER BY table_id";
-
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, floor);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                tables.add(mapResultSetToTable(rs));
-            }
-
-        } catch (SQLException e) {
-            logger.error("Error getting tables by floor: " + floor, e);
-        }
-
-        return tables;
-    }
-
-    /**
-     * Lấy tất cả bàn
-     */
-    public List<Table> getAllTables() {
-        List<Table> tables = new ArrayList<>();
-        String sql = "SELECT * FROM Tables WHERE status != 'MAINTENANCE' ORDER BY floor, table_id";
-
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                tables.add(mapResultSetToTable(rs));
-            }
-
-        } catch (SQLException e) {
-            logger.error("Error getting all tables", e);
-        }
-
-        return tables;
-    }
-
-    /**
-     * Kiểm tra trạng thái bàn theo ngày và giờ
-     */
-    public Map<Integer, Map<String, Object>> getTableStatusMap(String date, String time, Integer guestCount, String selectedFloor) {
-        Map<Integer, Map<String, Object>> tableStatusMap = new HashMap<>();
-
-        String sql = "SELECT t.table_id, t.table_name, t.capacity, t.floor, t.table_type, " +
-                "CASE WHEN EXISTS ( " +
-                "  SELECT 1 FROM Reservations r " +
-                "  INNER JOIN Reservation_Tables rt ON r.reservation_id = rt.reservation_id " +
-                "  WHERE rt.table_id = t.table_id " +
-                "  AND r.reservation_date = ? " +
-                "  AND r.reservation_time = ? " +
-                "  AND r.status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN') " +
-                ") THEN 'booked' ELSE 'available' END AS status " +
-                "FROM Tables t " +
-                "WHERE t.status != 'MAINTENANCE'";
-
-        // Thêm điều kiện lọc theo tầng nếu có
-        if (selectedFloor != null && !selectedFloor.equals("all")) {
-            sql += " AND t.floor = ?";
-        }
-
-        sql += " ORDER BY t.table_id";
-
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, date);
-            ps.setString(2, time);
-
-            if (selectedFloor != null && !selectedFloor.equals("all")) {
-                ps.setInt(3, Integer.parseInt(selectedFloor));
-            }
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                int tableId = rs.getInt("table_id");
-                int capacity = rs.getInt("capacity");
-                int floor = rs.getInt("floor");
-                String status = rs.getString("status");
-
-                Map<String, Object> tableDetails = new HashMap<>();
-                tableDetails.put("capacity", capacity);
-                tableDetails.put("floor", floor);
-                tableDetails.put("status", status);
-
-                // Kiểm tra xem bàn có phù hợp với số người không
-                boolean match = false;
-                if ("available".equals(status) && guestCount != null && guestCount > 0) {
-                    match = (capacity >= guestCount && capacity <= guestCount + 2);
-                }
-                tableDetails.put("match", match);
-
-                tableStatusMap.put(tableId, tableDetails);
-            }
-
-        } catch (SQLException e) {
-            logger.error("Error getting table status map", e);
-        }
-
-        return tableStatusMap;
-    }
-
-    /**
-     * Lấy thông tin bàn theo ID
-     */
+    // Get table by ID
     public Table getTableById(int tableId) {
         String sql = "SELECT * FROM Tables WHERE table_id = ?";
 
         try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, tableId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return mapResultSetToTable(rs);
+            pstmt.setInt(1, tableId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToTable(rs);
+                }
             }
-
         } catch (SQLException e) {
             logger.error("Error getting table by ID: " + tableId, e);
         }
-
         return null;
     }
 
-    /**
-     * Map ResultSet to Tables object
-     */
+    // Get all tables by floor
+    public List<Table> getTablesByFloor(int floor) {
+        String sql = "SELECT * FROM Tables WHERE floor = ? ORDER BY table_id ASC";
+        List<Table> tables = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, floor);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    tables.add(mapResultSetToTable(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting tables by floor: " + floor, e);
+        }
+        return tables;
+    }
+
+    // Get available tables by capacity and floor
+    public List<Table> getAvailableTablesByCapacity(int capacity, int floor) {
+        String sql = "SELECT * FROM Tables WHERE floor = ? AND capacity >= ? AND status = 'AVAILABLE' ORDER BY capacity ASC, table_id ASC";
+        List<Table> tables = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, floor);
+            pstmt.setInt(2, capacity);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    tables.add(mapResultSetToTable(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting available tables", e);
+        }
+        return tables;
+    }
+
+    // Get all available tables
+    public List<Table> getAllAvailableTables() {
+        String sql = "SELECT * FROM Tables WHERE status = 'AVAILABLE' ORDER BY floor ASC, table_id ASC";
+        List<Table> tables = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    tables.add(mapResultSetToTable(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting all available tables", e);
+        }
+        return tables;
+    }
+
+    // Update table status
+    public boolean updateTableStatus(int tableId, String status) {
+        String sql = "UPDATE Tables SET status = ?, updated_at = NOW() WHERE table_id = ?";
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, status);
+            pstmt.setInt(2, tableId);
+
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            logger.error("Error updating table status", e);
+        }
+        return false;
+    }
+
+    // Get all tables
+    public List<Table> getAllTables() {
+        String sql = "SELECT * FROM Tables ORDER BY floor ASC, table_id ASC";
+        List<Table> tables = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    tables.add(mapResultSetToTable(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting all tables", e);
+        }
+        return tables;
+    }
+
     private Table mapResultSetToTable(ResultSet rs) throws SQLException {
         Table table = new Table();
         table.setTableId(rs.getInt("table_id"));
@@ -161,8 +136,6 @@ public class TableDAO {
         table.setFloor(rs.getInt("floor"));
         table.setTableType(rs.getString("table_type"));
         table.setStatus(rs.getString("status"));
-        table.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        table.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
         return table;
     }
 }
