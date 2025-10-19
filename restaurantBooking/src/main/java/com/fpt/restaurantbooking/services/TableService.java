@@ -1,3 +1,4 @@
+/*
 package com.fpt.restaurantbooking.services;
 
 import com.fpt.restaurantbooking.repositories.impl.ReservationDAO;
@@ -21,14 +22,16 @@ public class TableService {
         this.reservationDAO = new ReservationDAO();
     }
 
-    /**
+    */
+/**
      * Finds available tables based on the given criteria.
      *
      * @param requiredDate The reservation date.
      * @param requiredTime The reservation time.
      * @param guestCount   The number of guests.
      * @return A map of table ID to a Map containing table details and status.
-     */
+     *//*
+
     public Map<Integer, Map<String, Object>> findAvailableTables(LocalDate requiredDate, LocalTime requiredTime, int guestCount) {
         List<Table> allTables = tableDAO.getAllTables();
         List<Table> availableTables = new ArrayList<>();
@@ -57,4 +60,4 @@ public class TableService {
                 }
         ));
     }
-}
+}*/
