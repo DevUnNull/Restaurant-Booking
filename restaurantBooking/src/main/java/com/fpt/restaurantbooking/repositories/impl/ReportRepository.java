@@ -1,7 +1,6 @@
 package com.fpt.restaurantbooking.repositories.impl;
 
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,47 +12,59 @@ import java.util.Map;
 
 public class ReportRepository {
 
-    PreparedStatement stm;
-    ResultSet rs;
     DatabaseUtil db = new DatabaseUtil();
 
-    /**
-     *  Báo cáo Doanh thu và Số lượng đặt theo Category (Loại Dịch vụ/Món ăn)
-     * @return List of Map<String, Object> chứa service_category, total_quantity_sold, total_category_revenue
-     * @throws SQLException
-     */
-    public List<Map<String, Object>> getServiceCategoryReport() throws SQLException {
+    public List<Map<String, Object>> getServiceCategoryReportByStatus(String status) throws SQLException {
         List<Map<String, Object>> reportList = new ArrayList<>();
 
-        // Truy vấn SQL để thống kê Doanh thu và Số lượng theo Category
-        String query = "SELECT " +
-                "    MI.category AS service_category, " +
-                "    SUM(OI.quantity) AS total_quantity_sold, " +
-                "    IFNULL(SUM(OI.quantity * OI.unit_price), 0) AS total_category_revenue " +
-                "FROM " +
-                "    Order_Items OI " +
-                "JOIN " +
-                "    Menu_Items MI ON OI.item_id = MI.item_id " +
-                "JOIN " +
-                "    Reservations R ON OI.reservation_id = R.reservation_id " +
-                "WHERE " +
-                "    R.status = 'COMPLETED' " +
-                "GROUP BY " +
-                "    MI.category " +
-                "ORDER BY " +
-                "    total_category_revenue DESC";
+        String query = """
+            SELECT
+                mc.name AS category_name,
+                -- Tổng số lượng (lấy từ Order_Items theo status được lọc)
+                SUM(oi.quantity) AS total_quantity_sold,
+                -- CHỈ tính doanh thu nếu trạng thái đặt bàn là COMPLETED
+                IFNULL(SUM(CASE WHEN r.status = 'COMPLETED' THEN oi.quantity * oi.unit_price ELSE 0 END), 0) AS total_category_revenue
+            FROM
+                Order_Items oi
+                JOIN Menu_Items mi ON oi.item_id = mi.item_id
+                JOIN menu_category mc ON mi.category_id = mc.id
+                JOIN Reservations r ON oi.reservation_id = r.reservation_id
+            WHERE 1=1
+        """;
+
+        List<Object> params = new ArrayList<>();
+
+        // Lọc theo Trạng thái (Status)
+        if (status != null && !status.trim().isEmpty() && !status.equalsIgnoreCase("All")) {
+            query += " AND r.status = ? ";
+            params.add(status);
+        } else {
+            // Mặc định CHỈ hiển thị COMPLETED
+            query += " AND r.status = 'COMPLETED' ";
+        }
+
+        query += """
+            GROUP BY
+                mc.name
+            ORDER BY
+                total_category_revenue DESC;
+        """;
 
         try (Connection con = db.getConnection();
-             PreparedStatement stm = con.prepareStatement(query);
-             ResultSet rs = stm.executeQuery()) {
+             PreparedStatement stm = con.prepareStatement(query)) {
 
-            while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
-                // Lưu trữ kết quả theo tên cột định nghĩa trong truy vấn SQL
-                row.put("service_category", rs.getString("service_category"));
-                row.put("total_quantity_sold", rs.getInt("total_quantity_sold"));
-                row.put("total_category_revenue", rs.getBigDecimal("total_category_revenue"));
-                reportList.add(row);
+            for (int i = 0; i < params.size(); i++) {
+                stm.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("service_category", rs.getString("category_name"));
+                    row.put("total_quantity_sold", rs.getInt("total_quantity_sold"));
+                    row.put("total_category_revenue", rs.getBigDecimal("total_category_revenue"));
+                    reportList.add(row);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -62,34 +73,41 @@ public class ReportRepository {
         return reportList;
     }
 
-    /**
-     * Phương thức 2: Top Món Bán Chạy Nhất (Theo số lượng)
-     * @param limit Số lượng món muốn hiển thị (ví dụ: 10)
-     * @return List of Map<String, Object> chứa item_name, total_quantity_sold, total_revenue_from_item
-     * @throws SQLException
-     */
+
     public List<Map<String, Object>> getTopSellingItems(int limit) throws SQLException {
         List<Map<String, Object>> reportList = new ArrayList<>();
+        String query = """
+                SELECT
+                   MI.item_name,
+                   SUM(OI.quantity) AS total_quantity_sold,
+                   IFNULL(SUM(OI.quantity * OI.unit_price), 0) AS total_revenue_from_item
+               FROM
+                   Order_Items OI
+                       JOIN
+                   Menu_Items MI ON OI.item_id = MI.item_id
+                       JOIN
+                   Reservations R ON OI.reservation_id = R.reservation_id
+               WHERE 1=1
+                 AND R.status = 'COMPLETED'
+               """;
 
-        // Truy vấn SQL để thống kê Top món bán chạy nhất
-        String query = "SELECT " +
-                "    MI.item_name, " +
-                "    SUM(OI.quantity) AS total_quantity_sold, " +
-                "    IFNULL(SUM(OI.quantity * OI.unit_price), 0) AS total_revenue_from_item " +
-                "FROM " +
-                "    Order_Items OI " +
-                "JOIN " +
-                "    Menu_Items MI ON OI.item_id = MI.item_id " +
-                "GROUP BY " +
-                "    MI.item_id, MI.item_name " +
-                "ORDER BY " +
-                "    total_quantity_sold DESC, total_revenue_from_item DESC " +
-                "LIMIT ?";
+        List<Object> params = new ArrayList<>();
+        query += """
+                GROUP BY
+                    MI.item_id, MI.item_name
+                ORDER BY
+                    total_quantity_sold DESC, total_revenue_from_item DESC
+                LIMIT ?;
+                """;
+
+        params.add(limit);
 
         try (Connection con = db.getConnection();
              PreparedStatement stm = con.prepareStatement(query)) {
 
-            stm.setInt(1, limit);
+            for (int i = 0; i < params.size(); i++) {
+                stm.setObject(i + 1, params.get(i));
+            }
 
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
@@ -106,4 +124,5 @@ public class ReportRepository {
         }
         return reportList;
     }
+
 }

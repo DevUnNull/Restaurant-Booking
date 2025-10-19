@@ -101,16 +101,5 @@
         <mime-type>application/json</mime-type>
     </mime-mapping>
 
-    <!-- DashboardOverviewServlet -->
-        <servlet>
-            <servlet-name>DashboardOverviewServlet</servlet-name>
-            <servlet-class>com.fpt.restaurantbooking.controllers.api.DashboardOverviewServlet</servlet-class>
-        </servlet>
-
-        <servlet-mapping>
-            <servlet-name>DashboardOverviewServlet</servlet-name>
-            <url-pattern>/api/dashboard-overview</url-pattern>
-        </servlet-mapping>
-
     </web-app>
 
