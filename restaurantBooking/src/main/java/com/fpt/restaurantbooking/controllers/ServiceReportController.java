@@ -1,6 +1,6 @@
 package com.fpt.restaurantbooking.controllers;
 
-import com.fpt.restaurantbooking.repositories.impl.ReportRepository;
+import com.fpt.restaurantbooking.repositories.ReportRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,61 +13,15 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name="ServiceReportController", urlPatterns={"/ServiceReport"})
+@WebServlet(name="ServiceReportController", urlPatterns={"/service-report"})
 public class ServiceReportController extends HttpServlet {
 
     private final ReportRepository reportRepository = new ReportRepository();
-
-    // CÁC HẰNG SỐ ID VAI TRÒ
-    private static final int ADMIN_ROLE_ID = 1;
-    private static final int MANAGER_ROLE_ID = 4;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
-        // 1. KIỂM TRA ĐĂNG NHẬP VÀ VAI TRÒ
-        if (session == null || session.getAttribute("userRole") == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-
-        Object roleObj = session.getAttribute("userRole");
-        int userRoleId = -1;
-
-        try {
-            if (roleObj instanceof Integer) {
-                userRoleId = (Integer) roleObj;
-            } else if (roleObj instanceof String) {
-                userRoleId = Integer.parseInt((String) roleObj);
-            }
-        } catch (NumberFormatException e) {
-            userRoleId = -1;
-        }
-
-        // 2. KIỂM TRA QUYỀN TRUY CẬP
-        if (userRoleId != ADMIN_ROLE_ID && userRoleId != MANAGER_ROLE_ID) {
-            response.sendRedirect("access_denied.jsp");
-            return;
-        }
-
-        // 3. CHUẨN HÓA TÊN HIỂN THỊ TRÊN HEADER
-        String currentUserName = (String) session.getAttribute("userName");
-
-        if (currentUserName == null || !(currentUserName.equals("Admin") || currentUserName.equals("Manager"))) {
-            String newDisplayName;
-
-            if (userRoleId == ADMIN_ROLE_ID) {
-                newDisplayName = "Admin";
-            } else if (userRoleId == MANAGER_ROLE_ID) {
-                newDisplayName = "Manager";
-            } else {
-                newDisplayName = "Authorized User";
-            }
-            session.setAttribute("userName", newDisplayName);
-        }
-
         response.setContentType("text/html;charset=UTF-8");
 
         String serviceType = request.getParameter("serviceType");
@@ -123,7 +77,7 @@ public class ServiceReportController extends HttpServlet {
         request.setAttribute("categoryReport", categoryReport);
         request.setAttribute("topSellingItems", topSellingItems);
 
-        request.getRequestDispatcher("/WEB-INF/Report/ServiceReport.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/report/service-report.jsp").forward(request, response);
     }
 
     @Override

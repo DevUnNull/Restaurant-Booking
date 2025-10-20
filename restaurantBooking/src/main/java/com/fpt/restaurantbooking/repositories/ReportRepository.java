@@ -1,4 +1,4 @@
-package com.fpt.restaurantbooking.repositories.impl;
+package com.fpt.restaurantbooking.repositories;
 
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 import java.sql.Connection;
