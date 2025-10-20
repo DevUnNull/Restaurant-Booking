@@ -1,8 +1,6 @@
 package com.fpt.restaurantbooking.controllers;
 
-import com.fpt.restaurantbooking.models.Reservation;
 import com.fpt.restaurantbooking.models.Table;
-import com.fpt.restaurantbooking.repositories.impl.ReservationDAO;
 import com.fpt.restaurantbooking.repositories.impl.TableDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,21 +21,22 @@ import java.util.Map;
 @WebServlet("/findTable")
 public class FindTableServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(FindTableServlet.class);
-    private ReservationDAO reservationDAO = new ReservationDAO();
     private TableDAO tableDAO = new TableDAO();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Forward to findTable.jsp
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Hiển thị form tìm bàn
         request.getRequestDispatcher("/WEB-INF/BookTable/findTable.jsp").forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         HttpSession session = request.getSession();
 
         try {
-            // Get parameters
+            // Lấy thông tin từ form
             String dateStr = request.getParameter("date");
             String timeStr = request.getParameter("time");
             String guestCountStr = request.getParameter("guests");
@@ -46,9 +45,11 @@ public class FindTableServlet extends HttpServlet {
             String eventType = request.getParameter("eventType");
             String promotion = request.getParameter("promotion");
 
-            // Validate input
-            if (dateStr == null || dateStr.isEmpty() || timeStr == null || timeStr.isEmpty() || guestCountStr == null) {
-                request.setAttribute("errorMessage", "Vui lòng nhập đầy đủ thông tin");
+            // Kiểm tra hợp lệ
+            if (dateStr == null || dateStr.isEmpty()
+                    || timeStr == null || timeStr.isEmpty()
+                    || guestCountStr == null || guestCountStr.isEmpty()) {
+                request.setAttribute("errorMessage", "Vui lòng nhập đầy đủ thông tin.");
                 request.getRequestDispatcher("/WEB-INF/BookTable/findTable.jsp").forward(request, response);
                 return;
             }
@@ -56,16 +57,16 @@ public class FindTableServlet extends HttpServlet {
             LocalDate reservationDate = LocalDate.parse(dateStr);
             LocalTime reservationTime = LocalTime.parse(timeStr);
             int guestCount = Integer.parseInt(guestCountStr);
-            int floor = floorStr != null && !floorStr.isEmpty() ? Integer.parseInt(floorStr) : 1;
+            int floor = (floorStr != null && !floorStr.isEmpty()) ? Integer.parseInt(floorStr) : 1;
 
-            // Validate date (cannot be in the past)
+            // Kiểm tra ngày
             if (reservationDate.isBefore(LocalDate.now())) {
-                request.setAttribute("errorMessage", "Ngày đặt bàn không được là ngày quá khứ");
+                request.setAttribute("errorMessage", "Ngày đặt bàn không được là ngày quá khứ.");
                 request.getRequestDispatcher("/WEB-INF/BookTable/findTable.jsp").forward(request, response);
                 return;
             }
 
-            // Store in session
+            // ✅ Lưu thông tin vào session (dùng cho bước chọn bàn)
             session.setAttribute("requiredDate", dateStr);
             session.setAttribute("requiredTime", timeStr);
             session.setAttribute("guestCount", guestCount);
@@ -74,45 +75,30 @@ public class FindTableServlet extends HttpServlet {
             session.setAttribute("eventType", eventType);
             session.setAttribute("promotion", promotion);
 
-            // Create a new reservation with PENDING status
-            Reservation reservation = new Reservation(0, (Integer) session.getAttribute("userId"), 0, guestCount,
-                    null, "PENDING", guestCount);
-            reservation.setReservationDate(reservationDate);
-            reservation.setReservationTime(reservationTime);
-            reservation.setSpecialRequests(specialRequest);
-
-            int reservationId = reservationDAO.createReservation(reservation);
-            if (reservationId > 0) {
-                session.setAttribute("reservationId", reservationId);
-
-                // Get available tables
-                List<Table> availableTables = tableDAO.getAvailableTablesByCapacity(guestCount, floor);
-
-                if (availableTables.isEmpty()) {
-                    request.setAttribute("errorMessage", "Không có bàn trống phù hợp với yêu cầu của bạn");
-                }
-
-                // Build table status map for frontend
-                Map<Integer, Map<String, Object>> tableStatusMap = new HashMap<>();
-                for (Table table : tableDAO.getAllTables()) {
-                    Map<String, Object> tableInfo = new HashMap<>();
-                    tableInfo.put("status", "available");
-                    tableInfo.put("capacity", table.getCapacity());
-                    tableInfo.put("floor", table.getFloor());
-                    tableInfo.put("match", table.getCapacity() >= guestCount && table.getFloor() == floor);
-                    tableStatusMap.put(table.getTableId(), tableInfo);
-                }
-
-                request.setAttribute("tableStatusMap", tableStatusMap);
-                request.setAttribute("requiredDate", dateStr);
-                request.setAttribute("requiredTime", timeStr);
-                request.setAttribute("guestCount", guestCount);
-
-                request.getRequestDispatcher("/WEB-INF/BookTable/mapTable.jsp").forward(request, response);
-            } else {
-                request.setAttribute("errorMessage", "Lỗi khi tạo đơn đặt bàn");
-                request.getRequestDispatcher("/WEB-INF/BookTable/findTable.jsp").forward(request, response);
+            // ✅ Lấy danh sách bàn trống
+            List<Table> availableTables = tableDAO.getAvailableTablesByCapacity(guestCount, floor);
+            if (availableTables.isEmpty()) {
+                request.setAttribute("errorMessage", "Không có bàn trống phù hợp với yêu cầu của bạn.");
             }
+
+            // Map dữ liệu bàn
+            Map<Integer, Map<String, Object>> tableStatusMap = new HashMap<>();
+            for (Table table : tableDAO.getAllTables()) {
+                Map<String, Object> info = new HashMap<>();
+                info.put("status", "available");
+                info.put("capacity", table.getCapacity());
+                info.put("floor", table.getFloor());
+                info.put("match", table.getCapacity() >= guestCount && table.getFloor() == floor);
+                tableStatusMap.put(table.getTableId(), info);
+            }
+
+            request.setAttribute("tableStatusMap", tableStatusMap);
+            request.setAttribute("requiredDate", dateStr);
+            request.setAttribute("requiredTime", timeStr);
+            request.setAttribute("guestCount", guestCount);
+
+            // ✅ Chuyển sang trang chọn bàn
+            request.getRequestDispatcher("/WEB-INF/BookTable/mapTable.jsp").forward(request, response);
 
         } catch (Exception e) {
             logger.error("Error in FindTableServlet", e);
