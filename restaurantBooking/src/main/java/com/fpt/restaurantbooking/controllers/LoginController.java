@@ -27,6 +27,10 @@ public class LoginController extends BaseController {
 
     private UserService userService;
 
+    // Hằng số vai trò (Ophelia)
+    private static final int ADMIN_ROLE_ID = 1;
+    private static final int MANAGER_ROLE_ID = 4;
+
     @Override
     public void init() throws ServletException {
         try {
@@ -102,6 +106,26 @@ public class LoginController extends BaseController {
                 
                 // Active user - proceed with normal login
                 HttpSession session = request.getSession();
+
+                // START LOGIC CHUẨN HÓA TÊN HIỂN THỊ (Ophelia)
+                int userRoleId = user.getRoleId();
+                String newDisplayName;
+
+                if (userRoleId == ADMIN_ROLE_ID) {
+                    newDisplayName = "Admin";
+                } else if (userRoleId == MANAGER_ROLE_ID) {
+                    newDisplayName = "Manager";
+                } else {
+                    newDisplayName = user.getFullName();
+                    if (newDisplayName == null || newDisplayName.isEmpty()) {
+                        newDisplayName = user.getEmail();
+                    }
+                }
+
+                // LƯU TÊN HIỂN THỊ ĐÃ CHUẨN HÓA VÀO SESSION
+                session.setAttribute("userName", newDisplayName);
+
+
                 // Set the current user for header display
                 setCurrentUser(request, user);
                 session.setAttribute("userId", user.getUserId());
@@ -130,11 +154,11 @@ public class LoginController extends BaseController {
                 }
             } else {
                 // Invalid credentials
-                ToastHelper.addErrorToast(request, "Tên đăng nhập hoặc mật khẩu không đúng!");
+                ToastHelper.addErrorToast(request, "Invalid username or password!");
                 redirectTo(response, request.getContextPath() + "/login");
             }
         } catch (Exception e) {
-            ToastHelper.addErrorToast(request, "Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại!");
+            ToastHelper.addErrorToast(request, "An error occurred during login. Please try again!");
             redirectTo(response, request.getContextPath() + "/login");
         }
     }

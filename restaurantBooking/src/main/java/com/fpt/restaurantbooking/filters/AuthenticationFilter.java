@@ -24,7 +24,11 @@ public class AuthenticationFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
     
     private UserService userService;
-    
+
+    // KHAI BÁO VAI TRÒ VÀ REPORT_URLS ĐÚNG VỊ TRÍ (Ophelia)
+    private static final int ADMIN_ROLE_ID = 1;
+    private static final int MANAGER_ROLE_ID = 4;
+
     // URLs that don't require authentication
     private static final List<String> PUBLIC_URLS = Arrays.asList(
             "/login",
@@ -60,6 +64,15 @@ public class AuthenticationFilter implements Filter {
         "/staff/",
         "/api/staff/"
     );
+
+    // URLs that require manager or admin role (Ophelia)
+    private static final List<String> REPORT_URLS = Arrays.asList(
+            "/overview-report",
+            "/service-report",
+            "/staff-report",
+            "/user-report",
+            "/cancel-report"
+    );
     
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -90,11 +103,22 @@ public class AuthenticationFilter implements Filter {
         // Check authentication
         HttpSession session = httpRequest.getSession(false);
         User currentUser = null;
-        
+        Integer userRoleId = null;
+
         if (session != null) {
             currentUser = (User) session.getAttribute("currentUser");
+            // ADD: Get Role ID from Session
+            Object roleObj = session.getAttribute("userRole");
+            if (roleObj != null) {
+                try {
+                    // Convert the Object to Integer (using toString() is safer)
+                    userRoleId = (roleObj instanceof Integer) ? (Integer) roleObj : Integer.parseInt(roleObj.toString());
+                } catch (NumberFormatException e) {
+                    logger.error("Error converting Role ID from session: {}", roleObj, e);
+                }
+            }
         }
-        
+
         // If user is not authenticated, redirect to login
         if (currentUser == null) {
             logger.debug("User not authenticated, redirecting to login");
@@ -107,6 +131,17 @@ public class AuthenticationFilter implements Filter {
                     redirectPath = "/";
                 }
                 httpResponse.sendRedirect(contextPath + "/login?redirect=" + URLEncoder.encode(redirectPath, "UTF-8"));
+            }
+            return;
+        }
+
+        // KIỂM TRA ỦY QUYỀN CHO URL BÁO CÁO (Ophelia)
+        if (isReportUrl(path) && !isManagerOrAdmin(userRoleId)) {
+            logger.warn("User {} (Role ID: {}) attempted to access report URL: {}", currentUser.getEmail(), userRoleId, path);
+            if (isApiRequest(path)) {
+                sendJsonError(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Admin or Manager access required for reports");
+            } else {
+                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
             }
             return;
         }
@@ -211,8 +246,22 @@ public class AuthenticationFilter implements Filter {
     private boolean isStaffOrAdmin(User user) {
         return user != null && (User.UserRole.STAFF.equals(user.getRole()) || User.UserRole.ADMIN.equals(user.getRole()));
     }
-    
-    
+
+    /** (Ophelia)
+     * Check if URL requires Admin or Manager role (reports)
+     */
+    private boolean isReportUrl(String path) {
+        // So khớp chính xác các URL báo cáo (giả định URL không có / ở cuối)
+        return REPORT_URLS.stream().anyMatch(reportUrl -> path.equalsIgnoreCase(reportUrl));
+    }
+
+    /** (Ophelia)
+     * Kiểm tra xem người dùng có vai trò Admin HOẶC Manager hay không (ID 1 HOẶC 4)
+     */
+    private boolean isManagerOrAdmin(Integer roleId) {
+        return roleId != null && (roleId == ADMIN_ROLE_ID || roleId == MANAGER_ROLE_ID);
+    }
+
     /**
      * Send JSON error response
      */
