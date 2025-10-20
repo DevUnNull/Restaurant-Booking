@@ -22,6 +22,7 @@ public class ReservationDAO {
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
+            // Gán dữ liệu
             pstmt.setInt(1, reservation.getUserId());
             pstmt.setInt(2, reservation.getTableId() != null ? reservation.getTableId() : 0);
             pstmt.setDate(3, Date.valueOf(reservation.getReservationDate()));
@@ -31,6 +32,18 @@ public class ReservationDAO {
             pstmt.setString(7, reservation.getStatus());
             pstmt.setBigDecimal(8, reservation.getTotalAmount() != null ? reservation.getTotalAmount() : BigDecimal.ZERO);
 
+            // Debug log
+            System.out.println("==== DEBUG INSERT RESERVATION ====");
+            System.out.println("userId: " + reservation.getUserId());
+            System.out.println("tableId: " + reservation.getTableId());
+            System.out.println("date: " + reservation.getReservationDate());
+            System.out.println("time: " + reservation.getReservationTime());
+            System.out.println("guestCount: " + reservation.getGuestCount());
+            System.out.println("specialRequests: " + reservation.getSpecialRequests());
+            System.out.println("status: " + reservation.getStatus());
+            System.out.println("totalAmount: " + reservation.getTotalAmount());
+            System.out.println("==================================");
+
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
@@ -39,11 +52,18 @@ public class ReservationDAO {
                     }
                 }
             }
+
         } catch (SQLException e) {
-            logger.error("Error creating reservation", e);
+            logger.error("❌ SQL Error while creating reservation: {}", e.getMessage());
+            e.printStackTrace();  // In stacktrace đầy đủ
+        } catch (Exception e) {
+            logger.error("❌ General Error while creating reservation: {}", e.getMessage());
+            e.printStackTrace();
         }
+
         return -1;
     }
+
 
     // Get reservation by ID
     public Reservation getReservationById(int reservationId) {
