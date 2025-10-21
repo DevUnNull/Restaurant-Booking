@@ -24,7 +24,12 @@ public class ReservationDAO {
 
             // Gán dữ liệu
             pstmt.setInt(1, reservation.getUserId());
-            pstmt.setInt(2, reservation.getTableId() != null ? reservation.getTableId() : 0);
+            if (reservation.getTableId() != null && reservation.getTableId() > 0) {
+                pstmt.setInt(2, reservation.getTableId());
+            } else {
+                pstmt.setNull(2, java.sql.Types.INTEGER);
+            }
+
             pstmt.setDate(3, Date.valueOf(reservation.getReservationDate()));
             pstmt.setTime(4, Time.valueOf(reservation.getReservationTime()));
             pstmt.setInt(5, reservation.getGuestCount());
