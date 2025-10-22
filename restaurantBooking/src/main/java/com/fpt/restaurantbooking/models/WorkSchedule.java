@@ -8,6 +8,8 @@ import java.time.LocalTime;
  */
 public class WorkSchedule extends BaseEntity {
     private Integer scheduleId;
+    private Integer userId;
+    private String employeeName;
     private LocalDate workDate;
     private String shift;
     private LocalTime startTime;
@@ -30,6 +32,12 @@ public class WorkSchedule extends BaseEntity {
     public void setScheduleId(Integer scheduleId) {
         this.scheduleId = scheduleId;
     }
+
+    public Integer getUserId() { return userId; }
+    public void setUserId(Integer userId) { this.userId = userId; }
+
+    public String getEmployeeName() { return employeeName; }
+    public void setEmployeeName(String employeeName) { this.employeeName = employeeName; }
 
     public LocalDate getWorkDate() {
         return workDate;
@@ -94,4 +102,21 @@ public class WorkSchedule extends BaseEntity {
     public void setAssignedBy(Integer assignedBy) {
         this.assignedBy = assignedBy;
     }
+
+    @Override
+    public String toString() {
+        return "WorkSchedule{" +
+                "scheduleId=" + scheduleId +
+                ", userId=" + userId +
+                ", workDate=" + workDate +
+                ", shift='" + shift + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", position='" + workPosition + '\'' +
+                ", note='" + notes + '\'' +
+                ", status='" + status + '\'' +
+                ", assignedBy='" + assignedBy + '\'' +
+                '}';
+    }
+
 }
