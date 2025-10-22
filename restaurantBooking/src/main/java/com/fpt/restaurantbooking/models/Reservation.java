@@ -24,10 +24,16 @@ public class Reservation extends BaseEntity {
         PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
     }
 
-    public Reservation(int i, int i1, int i2, int i3, LocalDateTime localDateTime, String confirmed, int i4) {
+    public Reservation(int reservationId, int userId, int tableId, int guestCount, LocalDateTime createdAt, String status, int guestCountDuplicate) {
         super();
-        this.status = "PENDING";
+        this.reservationId = reservationId;
+        this.userId = userId;
+        this.tableId = tableId;
+        this.guestCount = guestCount;
+        this.status = status;
+        this.setCreatedAt(createdAt); // nếu dùng BaseEntity
     }
+
 
     // Getters and Setters
     public Integer getReservationId() {
