@@ -1,5 +1,7 @@
 package com.fpt.restaurantbooking.models;
 
+import java.time.LocalDateTime;
+
 /**
  * Table entity representing restaurant tables
  */
@@ -9,14 +11,27 @@ public class Table extends BaseEntity {
     private Integer capacity;
     private Integer floor;
     private String tableType;
-    private String status;
+    private String status; // AVAILABLE, RESERVED, MAINTENANCE
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public enum TableStatus {
-        AVAILABLE, OCCUPIED, RESERVED, OUT_OF_SERVICE
+        AVAILABLE, RESERVED, MAINTENANCE
     }
 
+    // Constructors
     public Table() {
         super();
+        this.status = "AVAILABLE";
+    }
+
+    public Table(Integer tableId, String tableName, Integer capacity, Integer floor, String tableType) {
+        super();
+        this.tableId = tableId;
+        this.tableName = tableName;
+        this.capacity = capacity;
+        this.floor = floor;
+        this.tableType = tableType;
         this.status = "AVAILABLE";
     }
 
@@ -67,5 +82,32 @@ public class Table extends BaseEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Table{" +
+                "tableId=" + tableId +
+                ", tableName='" + tableName + '\'' +
+                ", capacity=" + capacity +
+                ", floor=" + floor +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

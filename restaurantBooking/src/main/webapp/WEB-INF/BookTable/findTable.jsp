@@ -1,33 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.time.LocalDate" %>
-<%
-    // --- LẤY DỮ LIỆU TỪ SESSION ---
-    String savedDate = (String) session.getAttribute("requiredDate");
-    String savedTime = (String) session.getAttribute("requiredTime");
-    Integer savedGuestCount = (Integer) session.getAttribute("guestCount");
-    String savedSpecialRequest = (String) session.getAttribute("specialRequest");
-    String savedEventType = (String) session.getAttribute("eventType");
-    String savedPromotion = (String) session.getAttribute("promotion");
-
-    // --- GIÁ TRỊ MẶC ĐỊNH ---
-    if (savedDate == null || savedDate.isEmpty()) savedDate = LocalDate.now().toString();
-    if (savedTime == null || savedTime.isEmpty()) savedTime = "19:00";
-    if (savedGuestCount == null || savedGuestCount <= 0) savedGuestCount = 2;
-    if (savedSpecialRequest == null) savedSpecialRequest = "";
-    if (savedEventType == null || savedEventType.isEmpty()) savedEventType = "regular";
-    if (savedPromotion == null || savedPromotion.isEmpty()) savedPromotion = "none";
-%>
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Find a Table</title>
+    <title>Tìm Bàn</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Copy tất cả CSS từ file gốc */
         body, html {
             margin: 0;
             padding: 0;
@@ -99,105 +81,7 @@
             font-family: 'Montserrat', sans-serif;
             width: 100%;
         }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 60px;
-            font-size: 0.95em;
-        }
-        .form-group textarea::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-        input::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-        }
         .form-group select option { background: #5e1717; }
-
-        .guest-stepper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-        .guest-stepper button {
-            background: none;
-            border: 1px solid white;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .guest-stepper button:hover { background: rgba(255,255,255,0.2); }
-        .guest-stepper input[type="number"] {
-            text-align: center;
-            -moz-appearance: textfield;
-        }
-        .guest-stepper input::-webkit-outer-spin-button,
-        .guest-stepper input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        /* ƯU ĐÃI */
-        .promotion-section {
-            grid-column: 1 / -1;
-            background: rgba(255, 193, 7, 0.15);
-            border: 2px solid rgba(255, 193, 7, 0.5);
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 10px;
-        }
-        .promotion-section h3 {
-            color: #ffc107;
-            font-size: 1.1em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .promotion-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        .promo-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .promo-card:hover {
-            border-color: #ffc107;
-            transform: translateY(-2px);
-        }
-        .promo-card.selected {
-            border-color: #ffc107;
-            background: rgba(255, 193, 7, 0.2);
-        }
-        .promo-card input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-        }
-        .promo-title {
-            font-weight: 700;
-            font-size: 1em;
-            margin-bottom: 5px;
-            color: #ffc107;
-        }
-        .promo-desc {
-            font-size: 0.85em;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
         .search-btn {
             grid-column: 1 / -1;
             padding: 15px;
@@ -214,106 +98,112 @@
             transition: background 0.3s ease;
         }
         .search-btn:hover { background: #c0392b; }
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
 <div class="bg-container">
     <div class="booking-box">
-        <h2>FIND A TABLE</h2>
-        <form class="search-form" method="get" action="findTableMap">
+        <h2>TÌM BÀN</h2>
 
+        <!-- Hiển thị lỗi nếu có -->
+        <% String errorMessage = (String)request.getAttribute("errorMessage"); %>
+        <% if (errorMessage != null) { %>
+        <div class="error-message">
+            <%= errorMessage %>
+        </div>
+        <% } %>
+
+        <form class="search-form" method="post" action="findTable">
+            <!-- Ngày -->
             <div class="form-group">
-                <label for="date">Date:</label>
+                <label for="date">Ngày:</label>
                 <div class="input-with-icon">
                     <i class="fas fa-calendar-alt"></i>
-                    <input type="date" id="date" name="date" required value="<%= savedDate %>">
+                    <input type="date" id="date" name="date" required>
                 </div>
             </div>
 
+            <!-- Giờ -->
             <div class="form-group">
-                <label for="time">Time:</label>
+                <label for="time">Giờ:</label>
                 <div class="input-with-icon">
                     <i class="fas fa-clock"></i>
                     <select id="time" name="time" required>
-                        <option value="17:00" <%= "17:00".equals(savedTime) ? "selected" : "" %>>5:00 PM</option>
-                        <option value="17:30" <%= "17:30".equals(savedTime) ? "selected" : "" %>>5:30 PM</option>
-                        <option value="18:00" <%= "18:00".equals(savedTime) ? "selected" : "" %>>6:00 PM</option>
-                        <option value="18:30" <%= "18:30".equals(savedTime) ? "selected" : "" %>>6:30 PM</option>
-                        <option value="19:00" <%= "19:00".equals(savedTime) ? "selected" : "" %>>7:00 PM</option>
-                        <option value="19:30" <%= "19:30".equals(savedTime) ? "selected" : "" %>>7:30 PM</option>
-                        <option value="20:00" <%= "20:00".equals(savedTime) ? "selected" : "" %>>8:00 PM</option>
-                        <option value="20:30" <%= "20:30".equals(savedTime) ? "selected" : "" %>>8:30 PM</option>
-                        <option value="21:00" <%= "21:00".equals(savedTime) ? "selected" : "" %>>9:00 PM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="11:30">11:30 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="12:30">12:30 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                        <option value="17:30">5:30 PM</option>
+                        <option value="18:00" selected>6:00 PM</option>
+                        <option value="18:30">6:30 PM</option>
+                        <option value="19:00">7:00 PM</option>
+                        <option value="19:30">7:30 PM</option>
+                        <option value="20:00">8:00 PM</option>
                     </select>
                 </div>
             </div>
 
-                <div class="form-group full-width">
-                    <label for="guests">Guests:</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-user-friends"></i>
-                        <div class="guest-stepper">
-                            <button type="button" id="minus-btn">-</button>
-                            <input type="number" id="guests" name="guests" min="1" max="20" value="<%= savedGuestCount %>" readonly>
-                            <button type="button" id="plus-btn">+</button>
-                        </div>
+            <!-- Số khách -->
+            <div class="form-group full-width">
+                <label for="guests">Số Khách:</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-user-friends"></i>
+                    <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                        <button type="button" id="minus-btn" style="background: none; border: 1px solid white; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">-</button>
+                        <input type="number" id="guests" name="guests" min="1" max="20" value="2" readonly style="flex: 1; text-align: center;">
+                        <button type="button" id="plus-btn" style="background: none; border: 1px solid white; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">+</button>
                     </div>
                 </div>
+            </div>
 
-            <!-- LOẠI HÌNH ĐẶT TIỆC -->
-                <div class="form-group full-width">
-                    <label for="eventType">Loại hình đặt chỗ:</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-star"></i>
-                        <select id="eventType" name="eventType">
-                            <option value="regular" <%= "regular".equals(savedEventType) ? "selected" : "" %>>Ăn thường</option>
-                            <option value="birthday" <%= "birthday".equals(savedEventType) ? "selected" : "" %>>Sinh nhật</option>
-                            <option value="anniversary" <%= "anniversary".equals(savedEventType) ? "selected" : "" %>>Kỷ niệm</option>
-                            <option value="business" <%= "business".equals(savedEventType) ? "selected" : "" %>>Tiệc công ty</option>
-                            <option value="date" <%= "date".equals(savedEventType) ? "selected" : "" %>>Hẹn hò</option>
-                            <option value="family" <%= "family".equals(savedEventType) ? "selected" : "" %>>Họp gia đình</option>
-                            <option value="other" <%= "other".equals(savedEventType) ? "selected" : "" %>>Khác</option>
-                        </select>
-                    </div>
+            <!-- Tầng -->
+            <div class="form-group">
+                <label for="floor">Tầng:</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-layer-group"></i>
+                    <select id="floor" name="floor">
+                        <option value="1">Tầng 1</option>
+                        <option value="2">Tầng 2</option>
+                        <option value="3">Tầng 3</option>
+                        <option value="4">Tầng 4</option>
+                    </select>
                 </div>
+            </div>
 
-            <!-- YÊU CẦU ĐẶC BIỆT -->
-                <div class="form-group full-width">
-                    <label for="specialRequest">Yêu cầu đặc biệt (tùy chọn):</label>
-                    <div class="input-with-icon" style="align-items:flex-start; padding-top:5px;">
-                        <i class="fas fa-comment-dots"></i>
-                        <textarea id="specialRequest" name="specialRequest"><%= savedSpecialRequest %></textarea>
-                    </div>
+            <!-- Loại sự kiện -->
+            <div class="form-group">
+                <label for="eventType">Loại Sự Kiện:</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-star"></i>
+                    <select id="eventType" name="eventType">
+                        <option value="regular">Ăn thường</option>
+                        <option value="birthday">Sinh nhật</option>
+                        <option value="anniversary">Kỷ niệm</option>
+                        <option value="business">Tiệc công ty</option>
+                        <option value="family">Hợp gia đình</option>
+                    </select>
                 </div>
+            </div>
 
-            <!-- ƯU ĐÃI -->
-                <div class="promotion-section">
-                    <h3><i class="fas fa-gift"></i> Chọn ưu đãi (tùy chọn)</h3>
-                    <div class="promotion-cards">
-                        <label class="promo-card <%= "none".equals(savedPromotion) ? "selected" : "" %>">
-                            <input type="radio" name="promotion" value="none" <%= "none".equals(savedPromotion) ? "checked" : "" %>>
-                            <div class="promo-title">Không áp dụng</div>
-                            <div class="promo-desc">Không sử dụng ưu đãi</div>
-                        </label>
-                        <label class="promo-card <%= "lunch".equals(savedPromotion) ? "selected" : "" %>">
-                            <input type="radio" name="promotion" value="lunch" <%= "lunch".equals(savedPromotion) ? "checked" : "" %>>
-                            <div class="promo-title">Giảm 15% Giờ vàng</div>
-                            <div class="promo-desc">11:00 - 14:00 các ngày trong tuần</div>
-                        </label>
-                        <label class="promo-card <%= "happy_hour".equals(savedPromotion) ? "selected" : "" %>">
-                            <input type="radio" name="promotion" value="happy_hour" <%= "happy_hour".equals(savedPromotion) ? "checked" : "" %>>
-                            <div class="promo-title">Happy Hour 20%</div>
-                            <div class="promo-desc">17:00 - 18:30 hàng ngày</div>
-                        </label>
-                        <label class="promo-card <%= "birthday".equals(savedPromotion) ? "selected" : "" %>">
-                            <input type="radio" name="promotion" value="birthday" <%= "birthday".equals(savedPromotion) ? "checked" : "" %>>
-                            <div class="promo-title">Sinh nhật miễn phí</div>
-                            <div class="promo-desc">Tặng bánh sinh nhật + 10% off</div>
-                        </label>
-                    </div>
+            <!-- Yêu cầu đặc biệt -->
+            <div class="form-group full-width">
+                <label for="specialRequest">Yêu Cầu Đặc Biệt (tùy chọn):</label>
+                <div class="input-with-icon" style="align-items: flex-start; padding-top: 5px;">
+                    <i class="fas fa-comment-dots"></i>
+                    <textarea id="specialRequest" name="specialRequest" style="min-height: 60px; resize: vertical;"></textarea>
                 </div>
+            </div>
 
-            <button type="submit" class="search-btn">Find Available Tables</button>
+            <button type="submit" class="search-btn">Tìm Bàn Trống</button>
         </form>
     </div>
 </div>
@@ -322,43 +212,28 @@
     const minusBtn = document.getElementById('minus-btn');
     const plusBtn = document.getElementById('plus-btn');
     const guestsInput = document.getElementById('guests');
+    const dateInput = document.getElementById('date');
 
-    minusBtn.addEventListener('click', () => {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+    dateInput.min = today;
+
+    minusBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         let currentValue = parseInt(guestsInput.value);
         if (currentValue > 1) {
             guestsInput.value = currentValue - 1;
         }
     });
 
-    plusBtn.addEventListener('click', () => {
+    plusBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         let currentValue = parseInt(guestsInput.value);
         if (currentValue < 20) {
             guestsInput.value = currentValue + 1;
         }
     });
-
-    // Xử lý chọn ưu đãi
-    const promoCards = document.querySelectorAll('.promo-card');
-    const promoRadios = document.querySelectorAll('input[name="promotion"]');
-
-    promoRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            promoCards.forEach(card => card.classList.remove('selected'));
-            this.closest('.promo-card').classList.add('selected');
-        });
-    });
-
-    // Click vào card để chọn
-    promoCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const radio = this.querySelector('input[type="radio"]');
-            radio.checked = true;
-            radio.dispatchEvent(new Event('change'));
-        });
-    });
-
-    // Đánh dấu card đầu tiên khi load
-    document.querySelector('.promo-card').classList.add('selected');
 </script>
 </body>
 </html>
