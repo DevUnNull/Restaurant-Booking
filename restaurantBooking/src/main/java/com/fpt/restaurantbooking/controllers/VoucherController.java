@@ -15,10 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Quandxnunxi28
  */
-@WebServlet(name="VoucherController", urlPatterns={"/Voucher"})
+@WebServlet(name = "VoucherController", urlPatterns = {"/Voucher"})
 public class VoucherController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -26,6 +25,7 @@ public class VoucherController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         int page = 1;
         int recordsPerPage = 6;
+
         if (request.getParameter("page") != null) {
             try {
                 page = Integer.parseInt(request.getParameter("page"));
@@ -34,9 +34,10 @@ public class VoucherController extends HttpServlet {
             }
         }
 
-        Promotions promo= (Promotions) request.getAttribute("pro");
+        Promotions promo = (Promotions) request.getAttribute("pro");
         int offset = (page - 1) * recordsPerPage;
         try {
+
             VoucherRepository vrepo = new VoucherRepository();
             List<Promotions> promotions = vrepo.getVouchersByPage(promo.getPromotion_level_id(), offset, recordsPerPage);
             int totalRecords = vrepo.getAllPromotions(promo.getPromotion_level_id()).size();
@@ -46,7 +47,7 @@ public class VoucherController extends HttpServlet {
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("promotions", promotions);
             request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
-        }catch (Exception ex){
+        } catch (Exception ex) {
         }
     }
 
@@ -70,7 +71,7 @@ public class VoucherController extends HttpServlet {
         List<Promotions> promotions = new ArrayList<>();
         VoucherRepository vrepo = new VoucherRepository();
         String idLevel = request.getParameter("idlevel");
-        if(idLevel==null){
+        if (idLevel == null) {
             try {
                 promotions = vrepo.getVouchersByPage(1, offset, recordsPerPage);
                 int totalRecords = vrepo.getAllPromotions(1).size();
@@ -78,13 +79,13 @@ public class VoucherController extends HttpServlet {
                 request.setAttribute("currentPage", page);
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("promotions", promotions);
-                request.setAttribute("kaku",idLevel);
+                request.setAttribute("kaku", idLevel);
                 request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
             request.setAttribute("promotions", promotions);
-        }else{
+        } else {
             try {
                 promotions = vrepo.getVouchersByPage(Integer.parseInt(idLevel), offset, recordsPerPage);
                 int totalRecords = vrepo.getAllPromotions(Integer.parseInt(idLevel)).size();
@@ -92,12 +93,11 @@ public class VoucherController extends HttpServlet {
                 request.setAttribute("currentPage", page);
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("promotions", promotions);
-                request.setAttribute("kaku",idLevel);
+                request.setAttribute("kaku", idLevel);
                 request.getRequestDispatcher("/WEB-INF/Voucher/ManageVoucher.jsp").forward(request, response);
-            }catch (Exception ex){
+            } catch (Exception ex) {
 
             }
-
 
 
         }
@@ -107,10 +107,11 @@ public class VoucherController extends HttpServlet {
 
     /**
      * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
+     *
+     * @param request  servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException      if an I/O error occurs
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -118,46 +119,66 @@ public class VoucherController extends HttpServlet {
         String id = request.getParameter("id");
         String nameVoucher = request.getParameter("promotionName");
         String description = request.getParameter("description");
-        String discount_percentage= request.getParameter("discount_percentage");
-        String start_date= request.getParameter("start_date");
-        String end_date= request.getParameter("end_date");
+        String discount_percentage = request.getParameter("discount_percentage");
+        String start_date = request.getParameter("start_date");
+        String end_date = request.getParameter("end_date");
         String updated_by = request.getParameter("updated_by");
-         VoucherRepository vrepo = new VoucherRepository();
-         String er;
-if(nameVoucher.isEmpty()){
-     er = "Name must not be empty";
-     request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(description.isEmpty()){
-    er = "Description must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(discount_percentage.isEmpty()){
-    er = "Discount percentage must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(start_date.isEmpty()){
-    er = "Start date must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}else if(end_date.isEmpty()){
-    er = "End date must not be empty";
-    request.setAttribute("errorMessage", er);
-    processRequest(request, response);
-    return;
-}
+        String promotion_level_id = request.getParameter("promotion_level_id");
 
+        VoucherRepository vrepo = new VoucherRepository();
+        Promotions pro = null;
+        try {
+            pro = vrepo.getIdWithUpdate(Integer.parseInt(id));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        String er;
+        if (nameVoucher.isEmpty()) {
+            er = "Name must not be empty";
+            request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
+            processRequest(request, response);
+            return;
+        } else if (description.isEmpty()) {
+            er = "Description must not be empty";
+            request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
+            processRequest(request, response);
+            return;
+        } else if (discount_percentage.isEmpty()) {
+            er = "Discount percentage must not be empty";
+            request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
+            processRequest(request, response);
+            return;
+        } else if (start_date.isEmpty()) {
+            er = "Start date must not be empty";
+            request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
+            processRequest(request, response);
+            return;
+        } else if (end_date.isEmpty()) {
+            er = "End date must not be empty";
+            request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
+            processRequest(request, response);
+            return;
+        } else if (promotion_level_id.isEmpty()) {
+            er = "Promotion level must not be empty";
+            request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
+            processRequest(request, response);
+            return;
+        }
 
 
         try {
-            Promotions pro = vrepo.getIdWithUpdate(Integer.parseInt(id));
-            vrepo.UpdatePromotion(id,nameVoucher,description,discount_percentage,start_date,end_date, updated_by);
+
+
+            vrepo.UpdatePromotion(id, nameVoucher, description, discount_percentage, start_date, end_date, updated_by);
             request.setAttribute("pro", pro);
             processRequest(request, response);
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -168,6 +189,7 @@ if(nameVoucher.isEmpty()){
 
     /**
      * Returns a short description of the servlet.
+     *
      * @return a String containing servlet description
      */
     @Override

@@ -359,6 +359,7 @@
                       data-discount="${o.discount_percentage}"
                       data-start="${o.start_date}"
                       data-end="${o.end_date}">
+
                 Sửa
               </button>
               <button class="btn btn-sm btn-danger btn-delete"
@@ -375,91 +376,8 @@
 
 
 </div>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const editButtons = document.querySelectorAll(".btn-edit");
-    const deleteButtons = document.querySelectorAll(".btn-delete");
 
-    const editModal = new bootstrap.Modal(document.getElementById('editVoucherModal'));
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteVoucherModal'));
 
-    // Nút SỬA
-    editButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.getElementById("voucherId").value = btn.dataset.id;
-        document.getElementById("voucherName").value = btn.dataset.name;
-        document.getElementById("voucherDescription").value = btn.dataset.desc;
-        document.getElementById("voucherDiscount").value = btn.dataset.discount;
-        document.getElementById("voucherStart").value = btn.dataset.start;
-        document.getElementById("voucherEnd").value = btn.dataset.end;
-
-        editModal.show();
-      });
-    });
-
-    // Nút XÓA
-    deleteButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.getElementById("deleteVoucherId").value = btn.dataset.id;
-        document.getElementById("deleteVoucherName").textContent = btn.dataset.name;
-        deleteModal.show();
-      });
-    });
-  });
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // JavaScript thay đổi nội dung khi chọn cấp voucher
-  document.getElementById("voucherLevel").addEventListener("change", function() {
-    const selected = this.value;
-    // TODO: thêm code load danh sách voucher tương ứng cấp
-    console.log("Đang chọn:", selected);
-  });
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // Modal thêm voucher
-    const addModal = new bootstrap.Modal(document.getElementById("addVoucherModal"));
-    document.querySelector(".btn-add").addEventListener("click", () => {
-      addModal.show();
-    });
-  });
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    <% if (request.getAttribute("errorMessageee") != null) { %>
-    const errorMsg = "<%= request.getAttribute("errorMessageee") %>";
-    const errorDiv = document.getElementById("addErrorMsg");
-
-    // Gỡ class ẩn và hiển thị lỗi
-    errorDiv.classList.remove("d-none");
-    errorDiv.textContent = errorMsg;
-
-    // Mở lại modal "Thêm voucher"
-    const addModal = new bootstrap.Modal(document.getElementById('addVoucherModal'));
-    addModal.show();
-    <% } %>
-  });
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // Modal sửa voucher
-    const editModal = new bootstrap.Modal(document.getElementById("editVoucherModal"));
-
-    // Nếu có lỗi từ server, hiển thị lỗi và mở modal
-    <% if (request.getAttribute("errorMessage") != null) { %>
-    const errorMsg = "<%= request.getAttribute("errorMessage") %>";
-    const errorDiv = document.getElementById("editErrorMsg");
-
-    // Hiển thị thông báo lỗi
-    errorDiv.classList.remove("d-none");
-    errorDiv.textContent = errorMsg;
-
-    // Mở modal
-    editModal.show();
-    <% } %>
-  });
-</script>
 
 <!-- Modal Sửa Voucher -->
 <div class="modal fade" id="editVoucherModal" tabindex="-1" aria-labelledby="editVoucherLabel" aria-hidden="true">
@@ -493,12 +411,21 @@
             <input type="number" class="form-control" id="voucherDiscount" name="discount_percentage" min="0" max="100" value="${param.discount_percentage != null ? param.discount_percentage : ''}">
           </div>
 <input type="hidden" name="updated_by" value="${sessionScope.userId}">
+
           <div class="mb-3">
             <label class="form-label">Thời gian hiệu lực</label>
             <div class="d-flex gap-2">
               <input type="date" class="form-control" id="voucherStart" name="start_date"value="${param.start_date != null ? param.start_date : ''}">
               <input type="date" class="form-control" id="voucherEnd" name="end_date" value="${param.end_date != null ? param.end_date : ''}">
             </div>
+          </div>
+          <div class="mb-3">
+            <label for="addVoucherLevel" class="form-label">Cấp độ Voucher</label>
+            <select class="form-select" id="addVoucherLevel" name="promotion_level_id" >
+              <option value="1">Cấp 1</option>
+              <option value="2">Cấp 2</option>
+              <option value="3">Cấp 3</option>
+            </select>
           </div>
 
         </div>
@@ -556,5 +483,102 @@
     </ul>
   </nav>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+
+    // ✅ Chỉ tạo 1 instance modal duy nhất
+    const editModal = new bootstrap.Modal(document.getElementById("editVoucherModal"));
+
+    // ====== 1️⃣ Xử lý nút “Sửa” ======
+    document.querySelectorAll(".btn-edit").forEach(btn => {
+      btn.addEventListener("click", () => {
+        // Gán dữ liệu vào form
+        document.getElementById("voucherId").value = btn.dataset.id;
+        document.getElementById("voucherName").value = btn.dataset.name;
+        document.getElementById("voucherDescription").value = btn.dataset.desc;
+        document.getElementById("voucherDiscount").value = btn.dataset.discount;
+        document.getElementById("voucherStart").value = btn.dataset.start;
+        document.getElementById("voucherEnd").value = btn.dataset.end;
+
+        // Mở modal
+        editModal.show();
+      });
+    });
+
+    // ====== 2️⃣ Nếu có lỗi từ servlet ======
+    <% if (request.getAttribute("errorMessage") != null) { %>
+    const errorMsg = "<%= request.getAttribute("errorMessage") %>";
+    const errorDiv = document.getElementById("editErrorMsg");
+    errorDiv.classList.remove("d-none");
+    errorDiv.textContent = errorMsg;
+    // ⚡ Mở lại modal để hiển thị lỗi
+    editModal.show();
+    <% } %>
+
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const editButtons = document.querySelectorAll(".btn-edit");
+    const deleteButtons = document.querySelectorAll(".btn-delete");
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteVoucherModal'));
+
+    // Nút SỬA
+    editButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.getElementById("voucherId").value = btn.dataset.id;
+        document.getElementById("voucherName").value = btn.dataset.name;
+        document.getElementById("voucherDescription").value = btn.dataset.desc;
+        document.getElementById("voucherDiscount").value = btn.dataset.discount;
+        document.getElementById("voucherStart").value = btn.dataset.start;
+        document.getElementById("voucherEnd").value = btn.dataset.end;
+        editModal.show();
+      });
+    });
+
+    // Nút XÓA
+    deleteButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.getElementById("deleteVoucherId").value = btn.dataset.id;
+        document.getElementById("deleteVoucherName").textContent = btn.dataset.name;
+        deleteModal.show();
+      });
+    });
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // JavaScript thay đổi nội dung khi chọn cấp voucher
+  document.getElementById("voucherLevel").addEventListener("change", function() {
+    const selected = this.value;
+    // TODO: thêm code load danh sách voucher tương ứng cấp
+    console.log("Đang chọn:", selected);
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Modal thêm voucher
+    const addModal = new bootstrap.Modal(document.getElementById("addVoucherModal"));
+    document.querySelector(".btn-add").addEventListener("click", () => {
+      addModal.show();
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    <% if (request.getAttribute("errorMessageee") != null) { %>
+    const errorMsg = "<%= request.getAttribute("errorMessageee") %>";
+    const errorDiv = document.getElementById("addErrorMsg");
+
+    // Gỡ class ẩn và hiển thị lỗi
+    errorDiv.classList.remove("d-none");
+    errorDiv.textContent = errorMsg;
+
+    // Mở lại modal "Thêm voucher"
+    const addModal = new bootstrap.Modal(document.getElementById('addVoucherModal'));
+    addModal.show();
+    <% } %>
+  });
+</script>
 </body>
 </html>
