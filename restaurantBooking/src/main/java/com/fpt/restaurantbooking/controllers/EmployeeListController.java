@@ -41,8 +41,8 @@ public class EmployeeListController extends HttpServlet {
 
             if (keyword != null && !keyword.trim().isEmpty()) {
                 // Nếu có từ khóa tìm kiếm
-                employees = userRepo.searchEmployees(keyword.trim(), offset, PAGE_SIZE);
-                totalEmployees = userRepo.countSearchEmployees(keyword.trim());
+//                employees = userRepo.searchEmployees(keyword.trim(), offset, PAGE_SIZE);
+//                totalEmployees = userRepo.countSearchEmployees(keyword.trim());
             } else {
                 // Nếu không có từ khóa lấy toàn bộ nhân viên
                 employees.addAll(userRepo.findByRole(User.UserRole.STAFF));
