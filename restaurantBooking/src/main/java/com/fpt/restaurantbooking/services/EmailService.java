@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
  * Service for sending email verification related emails
  */
 public class EmailService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-    
+
     /**
      * Send OTP verification email to user
      */
@@ -20,30 +20,30 @@ public class EmailService {
         try {
             String subject = "Xác Thực Email - Hệ Thống Đặt Bàn Nhà Hàng";
             String htmlBody = buildOTPEmailTemplate(user.getFullName(), otpCode);
-            
+
             boolean sent = EmailUtil.sendHtmlEmail(user.getEmail(), subject, htmlBody);
-            
+
             if (sent) {
                 logger.info("OTP verification email sent successfully to: {}", user.getEmail());
             } else {
                 logger.error("Failed to send OTP verification email to: {}", user.getEmail());
             }
-            
+
             return sent;
-            
+
         } catch (Exception e) {
             logger.error("Error sending OTP verification email to: {}", user.getEmail(), e);
             return false;
         }
     }
-    
+
     /**
      * Send OTP verification email using EmailVerification object
      */
     public boolean sendOTPVerificationEmail(User user, EmailVerification verification) {
         return sendOTPVerificationEmail(user, verification.getOtpCode());
     }
-    
+
     /**
      * Send email verification success notification
      */
@@ -51,23 +51,23 @@ public class EmailService {
         try {
             String subject = "Xác Thực Email Thành Công - Hệ Thống Đặt Bàn Nhà Hàng";
             String htmlBody = buildVerificationSuccessTemplate(user.getFullName());
-            
+
             boolean sent = EmailUtil.sendHtmlEmail(user.getEmail(), subject, htmlBody);
-            
+
             if (sent) {
                 logger.info("Verification success email sent successfully to: {}", user.getEmail());
             } else {
                 logger.error("Failed to send verification success email to: {}", user.getEmail());
             }
-            
+
             return sent;
-            
+
         } catch (Exception e) {
             logger.error("Error sending verification success email to: {}", user.getEmail(), e);
             return false;
         }
     }
-    
+
     /**
      * Send OTP resend notification email
      */
@@ -75,23 +75,23 @@ public class EmailService {
         try {
             String subject = "Mã OTP Mới - Hệ Thống Đặt Bàn Nhà Hàng";
             String htmlBody = buildOTPResendTemplate(user.getFullName(), otpCode);
-            
+
             boolean sent = EmailUtil.sendHtmlEmail(user.getEmail(), subject, htmlBody);
-            
+
             if (sent) {
                 logger.info("OTP resend email sent successfully to: {}", user.getEmail());
             } else {
                 logger.error("Failed to send OTP resend email to: {}", user.getEmail());
             }
-            
+
             return sent;
-            
+
         } catch (Exception e) {
             logger.error("Error sending OTP resend email to: {}", user.getEmail(), e);
             return false;
         }
     }
-    
+
     /**
      * Build OTP verification email template
      */
@@ -142,7 +142,7 @@ public class EmailService {
                 "</body>" +
                 "</html>";
     }
-    
+
     /**
      * Build verification success email template
      */
@@ -184,7 +184,7 @@ public class EmailService {
                 "</body>" +
                 "</html>";
     }
-    
+
     /**
      * Build OTP resend email template
      */
