@@ -7,12 +7,28 @@ public class User extends BaseEntity {
     private Integer userId;
     private Integer roleId;
     private String fullName;
+    private String gender;
     private String email;
     private String phoneNumber;
     private String password;
     private String avatar;
     private String status;
     private String role;
+
+    public User(int userId, String fullName) {
+        this.userId = userId;
+        this.fullName = fullName;
+    }
+
+    public User(Integer userId, Integer roleId, String fullName, String gender, String email, String phoneNumber, String status) {
+        this.userId = userId;
+        this.roleId = roleId;
+        this.fullName = fullName;
+        this.gender = gender;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.status = status;
+    }
 
     public enum UserRole {
         CUSTOMER, STAFF, ADMIN
@@ -47,6 +63,14 @@ public class User extends BaseEntity {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getEmail() {

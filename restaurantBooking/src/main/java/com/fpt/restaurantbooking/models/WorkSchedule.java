@@ -8,6 +8,7 @@ import java.time.LocalTime;
  */
 public class WorkSchedule extends BaseEntity {
     private Integer scheduleId;
+    private User user;
     private LocalDate workDate;
     private String shift;
     private LocalTime startTime;
@@ -29,6 +30,14 @@ public class WorkSchedule extends BaseEntity {
 
     public void setScheduleId(Integer scheduleId) {
         this.scheduleId = scheduleId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDate getWorkDate() {
