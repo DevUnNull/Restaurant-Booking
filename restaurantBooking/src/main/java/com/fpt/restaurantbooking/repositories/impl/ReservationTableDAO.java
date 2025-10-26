@@ -1,5 +1,6 @@
 package com.fpt.restaurantbooking.repositories.impl;
 
+import com.fpt.restaurantbooking.models.Table;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,37 @@ public class ReservationTableDAO {
             logger.error("Error getting tables for reservation", e);
         }
         return tableIds;
+    }
+
+    // Get detailed table information for a reservation
+    public List<Table> getTablesByReservationIdDetailed(int reservationId) {
+        String sql = "SELECT t.table_id, t.table_name, t.capacity, t.floor, t.table_type, t.status " +
+                "FROM Tables t " +
+                "INNER JOIN Reservation_Tables rt ON t.table_id = rt.table_id " +
+                "WHERE rt.reservation_id = ? " +
+                "ORDER BY rt.created_at ASC";
+        List<Table> tables = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, reservationId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Table table = new Table();
+                    table.setTableId(rs.getInt("table_id"));
+                    table.setTableName(rs.getString("table_name"));
+                    table.setCapacity(rs.getInt("capacity"));
+                    table.setFloor(rs.getInt("floor"));
+                    table.setTableType(rs.getString("table_type"));
+                    table.setStatus(rs.getString("status"));
+                    tables.add(table);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting detailed tables for reservation", e);
+        }
+        return tables;
     }
 
     // Remove table from reservation

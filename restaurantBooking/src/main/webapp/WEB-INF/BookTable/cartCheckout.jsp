@@ -3,6 +3,7 @@
 <%@ page import="com.fpt.restaurantbooking.models.OrderItem" %>
 <%@ page import="com.fpt.restaurantbooking.models.Reservation" %>
 <%@ page import="com.fpt.restaurantbooking.models.MenuItem" %>
+<%@ page import="com.fpt.restaurantbooking.models.Table" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -240,6 +241,7 @@
 <%
     // Lấy dữ liệu từ request attributes
     List<OrderItem> orderItems = (List<OrderItem>) request.getAttribute("currentItems");
+    List<Table> selectedTables = (List<Table>) request.getAttribute("selectedTables");
     Reservation reservation = (Reservation) request.getAttribute("reservation");
     String errorMessage = (String) request.getAttribute("errorMessage");
     String successMessage = (String) request.getAttribute("successMessage");
@@ -254,6 +256,7 @@
     }
 
     boolean hasItems = (orderItems != null && !orderItems.isEmpty());
+    boolean hasTables = (selectedTables != null && !selectedTables.isEmpty());
 %>
 
 <div class="container">
@@ -284,6 +287,45 @@
         </a>
     </div>
     <% } else { %>
+
+    <!-- Selected Tables Section -->
+    <% if (hasTables) { %>
+    <div style="background-color: rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 20px; margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.1);">
+        <h3 style="color: #fff; font-size: 1.5em; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-table"></i> Bàn đã chọn
+        </h3>
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; background-color: rgba(255, 255, 255, 0.08);">
+            <thead>
+            <tr style="background: #667eea;">
+                <th style="padding: 12px; color: white; font-weight: 600; text-align: left;">Tên bàn</th>
+                <th style="padding: 12px; color: white; font-weight: 600; text-align: center;">Sức chứa</th>
+                <th style="padding: 12px; color: white; font-weight: 600; text-align: center;">Tầng</th>
+                <th style="padding: 12px; color: white; font-weight: 600; text-align: center;">Loại bàn</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% for (int i = 0; i < selectedTables.size(); i++) {
+                Table table = selectedTables.get(i);
+            %>
+            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.15);">
+                <td style="padding: 12px; color: #f0f0f0;">
+                    <strong><%= table.getTableName() != null ? table.getTableName() : "Bàn " + table.getTableId() %></strong>
+                </td>
+                <td style="padding: 12px; color: #f0f0f0; text-align: center;">
+                    <i class="fas fa-users"></i> <%= table.getCapacity() %> người
+                </td>
+                <td style="padding: 12px; color: #f0f0f0; text-align: center;">
+                    <i class="fas fa-layer-group"></i> Tầng <%= table.getFloor() %>
+                </td>
+                <td style="padding: 12px; color: #f0f0f0; text-align: center;">
+                    <%= table.getTableType() != null ? table.getTableType() : "Standard" %>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+    <% } %>
 
     <!-- Order Items Table -->
     <table>
