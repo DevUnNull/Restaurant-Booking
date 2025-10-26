@@ -65,9 +65,6 @@
                 </li>
             </c:if>
 
-                   </div>
-               </li>
-           </c:if>
             <li><a href="${pageContext.request.contextPath}/about">Giới Thiệu</a></li>
             <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>
             <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
@@ -101,15 +98,16 @@
 <script>
     // Hàm duy nhất để bật/tắt bất kỳ dropdown nào bằng ID của nó
     function toggleDropdown(dropdownId) {
+        document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
+            if (openDropdown.id !== dropdownId) {
+                openDropdown.classList.remove('show');
+            }
+        });
+
         const dropdown = document.getElementById(dropdownId);
-        const userButton = dropdown.previousElementSibling;
-
-        // Đóng tất cả các dropdown khác trước khi mở cái mới
-        // Điều này đảm bảo chỉ có một dropdown được mở tại một thời điểm
-        closeAllDropdowns(dropdownId);
-
-        dropdown.classList.toggle('show');
-        userButton.classList.toggle('active');
+        if (dropdown) {
+            dropdown.classList.toggle('show');
+        }
     }
 
     // Hàm để đóng tất cả các dropdown đang mở, trừ cái có ID được chỉ định

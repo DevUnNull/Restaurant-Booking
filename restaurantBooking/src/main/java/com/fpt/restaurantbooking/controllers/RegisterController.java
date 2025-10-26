@@ -19,16 +19,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import java.util.logging.Logger;
-
-
 /**
  * Controller for handling user registration
  */
 @WebServlet(name = "RegisterController", urlPatterns = {"/register"})
 public class RegisterController extends BaseController {
+
     private UserService userService;
-    private static final Logger logger = Logger.getLogger(RegisterController.class.getName());
+
     @Override
     public void init() throws ServletException {
         try {
@@ -115,7 +113,7 @@ public class RegisterController extends BaseController {
             }
 
             // Create new user
-
+            User newUser = new User();
             newUser.setFullName(fullName);
             newUser.setEmail(email);
             newUser.setPhoneNumber(phoneNumber);
@@ -129,7 +127,6 @@ public class RegisterController extends BaseController {
             newUser.setGender(gender);
 
             // Register user (OTP đã được gửi trong service.register)
-
             User registeredUser = userService.register(newUser, password);
 
             if (registeredUser != null) {
@@ -142,7 +139,7 @@ public class RegisterController extends BaseController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            ToastHelper.addErrorToast(request, "Có lỗi xảy ra. Vui lòng thử lại. + "+ newUser.toString());
+            ToastHelper.addErrorToast(request, "Có lỗi xảy ra. Vui lòng thử lại.");
             forwardToPage(request, response, "/WEB-INF/views/auth/register.jsp");
         }
     }
