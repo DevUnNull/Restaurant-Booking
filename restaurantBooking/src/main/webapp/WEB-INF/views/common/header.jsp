@@ -65,17 +65,21 @@
                 </li>
             </c:if>
 
+                   </div>
+               </li>
+           </c:if>
+            <li><a href="${pageContext.request.contextPath}/about">Giới Thiệu</a></li>
             <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>
             <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
 
             <c:choose>
                 <c:when test="${not empty sessionScope.currentUser}">
                     <li class="user-dropdown">
-                        <div class="user-button" onclick="toggleDropdown('profileDropdown')">
+                        <div class="user-button" onclick="toggleDropdown('userDropdown')">
                             <span class="user-name">${sessionScope.currentUser.fullName}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
-                        <div id="profileDropdown" class="dropdown-content">
+                        <div id="userDropdown" class="dropdown-content">
                             <a href="${pageContext.request.contextPath}/profile"><i class="fas fa-user"></i> Hồ Sơ</a>
                             <a href="${pageContext.request.contextPath}/my-reservations"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
                             <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi Mật Khẩu</a>

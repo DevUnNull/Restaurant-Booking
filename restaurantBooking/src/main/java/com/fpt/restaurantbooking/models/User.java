@@ -1,5 +1,7 @@
 package com.fpt.restaurantbooking.models;
 
+import java.time.LocalDate;
+
 /**
  * User entity representing customers and staff
  */
@@ -13,6 +15,8 @@ public class User extends BaseEntity {
     private String avatar;
     private String status;
     private String role;
+    private LocalDate dateOfBirth;
+    private String gender;
 
     public enum UserRole {
         CUSTOMER, STAFF, ADMIN
@@ -28,6 +32,19 @@ public class User extends BaseEntity {
     public Integer getUserId() {
         return userId;
     }
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+    public String getGender() {
+        return gender;
+    }
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
 
     public void setUserId(Integer userId) {
         this.userId = userId;
