@@ -3,6 +3,7 @@ package com.fpt.restaurantbooking.controllers;
 import com.fpt.restaurantbooking.models.OrderItem;
 import com.fpt.restaurantbooking.models.Payment;
 import com.fpt.restaurantbooking.models.Reservation;
+import com.fpt.restaurantbooking.models.Table;
 import com.fpt.restaurantbooking.repositories.impl.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -53,12 +54,16 @@ public class CheckoutServlet extends HttpServlet {
             // ✅ Lấy danh sách order items
             List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
 
-            logger.info("✅ Found {} order items for reservation {}", orderItems.size(), reservationId);
+            // ✅ Lấy danh sách bàn đã chọn
+            List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
+
+            logger.info("✅ Found {} order items and {} tables for reservation {}", orderItems.size(), selectedTables.size(), reservationId);
             logger.info("✅ Total amount: {}", reservation.getTotalAmount());
 
-            // ✅ Set cả 2 attributes
+            // ✅ Set các attributes
             request.setAttribute("reservation", reservation);
             request.setAttribute("currentItems", orderItems);
+            request.setAttribute("selectedTables", selectedTables);
 
             request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
 
@@ -106,9 +111,11 @@ public class CheckoutServlet extends HttpServlet {
                 List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
                 if (orderItems.isEmpty()) {
                     logger.warn("⚠️ No order items for reservation {}", reservationId);
+                    List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
                     request.setAttribute("errorMessage", "Vui lòng chọn ít nhất 1 món ăn trước khi thanh toán");
                     request.setAttribute("reservation", reservation);
                     request.setAttribute("currentItems", orderItems);
+                    request.setAttribute("selectedTables", selectedTables);
                     request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
                     return;
                 }
@@ -149,9 +156,11 @@ public class CheckoutServlet extends HttpServlet {
                     response.sendRedirect("orderHistory?success=true");
                 } else {
                     logger.error("❌ Failed to create payment");
+                    List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
                     request.setAttribute("errorMessage", "Lỗi khi xử lý thanh toán");
                     request.setAttribute("reservation", reservation);
                     request.setAttribute("currentItems", orderItems);
+                    request.setAttribute("selectedTables", selectedTables);
                     request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
                 }
             }
@@ -164,8 +173,10 @@ public class CheckoutServlet extends HttpServlet {
             try {
                 Reservation reservation = reservationDAO.getReservationById(reservationId);
                 List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
+                List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
                 request.setAttribute("reservation", reservation);
                 request.setAttribute("currentItems", orderItems);
+                request.setAttribute("selectedTables", selectedTables);
             } catch (Exception ex) {
                 logger.error("❌ Error loading data for error page", ex);
             }
