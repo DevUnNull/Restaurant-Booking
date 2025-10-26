@@ -206,6 +206,59 @@ public class OrderItemsServlet extends HttpServlet {
                     response.getWriter().write("{\"success\": false, \"message\": \"Lỗi khi thêm món\"}");
                 }
             }
+            else if ("updateQty".equals(action)) {
+                // Cập nhật số lượng món ăn
+                String orderItemIdStr = request.getParameter("orderItemId");
+                String qtyStr = request.getParameter("quantity");
+
+                logger.info(">>> updateQty: orderItemId={}, quantity={}", orderItemIdStr, qtyStr);
+
+                int orderItemId = Integer.parseInt(orderItemIdStr);
+                int quantity = Integer.parseInt(qtyStr);
+
+                if (quantity <= 0) {
+                    logger.warn("⚠️ Quantity <= 0: {}", quantity);
+                    response.getWriter().write("{\"success\": false, \"message\": \"Số lượng phải lớn hơn 0\"}");
+                    return;
+                }
+
+                boolean updated = orderItemDAO.updateOrderItemQuantity(orderItemId, quantity);
+
+                if (updated) {
+                    BigDecimal totalPrice = orderItemDAO.calculateTotalPrice(reservationId);
+                    reservationDAO.updateTotalAmount(reservationId, totalPrice);
+
+                    logger.info("✅ Updated order item {} to quantity {}, new total: {}",
+                            orderItemId, quantity, totalPrice);
+
+                    response.getWriter().write("{\"success\": true, \"message\": \"Cập nhật thành công\"}");
+                } else {
+                    logger.error("❌ Failed to update order item");
+                    response.getWriter().write("{\"success\": false, \"message\": \"Lỗi khi cập nhật\"}");
+                }
+            }
+            else if ("remove".equals(action)) {
+                // Xóa món ăn
+                String orderItemIdStr = request.getParameter("orderItemId");
+
+                logger.info(">>> remove: orderItemId={}", orderItemIdStr);
+
+                int orderItemId = Integer.parseInt(orderItemIdStr);
+
+                boolean deleted = orderItemDAO.deleteOrderItem(orderItemId);
+
+                if (deleted) {
+                    BigDecimal totalPrice = orderItemDAO.calculateTotalPrice(reservationId);
+                    reservationDAO.updateTotalAmount(reservationId, totalPrice);
+
+                    logger.info("✅ Deleted order item {}, new total: {}", orderItemId, totalPrice);
+
+                    response.getWriter().write("{\"success\": true, \"message\": \"Xóa thành công\"}");
+                } else {
+                    logger.error("❌ Failed to delete order item");
+                    response.getWriter().write("{\"success\": false, \"message\": \"Lỗi khi xóa\"}");
+                }
+            }
 
         } catch (NumberFormatException e) {
             logger.error("❌ Invalid number format", e);
