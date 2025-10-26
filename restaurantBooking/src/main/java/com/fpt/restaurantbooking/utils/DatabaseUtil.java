@@ -67,9 +67,9 @@ public class DatabaseUtil {
                 props.load(input);
             } else {
                 // Default properties if file not found
-                props.setProperty("db.url", "jdbc:mysql://localhost:3306/restaurantbooking?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+                props.setProperty("db.url", "jdbc:mysql://localhost:3306/restaurantbooking1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
                 props.setProperty("db.username", "root");
-                props.setProperty("db.password", "123456");
+                props.setProperty("db.password", "1234");
                 logger.warn("Database properties file not found, using default values");
             }
         } catch (Exception e) {

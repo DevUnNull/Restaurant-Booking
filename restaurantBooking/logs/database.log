@@ -1,0 +1,16 @@
+2025-10-17 00:50:20 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-17 00:50:20 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@729d991e
+2025-10-17 00:50:20 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-17 00:50:20 [main] INFO  c.f.r.utils.DatabaseUtil - Database connection pool initialized successfully
+2025-10-17 00:50:32 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-17 00:50:32 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@729d991e
+2025-10-17 00:50:32 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-17 00:50:32 [main] INFO  c.f.r.utils.DatabaseUtil - Database connection pool initialized successfully
+2025-10-17 01:00:09 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-17 01:00:09 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@550dbc7a
+2025-10-17 01:00:09 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-17 01:00:09 [main] INFO  c.f.r.utils.DatabaseUtil - Database connection pool initialized successfully
+2025-10-17 01:00:58 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-17 01:00:59 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1e1a0406
+2025-10-17 01:00:59 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-17 01:00:59 [main] INFO  c.f.r.utils.DatabaseUtil - Database connection pool initialized successfully

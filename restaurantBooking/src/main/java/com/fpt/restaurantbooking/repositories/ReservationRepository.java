@@ -4,6 +4,7 @@ import com.fpt.restaurantbooking.models.Reservation;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Repository interface for Reservation entity
@@ -69,4 +70,6 @@ public interface ReservationRepository extends BaseRepository<Reservation, Long>
      * Update reservation status
      */
     boolean updateStatus(Long reservationId, Reservation.ReservationStatus status);
+
+    Map<String, Object> getOverviewStats();
 }

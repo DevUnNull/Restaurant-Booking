@@ -119,4 +119,21 @@ public class User extends BaseEntity {
     public boolean getIsActive() {
         return isActive();
     }
+
+
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                "Pass= "+ password +
+                ", roleId=" + roleId +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", status='" + status + '\'' +
+                ", role='" + role + '\'' +
+                '}';
+    }
+
+
 }

@@ -13,34 +13,38 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author Quandxnunxi28
  */
-public class ServiceRepository {
+public class ServiceRepository   {
 
     PreparedStatement stm;
     ResultSet rs;
     DatabaseUtil db = new DatabaseUtil();
 
-    public List<Service> getService() {
+    public List<Service> getService() throws SQLException {
         List<Service> list = new ArrayList<>();
         String query = "select * from Services";
-        try {
-            stm = db.getConnection().prepareStatement(query);
-            rs = stm.executeQuery();
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query);
+             ResultSet rs = stm.executeQuery();){
+
             while (rs.next()) {
                 list.add(new Service(rs.getInt("service_id"), rs.getString("service_name"), rs.getString("service_code"), rs.getString("description"), rs.getString("price"),
                          rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status")));
             }
         } catch (Exception e) {
         }
+
         return list;
     }
 
-    public List<Service> getAllService() {
+    public List<Service> getAllService() throws SQLException {
         List<Service> list = new ArrayList<>();
         String query = "SELECT \n" +
 "    s.service_id,\n" +
@@ -51,9 +55,11 @@ public class ServiceRepository {
 " FROM Services s\n" +
 " LEFT JOIN Users uc ON s.created_by = uc.user_id\n" +
 " LEFT JOIN Users uu ON s.updated_by = uu.user_id";
-        try {
-            stm = db.getConnection().prepareStatement(query);
-            rs = stm.executeQuery();
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(query);
+            ResultSet rs = stm.executeQuery();) {
+
+
             while (rs.next()) {
                 list.add(new Service(rs.getInt("service_id"), rs.getString("service_name"), rs.getString("service_code"), rs.getString("description"), rs.getString("price"),
                          rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status"), rs.getString("created_by_name"), // đổi sang name
@@ -61,6 +67,7 @@ public class ServiceRepository {
             }
         } catch (Exception e) {
         }
+
         return list;
     }
 
@@ -79,6 +86,7 @@ public class ServiceRepository {
         } catch (SQLException e) {
             throw e;
         }
+
     }
 
     public void deleteService(String service_id) throws SQLException {
@@ -91,6 +99,7 @@ public class ServiceRepository {
         } catch (SQLException e) {
             throw e;
         }
+
     }
 
     public void addService(String serviceName,String serviceCode, String description, String price, String status, String startDate, String endDate, int id) throws SQLException {
@@ -113,33 +122,38 @@ public class ServiceRepository {
         } catch (SQLException e) {
             throw e;
         }
+
     }
-    public List<Service> getServicesByPageShowList(int offset, int limit) {
+    public List<Service> getServicesByPageShowList(int offset, int limit) throws SQLException {
     List<Service> list = new ArrayList<>();
    
 
     String query = "SELECT * FROM Services ORDER BY service_id DESC limit ?,  ?";
-    try {
-        stm = db.getConnection().prepareStatement(query);
+    try(Connection conn = db.getConnection();
+        PreparedStatement stm = conn.prepareStatement(query);) {
+
         stm.setInt(1, offset);
         stm.setInt(2, limit);
-        rs = stm.executeQuery();
-        while (rs.next()) {
-            list.add(new Service(
-                rs.getInt("service_id"),
-                rs.getString("service_name"),
-                rs.getString("service_code"),
-                rs.getString("description"),
-                rs.getString("price"),
-                rs.getString("promotion_info"),
-                rs.getString("start_date"),
-                rs.getString("end_date"),
-                rs.getString("status")
-            ));
+       try( ResultSet rs = stm.executeQuery();){
+            while (rs.next()) {
+                list.add(new Service(
+                        rs.getInt("service_id"),
+                        rs.getString("service_name"),
+                        rs.getString("service_code"),
+                        rs.getString("description"),
+                        rs.getString("price"),
+                        rs.getString("promotion_info"),
+                        rs.getString("start_date"),
+                        rs.getString("end_date"),
+                        rs.getString("status")
+                ));
+            }
         }
+
     } catch (Exception e) {
         e.printStackTrace();
     }
+
     return list;
 }
     public List<Service> getServicesByPage(int offset, int limit) throws SQLException {
@@ -154,35 +168,54 @@ public class ServiceRepository {
             " LEFT JOIN Users uu ON s.updated_by = uu.user_id  " +
             " ORDER BY s.service_id DESC " +
             " LIMIT ?, ? ";
-    PreparedStatement ps = db.getConnection().prepareStatement(sql);
-    ps.setInt(1, offset);
-    ps.setInt(2, limit);
-    ResultSet rs = ps.executeQuery();
-    while (rs.next()) {
-        list.add(new Service(
-                rs.getInt("service_id"),
-                rs.getString("service_name"),
-                rs.getString("service_code"),
-                rs.getString("description"),
-                rs.getString("price"),
-                rs.getString("promotion_info"),
-                rs.getString("start_date"),
-                rs.getString("end_date"),
-                rs.getString("status"),
-                rs.getString("created_by_name"),
-                rs.getString("updated_by_name")
-        ));
-    }
+
+   try(Connection conn = db.getConnection();
+       PreparedStatement stm = conn.prepareStatement(sql);
+        ){
+       stm.setInt(1, offset);
+       stm.setInt(2, limit);
+       try(ResultSet rs = stm.executeQuery();){
+           while (rs.next()) {
+               list.add(new Service(
+                       rs.getInt("service_id"),
+                       rs.getString("service_name"),
+                       rs.getString("service_code"),
+                       rs.getString("description"),
+                       rs.getString("price"),
+                       rs.getString("promotion_info"),
+                       rs.getString("start_date"),
+                       rs.getString("end_date"),
+                       rs.getString("status"),
+                       rs.getString("created_by_name"),
+                       rs.getString("updated_by_name")
+               ));
+           }
+       }
+   }
+
+
+
+
+
     return list;
 }
 
 public int getTotalServiceCount() throws SQLException {
     String sql = "SELECT COUNT(*) FROM services ";
-    PreparedStatement ps = db.getConnection().prepareStatement(sql);
-    ResultSet rs = ps.executeQuery();
-    if (rs.next()) {
-        return rs.getInt(1);
+
+    try(Connection conn = db.getConnection();
+        PreparedStatement stm = conn.prepareStatement(sql);
+        ResultSet rs = stm.executeQuery();){
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
     }
+
+
+
+
     return 0;
 }
+
+
 }

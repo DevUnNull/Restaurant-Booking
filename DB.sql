@@ -221,3 +221,37 @@ CREATE INDEX idx_user_id ON Email_Verification (user_id);
 CREATE INDEX idx_otp_code ON Email_Verification (otp_code);
 CREATE INDEX idx_reset_token ON Email_Verification (reset_token);
 CREATE INDEX idx_expiration_time ON Email_Verification (expiration_time);
+
+
+-- Create Payments table
+CREATE TABLE Payments (
+                          payment_id INT AUTO_INCREMENT PRIMARY KEY,
+                          reservation_id INT NOT NULL,
+                          payment_method VARCHAR(50) NOT NULL,   -- Ví dụ: Cash, Credit Card, E-Wallet
+                          payment_status VARCHAR(20) NOT NULL,   -- Pending, Completed, Failed, Refunded
+                          payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                          amount BIGINT NOT NULL,
+                          promotion_id INT,
+                          transaction_id VARCHAR(100),           -- Mã giao dịch (nếu có từ cổng thanh toán)
+                          notes TEXT,
+                          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                          updated_at DATETIME,
+
+                          FOREIGN KEY (reservation_id) REFERENCES Reservations(reservation_id) ON DELETE CASCADE,
+                          FOREIGN KEY (promotion_id) REFERENCES Promotions(promotion_id)
+);
+
+-- Indexes for faster queries
+CREATE INDEX idx_reservation_id ON Payments (reservation_id);
+CREATE INDEX idx_promotion_id ON Payments (promotion_id);
+CREATE INDEX idx_payment_status ON Payments (payment_status);
+CREATE INDEX idx_payment_method ON Payments (payment_method);
+
+
+
+
+
+
+
+
+

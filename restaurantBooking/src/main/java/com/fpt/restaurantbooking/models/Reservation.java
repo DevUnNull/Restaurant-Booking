@@ -2,6 +2,7 @@ package com.fpt.restaurantbooking.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
@@ -23,10 +24,16 @@ public class Reservation extends BaseEntity {
         PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
     }
 
-    public Reservation() {
+    public Reservation(int reservationId, int userId, int tableId, int guestCount, LocalDateTime createdAt, String status, int guestCountDuplicate) {
         super();
-        this.status = "PENDING";
+        this.reservationId = reservationId;
+        this.userId = userId;
+        this.tableId = tableId;
+        this.guestCount = guestCount;
+        this.status = status;
+        this.setCreatedAt(createdAt); // nếu dùng BaseEntity
     }
+
 
     // Getters and Setters
     public Integer getReservationId() {

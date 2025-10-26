@@ -6,7 +6,6 @@ import com.fpt.restaurantbooking.models.RestaurantInfo;
 import com.fpt.restaurantbooking.repositories.MenuItemRepository;
 import com.fpt.restaurantbooking.repositories.PromotionRepository;
 import com.fpt.restaurantbooking.repositories.RestaurantInfoRepository;
-import com.fpt.restaurantbooking.repositories.impl.MenuItemRepositoryImpl;
 import com.fpt.restaurantbooking.repositories.impl.PromotionRepositoryImpl;
 import com.fpt.restaurantbooking.repositories.impl.RestaurantInfoRepositoryImpl;
 import com.fpt.restaurantbooking.services.MenuItemService;
@@ -33,7 +32,7 @@ public class HomeController extends BaseController {
 
     private final PromotionService promotionService;
     private final RestaurantInfoService restaurantInfoService;
-    private final MenuItemService menuItemService;
+
     
     public HomeController() {
         try {
@@ -42,12 +41,12 @@ public class HomeController extends BaseController {
             // Initialize repositories
             PromotionRepository promotionRepository = new PromotionRepositoryImpl(connection);
             RestaurantInfoRepository restaurantInfoRepository = new RestaurantInfoRepositoryImpl(connection);
-            MenuItemRepository menuItemRepository = new MenuItemRepositoryImpl(connection);
+
             
             // Initialize services with dependency injection
             this.promotionService = new PromotionServiceImpl(promotionRepository);
             this.restaurantInfoService = new RestaurantInfoServiceImpl(restaurantInfoRepository);
-            this.menuItemService = new MenuItemServiceImpl(menuItemRepository);
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize HomeController", e);
         }
@@ -64,9 +63,8 @@ public class HomeController extends BaseController {
             RestaurantInfo restaurantInfo = restaurantInfoService.getMainRestaurantInfo().orElse(null);
             request.setAttribute("restaurantInfo", restaurantInfo);
             
-            // Get featured dishes
-            List<MenuItem> featuredDishes = menuItemService.findFeaturedItems();
-            request.setAttribute("featuredDishes", featuredDishes);
+
+
             
             // Forward to home page
             forwardToPage(request, response, "/WEB-INF/views/home.jsp");
