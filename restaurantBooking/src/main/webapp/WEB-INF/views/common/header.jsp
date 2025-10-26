@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<header>
+<header style="background: #ad0505">
     <div class="logo">
         <a href="${pageContext.request.contextPath}/">
             <h1>Đặt Bàn Nhà Hàng</h1>

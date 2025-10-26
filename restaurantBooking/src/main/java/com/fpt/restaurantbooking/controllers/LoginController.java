@@ -27,10 +27,6 @@ public class LoginController extends BaseController {
 
     private UserService userService;
 
-    // Hằng số vai trò (Ophelia)
-    private static final int ADMIN_ROLE_ID = 1;
-    private static final int MANAGER_ROLE_ID = 4;
-
     @Override
     public void init() throws ServletException {
         try {
@@ -44,12 +40,12 @@ public class LoginController extends BaseController {
             throw new ServletException("Failed to initialize LoginController", e);
         }
     }
-    
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String path = request.getServletPath();
-        
+
         if ("/login".equals(path)) {
             // Forward to login page using BaseController method
             forwardToPage(request, response, "/WEB-INF/views/auth/login.jsp");
@@ -57,43 +53,43 @@ public class LoginController extends BaseController {
             handleLogout(request, response);
         }
     }
-    
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String path = request.getServletPath();
-        
+
         if ("/login".equals(path)) {
             handleLogin(request, response);
         }
     }
-    
+
     /**
      * Handle login form submission
      * This demonstrates the pattern you want: show toast after redirect
      */
-    private void handleLogin(HttpServletRequest request, HttpServletResponse response) 
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String rememberMe = request.getParameter("rememberMe");
         String redirect = request.getParameter("redirect");
-        
+
         try {
             // Authenticate user by email only
             var userOptional = userService.authenticate(email, password);
-            
+
             if (userOptional.isPresent()) {
                 var user = userOptional.get();
-                
+
                 // Check user status
                 if ("PENDING".equals(user.getStatus())) {
                     // Store user info in session for OTP verification
                     HttpSession session = request.getSession();
                     session.setAttribute("userId", user.getUserId());
                     session.setAttribute("userEmail", user.getEmail());
-                    
+
                     // Redirect to OTP verification page using BaseController method
                     redirectTo(response, request.getContextPath() + "/email-verification?email=" + user.getEmail() + "&fromRegister=true");
                     return;
@@ -103,37 +99,17 @@ public class LoginController extends BaseController {
                     redirectTo(response, request.getContextPath() + "/login");
                     return;
                 }
-                
+
                 // Active user - proceed with normal login
                 HttpSession session = request.getSession();
-
-                // START LOGIC CHUẨN HÓA TÊN HIỂN THỊ (Ophelia)
-                int userRoleId = user.getRoleId();
-                String newDisplayName;
-
-                if (userRoleId == ADMIN_ROLE_ID) {
-                    newDisplayName = "Admin";
-                } else if (userRoleId == MANAGER_ROLE_ID) {
-                    newDisplayName = "Manager";
-                } else {
-                    newDisplayName = user.getFullName();
-                    if (newDisplayName == null || newDisplayName.isEmpty()) {
-                        newDisplayName = user.getEmail();
-                    }
-                }
-
-                // LƯU TÊN HIỂN THỊ ĐÃ CHUẨN HÓA VÀO SESSION
-                session.setAttribute("userName", newDisplayName);
-
-
                 // Set the current user for header display
                 setCurrentUser(request, user);
                 session.setAttribute("userId", user.getUserId());
                 session.setAttribute("userRole", user.getRoleId());
-                
+
                 // Add success toast
                 ToastHelper.addSuccessToast(request, "Đăng nhập thành công!");
-                
+
                 // Handle redirect after successful login
                 if (redirect != null && !redirect.trim().isEmpty()) {
                     try {
@@ -154,37 +130,37 @@ public class LoginController extends BaseController {
                 }
             } else {
                 // Invalid credentials
-                ToastHelper.addErrorToast(request, "Invalid username or password!");
+                ToastHelper.addErrorToast(request, "Tên đăng nhập hoặc mật khẩu không đúng!");
                 redirectTo(response, request.getContextPath() + "/login");
             }
         } catch (Exception e) {
-            ToastHelper.addErrorToast(request, "An error occurred during login. Please try again!");
+            ToastHelper.addErrorToast(request, "Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại!");
             redirectTo(response, request.getContextPath() + "/login");
         }
     }
-    
+
     /**
      * Handle logout
      * Another example of toast after redirect
      */
-    private void handleLogout(HttpServletRequest request, HttpServletResponse response) 
+    private void handleLogout(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        
+
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
         redirectTo(response, request.getContextPath() + "/login");
     }
-    
+
     /**
      * Simulate login validation
      * In real application, this would check against database
      */
     private boolean isValidLogin(String username, String password) {
         // Simple validation for demo
-        return username != null && password != null && 
-               username.length() > 0 && password.length() > 0 &&
-               !username.equals("invalid");
+        return username != null && password != null &&
+                username.length() > 0 && password.length() > 0 &&
+                !username.equals("invalid");
     }
 }
