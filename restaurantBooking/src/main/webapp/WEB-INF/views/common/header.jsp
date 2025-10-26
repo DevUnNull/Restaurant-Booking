@@ -38,37 +38,28 @@
                    </div>
                </li>
            </c:if>
+            <li><a href="${pageContext.request.contextPath}/about">Giới Thiệu</a></li>
             <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>
             <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
             
             <!-- Conditional user authentication section -->
             <c:choose>
                 <c:when test="${not empty sessionScope.currentUser}">
-                    <!-- User is logged in - show dropdown -->
                     <li class="user-dropdown">
-                        <div class="user-button" onclick="toggleUserDropdown()">
+                        <div class="user-button" onclick="toggleDropdown('userDropdown')">
                             <span class="user-name">${sessionScope.currentUser.fullName}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
                         <div id="userDropdown" class="dropdown-content">
-                            <a href="${pageContext.request.contextPath}/profile">
-                                <i class="fas fa-user"></i> Hồ Sơ
-                            </a>
-                            <a href="${pageContext.request.contextPath}/my-reservations">
-                                <i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi
-                            </a>
-                            <a href="${pageContext.request.contextPath}/change-password">
-                                <i class="fas fa-key"></i> Đổi Mật Khẩu
-                            </a>
+                            <a href="${pageContext.request.contextPath}/profile"><i class="fas fa-user"></i> Hồ Sơ</a>
+                            <a href="${pageContext.request.contextPath}/my-reservations"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
+                            <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi Mật Khẩu</a>
                             <div class="dropdown-divider"></div>
-                            <a href="${pageContext.request.contextPath}/logout" class="logout-link">
-                                <i class="fas fa-sign-out-alt"></i> Đăng Xuất
-                            </a>
+                            <a href="${pageContext.request.contextPath}/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
                         </div>
                     </li>
                 </c:when>
                 <c:otherwise>
-                    <!-- User is not logged in - show login/register links -->
                     <li><a href="${pageContext.request.contextPath}/register">Đăng Ký</a></li>
                     <li><a href="${pageContext.request.contextPath}/login">Đăng Nhập</a></li>
                 </c:otherwise>
