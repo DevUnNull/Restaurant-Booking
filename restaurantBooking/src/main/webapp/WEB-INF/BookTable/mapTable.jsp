@@ -384,7 +384,7 @@
             <a href="findViewTable" class="btn-nav btn-back">
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
-            <a href="orderFood.jsp" class="btn-nav btn-order">
+            <a href="orderItems" class="btn-nav btn-order">
                 <i class="fas fa-utensils"></i> Đặt món ăn
             </a>
         </div>
