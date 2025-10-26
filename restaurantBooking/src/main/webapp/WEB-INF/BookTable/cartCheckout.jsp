@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.LinkedHashMap, java.util.Map, java.text.DecimalFormat, java.util.ArrayList" %>
+<%@ page import="java.util.List, java.text.DecimalFormat, java.math.BigDecimal" %>
+<%@ page import="com.fpt.restaurantbooking.models.OrderItem" %>
+<%@ page import="com.fpt.restaurantbooking.models.Reservation" %>
+<%@ page import="com.fpt.restaurantbooking.models.MenuItem" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -102,70 +105,16 @@
         .item-row td {
             color: #f0f0f0;
         }
-        .item-row td:first-child {
-            width: 50px;
-            text-align: center;
-        }
-        input[type="checkbox"] {
-            transform: scale(1.3);
-            cursor: pointer;
-            accent-color: #e74c3c;
-        }
-        input[type="number"] {
-            width: 65px;
-            padding: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1em;
-        }
-        input[type="number"]:focus {
-            outline: none;
-            border-color: #e74c3c;
-        }
         .price-col {
             text-align: right;
             font-weight: bold;
             color: #ffc107;
         }
-
-        /* --- Promo Code --- */
-        .promo-code {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            gap: 10px;
-        }
-        .promo-code input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            outline: none;
-            font-size: 1em;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-        }
-        .promo-code input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-        .promo-code button {
-            padding: 12px 25px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 500;
-            transition: background 0.3s ease;
-        }
-        .promo-code button:hover {
-            background: #218838;
+        .note-text {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            margin-top: 5px;
         }
 
         /* --- Total Summary --- */
@@ -201,29 +150,35 @@
         /* --- Payment Method --- */
         .payment-method {
             margin: 30px 0;
-            padding: 15px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .payment-method p {
             font-weight: 600;
             margin-bottom: 15px;
-            font-size: 1.1em;
+            font-size: 1.2em;
             color: #fff;
         }
         .payment-method label {
-            margin-right: 30px;
+            display: block;
+            margin: 12px 0;
             font-weight: 500;
             cursor: pointer;
             color: rgba(255,255,255,0.9);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .payment-method label:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
         .payment-method input[type="radio"] {
             transform: scale(1.2);
             accent-color: #e74c3c;
             cursor: pointer;
+            margin-right: 10px;
         }
 
         /* --- Action Buttons --- */
@@ -247,17 +202,18 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-family: 'Montserrat', sans-serif;
         }
         .actions .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 15px rgba(0,0,0,0.2);
         }
-        .update-btn {
-            background: #ffc107;
-            color: #333;
+        .back-btn {
+            background: #6c757d;
+            color: white;
         }
-        .update-btn:hover {
-            background: #e0a800;
+        .back-btn:hover {
+            background: #5a6268;
         }
         .confirm-btn {
             background: #e74c3c;
@@ -266,190 +222,154 @@
         .confirm-btn:hover {
             background: #c0392b;
         }
-        .history-btn {
-            background: #17a2b8;
-            color: white;
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255, 255, 255, 0.7);
         }
-        .history-btn:hover {
-            background: #138496;
+        .empty-cart i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.5);
         }
 
     </style>
 </head>
 <body>
+<%
+    // Lấy dữ liệu từ request attributes
+    List<OrderItem> orderItems = (List<OrderItem>) request.getAttribute("currentItems");
+    Reservation reservation = (Reservation) request.getAttribute("reservation");
+    String errorMessage = (String) request.getAttribute("errorMessage");
+    String successMessage = (String) request.getAttribute("successMessage");
+
+    // Khởi tạo formatter
+    DecimalFormat formatter = new DecimalFormat("###,###,### VNĐ");
+
+    // Tính tổng tiền
+    BigDecimal totalAmount = BigDecimal.ZERO;
+    if (reservation != null && reservation.getTotalAmount() != null) {
+        totalAmount = reservation.getTotalAmount();
+    }
+
+    boolean hasItems = (orderItems != null && !orderItems.isEmpty());
+%>
+
 <div class="container">
     <h2><i class="fas fa-shopping-cart"></i> Giỏ hàng & Thanh toán</h2>
 
-    <%
-        // Khởi tạo hoặc lấy giỏ hàng từ session
-        Map<String, Object[]> cart = (Map<String, Object[]>) session.getAttribute("cart");
-        if (cart == null) {
-            cart = new LinkedHashMap<>();
-            // Dữ liệu demo cho giỏ hàng
-            cart.put("phoBo", new Object[]{"Phở Bò", 50000.0, 2});
-            cart.put("traSua", new Object[]{"Trà Sữa", 30000.0, 1});
-            cart.put("bunCha", new Object[]{"Bún Chả", 45000.0, 1});
-            cart.put("caPhe", new Object[]{"Cà Phê Sữa", 25000.0, 2});
-            cart.put("banhMi", new Object[]{"Bánh Mì Thịt", 20000.0, 3});
-
-            session.setAttribute("cart", cart);
-        }
-
-        // Xử lý hành động từ form
-        String action = request.getParameter("action");
-        String message = null;
-        String messageType = null;
-
-        if (action != null) {
-            if ("update".equals(action)) {
-                for (String key : new ArrayList<>(cart.keySet())) {
-                    String qtyStr = request.getParameter(key + "_qty");
-                    String removeCheck = request.getParameter("remove_" + key);
-
-                    if ("on".equals(removeCheck)) {
-                        cart.remove(key);
-                    } else if (qtyStr != null) {
-                        try {
-                            int newQty = Integer.parseInt(qtyStr);
-                            if (newQty > 0) {
-                                Object[] item = cart.get(key);
-                                if(item != null) item[2] = newQty;
-                            } else {
-                                cart.remove(key);
-                            }
-                        } catch (NumberFormatException e) {
-                            // Bỏ qua nếu giá trị không hợp lệ
-                        }
-                    }
-                }
-                session.setAttribute("updateSuccess", "true");
-
-            } else if ("applyPromo".equals(action)) {
-                String promoCodeInput = request.getParameter("promoCode");
-                if (promoCodeInput != null && promoCodeInput.equalsIgnoreCase("GIAM10")) {
-                    session.setAttribute("promoCode", promoCodeInput);
-                    message = "🎉 Đã áp dụng thành công mã GIAM10!";
-                    messageType = "success";
-                } else {
-                    session.removeAttribute("promoCode");
-                    message = "❌ Mã khuyến mãi không hợp lệ hoặc đã hết hạn.";
-                    messageType = "error";
-                }
-            } else if ("confirm".equals(action)) {
-                if (cart.isEmpty()) {
-                    message = "❌ Giỏ hàng của bạn đang trống, không thể xác nhận đơn hàng.";
-                    messageType = "error";
-                } else {
-                    session.setAttribute("orderConfirmed", "true");
-                    session.removeAttribute("cart");
-                    session.removeAttribute("promoCode");
-                }
-            }
-        }
-
-        if (session.getAttribute("orderConfirmed") != null) {
-            message = "🎉 Đơn hàng của bạn đã được xác nhận thành công! Vui lòng chờ để được liên hệ.";
-            messageType = "success";
-            session.removeAttribute("orderConfirmed");
-        } else if (session.getAttribute("updateSuccess") != null) {
-            message = "✅ Giỏ hàng đã được cập nhật thành công!";
-            messageType = "success";
-            session.removeAttribute("updateSuccess");
-        }
-
-        double subtotal = 0;
-        for (Object[] item : cart.values()) {
-            double price = (Double) item[1];
-            int quantity = (Integer) item[2];
-            subtotal += price * quantity;
-        }
-
-        String promoCode = (String) session.getAttribute("promoCode");
-        double discount = 0;
-        String discountMessage = "";
-        if (promoCode != null && promoCode.equalsIgnoreCase("GIAM10")) {
-            discount = subtotal * 0.10;
-            discountMessage = "(Giảm 10% với mã GIAM10)";
-        }
-
-        double finalTotal = subtotal - discount;
-
-        DecimalFormat formatter = new DecimalFormat("###,###,### VNĐ");
-    %>
-
-    <% if (message != null) { %>
-    <div class="message <%= messageType %>-message">
-        <%= message %>
+    <!-- Error Message -->
+    <% if (errorMessage != null) { %>
+    <div class="message error-message">
+        <i class="fas fa-exclamation-circle"></i> <%= errorMessage %>
     </div>
     <% } %>
 
-    <form method="post">
-        <table>
-            <thead>
-            <tr>
-                <th><i class="fas fa-trash-alt"></i></th>
-                <th>Tên món</th>
-                <th>Số lượng</th>
-                <th class="price-col">Đơn giá</th>
-                <th class="price-col">Thành tiền</th>
-            </tr>
-            </thead>
-            <tbody>
-            <% if (cart.isEmpty()) { %>
-            <tr><td colspan="5" style="text-align:center; padding: 25px; color: rgba(255,255,255,0.7);">Giỏ hàng của bạn đang trống.</td></tr>
-            <% } else { %>
-            <% for (Map.Entry<String, Object[]> entry : cart.entrySet()) {
-                String id = entry.getKey();
-                Object[] item = entry.getValue();
-                String name = (String) item[0];
-                double price = (Double) item[1];
-                int quantity = (Integer) item[2];
-            %>
-            <tr class="item-row">
-                <td><input type="checkbox" name="remove_<%= id %>"></td>
-                <td><%= name %></td>
-                <td><input type="number" name="<%= id %>_qty" value="<%= quantity %>" min="0"></td>
-                <td class="price-col"><%= formatter.format(price) %></td>
-                <td class="price-col"><%= formatter.format(price * quantity) %></td>
-            </tr>
-            <% } %>
-            <% } %>
-            </tbody>
-        </table>
+    <!-- Success Message -->
+    <% if (successMessage != null) { %>
+    <div class="message success-message">
+        <i class="fas fa-check-circle"></i> <%= successMessage %>
+    </div>
+    <% } %>
 
-        <div class="promo-code">
-            <input type="text" name="promoCode" placeholder="Nhập mã khuyến mãi" value="<%= promoCode != null ? promoCode : "" %>">
-            <button type="submit" name="action" value="applyPromo"><i class="fas fa-tags"></i> Áp dụng</button>
-        </div>
+    <% if (!hasItems) { %>
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Giỏ hàng của bạn đang trống</h3>
+        <p>Vui lòng chọn món ăn để tiếp tục</p>
+        <a href="orderItems" class="btn back-btn" style="margin-top: 20px;">
+            <i class="fas fa-utensils"></i> Quay lại chọn món
+        </a>
+    </div>
+    <% } else { %>
 
-        <div class="total-summary">
-            <p>Tổng tiền món: <strong><%= formatter.format(subtotal) %></strong></p>
-            <p>Giảm giá <%= discountMessage %>: <strong>- <%= formatter.format(discount) %></strong></p>
-            <p class="final-total">Tổng tiền cần thanh toán: <strong><%= formatter.format(finalTotal) %></strong></p>
-        </div>
+    <!-- Order Items Table -->
+    <table>
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Tên món</th>
+            <th>Số lượng</th>
+            <th class="price-col">Đơn giá</th>
+            <th class="price-col">Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <%
+            int index = 1;
+            for (OrderItem item : orderItems) {
+                BigDecimal itemTotal = item.getUnitPrice().multiply(new BigDecimal(item.getQuantity()));
+        %>
+        <tr class="item-row">
+            <td style="text-align: center;"><%= index++ %></td>
+            <td>
+                <div><%= item.getItemId() %></div>
+                <% if (item.getSpecialInstructions() != null && !item.getSpecialInstructions().trim().isEmpty()) { %>
+                <div class="note-text">
+                    <i class="fas fa-sticky-note"></i> <%= item.getSpecialInstructions() %>
+                </div>
+                <% } %>
+            </td>
+            <td style="text-align: center;"><%= item.getQuantity() %></td>
+            <td class="price-col"><%= formatter.format(item.getUnitPrice()) %></td>
+            <td class="price-col"><%= formatter.format(itemTotal) %></td>
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
 
+    <!-- Total Summary -->
+    <div class="total-summary">
+        <p>Tổng tiền món ăn: <strong><%= formatter.format(totalAmount) %></strong></p>
+        <p class="final-total">Tổng tiền cần thanh toán: <strong><%= formatter.format(totalAmount) %></strong></p>
+    </div>
+
+    <!-- Payment Form -->
+    <form method="post" action="checkout">
+        <input type="hidden" name="action" value="confirm">
+
+        <!-- Payment Method Selection -->
         <div class="payment-method">
-            <p><b><i class="fas fa-credit-card"></i> Chọn hình thức thanh toán:</b></p>
-            <label><input type="radio" name="payment" value="COD" checked> Thanh toán khi nhận (COD)</label>
-            <label><input type="radio" name="payment" value="Online"> Thanh toán Online</label>
-            <label><input type="radio" name="payment" value="Card"> Thẻ Ngân Hàng</label>
+            <p><i class="fas fa-credit-card"></i> Chọn hình thức thanh toán:</p>
+            <label>
+                <input type="radio" name="paymentMethod" value="CASH" checked>
+                <i class="fas fa-money-bill-wave"></i> Thanh toán khi nhận (COD)
+            </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="CREDIT_CARD">
+                <i class="fas fa-credit-card"></i> Thẻ tín dụng
+            </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="E_WALLET">
+                <i class="fas fa-wallet"></i> Ví điện tử (Momo, ZaloPay)
+            </label>
         </div>
 
+        <!-- Action Buttons -->
         <div class="actions">
-            <button type="submit" name="action" value="update" class="btn update-btn">
-                <i class="fas fa-sync-alt"></i> Cập nhật giỏ hàng
-            </button>
-            <button type="submit" name="action" value="confirm" class="btn confirm-btn">
-                <i class="fas fa-check-circle"></i> Xác nhận đơn hàng
-            </button>
-            <a href="trangdatban.jsp" class="btn history-btn">
-                <i class="fas fa-backward"></i> Tiếp tục chọn món
+            <a href="orderItems" class="btn back-btn">
+                <i class="fas fa-arrow-left"></i> Quay lại chọn món
             </a>
-            <a href="lichsudat.jsp" class="btn history-btn">
-                <i class="fas fa-history"></i> Xem lịch sử đặt hàng
-            </a>
+            <button type="submit" class="btn confirm-btn">
+                <i class="fas fa-check-circle"></i> Xác nhận & Thanh toán
+            </button>
         </div>
     </form>
+    <% } %>
 </div>
+
+<script>
+    // Hiển thị alert nếu có message
+    window.addEventListener('DOMContentLoaded', function() {
+        <% if (successMessage != null) { %>
+        setTimeout(function() {
+            document.querySelector('.success-message')?.remove();
+        }, 5000);
+        <% } %>
+    });
+</script>
+
 </body>
 </html>
