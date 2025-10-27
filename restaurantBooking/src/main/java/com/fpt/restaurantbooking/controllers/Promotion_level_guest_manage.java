@@ -33,15 +33,31 @@ public class Promotion_level_guest_manage extends HttpServlet  {
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
-//        List<User> userList = new ArrayList<>();
-//        VoucherRepository voucherRepository = new VoucherRepository();
-//        try {
-//            userList = voucherRepository.getAllUsertoPromotion_level_id();
-//            request.setAttribute("userList", userList);
-//            request.getRequestDispatcher("/WEB-INF/Voucher/Promotion_level_guest_manage.jsp").forward(request, response);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+        int page = 1;
+        int recordsPerPage = 12;
+
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+        VoucherRepository voucherRepository = new VoucherRepository();
+
+
+
+        try {
+            List<User> userList = voucherRepository.getUsersByPagee((page - 1) * recordsPerPage, recordsPerPage);
+           int totalRecords = voucherRepository.getAllUsertoPromotion_level_idd();
+           int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
+            request.setAttribute("userList", userList);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("currentPage", page);
+            request.getRequestDispatcher("/WEB-INF/Voucher/Promotion_level_guest_manage.jsp").forward(request, response);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
 
 
 

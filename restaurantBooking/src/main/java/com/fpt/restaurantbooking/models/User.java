@@ -17,9 +17,21 @@ public class User extends BaseEntity {
     private String role;
     private LocalDate dateOfBirth;
     private String gender;
+    private String promotion_level_id;
 
     public enum UserRole {
         CUSTOMER, STAFF, ADMIN
+    }
+
+    public User(Integer userId, Integer roleId, String fullName, String email, String phoneNumber, String promotion_level_id, LocalDate dateOfBirth, String gender) {
+        this.userId = userId;
+        this.roleId = roleId;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.promotion_level_id = promotion_level_id;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
     }
 
     public User() {
@@ -32,15 +44,19 @@ public class User extends BaseEntity {
     public Integer getUserId() {
         return userId;
     }
+
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
+
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
+
     public String getGender() {
         return gender;
     }
+
     public void setGender(String gender) {
         this.gender = gender;
     }
@@ -64,6 +80,14 @@ public class User extends BaseEntity {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getPromotion_level_id() {
+        return promotion_level_id;
+    }
+
+    public void setPromotion_level_id(String promotion_level_id) {
+        this.promotion_level_id = promotion_level_id;
     }
 
     public String getEmail() {
@@ -115,7 +139,6 @@ public class User extends BaseEntity {
     }
 
 
-
     public boolean getIsActive() {
         return isActive();
     }
@@ -124,7 +147,7 @@ public class User extends BaseEntity {
     public String toString() {
         return "User{" +
                 "userId=" + userId +
-                "Pass= "+ password +
+                "Pass= " + password +
                 ", roleId=" + roleId +
                 ", fullName='" + fullName + '\'' +
                 ", email='" + email + '\'' +

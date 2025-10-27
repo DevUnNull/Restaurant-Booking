@@ -187,28 +187,70 @@ public class VoucherRepository {
 
     }
 
-//    public List<User> getAllUsertoPromotion_level_id() throws SQLException {
-//        List<User> userList = new ArrayList<User>();
-//        String sql = " select * from users where role_id = 3 ";
-//
-//        try (Connection conn = db.getConnection();
-//             PreparedStatement stm = conn.prepareStatement(sql);
-//             ResultSet rs = stm.executeQuery();) {
-//
-//
-//            while (rs.next()) {
-//                userList.add(new User(rs.getInt("user_id"), rs.getInt("role_id"),
-//                        rs.getString("full_name"),
-//                        rs.getString("email"),
-//                        rs.getString("phone_number"),
-//                        rs.getString("promotion_level_id")));
-//
-//            }
-//
-//        }
-//
-//        return userList;
-//    }
+    public List<User> getAllUsertoPromotion_level_id() throws SQLException {
+        List<User> userList = new ArrayList<User>();
+        String sql = " select * from users where role_id = 3 ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery();) {
+
+
+            while (rs.next()) {
+                userList.add(new User(rs.getInt("user_id"), rs.getInt("role_id"),
+                        rs.getString("full_name"),
+                        rs.getString("email"),
+                        rs.getString("phone_number"),
+                        rs.getString("promotion_level_id"),rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender")));
+
+            }
+
+        }
+
+        return userList;
+    }
+    public int getAllUsertoPromotion_level_idd() throws SQLException {
+        int count = 0;
+        String sql = " SELECT COUNT(*) FROM Users where role_id = 3 ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery();) {
+            if (rs.next()) count = rs.getInt(1);
+
+
+
+        }
+
+        return count;
+    }
+    public List<User> getUsersByPagee(int start, int total) {
+        List<User> userList = new ArrayList<>();
+        String sql = "SELECT * FROM Users where role_id = 3  LIMIT ?, ?";
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(sql);
+            ) {
+
+
+            stm.setInt(1, start);
+            stm.setInt(2, total);
+            try(ResultSet rs = stm.executeQuery();){
+                while (rs.next()) {
+                    userList.add(new User(rs.getInt("user_id"), rs.getInt("role_id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            rs.getString("phone_number"),
+                            rs.getString("promotion_level_id"),rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender")));
+
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
 }
 
 
