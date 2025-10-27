@@ -1,7 +1,5 @@
 package com.fpt.restaurantbooking.controllers;
 
-import com.fpt.restaurantbooking.repositories.impl.ReservationTableDAO;
-import com.fpt.restaurantbooking.repositories.impl.TableDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,12 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/removeTable")
 public class RemoveTableServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(RemoveTableServlet.class);
-    private ReservationTableDAO reservationTableDAO = new ReservationTableDAO();
-    private TableDAO tableDAO = new TableDAO();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -27,13 +24,7 @@ public class RemoveTableServlet extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
 
         try {
-            Integer reservationId = (Integer) session.getAttribute("reservationId");
             String tableIdStr = request.getParameter("tableId");
-
-            if (reservationId == null) {
-                response.getWriter().write("{\"success\": false, \"message\": \"Không có đơn đặt bàn\"}");
-                return;
-            }
 
             if (tableIdStr == null || tableIdStr.isEmpty()) {
                 response.getWriter().write("{\"success\": false, \"message\": \"Thiếu thông tin bàn\"}");
@@ -42,19 +33,28 @@ public class RemoveTableServlet extends HttpServlet {
 
             int tableId = Integer.parseInt(tableIdStr);
 
-            logger.info(">>> Removing table {} from reservation {}", tableId, reservationId);
+            logger.info(">>> Removing table {} from session", tableId);
 
-            // Xóa bàn khỏi đơn đặt bàn
-            boolean success = reservationTableDAO.removeTableFromReservation(reservationId, tableId);
+            // 🔹 Lấy danh sách bàn từ session
+            @SuppressWarnings("unchecked")
+            List<Integer> selectedTableIds = (List<Integer>) session.getAttribute("selectedTableIds");
 
-            if (success) {
-                // Cập nhật trạng thái bàn thành AVAILABLE
-                tableDAO.updateTableStatus(tableId, "AVAILABLE");
-                logger.info("✅ Removed table {} from reservation {}", tableId, reservationId);
+            if (selectedTableIds == null || selectedTableIds.isEmpty()) {
+                response.getWriter().write("{\"success\": false, \"message\": \"Không có bàn nào để xóa\"}");
+                return;
+            }
+
+            // Xóa bàn khỏi session
+            boolean removed = selectedTableIds.removeIf(id -> id.equals(tableId));
+
+            if (removed) {
+                // Cập nhật lại session
+                session.setAttribute("selectedTableIds", selectedTableIds);
+                logger.info("✅ Removed table {} from session", tableId);
                 response.getWriter().write("{\"success\": true, \"message\": \"Xóa bàn thành công\"}");
             } else {
-                logger.error("❌ Failed to remove table from reservation");
-                response.getWriter().write("{\"success\": false, \"message\": \"Lỗi khi xóa bàn\"}");
+                logger.warn("⚠️ Table {} not found in session", tableId);
+                response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy bàn\"}");
             }
 
         } catch (NumberFormatException e) {
