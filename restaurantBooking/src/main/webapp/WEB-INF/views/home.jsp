@@ -226,7 +226,7 @@
         <section id="notification">
             <div class="notification-overlay"></div>
             <div class="notification-section">
-                <h3>Tham Gia Câu Lạc Bộ Của Chúng Tôi</h3>
+                <h3 style="color: #c7c728">Tham Gia Câu Lạc Bộ Của Chúng Tôi</h3>
                 <p>Đăng ký nhận bản tin của chúng tôi để nhận ưu đãi độc quyền, món ăn mới và mẹo ẩm thực!</p>
                 <form class="subscribe-form">
                     <input type="email" placeholder="Nhập địa chỉ email của bạn">

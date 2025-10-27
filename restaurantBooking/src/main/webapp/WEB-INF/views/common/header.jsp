@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<header>
+<header style="background: #ad0505">
     <div class="logo">
         <a href="${pageContext.request.contextPath}/">
             <h1>Đặt Bàn Nhà Hàng</h1>
@@ -22,11 +22,13 @@
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div id="bookingDropdown" class="dropdown-content">
-                        <a href="${pageContext.request.contextPath}/ServiceList"><i class="fas fa-concierge-bell"></i> Service Management</a>
-                        <a href="${pageContext.request.contextPath}/Menu_manage"><i class="fas fa-utensils"></i> Menu Management</a>
+                        <a href="${pageContext.request.contextPath}/ServiceList"><i class="fas fa-concierge-bell"></i>
+                            Service Management</a>
+                        <a href="${pageContext.request.contextPath}/Menu_manage"><i class="fas fa-utensils"></i> Menu
+                            Management</a>
                         <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý Voucher</a>
-                        <a href="${pageContext.request.contextPath}/###"><i class="fas fa-users"></i> Quản lý khách hàng</a>
-                        <a href="${pageContext.request.contextPath}/###"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
+                        <a href="${pageContext.request.contextPath}/Promotion_level"><i class="fas fa-users"></i> Quản lý khách hàng</a>
+                        <a href="${pageContext.request.contextPath}/Timedirect"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
                         <a href="${pageContext.request.contextPath}/Blog"><i class="fas fa-newspaper"></i> Blog Nhà Hàng</a>
                     </div>
                 </li>
@@ -64,23 +66,33 @@
                     </div>
                 </li>
             </c:if>
+            <c:if test="sessionScope.userRole == 3">
+                <li><a href="${pageContext.request.contextPath}/Timedirect">Khung giờ hoạt động</a></li>
+                <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
+            </c:if>
 
+
+            <li><a href="${pageContext.request.contextPath}/about">Giới Thiệu</a></li>
             <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>
             <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
+
 
             <c:choose>
                 <c:when test="${not empty sessionScope.currentUser}">
                     <li class="user-dropdown">
-                        <div class="user-button" onclick="toggleDropdown('profileDropdown')">
+                        <div class="user-button" onclick="toggleDropdown('userDropdown')">
                             <span class="user-name">${sessionScope.currentUser.fullName}</span>
                             <i class="fas fa-chevron-down"></i>
                         </div>
-                        <div id="profileDropdown" class="dropdown-content">
+                        <div id="userDropdown" class="dropdown-content">
                             <a href="${pageContext.request.contextPath}/profile"><i class="fas fa-user"></i> Hồ Sơ</a>
-                            <a href="${pageContext.request.contextPath}/my-reservations"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
-                            <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi Mật Khẩu</a>
+                            <a href="${pageContext.request.contextPath}/my-reservations"><i
+                                    class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
+                            <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi
+                                Mật Khẩu</a>
                             <div class="dropdown-divider"></div>
-                            <a href="${pageContext.request.contextPath}/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+                            <a href="${pageContext.request.contextPath}/logout" class="logout-link"><i
+                                    class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
                         </div>
                     </li>
                 </c:when>
@@ -97,15 +109,16 @@
 <script>
     // Hàm duy nhất để bật/tắt bất kỳ dropdown nào bằng ID của nó
     function toggleDropdown(dropdownId) {
+        document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
+            if (openDropdown.id !== dropdownId) {
+                openDropdown.classList.remove('show');
+            }
+        });
+
         const dropdown = document.getElementById(dropdownId);
-        const userButton = dropdown.previousElementSibling;
-
-        // Đóng tất cả các dropdown khác trước khi mở cái mới
-        // Điều này đảm bảo chỉ có một dropdown được mở tại một thời điểm
-        closeAllDropdowns(dropdownId);
-
-        dropdown.classList.toggle('show');
-        userButton.classList.toggle('active');
+        if (dropdown) {
+            dropdown.classList.toggle('show');
+        }
     }
 
     // Hàm để đóng tất cả các dropdown đang mở, trừ cái có ID được chỉ định
@@ -123,7 +136,7 @@
     }
 
     // Đóng dropdown khi click ra bên ngoài
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', function (event) {
         if (!event.target.closest('.user-button')) {
             closeAllDropdowns();
         }

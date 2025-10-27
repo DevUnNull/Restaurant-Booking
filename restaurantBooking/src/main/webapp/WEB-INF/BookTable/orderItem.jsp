@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, java.util.ArrayList, java.util.LinkedHashMap, java.util.Map, java.text.DecimalFormat" %>
+<%@ page import="java.util.List, java.util.ArrayList, java.text.DecimalFormat, com.fpt.restaurantbooking.models.MenuItem" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,7 +21,6 @@
 
         body, html {
             font-family: 'Montserrat', sans-serif;
-            /* THAY THẾ BẰNG URL ẢNH NỀN CỦA BẠN */
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
@@ -280,159 +279,250 @@
             color: #fff;
         }
 
+        /* --- Pagination --- */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 10px;
+        }
+
+        .pagination a {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s;
+            font-size: 1em;
+        }
+
+        .pagination a:hover {
+            background: #e74c3c;
+        }
+
+        .pagination a.active {
+            background: #e74c3c;
+            font-weight: bold;
+        }
+
+        .pagination a.disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
 <%
-    // --- TOÀN BỘ LOGIC JAVA CỦA BẠN ĐƯỢC GIỮ NGUYÊN ---
-    class MenuItem {
-        String id; String name; String category; String description;
-        double price; int calories; String image; int orderCount;
-        MenuItem(String id, String name, String category, String description, double price, int calories, String image, int orderCount) {
-            this.id = id; this.name = name; this.category = category; this.description = description;
-            this.price = price; this.calories = calories; this.image = image; this.orderCount = orderCount;
-        }
-    }
-    List<MenuItem> allMenuItems = new ArrayList<>();
-    allMenuItems.add(new MenuItem("phoBo", "Phở Bò", "Món chính", "Món phở truyền thống với thịt bò.", 50000.0, 450, "https://via.placeholder.com/300x160?text=Pho+Bo", 150));
-    allMenuItems.add(new MenuItem("comGa", "Cơm Gà", "Món chính", "Cơm thơm ăn kèm với gà giòn.", 45000.0, 600, "https://via.placeholder.com/300x160?text=Com+Ga", 210));
-    allMenuItems.add(new MenuItem("banhMi", "Bánh Mì Thịt", "Đồ ăn nhanh", "Bánh mì Việt Nam với chả lụa.", 25000.0, 350, "https://via.placeholder.com/300x160?text=Banh+Mi", 300));
-    allMenuItems.add(new MenuItem("traSua", "Trà Sữa", "Đồ uống", "Trà sữa béo ngậy ăn kèm trân châu.", 30000.0, 250, "https://via.placeholder.com/300x160?text=Tra+Sua", 120));
-    allMenuItems.add(new MenuItem("nemRan", "Nem Rán", "Món khai vị", "Nem rán giòn rụm chấm mắm.", 35000.0, 200, "https://via.placeholder.com/300x160?text=Nem+Ran", 250));
+    // Get data from request attributes (set by servlet)
+    List<MenuItem> menuItems = (List<MenuItem>) request.getAttribute("menuItems");
+    List<String> categories = (List<String>) request.getAttribute("categories");
+    Integer currentPage = (Integer) request.getAttribute("currentPage");
+    Integer totalPages = (Integer) request.getAttribute("totalPages");
 
-    Map<String, Map<String, Object>> cart = (Map<String, Map<String, Object>>) session.getAttribute("cart");
-    if (cart == null) {
-        cart = new LinkedHashMap<>();
-        session.setAttribute("cart", cart);
-    }
-    String action = request.getParameter("action");
-    if ("add".equals(action)) {
-        String itemId = request.getParameter("itemId");
-        String qtyStr = request.getParameter("qty_" + itemId); // Sửa lại cách lấy qty
-        String note = request.getParameter("note_" + itemId); // Sửa lại cách lấy note
-
-        try {
-            int quantity = Integer.parseInt(qtyStr);
-            if (quantity > 0) {
-                MenuItem selectedItem = null;
-                for (MenuItem item : allMenuItems) {
-                    if (item.id.equals(itemId)) { selectedItem = item; break; }
-                }
-                if (selectedItem != null) {
-                    Map<String, Object> newItem = new LinkedHashMap<>();
-                    newItem.put("item", selectedItem);
-                    newItem.put("quantity", quantity);
-                    newItem.put("note", note);
-                    cart.put(itemId, newItem); // Ghi đè hoặc thêm mới
-                }
-            } else if (quantity == 0) {
-                cart.remove(itemId); // Xóa khỏi giỏ hàng nếu số lượng là 0
-            }
-        } catch (NumberFormatException e) {
-            // Bỏ qua lỗi
-        }
-    } else if ("confirm".equals(action)) {
-        if (!cart.isEmpty()) {
-            session.removeAttribute("cart");
-            // Chuyển hướng hoặc hiển thị thông báo thành công
-        }
-    }
-
+    // Get current filter params
     String searchKeyword = request.getParameter("search");
     String categoryFilter = request.getParameter("category");
-    List<MenuItem> filteredItems = new ArrayList<>();
-    for (MenuItem item : allMenuItems) {
-        boolean matchesSearch = searchKeyword == null || searchKeyword.trim().isEmpty() || item.name.toLowerCase().contains(searchKeyword.toLowerCase());
-        boolean matchesCategory = categoryFilter == null || "all".equals(categoryFilter) || item.category.equals(categoryFilter);
-        if (matchesSearch && matchesCategory) {
-            filteredItems.add(item);
-        }
-    }
 
-    int totalItemsInCart = 0;
-    double totalPrice = 0;
-    for (Map<String, Object> itemData : cart.values()) {
-        int qty = (Integer) itemData.get("quantity");
-        MenuItem menuItem = (MenuItem) itemData.get("item");
-        totalItemsInCart += qty;
-        totalPrice += qty * menuItem.price;
-    }
+    // Initialize formatter
     DecimalFormat formatter = new DecimalFormat("###,###,### VNĐ");
+
+    // Default values if null
+    if (menuItems == null) menuItems = new ArrayList<>();
+    if (categories == null) categories = new ArrayList<>();
+    if (currentPage == null) currentPage = 1;
+    if (totalPages == null) totalPages = 1;
+    if (categoryFilter == null) categoryFilter = "all";
 %>
 
 <div class="page-wrapper">
     <h2>Our Menu</h2>
 
     <div class="header-actions">
-        <form class="search-filter-form" method="get">
+        <form class="search-filter-form" method="get" action="orderItems">
+            <!-- ✅ KHÔNG CẦN hidden input cho GET form -->
             <div class="input-group">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" placeholder="Tìm kiếm món ăn..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+                <input type="text" name="search" placeholder="Tìm kiếm món ăn..." value="<%= searchKeyword != null ? searchKeyword : "" %>">
             </div>
             <div class="input-group">
                 <i class="fas fa-utensils"></i>
                 <select name="category" onchange="this.form.submit()">
                     <option value="all">Tất cả danh mục</option>
-                    <option value="Món chính" <%= "Món chính".equals(categoryFilter) ? "selected" : "" %>>Món chính</option>
-                    <option value="Món khai vị" <%= "Món khai vị".equals(categoryFilter) ? "selected" : "" %>>Món khai vị</option>
-                    <option value="Đồ uống" <%= "Đồ uống".equals(categoryFilter) ? "selected" : "" %>>Đồ uống</option>
+                    <% for (String category : categories) { %>
+                    <option value="<%= category %>" <%= category.equals(categoryFilter) ? "selected" : "" %>><%= category %></option>
+                    <% } %>
                 </select>
             </div>
             <button type="submit" class="btn-filter">Lọc</button>
         </form>
         <div class="cart-summary">
             <a href="#cart">
-                <i class="fas fa-shopping-cart"></i> Giỏ hàng (<%= totalItemsInCart %>)
+                <i class="fas fa-shopping-cart"></i> Giỏ hàng (<span id="cart-count">0</span>)
             </a>
         </div>
     </div>
 
-    <form method="post" id="menuForm">
-        <div class="menu-list">
-            <% for (MenuItem item : filteredItems) {
-                int currentQty = 0;
-                String currentNote = "";
-                if(cart.containsKey(item.id)) {
-                    currentQty = (Integer) cart.get(item.id).get("quantity");
-                    currentNote = (String) cart.get(item.id).get("note");
-                }
-            %>
-            <div class="menu-item">
-                <img src="<%= item.image %>" alt="<%= item.name %>">
-                <div class="item-details">
-                    <h3><%= item.name %></h3>
-                    <p class="price"><%= formatter.format(item.price) %></p>
-                    <p><%= item.description %></p>
-                    <p class="calories"><%= item.calories %> calo</p>
-                </div>
-                <div class="item-controls">
-                    <label>
-                        Số lượng:
-                        <input type="number" name="qty_<%= item.id %>" value="<%= currentQty %>" min="0" onchange="document.getElementById('itemId').value='<%= item.id %>'; document.getElementById('menuForm').submit();">
-                    </label>
-                </div>
-                <textarea class="note-input" name="note_<%= item.id %>" placeholder="Yêu cầu đặc biệt..."><%= currentNote %></textarea>
+    <div class="menu-list">
+        <% for (MenuItem item : menuItems) { %>
+        <div class="menu-item">
+            <img src="<%= item.getImageUrl() %>" alt="<%= item.getItemName() %>">
+            <div class="item-details">
+                <h3><%= item.getItemName() %></h3>
+                <p class="price"><%= formatter.format(item.getPrice()) %></p>
+                <p><%= item.getDescription() %></p>
+                <% if (item.getCalories() != null) { %>
+                <p class="calories"><%= item.getCalories() %> calo</p>
+                <% } %>
             </div>
-            <% } %>
-        </div>
 
-        <input type="hidden" name="action" value="add">
-        <input type="hidden" name="itemId" id="itemId">
-    </form>
+            <div class="item-controls">
+                <label>
+                    Số lượng:
+                    <input type="number" name="qty_<%= item.getItemId() %>" value="0" min="0">
+                </label>
+
+                <button type="button" class="btn-add-cart"
+                        onclick="addToCart(<%= item.getItemId() %>, '<%= item.getItemName().replace("'", "\\'") %>', <%= item.getPrice().doubleValue() %>)">
+                    <i class="fas fa-cart-plus"></i> THÊM
+                </button>
+            </div>
+
+            <textarea class="note-input"
+                      name="note_<%= item.getItemId() %>"
+                      placeholder="Yêu cầu đặc biệt..."></textarea>
+        </div>
+        <% } %>
+    </div>
+
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+        <a href="orderItems?page=<%= currentPage - 1 %>&search=<%= searchKeyword != null ? searchKeyword : "" %>&category=<%= categoryFilter %>">&laquo; Trước</a>
+        <% } else { %>
+        <a class="disabled">&laquo; Trước</a>
+        <% } %>
+
+        <% for (int i = 1; i <= totalPages; i++) { %>
+        <a href="orderItems?page=<%= i %>&search=<%= searchKeyword != null ? searchKeyword : "" %>&category=<%= categoryFilter %>" <%= i == currentPage ? "class='active'" : "" %>><%= i %></a>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+        <a href="orderItems?page=<%= currentPage + 1 %>&search=<%= searchKeyword != null ? searchKeyword : "" %>&category=<%= categoryFilter %>">Tiếp &raquo;</a>
+        <% } else { %>
+        <a class="disabled">Tiếp &raquo;</a>
+        <% } %>
+    </div>
 </div>
 
 <div class="sticky-footer" id="cart">
     <div class="total">
-        Tổng cộng: <span><%= formatter.format(totalPrice) %></span>
+        Tổng cộng: <span id="total-price">0 VNĐ</span>
     </div>
     <div class="footer-buttons">
-        <a href="trangdatban.jsp" class="btn">Quay lại Đặt bàn</a>
-        <form method="post" style="display:inline;">
-            <button type="submit" name="action" value="confirm" class="btn btn-confirm">
-                <i class="fas fa-check-circle"></i> Xác nhận đơn hàng
-            </button>
-        </form>
+        <a href="mapTable" class="btn">
+            <i class="fas fa-arrow-left"></i> Quay lại chọn bàn
+        </a>
+        <a href="checkout" class="btn btn-confirm">
+            <i class="fas fa-check-circle"></i> Xác nhận & Thanh toán
+        </a>
     </div>
 </div>
+
+<script>
+    const contextPath = '<%= request.getContextPath() %>';
+
+    // Load initial cart state on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        updateTotalPrice();
+    });
+
+    function addToCart(itemId, itemName, price) {
+        console.log('🔍 addToCart called with itemId:', itemId);
+
+        // ✅ Tìm input theo attribute selector an toàn hơn
+        const qtyInput = document.querySelector('input[name="qty_' + itemId + '"]');
+        const noteInput = document.querySelector('textarea[name="note_' + itemId + '"]');
+
+        console.log('🔍 Found qtyInput:', qtyInput);
+        console.log('🔍 Input value:', qtyInput ? qtyInput.value : 'NULL');
+
+        if (!qtyInput) {
+            alert('❌ Không tìm thấy ô nhập số lượng cho món #' + itemId);
+            console.error('❌ Selector failed: input[name="qty_' + itemId + '"]');
+            return;
+        }
+
+        const quantity = parseInt(qtyInput.value);
+        const note = noteInput ? noteInput.value.trim() : '';
+
+        console.log('📊 Quantity:', quantity, '| Note:', note);
+
+        if (isNaN(quantity) || quantity <= 0) {
+            alert('⚠️ Vui lòng nhập số lượng > 0');
+            return;
+        }
+
+        // ✅ Dùng URLSearchParams thay vì FormData để đảm bảo servlet nhận được parameters
+        const params = new URLSearchParams();
+        params.append('action', 'add');
+        params.append('itemId', itemId);
+        params.append('quantity', quantity);
+        params.append('note', note);
+
+        console.log('📤 Sending request with params:', params.toString());
+
+        fetch(contextPath + '/orderItems', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString()
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Thêm ' + itemName + ' thành công!');
+                    qtyInput.value = 0;
+                    if (noteInput) noteInput.value = '';
+                    updateTotalPrice();
+                } else {
+                    alert('⚠️ Lỗi: ' + (data.message || 'Không thể thêm món'));
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('❌ Có lỗi xảy ra khi thêm món.');
+            });
+    }
+
+    function updateTotalPrice() {
+        fetch(contextPath + '/orderItems?action=getTotal')
+            .then(response => response.json())
+            .then(data => {
+                const formatter = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                });
+
+                const totalPriceElement = document.getElementById('total-price');
+                const cartCountElement = document.getElementById('cart-count');
+
+                if (totalPriceElement) {
+                    totalPriceElement.textContent = formatter.format(data.total || 0);
+                }
+
+                if (cartCountElement) {
+                    cartCountElement.textContent = data.totalItems || 0;
+                }
+            })
+            .catch(error => {
+                console.error('Error updating total:', error);
+            });
+    }
+</script>
+
 </body>
 </html>

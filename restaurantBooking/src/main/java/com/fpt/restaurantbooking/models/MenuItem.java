@@ -59,7 +59,13 @@ public class MenuItem extends BaseEntity {
 
     // Getters and Setters
 
+    public Integer getCategory_id() {
+        return category_id;
+    }
 
+    public void setCategory_id(Integer category_id) {
+        this.category_id = category_id;
+    }
     public String getCreated_By() {
         return created_By;
     }

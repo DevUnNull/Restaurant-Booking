@@ -27,7 +27,6 @@ import java.util.UUID;
 public class ForgotPasswordController extends BaseController {
 
     private UserService userService;
-    private EmailService emailService;
     private EmailVerificationRepository emailVerificationRepository;
 
     @Override
@@ -39,20 +38,19 @@ public class ForgotPasswordController extends BaseController {
             EmailVerificationRepository emailVerificationRepository = new EmailVerificationRepositoryImpl(connection);
             OTPService otpService = new OTPService(emailVerificationRepository);
             EmailService emailService = new EmailService();
-            
+
             this.userService = new UserServiceImpl(userRepository, emailVerificationRepository, otpService, emailService);
-            this.emailService = emailService;
             this.emailVerificationRepository = emailVerificationRepository;
         } catch (Exception e) {
             throw new ServletException("Failed to initialize ForgotPasswordController", e);
         }
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String path = request.getServletPath();
-        
+
         switch (path) {
             case "/forgot-password":
                 showForgotPasswordPage(request, response);
@@ -65,11 +63,11 @@ public class ForgotPasswordController extends BaseController {
         }
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String path = request.getServletPath();
-        
+
         switch (path) {
             case "/forgot-password":
                 handleForgotPassword(request, response);
@@ -82,23 +80,16 @@ public class ForgotPasswordController extends BaseController {
         }
     }
 
-    /**
-     * Show forgot password page
-     */
-    private void showForgotPasswordPage(HttpServletRequest request, HttpServletResponse response) 
+    private void showForgotPasswordPage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         forwardToPage(request, response, "/WEB-INF/views/auth/forgot-password.jsp");
     }
 
-    /**
-     * Show reset password page with token validation
-     */
-    private void showResetPasswordPage(HttpServletRequest request, HttpServletResponse response) 
+    private void showResetPasswordPage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String token = request.getParameter("token");
-        
+
         if (token == null || token.trim().isEmpty()) {
             ToastHelper.addErrorToast(request, "Liên kết đặt lại mật khẩu không hợp lệ.");
             redirectTo(response, request.getContextPath() + "/forgot-password");
@@ -106,22 +97,19 @@ public class ForgotPasswordController extends BaseController {
         }
 
         try {
-            // Find email verification by reset token
             Optional<EmailVerification> verificationOpt = emailVerificationRepository.findByResetToken(token);
-            
+
             if (verificationOpt.isPresent()) {
                 EmailVerification verification = verificationOpt.get();
-                
-                // Check if verification is still valid (not expired)
+
                 if (verification.isExpired()) {
                     ToastHelper.addErrorToast(request, "Liên kết đặt lại mật khẩu đã hết hạn.");
                     redirectTo(response, request.getContextPath() + "/forgot-password");
                     return;
                 }
-                
-                // Find user by user ID from verification
+
                 Optional<User> userOpt = userService.findById(verification.getUserId().longValue());
-                
+
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
                     request.setAttribute("token", token);
@@ -136,27 +124,23 @@ public class ForgotPasswordController extends BaseController {
                 redirectTo(response, request.getContextPath() + "/forgot-password");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             ToastHelper.addErrorToast(request, "Có lỗi xảy ra khi xác thực liên kết đặt lại mật khẩu.");
             redirectTo(response, request.getContextPath() + "/forgot-password");
         }
     }
 
-    /**
-     * Handle forgot password form submission
-     */
-    private void handleForgotPassword(HttpServletRequest request, HttpServletResponse response) 
+    private void handleForgotPassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String email = request.getParameter("email");
-        
-        // Validate email
+
         if (email == null || email.trim().isEmpty()) {
             ToastHelper.addErrorToast(request, "Vui lòng nhập địa chỉ email.");
             redirectTo(response, request.getContextPath() + "/forgot-password");
             return;
         }
-        
-        // Basic email format validation
+
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             ToastHelper.addErrorToast(request, "Địa chỉ email không hợp lệ.");
             redirectTo(response, request.getContextPath() + "/forgot-password");
@@ -164,36 +148,44 @@ public class ForgotPasswordController extends BaseController {
         }
 
         try {
-            // Check if user exists
             Optional<User> userOpt = userService.findByEmail(email);
-            
+
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                
-                // Generate password reset token
                 String resetToken = UUID.randomUUID().toString();
-                
-                // Create EmailVerification record with reset token
+
                 EmailVerification verification = new EmailVerification();
                 verification.setUserId(user.getUserId().longValue());
                 verification.setResetToken(resetToken);
-                verification.setOtpCode("RESET"); // Set a default OTP code for password reset
+                verification.setOtpCode("RESET");
                 verification.setStatus("PENDING");
-                verification.setExpirationTime(java.time.LocalDateTime.now().plusHours(24)); // 24 hours expiration
-                
-                // Save the verification record
+                verification.setExpirationTime(java.time.LocalDateTime.now().plusHours(24));
+
                 EmailVerification savedVerification = emailVerificationRepository.save(verification);
-                
+
                 if (savedVerification != null) {
-                    // Send password reset email
+                    String scheme = request.getScheme();
+                    String serverName = request.getServerName();
+                    int serverPort = request.getServerPort();
+                    String contextPath = request.getContextPath();
+
+                    StringBuilder urlBuilder = new StringBuilder();
+                    urlBuilder.append(scheme).append("://").append(serverName);
+
+                    if ((serverPort != 80 && "http".equals(scheme)) || (serverPort != 443 && "https".equals(scheme))) {
+                        urlBuilder.append(":").append(serverPort);
+                    }
+
+                    urlBuilder.append(contextPath).append("/reset-password?token=").append(resetToken);
+                    String resetLink = urlBuilder.toString();
+
                     boolean emailSent = EmailUtil.sendPasswordResetEmail(
-                        user.getEmail(), 
-                        user.getFullName(), 
-                        resetToken
+                            user.getEmail(),
+                            user.getFullName(),
+                            resetLink
                     );
-                    
+
                     if (emailSent) {
-                        // Show success message but don't reveal if email exists
                         ToastHelper.addSuccessToast(request, "Chúng tôi đã gửi liên kết đặt lại mật khẩu đến địa chỉ email của bạn nếu tài khoản tồn tại.");
                     } else {
                         ToastHelper.addErrorToast(request, "Có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.");
@@ -202,48 +194,43 @@ public class ForgotPasswordController extends BaseController {
                     ToastHelper.addErrorToast(request, "Có lỗi xảy ra khi tạo liên kết đặt lại mật khẩu.");
                 }
             } else {
-                // Don't reveal that email doesn't exist - show same message
                 ToastHelper.addSuccessToast(request, "Chúng tôi đã gửi liên kết đặt lại mật khẩu đến địa chỉ email của bạn nếu tài khoản tồn tại.");
             }
-            
-            // Redirect to login page
+
             redirectTo(response, request.getContextPath() + "/login");
-            
+
         } catch (Exception e) {
+            e.printStackTrace();
             ToastHelper.addErrorToast(request, "Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.");
             redirectTo(response, request.getContextPath() + "/forgot-password");
         }
     }
 
-    /**
-     * Handle reset password form submission
-     */
-    private void handleResetPassword(HttpServletRequest request, HttpServletResponse response) 
+    private void handleResetPassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String token = request.getParameter("token");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
-        
-        // Validate inputs
+
         if (token == null || token.trim().isEmpty()) {
             ToastHelper.addErrorToast(request, "Liên kết đặt lại mật khẩu không hợp lệ.");
             redirectTo(response, request.getContextPath() + "/forgot-password");
             return;
         }
-        
+
         if (newPassword == null || newPassword.trim().isEmpty()) {
             ToastHelper.addErrorToast(request, "Vui lòng nhập mật khẩu mới.");
             redirectTo(response, request.getContextPath() + "/reset-password?token=" + token);
             return;
         }
-        
+
         if (newPassword.length() < 6) {
             ToastHelper.addErrorToast(request, "Mật khẩu phải có ít nhất 6 ký tự.");
             redirectTo(response, request.getContextPath() + "/reset-password?token=" + token);
             return;
         }
-        
+
         if (!newPassword.equals(confirmPassword)) {
             ToastHelper.addErrorToast(request, "Mật khẩu xác nhận không khớp.");
             redirectTo(response, request.getContextPath() + "/reset-password?token=" + token);
@@ -251,34 +238,28 @@ public class ForgotPasswordController extends BaseController {
         }
 
         try {
-            // Find email verification by reset token
             Optional<EmailVerification> verificationOpt = emailVerificationRepository.findByResetToken(token);
-            
+
             if (verificationOpt.isPresent()) {
                 EmailVerification verification = verificationOpt.get();
-                
-                // Check if verification is still valid (not expired)
+
                 if (verification.isExpired()) {
                     ToastHelper.addErrorToast(request, "Liên kết đặt lại mật khẩu đã hết hạn.");
                     redirectTo(response, request.getContextPath() + "/forgot-password");
                     return;
                 }
-                
-                // Find user by user ID from verification
+
                 Optional<User> userOpt = userService.findById(verification.getUserId().longValue());
-                
+
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
-                    
-                    // Update password using the new password from the form
                     String hashedPassword = userService.hashPassword(newPassword);
                     boolean passwordUpdated = userService.getUserRepository().updatePassword(user.getUserId().longValue(), hashedPassword);
-                    
+
                     if (passwordUpdated) {
-                        // Mark verification as completed
-                        verification.setStatus("COMPLETED");
+                        verification.setStatus("VERIFIED");
                         emailVerificationRepository.update(verification);
-                        
+
                         ToastHelper.addSuccessToast(request, "Mật khẩu của bạn đã được đặt lại thành công!");
                         redirectTo(response, request.getContextPath() + "/login");
                     } else {
@@ -293,24 +274,11 @@ public class ForgotPasswordController extends BaseController {
                 ToastHelper.addErrorToast(request, "Liên kết đặt lại mật khẩu đã hết hạn hoặc không hợp lệ.");
                 redirectTo(response, request.getContextPath() + "/forgot-password");
             }
-            
+
         } catch (Exception e) {
+            e.printStackTrace();
             ToastHelper.addErrorToast(request, "Có lỗi xảy ra khi đặt lại mật khẩu.");
             redirectTo(response, request.getContextPath() + "/reset-password?token=" + token);
-        }
-    }
-
-    /**
-     * Update user's verification token in database
-     */
-    private boolean updateUserVerificationToken(Long userId, String token) {
-        try {
-            // This would typically be implemented in UserRepository
-            // For now, we'll use a placeholder implementation
-            // In a real implementation, you would add this method to UserRepository
-            return true; // Placeholder
-        } catch (Exception e) {
-            return false;
         }
     }
 }

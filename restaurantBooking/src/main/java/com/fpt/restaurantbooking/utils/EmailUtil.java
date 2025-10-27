@@ -13,15 +13,15 @@ import java.util.Properties;
  * Email utility class for sending emails
  */
 public class EmailUtil {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(EmailUtil.class);
     private static Properties emailProperties;
     private static final String EMAIL_CONFIG_FILE = "email.properties";
-    
+
     static {
         loadEmailProperties();
     }
-    
+
     /**
      * Load email configuration properties
      */
@@ -46,21 +46,21 @@ public class EmailUtil {
             logger.error("Error loading email properties", e);
         }
     }
-    
+
     /**
      * Send simple text email
      */
     public static boolean sendEmail(String to, String subject, String body) {
         return sendEmail(to, subject, body, false);
     }
-    
+
     /**
      * Send HTML email
      */
     public static boolean sendHtmlEmail(String to, String subject, String htmlBody) {
         return sendEmail(to, subject, htmlBody, true);
     }
-    
+
     /**
      * Send email with specified content type
      */
@@ -68,51 +68,51 @@ public class EmailUtil {
         try {
             // Create session
             Session session = createEmailSession();
-            
+
             // Create message
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(
-                emailProperties.getProperty("mail.from"),
-                emailProperties.getProperty("mail.from.name")
+                    emailProperties.getProperty("mail.from"),
+                    emailProperties.getProperty("mail.from.name")
             ));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(subject);
-            
+
             if (isHtml) {
                 message.setContent(body, "text/html; charset=utf-8");
             } else {
                 message.setText(body);
             }
-            
+
             // Send message
             Transport.send(message);
             logger.info("Email sent successfully to: {}", to);
             return true;
-            
+
         } catch (Exception e) {
             logger.error("Failed to send email to: {}", to, e);
             return false;
         }
     }
-    
+
     /**
      * Create email session with authentication
      */
     private static Session createEmailSession() {
         Properties props = new Properties();
         props.putAll(emailProperties);
-        
+
         return Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
-                    emailProperties.getProperty("mail.username"),
-                    emailProperties.getProperty("mail.password")
+                        emailProperties.getProperty("mail.username"),
+                        emailProperties.getProperty("mail.password")
                 );
             }
         });
     }
-    
+
     /**
      * Send verification email (DEPRECATED - use OTP verification instead)
      * This method is kept for backward compatibility but should not be used
@@ -123,14 +123,14 @@ public class EmailUtil {
         // Consider removing it or updating it to use OTP-based verification
         return false;
     }
-    
+
     /**
      * Send reservation confirmation email
      */
-    public static boolean sendReservationConfirmation(String to, String customerName, 
-            String restaurantName, String dateTime, String partySize) {
+    public static boolean sendReservationConfirmation(String to, String customerName,
+                                                      String restaurantName, String dateTime, String partySize) {
         String subject = "Xác Nhận Đặt Bàn - " + restaurantName;
-        
+
         String htmlBody = String.format("""
             <html>
             <body>
@@ -148,17 +148,17 @@ public class EmailUtil {
             </body>
             </html>
             """, customerName, restaurantName, dateTime, partySize, restaurantName);
-        
+
         return sendHtmlEmail(to, subject, htmlBody);
     }
-    
+
     /**
      * Send reservation cancellation email
      */
-    public static boolean sendReservationCancellation(String to, String customerName, 
-            String restaurantName, String dateTime, String reason) {
+    public static boolean sendReservationCancellation(String to, String customerName,
+                                                      String restaurantName, String dateTime, String reason) {
         String subject = "Đặt Bàn Đã Hủy - " + restaurantName;
-        
+
         String htmlBody = String.format("""
             <html>
             <body>
@@ -175,17 +175,16 @@ public class EmailUtil {
             </body>
             </html>
             """, customerName, restaurantName, dateTime, reason, restaurantName);
-        
+
         return sendHtmlEmail(to, subject, htmlBody);
     }
-    
+
     /**
      * Send password reset email
      */
-    public static boolean sendPasswordResetEmail(String to, String username, String resetToken) {
+    public static boolean sendPasswordResetEmail(String to, String username, String resetLink) {
         String subject = "Đặt Lại Mật Khẩu - Hệ Thống Đặt Bàn Nhà Hàng";
-        String resetUrl = getBaseUrl() + "/reset-password?token=" + resetToken + "&email=" + to;
-        
+
         String htmlBody = String.format("""
             <html>
             <body>
@@ -195,22 +194,22 @@ public class EmailUtil {
                 <p><a href="%s" style="background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Đặt Lại Mật Khẩu</a></p>
                 <p>Nếu nút không hoạt động, sao chép và dán liên kết này vào trình duyệt của bạn:</p>
                 <p>%s</p>
-                <p>Liên kết này sẽ hết hạn sau 1 giờ. Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>
+                <p>Liên kết này sẽ hết hạn sau 24 giờ. Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>
                 <p>Trân trọng,<br>Đội Ngũ Đặt Bàn Nhà Hàng</p>
             </body>
             </html>
-            """, username, resetUrl, resetUrl);
-        
+            """, username, resetLink, resetLink);
+
         return sendHtmlEmail(to, subject, htmlBody);
     }
-    
+
     /**
      * Get base URL for email links
      */
     private static String getBaseUrl() {
         return emailProperties.getProperty("app.base.url", "http://localhost:8080/restaurantbooking");
     }
-    
+
     /**
      * Test email configuration
      */

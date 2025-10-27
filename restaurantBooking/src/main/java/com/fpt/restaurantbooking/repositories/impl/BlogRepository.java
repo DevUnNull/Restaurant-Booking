@@ -8,6 +8,7 @@ package com.fpt.restaurantbooking.repositories.impl;
 import com.fpt.restaurantbooking.models.Blog;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -21,13 +22,14 @@ public class BlogRepository {
      PreparedStatement stm;
     ResultSet rs;
     DatabaseUtil db = new DatabaseUtil();
-    
+    Connection con;
     public List<Blog> getAllBlog(){
         List<Blog> list = new ArrayList<>();
         String query= "select * from BlogCategories ";
-        try {
-            stm = db.getConnection().prepareStatement(query);
-            rs = stm.executeQuery();
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(query);
+            ResultSet rs = stm.executeQuery()) {
+
             while (rs.next()) {
                 list.add(new Blog(rs.getInt("id"), rs.getString("name"), rs.getString("img_url"), rs.getString("description"), rs.getString("created_date")));
             }
@@ -51,13 +53,18 @@ public class BlogRepository {
                 " FROM posts p\n "  +
                 "         JOIN blogcategories c ON p.category_id = c.id\n" +
                 " WHERE p.category_id = ? ";
-        try {
-            stm = db.getConnection().prepareStatement(query);
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(query);
+
+            ) {
             stm.setInt(1, category_id);
-            rs = stm.executeQuery();
-            while (rs.next()) {
-                list.add(new Blog(rs.getInt("id"), rs.getString("title"), rs.getString("thumbnail"), rs.getString("content"), rs.getString("created_by"), rs.getString("created_at"), rs.getString("category_name"), rs.getInt("category_id")));
-            }
+try(ResultSet rs = stm.executeQuery()) {
+
+
+    while (rs.next()) {
+        list.add(new Blog(rs.getInt("id"), rs.getString("title"), rs.getString("thumbnail"), rs.getString("content"), rs.getString("created_by"), rs.getString("created_at"), rs.getString("category_name"), rs.getInt("category_id")));
+    }
+}
         } catch (Exception e) {
         }
         return list;

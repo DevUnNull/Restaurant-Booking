@@ -358,43 +358,43 @@
     .profile-container {
         margin: 1rem auto;
     }
-    
+
     .profile-header {
         padding: 1.5rem;
     }
-    
+
     .profile-header-content {
         flex-direction: column;
         text-align: center;
         gap: 1.5rem;
     }
-    
+
     .avatar {
         width: 100px;
         height: 100px;
     }
-    
+
     .profile-name {
         font-size: 1.3rem;
     }
-    
+
     .profile-meta {
         justify-content: center;
     }
-    
+
     .profile-body {
         padding: 1.5rem;
     }
-    
+
     .form-row {
         flex-direction: column;
         gap: 0;
     }
-    
+
     .btn-group {
         flex-direction: column;
     }
-    
+
     .btn {
         width: 100%;
     }
