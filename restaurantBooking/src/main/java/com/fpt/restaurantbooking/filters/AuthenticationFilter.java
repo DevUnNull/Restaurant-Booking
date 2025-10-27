@@ -135,7 +135,7 @@ public class AuthenticationFilter implements Filter {
             return;
         }
 
-        // KIỂM TRA ỦY QUYỀN CHO URL BÁO CÁO (Ophelia)
+        // KIỂM TRA ỦY QUYỀN CHO URL BÁO CÁO
         if (isReportUrl(path) && !isManagerOrAdmin(userRoleId)) {
             logger.warn("User {} (Role ID: {}) attempted to access report URL: {}", currentUser.getEmail(), userRoleId, path);
             if (isApiRequest(path)) {
@@ -247,7 +247,7 @@ public class AuthenticationFilter implements Filter {
         return user != null && (User.UserRole.STAFF.equals(user.getRole()) || User.UserRole.ADMIN.equals(user.getRole()));
     }
 
-    /** (Ophelia)
+    /**
      * Check if URL requires Admin or Manager role (reports)
      */
     private boolean isReportUrl(String path) {
@@ -255,7 +255,7 @@ public class AuthenticationFilter implements Filter {
         return REPORT_URLS.stream().anyMatch(reportUrl -> path.equalsIgnoreCase(reportUrl));
     }
 
-    /** (Ophelia)
+    /**
      * Kiểm tra xem người dùng có vai trò Admin HOẶC Manager hay không (ID 1 HOẶC 4)
      */
     private boolean isManagerOrAdmin(Integer roleId) {

@@ -56,11 +56,11 @@
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div id="reportDropdown" class="dropdown-content">
-                        <a href="${pageContext.request.contextPath}/OverviewReport">Overview Report</a>
-                        <a href="${pageContext.request.contextPath}/ServiceReport">Service Reports</a>
-                        <a href="${pageContext.request.contextPath}/StaffReport">Staff Report</a>
-                        <a href="${pageContext.request.contextPath}/UserReport">User Report</a>
-                        <a href="${pageContext.request.contextPath}/Cancel">Cancel Request</a>
+                        <a href="${pageContext.request.contextPath}/overview-report">Overview Report</a>
+                        <a href="${pageContext.request.contextPath}/service-report">Service Reports</a>
+                        <a href="${pageContext.request.contextPath}/staff-report">Staff Report</a>
+                        <a href="${pageContext.request.contextPath}/user-report">User Report</a>
+                        <a href="${pageContext.request.contextPath}/cancel-report">Cancel Request</a>
                     </div>
                 </li>
             </c:if>
