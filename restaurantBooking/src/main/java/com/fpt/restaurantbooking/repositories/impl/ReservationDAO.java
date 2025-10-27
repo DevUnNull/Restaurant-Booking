@@ -191,12 +191,16 @@ public class ReservationDAO {
     }
 
     private Reservation mapResultSetToReservation(ResultSet rs) throws SQLException {
+        // Lấy created_at từ DB trước
+        Timestamp createdAt = rs.getTimestamp("created_at");
+        Timestamp updatedAt = rs.getTimestamp("updated_at");
+
         Reservation reservation = new Reservation(
                 rs.getInt("reservation_id"),
                 rs.getInt("user_id"),
                 rs.getInt("table_id"),
                 rs.getInt("guest_count"),
-                rs.getTimestamp("created_at").toLocalDateTime(),
+                createdAt != null ? createdAt.toLocalDateTime() : null,
                 rs.getString("status"),
                 rs.getInt("guest_count")
         );
@@ -207,6 +211,13 @@ public class ReservationDAO {
         reservation.setSpecialRequests(rs.getString("special_requests"));
         reservation.setTotalAmount(rs.getBigDecimal("total_amount"));
         reservation.setCancellationReason(rs.getString("cancellation_reason"));
+
+        // Lấy updated_at từ DB, nếu null thì dùng created_at
+        if (updatedAt != null) {
+            reservation.setUpdatedAt(updatedAt.toLocalDateTime());
+        } else if (createdAt != null) {
+            reservation.setUpdatedAt(createdAt.toLocalDateTime());
+        }
 
         return reservation;
     }
