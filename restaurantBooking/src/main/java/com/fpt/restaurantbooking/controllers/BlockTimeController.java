@@ -14,14 +14,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Quandxnunxi28
  */
-@WebServlet(name = "TimeController", urlPatterns = {"/Time"})
-public class TimeController extends HttpServlet {
+@WebServlet(name = "BlockTimeController", urlPatterns = {"/BlockTime"})
+public class BlockTimeController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -34,32 +35,7 @@ public class TimeController extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
-        int day = Integer.parseInt(request.getParameter("day"));
-        int month = Integer.parseInt(request.getParameter("month"));
-        int year = Integer.parseInt(request.getParameter("year"));
 
-       LocalDate localDate = java.time.LocalDate.of(year, month, day);
-        java.sql.Date applicableDate = java.sql.Date.valueOf(localDate);
-
-        TimeRepository timeDAO= new TimeRepository();
-        try {
-            TimeSlot time = timeDAO.getDate(year , month, day);
-            //nếu null thì cuyển hớng đến trang mặc định
-            if(time==null){
-                request.setAttribute("localDate", localDate);
-                request.getRequestDispatcher("/WEB-INF/Time_slot/TimeDetail.jsp").forward(request, response);
-            }else{
-                request.setAttribute("localDate", localDate);
-                request.setAttribute("time", time);
-                request.getRequestDispatcher("/WEB-INF/Time_slot/TimeDetailEspecial.jsp").forward(request, response);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-
-
-        
 
 
 
@@ -77,8 +53,25 @@ public class TimeController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+String date= request.getParameter("applicable_date");
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate parsedDate = LocalDate.parse(date, inputFormatter);
 
+        // Convert sang định dạng MySQL (thực ra vẫn là yyyy-MM-dd nên dòng này có thể bỏ)
+        DateTimeFormatter mysqlFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String mysqlDate = parsedDate.format(mysqlFormatter);
+        String description = request.getParameter("slot_description");
 
+        TimeRepository timeRepository = new TimeRepository();
+        try {
+            timeRepository.insertBlockTime(mysqlDate,description);
+            List<TimeSlot> timeSlots = new ArrayList<>();
+            timeSlots = timeRepository.getAllTimeSlot();
+            request.setAttribute("timeSlots", timeSlots);
+            request.getRequestDispatcher("/WEB-INF/Time_slot/ManageSingleTime.jsp").forward(request, response);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -92,6 +85,10 @@ public class TimeController extends HttpServlet {
     }// </editor-fold>
 
 }
+
+
+
+
 
 
 

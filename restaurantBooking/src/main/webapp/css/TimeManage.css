@@ -1,0 +1,199 @@
+/* ---------- layout giống voucher page ---------- */
+body {
+    margin: 0;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    background: #f6f6f6;
+}
+.top-header {
+    background: #a92e28; /* đỏ chủ đạo */
+    color: #fff;
+    padding: 18px 24px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 1000;
+}
+.top-header .brand {
+    font-weight: 700;
+    font-size: 28px;
+}
+.sidebar {
+    width: 230px;
+    background: #7b1c1c;
+    color: #fff;
+    position: fixed;
+    top: 68px; /* dưới header */
+    bottom: 0;
+    padding: 20px 12px;
+    overflow-y: auto;
+}
+.sidebar .nav-item {
+    padding: 8px 6px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+.sidebar .nav-item:hover { background: rgba(255,255,255,0.06); cursor: pointer; }
+
+.content {
+    margin-left: 230px;
+    padding-top: 68px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 40px;
+}
+
+/* banner (khoanh đỏ) */
+.banner {
+    margin-top: 18px;
+    background: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=60') center/cover no-repeat;
+    border-radius: 6px;
+    padding: 28px 20px;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;      /* QUAN TRỌNG: để overlay nằm đúng */
+    overflow: hidden;
+}
+/* overlay thêm vào */
+.banner::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);   /* chỉnh độ tối: 0.3 - 0.6 tuỳ bạn */
+    z-index: 1;
+}
+
+/* để nội dung nổi lên trên overlay */
+.banner > * {
+    position: relative;
+    z-index: 2;
+}
+.banner .title {
+    font-size: 26px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.banner .actions { /* phần nút bên phải giống voucher */ }
+.banner .actions .btn {
+    background: rgba(255,255,255,0.9);
+    color: #7b1c1c;
+    border: none;
+    margin-left: 8px;
+    border-radius: 6px;
+}
+
+/* legend + month selector */
+.controls {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.legend {
+    display:flex;
+    align-items:center;
+    gap:18px;
+    color:#333;
+    font-weight:500;
+}
+.legend .dot {
+    width:14px; height:14px; display:inline-block; margin-right:6px; border-radius:3px;
+}
+
+/* month selector centered */
+.month-selector {
+    text-align: center;
+    flex: 1;
+}
+.month-selector .nav {
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:#d9cdcd;
+    padding:6px 12px;
+    border-radius:8px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.08);
+}
+.month-selector a {
+    color:#7b1c1c;
+    font-weight:700;
+    text-decoration:none;
+    padding:6px 10px;
+    border-radius:6px;
+}
+.kakaku{
+    position:  relative;
+    right: 43px;
+    top: -1px;
+    bottom: 24px;
+    left: 78px;
+}
+.goku{
+    position:  relative;
+    right: 43px;
+    top: -1px;
+    bottom: 24px;
+    left: 78px;
+}
+.month-selector .label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 160px;
+    text-align: center;
+    flex: 1 0 auto;   /* QUAN TRỌNG: không cho flex co về 0 */
+    font-weight: 700;
+    font-size: 16px;
+    color: #7b1c1c;
+    white-space: nowrap;
+}
+
+/* calendar table */
+.calendar-wrap {
+    margin-top: 18px;
+    background: #fff;
+    padding: 18px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+table.calendar {
+    width:100%;
+    border-collapse: collapse;
+}
+table.calendar thead th {
+    background:#e9e9e9;
+    padding:10px 6px;
+    text-align:center;
+    font-weight:700;
+}
+table.calendar td {
+    border: 1px solid #eee;
+    height: 86px;
+    vertical-align: middle;
+    text-align: center;
+    font-size:18px;
+    font-weight:600;
+    padding:0;
+    cursor:pointer;
+}
+
+
+.day-cell { color:#fff; display:flex; align-items:center; justify-content:center; height:100%; }
+.normal-day { background:#28a745; }       /* xanh */
+.special-day { background:#dc3545; }      /* đỏ */
+.maintenance-day { background:#111; }    /* đen */
+
+
+.empty-cell { background:transparent; cursor:default; }
+
+
+@media (max-width: 900px) {
+    .sidebar { display:none; }
+    .content { margin-left: 0; padding-left: 12px; padding-right: 12px; }
+}

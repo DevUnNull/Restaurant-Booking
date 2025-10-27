@@ -1,9 +1,9 @@
-
 package com.fpt.restaurantbooking.controllers;
 
+
+
 import com.fpt.restaurantbooking.models.Promotions;
-import com.fpt.restaurantbooking.models.TimeSlot;
-import com.fpt.restaurantbooking.repositories.impl.TimeRepository;
+import com.fpt.restaurantbooking.models.User;
 import com.fpt.restaurantbooking.repositories.impl.VoucherRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,15 +13,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Quandxnunxi28
  */
-@WebServlet(name = "TimeController", urlPatterns = {"/Time"})
-public class TimeController extends HttpServlet {
+@WebServlet(name = "Promotion_level_guest_manage", urlPatterns = {"/Promotion_level"})
+public class Promotion_level_guest_manage extends HttpServlet  {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -34,32 +33,34 @@ public class TimeController extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
-        int day = Integer.parseInt(request.getParameter("day"));
-        int month = Integer.parseInt(request.getParameter("month"));
-        int year = Integer.parseInt(request.getParameter("year"));
+        int page = 1;
+        int recordsPerPage = 12;
 
-       LocalDate localDate = java.time.LocalDate.of(year, month, day);
-        java.sql.Date applicableDate = java.sql.Date.valueOf(localDate);
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+        VoucherRepository voucherRepository = new VoucherRepository();
 
-        TimeRepository timeDAO= new TimeRepository();
+
+
         try {
-            TimeSlot time = timeDAO.getDate(year , month, day);
-            //nếu null thì cuyển hớng đến trang mặc định
-            if(time==null){
-                request.setAttribute("localDate", localDate);
-                request.getRequestDispatcher("/WEB-INF/Time_slot/TimeDetail.jsp").forward(request, response);
-            }else{
-                request.setAttribute("localDate", localDate);
-                request.setAttribute("time", time);
-                request.getRequestDispatcher("/WEB-INF/Time_slot/TimeDetailEspecial.jsp").forward(request, response);
-            }
+            List<User> userList = voucherRepository.getUsersByPagee((page - 1) * recordsPerPage, recordsPerPage);
+           int totalRecords = voucherRepository.getAllUsertoPromotion_level_idd();
+           int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
+            request.setAttribute("userList", userList);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("currentPage", page);
+            request.getRequestDispatcher("/WEB-INF/Voucher/Promotion_level_guest_manage.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
 
 
-        
+
+
+
 
 
 
@@ -92,6 +93,5 @@ public class TimeController extends HttpServlet {
     }// </editor-fold>
 
 }
-
 
 
