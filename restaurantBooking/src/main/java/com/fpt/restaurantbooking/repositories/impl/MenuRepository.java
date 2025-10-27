@@ -19,12 +19,15 @@ public class MenuRepository {
  public List<MenuCategory> getCateGory() throws SQLException {
      List<MenuCategory> categoryList = new ArrayList<MenuCategory>();
      String sql= " select * from menu_category  ";
-     stm = db.getConnection().prepareStatement(sql);
-
-     rs = stm.executeQuery();
-     while (rs.next()) {
-         categoryList.add(new MenuCategory(rs.getInt("id"),rs.getString("name")));
+     try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql); ResultSet rs = stm.executeQuery();){
+         while (rs.next()) {
+             categoryList.add(new MenuCategory(rs.getInt("id"),rs.getString("name")));
+         }
      }
+
+
+
+
      return categoryList;
 
  }
@@ -46,26 +49,32 @@ public class MenuRepository {
              "    mi.created_at,\n " +
              "    mi.updated_at\n " +
              "FROM menu_items mi\n " +
-             "LEFT JOIN menu_category c ON mi.category_id = c.id\n " +
+             "LEFT JOIN menu_category c ON mi.category_id = c.id \n " +
              "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n " +
              "LEFT JOIN users u2 ON mi.updated_by = u2.user_id\n " +
              "WHERE mi.category_id = ?\n " +
              "ORDER BY mi.item_id DESC\n " +
              "LIMIT ? ,?  ";
-     stm = db.getConnection().prepareStatement(sql);
-stm.setInt(1, id );
-stm.setInt(2, start );
-stm.setInt(3, end );
-     rs = stm.executeQuery();
-     while (rs.next()) {
-         menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
-                 rs.getString("item_code"), rs.getString("description"),
-                 rs.getBigDecimal("price"), rs.getString("image_url"),
-                 rs.getString("status"),
-                 rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                 rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name")));
+     try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql);) {
 
+         stm.setInt(1, id );
+         stm.setInt(2, start );
+         stm.setInt(3, end );
+         try(ResultSet rs = stm.executeQuery();) {
+             while (rs.next()) {
+                 menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
+                         rs.getString("item_code"), rs.getString("description"),
+                         rs.getBigDecimal("price"), rs.getString("image_url"),
+                         rs.getString("status"),
+                         rs.getString("created_by_name"), rs.getString("updated_by_name"),
+                         rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name")));
+
+             }
+         }
      }
+
+
+
      return menuItemList;
  }
     public List<MenuItem> getAllMenuItems(int id) throws SQLException {
@@ -89,18 +98,24 @@ stm.setInt(3, end );
                 "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n" +
                 "LEFT JOIN users u2 ON mi.updated_by = u2.user_id\n" +
                 "WHERE mi.category_id = ? ";
-        stm = db.getConnection().prepareStatement(sql);
-        stm.setInt(1, id );
-        rs = stm.executeQuery();
-        while (rs.next()) {
-            menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
-                    rs.getString("item_code"), rs.getString("description"),
-                    rs.getBigDecimal("price"), rs.getString("image_url"),
-                    rs.getString("status"),
-                    rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                    rs.getString("created_at"),rs.getString("updated_at"),rs.getString("category_name") ));
 
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql);){
+            stm.setInt(1, id );
+            try(ResultSet rs = stm.executeQuery();) {
+                while (rs.next()) {
+                    menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
+                            rs.getString("item_code"), rs.getString("description"),
+                            rs.getBigDecimal("price"), rs.getString("image_url"),
+                            rs.getString("status"),
+                            rs.getString("created_by_name"), rs.getString("updated_by_name"),
+                            rs.getString("created_at"),rs.getString("updated_at"),rs.getString("category_name") ));
+
+                }
+            }
         }
+
+
+
         return menuItemList;
     }
     public void addMenu(String name,String code, String description, String price, String category_id, String status, String created_by, String img_url) throws SQLException {
@@ -136,8 +151,8 @@ stm.setInt(3, end );
                 "  category_id = ?, \n" +
                 "               updated_at = NOW()  \n" +
                 "               WHERE item_id = ?" ;
-        try {
-            stm= db.getConnection().prepareStatement(sql);
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql); ) {
+
             stm.setString(1, name);
 
             stm.setString(2, description);
@@ -164,8 +179,8 @@ stm.setInt(3, end );
                 "  category_id = ?, \n" +
                 "               updated_at = NOW()  \n" +
                 "               WHERE item_id = ?" ;
-        try {
-            stm= db.getConnection().prepareStatement(sql);
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql); ResultSet rs = stm.executeQuery();)  {
+
             stm.setString(1, name);
 
             stm.setString(2, description);
@@ -185,29 +200,51 @@ stm.setInt(3, end );
     public MenuItem getIdWithUpdate(int id) throws SQLException {
         MenuItem menuItem = null;
         String sql= " select * from menu_items where item_id = ?  ";
-        stm = db.getConnection().prepareStatement(sql);
-        stm.setInt(1, id);
-        rs = stm.executeQuery();
-        if (rs.next()) {
-            menuItem = new MenuItem(
-                    rs.getInt("item_id"),
-                    rs.getString("item_name"),
-                    rs.getString("item_code"),
-                    rs.getString("description"),
-                    rs.getBigDecimal("price"),
-                    rs.getString("image_url"),
-                    rs.getString("status"),
-                    rs.getString("created_by"),
-                    rs.getString("updated_by"),
-                    rs.getString("created_at"),
-                    rs.getString("updated_at"),
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql);) {
+            stm.setInt(1, id);
+            try(ResultSet rs = stm.executeQuery();) {
+                if (rs.next()) {
+                    menuItem = new MenuItem(
+                            rs.getInt("item_id"),
+                            rs.getString("item_name"),
+                            rs.getString("item_code"),
+                            rs.getString("description"),
+                            rs.getBigDecimal("price"),
+                            rs.getString("image_url"),
+                            rs.getString("status"),
+                            rs.getString("created_by"),
+                            rs.getString("updated_by"),
+                            rs.getString("created_at"),
+                            rs.getString("updated_at"),
 
-                    rs.getInt("category_id")
-            );
+                            rs.getInt("category_id")
+                    );
+                }
+            }
         }
-        rs.close();
-        stm.close();
+
+
+
+
+
         return menuItem;
+    }
+    public void DeleteMenu(String id) throws SQLException {
+        String sql = " DELETE FROM menu_items \n" +
+                " WHERE item_id = ? ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+        ) {
+
+            stm.setString(1, id);
+
+            stm.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
 }

@@ -18,6 +18,17 @@ public class WorkSchedule extends BaseEntity {
     private String status;
     private Integer assignedBy;
 
+    public WorkSchedule(Integer scheduleId, User user, LocalDate workDate, String shift, LocalTime startTime, LocalTime endTime, String workPosition, String notes) {
+        this.scheduleId = scheduleId;
+        this.user = user;
+        this.workDate = workDate;
+        this.shift = shift;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.workPosition = workPosition;
+        this.notes = notes;
+    }
+
     public WorkSchedule() {
         super();
         this.status = "ACTIVE";

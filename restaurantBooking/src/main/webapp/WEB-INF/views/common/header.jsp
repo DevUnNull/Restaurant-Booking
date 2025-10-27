@@ -57,7 +57,7 @@
                     </div>
                     <div id="hrDropdown" class="dropdown-content">
                         <a href="${pageContext.request.contextPath}/EmployeeList">Quản Lý Nhân Sự</a>
-                        <a href="#">Phân lịch làm việc</a>
+                        <a href="${pageContext.request.contextPath}/WorkSchedule">Phân lịch làm việc</a>
                         <a href="#">Lịch làm việc</a>
                         <a href="#">Đơn xin việc</a>
                     </div>

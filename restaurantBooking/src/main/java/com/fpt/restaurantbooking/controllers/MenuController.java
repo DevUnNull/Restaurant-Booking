@@ -39,17 +39,17 @@ public class MenuController extends HttpServlet {
                 page = 1;
             }
         }
-        Promotions promo= (Promotions) request.getAttribute("pro");
+        MenuItem promo= (MenuItem) request.getAttribute("pro");
         int offset = (page - 1) * recordsPerPage;
         try {
             MenuRepository menuRepo = new MenuRepository();
             List<MenuCategory> listMenuCategory = new ArrayList<>();
             listMenuCategory = menuRepo.getCateGory();
-            List<MenuItem> menuItelList = menuRepo.getMenuItems(promo.getPromotion_level_id(), offset, recordsPerPage);
-            int totalRecords = menuRepo.getAllMenuItems(promo.getPromotion_level_id()).size();
+            List<MenuItem> menuItelList = menuRepo.getMenuItems(promo.getCategory_id(), offset, recordsPerPage);
+            int totalRecords = menuRepo.getAllMenuItems(promo.getCategory_id()).size();
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
             request.setAttribute("listMenuCategory", listMenuCategory);
-            request.setAttribute("kaku", promo.getPromotion_level_id());
+            request.setAttribute("kaku", promo.getCategory_id());
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("menuList", menuItelList);
@@ -63,62 +63,61 @@ public class MenuController extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
+
         int page = 1;
         int recordsPerPage = 6;
-        if (request.getParameter("page") != null) {
+
+        // 🧭 Xử lý tham số "page" an toàn
+        String pageRaw = request.getParameter("page");
+        if (pageRaw != null && !pageRaw.trim().isEmpty()) {
             try {
-                page = Integer.parseInt(request.getParameter("page"));
+                page = Integer.parseInt(pageRaw);
             } catch (NumberFormatException e) {
                 page = 1;
             }
         }
+
         int offset = (page - 1) * recordsPerPage;
-
-
-        List<MenuItem> menuItemList = new ArrayList<>();
         MenuRepository menurepo = new MenuRepository();
-        String categoryId = request.getParameter("categoryId");
-        if(categoryId==null){
+
+        // 🧩 Xử lý tham số "categoryId" an toàn
+        String categoryIdRaw = request.getParameter("categoryId");
+        int categoryId = 1; // giá trị mặc định
+
+        if (categoryIdRaw != null && !categoryIdRaw.trim().isEmpty()) {
             try {
-                List<MenuCategory> listMenuCategory = new ArrayList<>();
-                listMenuCategory = menurepo.getCateGory();
-                menuItemList = menurepo.getMenuItems(1, offset, recordsPerPage);
-                int totalRecords = menurepo.getAllMenuItems(1).size();
-                int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-                request.setAttribute("listMenuCategory", listMenuCategory);
-                request.setAttribute("currentPage", page);
-                request.setAttribute("totalPages", totalPages);
-                request.setAttribute("menuList", menuItemList);
-                request.setAttribute("kaku",categoryId);
-                request.getRequestDispatcher("/WEB-INF/Menu/Menu.jsp").forward(request, response);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+                categoryId = Integer.parseInt(categoryIdRaw);
+            } catch (NumberFormatException e) {
+                // Nếu parse lỗi, giữ mặc định
+                categoryId = 1;
             }
-
-        }else{
-            try {
-                List<MenuCategory> listMenuCategory = new ArrayList<>();
-                listMenuCategory = menurepo.getCateGory();
-                menuItemList = menurepo.getMenuItems(Integer.parseInt(categoryId), offset, recordsPerPage);
-                int totalRecords = menurepo.getAllMenuItems(Integer.parseInt(categoryId)).size();
-                int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-                request.setAttribute("listMenuCategory", listMenuCategory);
-                request.setAttribute("currentPage", page);
-                request.setAttribute("totalPages", totalPages);
-                request.setAttribute("menuList", menuItemList);
-
-                request.setAttribute("kaku",categoryId);
-                request.getRequestDispatcher("/WEB-INF/Menu/Menu.jsp").forward(request, response);
-            }catch (Exception ex){
-
-            }
-
-
-
         }
 
+        try {
+            // 🔹 Lấy danh sách category & menu
+            List<MenuCategory> listMenuCategory = menurepo.getCateGory();
+            List<MenuItem> menuItemList = menurepo.getMenuItems(categoryId, offset, recordsPerPage);
+            int totalRecords = menurepo.getAllMenuItems(categoryId).size();
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
+            // 🔹 Set dữ liệu lên request
+            request.setAttribute("listMenuCategory", listMenuCategory);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("menuList", menuItemList);
+            request.setAttribute("kaku", categoryId);
+
+            // 🔹 Forward tới JSP
+            request.getRequestDispatcher("/WEB-INF/Menu/Menu.jsp").forward(request, response);
+
+        } catch (Exception ex) {
+            // ⚠️ Log lỗi để dễ debug
+            ex.printStackTrace();
+            request.setAttribute("errorMessage", "Lỗi khi tải dữ liệu menu: " + ex.getMessage());
+            request.getRequestDispatcher("/WEB-INF/Error.jsp").forward(request, response);
+        }
     }
+
 
     /**
      * Handles the HTTP <code>POST</code> method.
@@ -139,39 +138,50 @@ public class MenuController extends HttpServlet {
         String status= request.getParameter("status");
         String categoryId = request.getParameter("categoryId");
         MenuRepository menuRepo = new MenuRepository();
+        MenuItem pro = null;
+        try {
+            pro = (MenuItem) menuRepo.getIdWithUpdate(Integer.parseInt(id));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         String er;
 
 
         if(menuName.isEmpty()){
             er = "Name must not be empty";
             request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
             processRequest(request, response);
             return;
         }else if(description.isEmpty()){
             er = "Description must not be empty";
             request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
             processRequest(request, response);
             return;
         }else if(price.isEmpty()){
             er = "price percentage must not be empty";
             request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
             processRequest(request, response);
             return;
         }else if(status.isEmpty()){
             er = "status date must not be empty";
             request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
             processRequest(request, response);
             return;
         }else if(categoryId.isEmpty()){
             er = "categoryId date must not be empty";
             request.setAttribute("errorMessage", er);
+            request.setAttribute("pro", pro);
             processRequest(request, response);
             return;
         }
 
         try {
 
-                MenuItem pro = (MenuItem) menuRepo.getIdWithUpdate(Integer.parseInt(id));
+
                 menuRepo.UpdateMenu(id,menuName,description,price,imageFile,updated_by,status, categoryId);
                 request.setAttribute("pro", pro);
                 processRequest(request, response);
