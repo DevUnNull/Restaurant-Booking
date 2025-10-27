@@ -75,7 +75,7 @@
                 <!-- nếu quyền là admin Restaurant thì hiện  -->
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
                 <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
-                <li><a href="Time">Quản lý đánh giá bình luận</a></li>
+                <li><a href="Timedirect">Quản lý đánh giá bình luận</a></li>
 
                 <li><a href="#">Quản lý Menu</a></li>
                 <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>

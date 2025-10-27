@@ -20,8 +20,8 @@ import java.util.List;
 /**
  * @author Quandxnunxi28
  */
-@WebServlet(name = "TimeController", urlPatterns = {"/Time"})
-public class TimeController extends HttpServlet {
+@WebServlet(name = "TimeDirectController", urlPatterns = {"/Timedirect"})
+public class TimeDirectController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -34,33 +34,16 @@ public class TimeController extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
-        int day = Integer.parseInt(request.getParameter("day"));
-        int month = Integer.parseInt(request.getParameter("month"));
-        int year = Integer.parseInt(request.getParameter("year"));
 
-       LocalDate localDate = java.time.LocalDate.of(year, month, day);
-        java.sql.Date applicableDate = java.sql.Date.valueOf(localDate);
-
-        TimeRepository timeDAO= new TimeRepository();
+        TimeRepository timeDAO = new TimeRepository();
+        List<TimeSlot> listTime = new ArrayList<>();
         try {
-            TimeSlot time = timeDAO.getDate(year , month, day);
-            //nếu null thì cuyển hớng đến trang mặc định
-            if(time==null){
-                request.setAttribute("localDate", localDate);
-                request.getRequestDispatcher("/WEB-INF/Time_slot/TimeDetail.jsp").forward(request, response);
-            }else{
-                request.setAttribute("localDate", localDate);
-                request.setAttribute("time", time);
-                request.getRequestDispatcher("/WEB-INF/Time_slot/TimeDetailEspecial.jsp").forward(request, response);
-            }
+            listTime = timeDAO.getAll();
+            request.setAttribute("listTime", listTime);
+            request.getRequestDispatcher("/WEB-INF/Time_slot/ManageTime.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-
-
-        
-
 
 
     }
@@ -92,6 +75,8 @@ public class TimeController extends HttpServlet {
     }// </editor-fold>
 
 }
+
+
 
 
 
