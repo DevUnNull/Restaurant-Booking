@@ -323,9 +323,6 @@
     Integer currentPage = (Integer) request.getAttribute("currentPage");
     Integer totalPages = (Integer) request.getAttribute("totalPages");
 
-    // ✅ LẤY reservationId TỪ SESSION, KHÔNG PHẢI REQUEST ATTRIBUTE
-    Integer reservationId = (Integer) session.getAttribute("reservationId");
-
     // Get current filter params
     String searchKeyword = request.getParameter("search");
     String categoryFilter = request.getParameter("category");
@@ -436,8 +433,6 @@
 
 <script>
     const contextPath = '<%= request.getContextPath() %>';
-    // ✅ LẤY reservationId TỪ SESSION (đã load từ JSP scriptlet)
-    const reservationId = '<%= reservationId != null ? reservationId : "" %>';
 
     // Load initial cart state on page load
     window.addEventListener('DOMContentLoaded', function() {
@@ -457,11 +452,6 @@
         if (!qtyInput) {
             alert('❌ Không tìm thấy ô nhập số lượng cho món #' + itemId);
             console.error('❌ Selector failed: input[name="qty_' + itemId + '"]');
-            return;
-        }
-
-        if (!reservationId || reservationId === '') {
-            alert('❌ Không tìm thấy thông tin đơn đặt bàn. Vui lòng đặt bàn trước.');
             return;
         }
 

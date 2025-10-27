@@ -358,6 +358,54 @@
             margin-right: 10px;
         }
 
+        /* Payment Info Box */
+        .payment-info {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+        .payment-info.show {
+            display: block;
+        }
+        .payment-info i {
+            color: #667eea;
+            margin-right: 10px;
+        }
+        .payment-info p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        .payment-info.cash {
+            border-left-color: #ffc107;
+            background: rgba(255, 193, 7, 0.1);
+        }
+        .payment-info.cash i {
+            color: #ffc107;
+        }
+        .payment-info.prepaid {
+            border-left-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+        .payment-info.prepaid i {
+            color: #28a745;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* --- Action Buttons --- */
         .actions {
             display: flex;
@@ -602,7 +650,7 @@
                     <button class="update-btn" onclick="updateItemQty(<%= item.getOrderItemId() %>)">
                         <i class="fas fa-sync-alt"></i> Cập nhật
                     </button>
-                    <button class="remove-btn" onclick="removeItem(<%= item.getOrderItemId() %>)">
+                    <button class="remove-btn" onclick="removeItem(<%= item.getItemId() %>)">
                         <i class="fas fa-trash"></i> Xóa
                     </button>
                 </div>
@@ -678,6 +726,22 @@
                 <input type="radio" name="paymentMethod" value="E_WALLET">
                 <i class="fas fa-wallet"></i> Ví điện tử (Momo, ZaloPay)
             </label>
+
+            <!-- Payment Info -->
+            <div id="paymentInfoCash" class="payment-info cash show">
+                <p>
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Thanh toán khi nhận:</strong><br>
+                    Món ăn sẽ được nấu khi bạn đến nhà hàng. Vui lòng đến đúng giờ đã đặt.
+                </p>
+            </div>
+            <div id="paymentInfoPrepaid" class="payment-info prepaid" style="display: none;">
+                <p>
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Thanh toán trước:</strong><br>
+                    Món ăn sẽ được chuẩn bị sẵn trước khi bạn đến. Đến nhà hàng sẽ có món ăn sẵn sàng ngay!
+                </p>
+            </div>
         </div>
 
         <!-- Action Buttons -->
@@ -790,6 +854,25 @@
         }
     });
 
+    // ===== XỬ LÝ THAY ĐỔI PAYMENT METHOD =====
+    const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
+    const paymentInfoCash = document.getElementById('paymentInfoCash');
+    const paymentInfoPrepaid = document.getElementById('paymentInfoPrepaid');
+
+    paymentMethods.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.value === 'CASH') {
+                // Thanh toán khi nhận (COD)
+                paymentInfoCash.style.display = 'block';
+                paymentInfoPrepaid.style.display = 'none';
+            } else if (this.value === 'CREDIT_CARD' || this.value === 'E_WALLET') {
+                // Thanh toán trước
+                paymentInfoCash.style.display = 'none';
+                paymentInfoPrepaid.style.display = 'block';
+            }
+        });
+    });
+
     // ===== CÁC HÀM QUẢN LÝ GIỎ HÀNG =====
 
     // Tăng số lượng
@@ -843,7 +926,7 @@
     }
 
     // Xóa món ăn
-    function removeItem(orderItemId) {
+    function removeItem(itemId) {
         if (!confirm('Bạn có chắc muốn xóa món ăn này khỏi giỏ hàng?')) {
             return;
         }
@@ -854,13 +937,13 @@
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: 'action=remove&orderItemId=' + orderItemId
+            body: 'action=remove&itemId=' + itemId
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     // Xóa dòng khỏi bảng
-                    const row = document.querySelector('[data-item-id="' + orderItemId + '"]');
+                    const row = document.querySelector('[data-item-id="' + itemId + '"]');
                     if (row) {
                         row.remove();
                     }
