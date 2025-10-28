@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="styless.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link href="css/ServiceManage.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
 
 </head>
 
@@ -45,24 +46,90 @@
         background-color: #a93226;
         transform: translateY(0);
     }
+    .filter-section {
+        position: relative;
+        background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80'); /* ảnh banner */
+        background-size: cover;
+        background-position: center;
+        height: 120px;
+        border-radius: 10px;
+        margin: 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    /* Lớp phủ mờ */
+    .filter-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 1;
+    }
+
+    /* Nội dung bên trong */
+    .filter-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        padding: 0 30px;
+    }
+
+    /* Tiêu đề bên trái */
+    .filter-title {
+        font-size: 26px;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    /* Dropdown + nút bên phải */
+    .filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Dropdown */
+    .category-select {
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: none;
+        background: rgba(255,255,255,0.9);
+        color: #333;
+        font-weight: 500;
+    }
+
+    /* Nút thêm */
+    .add-btn {
+        background-color: #b52a1a;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .add-btn:hover {
+        background-color: #d63a2a;
+        transform: translateY(-2px);
+    }
+
 </style>
 
 <body>
 
 <div class="main">
     <!-- Header -->
-    <div class="header">
-        <div class="logo">Restaurant_Booking</div>
-        <nav>
-            <ul>
-                <li><a href="#">Trang chủ</a></li>
-                <li><a href="#">Đặt bàn</a></li>
-                <li><a href="#">Menu</a></li>
-                <li><a href="#">Liên hệ</a></li>
-                <li><a href="#">Giỏ hàng (0)</a></li>
-            </ul>
-        </nav>
-    </div>
+    <jsp:include page="/WEB-INF/views/common/header.jsp" />
+
 
     <!-- Wrapper -->
     <div class="main-wrapper">
@@ -83,12 +150,20 @@
             </ul>
         </div>
 
+
+
         <!-- Content -->
         <div class="content">
-            <h2>Quản lý dịch vụ</h2>
+            <!-- Banner / Filter Section -->
+            <div class="filter-section">
+                <div class="filter-content">
+                    <h2 class="filter-title">Danh Sách Dịch Vụ</h2>
+                    <div class="filter-actions">
 
-            <!-- Add button -->
-            <button class="add-btn" onclick="openAddModal()">+ Thêm dịch vụ</button>
+                        <button class="add-btn" onclick="openAddModal()">+ Thêm dịch vụ</button>
+                    </div>
+                </div>
+            </div>
             <div id="addModal" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="closeAddModal()">&times;</span>
@@ -119,7 +194,7 @@
 
                         <label>Trạng thái:</label>
                         <select id="add-status" name="status">
-                                <option value="ACTIVE" ${param.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+                            <option value="ACTIVE" ${param.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
                             <option value="INACTIVE" ${param.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
                         </select>
 
@@ -351,6 +426,5 @@ window.onclick = function (event) {
         document.getElementById("addModal").style.display = "none";
     }
 </script>
-
 </body>
 </html>
