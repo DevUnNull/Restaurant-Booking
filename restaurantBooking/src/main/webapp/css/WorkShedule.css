@@ -1,0 +1,215 @@
+/* ===================================== */
+/* CSS cho các nút Thao tác (Sửa/Xóa/Chi tiết) */
+/* ===================================== */
+
+/* Kiểu dáng chung cho 3 nút */
+.linkWS1,
+.linkWS2,
+.linkWS3,
+.linkWS2 button {
+    color: white;
+    padding: 5px 8px; /* Giảm padding một chút để vừa với 3 nút */
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    margin-right: 3px; /* Khoảng cách giữa các nút */
+    transition: background-color 0.2s;
+}
+
+/* Nút Sửa */
+.linkWS1 {
+    background-color: #b23627; /* Đỏ nâu */
+}
+.linkWS1:hover {
+    background-color: #9f3024;
+}
+
+/* Nút Xóa */
+.linkWS2, .linkWS2 button {
+    background-color: #1e90ff; /* Xanh dương */
+}
+.linkWS2:hover, .linkWS2 button:hover {
+    background-color: #1a75d1;
+}
+
+/* Nút Chi tiết */
+.linkWS3 {
+    background-color: #4CAF50; /* Xanh lá cây */
+}
+.linkWS3:hover {
+    background-color: #45a049;
+}
+
+
+/* ===================================== */
+/* CSS cho Inline Form (scheduleForm) */
+/* ===================================== */
+
+.inline-form {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-top: 30px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.inline-form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.inline-form input[type="date"],
+.inline-form input[type="time"],
+.inline-form input[type="text"],
+.inline-form select,
+.inline-form textarea {
+    width: 300px; /* Định chiều rộng cố định */
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.inline-form textarea {
+    resize: vertical; /* Cho phép thay đổi chiều cao */
+}
+
+/* Container chứa các trường (có thể dùng Flexbox hoặc Grid để sắp xếp nhiều cột nếu muốn) */
+.form-fields-container {
+    /* Hiển thị tất cả các trường trên nhiều dòng */
+    margin-bottom: 20px;
+}
+
+/* Nút Thêm/Cập nhật */
+#submitBtn {
+    padding: 10px 20px;
+    background-color: #007bff; /* Màu xanh dương khác */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px;
+    transition: background-color 0.2s;
+}
+#submitBtn:hover {
+    background-color: #0056b3;
+}
+
+/* Nút Hủy/Thêm mới */
+#resetBtn {
+    padding: 10px 20px;
+    background-color: #6c757d; /* Màu xám */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    display: none; /* Mặc định ẩn, chỉ hiện khi ở chế độ Sửa */
+    transition: background-color 0.2s;
+}
+#resetBtn:hover {
+    background-color: #5a6268;
+}
+
+/* CSS cho Modal (Popup) */
+.modal {
+    display: none; /* ⭐ Ẩn mặc định */
+    position: fixed; /* Vị trí cố định, che phủ màn hình */
+    z-index: 1000; /* Hiển thị trên cùng */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Cho phép cuộn nếu nội dung dài */
+    background-color: rgba(0, 0, 0, 0.4); /* Nền mờ */
+}
+
+/* Nội dung bên trong Modal */
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* Canh giữa, cách top 10% */
+    padding: 25px;
+    border: 1px solid #888;
+    width: 50%; /* Điều chỉnh chiều rộng nếu cần */
+    min-width: 400px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+/* Nút đóng (dấu X) */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute; /* Đặt nút đóng ở góc */
+    top: 10px;
+    right: 20px;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* CSS cho các trường trong form (có thể bạn đã có) */
+.form-fields label {
+    display: inline-block;
+    width: 120px; /* Căn chỉnh các label */
+    margin-bottom: 10px;
+}
+
+.form-fields input,
+.form-fields select,
+.form-fields textarea {
+    width: calc(100% - 130px); /* Lấp đầy phần còn lại */
+    padding: 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box; /* Quan trọng */
+}
+
+/* === Nút Thêm lịch làm việc === */
+
+/* ID khớp với <button id="openModalBtn"> */
+#openModalBtn {
+    display: inline-block;
+    padding: 10px 18px; /* Kích thước vùng đệm */
+    margin-bottom: 15px; /* Khoảng cách với bảng bên dưới */
+
+    background-color: #007bff; /* Màu nền xanh dương */
+    color: #ffffff; /* Màu chữ trắng */
+
+    border: none; /* Không có viền */
+    border-radius: 5px; /* Bo góc */
+
+    font-size: 15px;
+    font-weight: bold; /* Chữ đậm */
+    text-align: center;
+
+    cursor: pointer; /* Biểu tượng bàn tay khi di chuột */
+
+    /* Hiệu ứng chuyển màu mượt mà */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hiệu ứng khi di chuột qua */
+#openModalBtn:hover {
+    background-color: #0056b3; /* Màu xanh đậm hơn */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng mờ */
+}
+
+/* Hiệu ứng khi nhấn nút */
+#openModalBtn:active {
+    background-color: #004085; /* Đậm hơn nữa */
+    transform: translateY(1px); /* Tạo cảm giác nhấn xuống */
+}

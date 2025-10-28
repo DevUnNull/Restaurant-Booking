@@ -18,7 +18,7 @@ public class WorkSchedule extends BaseEntity {
     private String status;
     private Integer assignedBy;
 
-    public WorkSchedule(Integer scheduleId, User user, LocalDate workDate, String shift, LocalTime startTime, LocalTime endTime, String workPosition, String notes) {
+    public WorkSchedule(Integer scheduleId, User user, LocalDate workDate, String shift, LocalTime startTime, LocalTime endTime, String workPosition, String notes, String status) {
         this.scheduleId = scheduleId;
         this.user = user;
         this.workDate = workDate;
@@ -27,6 +27,7 @@ public class WorkSchedule extends BaseEntity {
         this.endTime = endTime;
         this.workPosition = workPosition;
         this.notes = notes;
+        this.status = status;
     }
 
     public WorkSchedule() {

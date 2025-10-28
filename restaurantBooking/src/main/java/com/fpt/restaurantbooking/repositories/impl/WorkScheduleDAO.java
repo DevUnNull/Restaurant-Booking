@@ -18,7 +18,7 @@ public class WorkScheduleDAO {
         List<WorkSchedule> list = new ArrayList<>();
         String sql = "SELECT ws.schedule_id, ws.user_id, u.full_name, " +
                 "ws.work_date, ws.shift, ws.start_time, ws.end_time, " +
-                "ws.work_position, ws.notes " +
+                "ws.work_position, ws.notes, ws.status " +
                 "FROM work_schedules ws " +
                 "JOIN users u ON ws.user_id = u.user_id";
 
@@ -54,7 +54,108 @@ public class WorkScheduleDAO {
                 rs.getTime("start_time").toLocalTime(),
                 rs.getTime("end_time").toLocalTime(),
                 rs.getString("work_position"),
-                rs.getString("notes")
+                rs.getString("notes"),
+                rs.getString("status")
         );
     }
+
+    public boolean addWorkSchedule(WorkSchedule ws) {
+        String sql = "INSERT INTO work_schedules (user_id, work_date, shift, start_time, end_time, work_position, notes) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            stm.setInt(1, ws.getUser().getUserId());
+            stm.setDate(2, java.sql.Date.valueOf(ws.getWorkDate()));
+            stm.setString(3, ws.getShift());
+            stm.setTime(4, java.sql.Time.valueOf(ws.getStartTime()));
+            stm.setTime(5, java.sql.Time.valueOf(ws.getEndTime()));
+            stm.setString(6, ws.getWorkPosition());
+            stm.setString(7, ws.getNotes());
+
+            return stm.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void updateStatus(int scheduleId, String status) {
+        String sql = "UPDATE work_schedules SET status = ? WHERE schedule_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            stmt.setInt(2, scheduleId);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean updateWorkSchedule(WorkSchedule ws) {
+        String sql = "UPDATE work_schedules " +
+                "SET user_id = ?, work_date = ?, shift = ?, start_time = ?, end_time = ?, " +
+                "work_position = ?, notes = ? " +
+                "WHERE schedule_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            stm.setInt(1, ws.getUser().getUserId());
+            stm.setDate(2, java.sql.Date.valueOf(ws.getWorkDate()));
+            stm.setString(3, ws.getShift());
+            stm.setTime(4, java.sql.Time.valueOf(ws.getStartTime()));
+            stm.setTime(5, java.sql.Time.valueOf(ws.getEndTime()));
+            stm.setString(6, ws.getWorkPosition());
+            stm.setString(7, ws.getNotes());
+            stm.setInt(8, ws.getScheduleId());
+
+            int rowsUpdated = stm.executeUpdate();
+            return rowsUpdated > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public WorkSchedule getWorkScheduleById(int scheduleId) {
+        String sql = "SELECT ws.schedule_id, ws.user_id, ws.work_date, ws.shift, ws.start_time, ws.end_time, " +
+                "ws.work_position, ws.notes, ws.status, u.full_name " +
+                "FROM work_schedules ws " +
+                "JOIN users u ON ws.user_id = u.user_id " +
+                "WHERE ws.schedule_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            stm.setInt(1, scheduleId);
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setUserId(rs.getInt("user_id"));
+                    user.setFullName(rs.getString("full_name"));
+
+                    return new WorkSchedule(
+                            rs.getInt("schedule_id"),
+                            user,
+                            rs.getDate("work_date").toLocalDate(),
+                            rs.getString("shift"),
+                            rs.getTime("start_time").toLocalTime(),
+                            rs.getTime("end_time").toLocalTime(),
+                            rs.getString("work_position"),
+                            rs.getString("notes"),
+                            rs.getString("status")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 }
