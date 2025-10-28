@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
 <head>
     <meta charset="UTF-8">
     <title>Tìm Bàn</title>
@@ -109,6 +110,7 @@
     </style>
 </head>
 <body>
+<jsp:include page="../views/common/header.jsp" />
 <div class="bg-container">
     <div class="booking-box">
         <h2>TÌM BÀN</h2>

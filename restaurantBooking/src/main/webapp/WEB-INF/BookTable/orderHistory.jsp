@@ -188,15 +188,6 @@
             content: " ↓";
             margin-left: 5px;
         }
-        .clear-btn {
-            background: rgba(220, 53, 69, 0.3);
-            border-color: #dc3545;
-            color: #dc3545;
-        }
-        .clear-btn:hover {
-            background: #dc3545;
-            color: white;
-        }
 
         /* --- Table Styling --- */
         table {
@@ -271,20 +262,75 @@
             background: #17a2b8;
             color: white;
             border: none;
-            padding: 9px 18px;
+            padding: 8px 16px; /* Giảm kích thước để gọn hơn */
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            font-size: 0.9em; /* Giảm kích thước chữ */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
         }
 
         .btn:hover {
-            background: #117a8b;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            background: #138496; /* Tối hơn khi hover */
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn i {
+            font-size: 1em; /* Kích thước biểu tượng nhỏ hơn */
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover i {
+            transform: scale(1.2); /* Phóng to nhẹ biểu tượng khi hover */
+        }
+
+        .btn-detail {
+            background: #17a2b8;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        /* Tooltip cho nút */
+        .btn::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .btn:hover::after {
+            opacity: 1;
+            visibility: visible;
         }
 
         .back-link-container {
@@ -344,7 +390,6 @@
             color: rgba(255, 255, 255, 0.7);
             font-size: 0.95em;
         }
-
     </style>
 </head>
 <body>
@@ -374,6 +419,16 @@
     %>
     <div class="message success-message">
         <i class="fas fa-check-circle"></i> <%= successMessage %>
+    </div>
+    <%
+        }
+
+        // Check for cancellation success
+        String cancelled = request.getParameter("cancelled");
+        if ("true".equals(cancelled)) {
+    %>
+    <div class="message success-message">
+        <i class="fas fa-check-circle"></i> Hủy đơn đặt bàn thành công!
     </div>
     <%
         }
@@ -416,9 +471,6 @@
             </button>
             <button class="sort-btn" id="sortTimeBtn" onclick="sortByTime()">
                 <i class="fas fa-clock"></i> Sắp xếp theo giờ
-            </button>
-            <button class="sort-btn clear-btn" id="clearSortBtn" onclick="clearSort()">
-                <i class="fas fa-times"></i> Clear
             </button>
         </div>
     </div>
@@ -515,7 +567,18 @@
             <td><%= tableNames.toString() %></td>
             <td><%= r.getGuestCount() %></td>
             <td><span class="status <%= statusClass %>"><%= statusText %></span></td>
-            <td><a href="orderDetails?id=<%= r.getReservationId() %>" class="btn"><i class="fas fa-eye"></i> Chi tiết</a></td>
+            <td>
+                <div style="display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                    <a href="orderDetails?id=<%= r.getReservationId() %>" class="btn btn-detail" title="Xem chi tiết đơn hàng">
+                        <i class="fas fa-eye"></i> Chi tiết
+                    </a>
+                    <% if (!"DONE".equals(r.getStatus()) && !"CANCELLED".equals(r.getStatus())) { %>
+                    <a href="cancelOrder?reservationId=<%= r.getReservationId() %>" class="btn btn-delete" title="Hủy đơn hàng" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn đặt bàn này?');">
+                        <i class="fas fa-trash-alt"></i> Hủy
+                    </a>
+                    <% } %>
+                </div>
+            </td>
         </tr>
         <%
                 }
@@ -805,16 +868,6 @@
             row => row.classList.contains('visible-row')
         );
         showCurrentPage(visibleRows);
-    }
-
-    // Clear sort - reset về mặc định
-    function clearSort() {
-        clearAllButtons();
-        currentSortType = 'created';
-        currentSortOrder = 'desc';
-
-        // Re-sort về mặc định
-        applySort('created', sortCreatedBtn);
     }
 
     function convertTimeToMinutes(time) {

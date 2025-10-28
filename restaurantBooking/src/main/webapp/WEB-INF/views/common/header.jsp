@@ -86,7 +86,7 @@
                         </div>
                         <div id="userDropdown" class="dropdown-content">
                             <a href="${pageContext.request.contextPath}/profile"><i class="fas fa-user"></i> Hồ Sơ</a>
-                            <a href="${pageContext.request.contextPath}/my-reservations"><i
+                            <a href="${pageContext.request.contextPath}/orderHistory"><i
                                     class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
                             <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi
                                 Mật Khẩu</a>
