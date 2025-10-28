@@ -155,7 +155,9 @@ public class CheckoutServlet extends HttpServlet {
 
                 logger.info(">>> paymentMethod: {}", paymentMethod);
 
-                // ✅ TẠO RESERVATION mới trong DB
+                Integer editingReservationId = (Integer) session.getAttribute("editingReservationId");
+
+                // ✅ Chuẩn bị dữ liệu Reservation
                 Reservation reservation = new Reservation(
                         0,
                         userId,
@@ -180,8 +182,37 @@ public class CheckoutServlet extends HttpServlet {
                 }
                 reservation.setTotalAmount(totalAmount);
 
-                // Tạo Reservation trong DB
-                int reservationId = reservationDAO.createReservation(reservation);
+                int reservationId;
+                if (editingReservationId != null && editingReservationId > 0) {
+                    // ✅ Chế độ chỉnh sửa: cập nhật đơn cũ
+                    reservationId = editingReservationId;
+                    boolean updated = reservationDAO.updateReservationDetails(
+                            reservationId,
+                            reservation.getReservationDate(),
+                            reservation.getReservationTime(),
+                            reservation.getGuestCount(),
+                            reservation.getSpecialRequests(),
+                            totalAmount
+                    );
+                    if (!updated) {
+                        logger.error("❌ Failed to update reservation {}", reservationId);
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể cập nhật đơn đặt bàn");
+                        return;
+                    }
+
+                    // Ghi đè tables và items
+                    reservationTableDAO.removeAllTablesFromReservation(reservationId);
+                    orderItemDAO.deleteAllOrderItemsForReservation(reservationId);
+                } else {
+                    // ✅ Tạo mới
+                    reservation.setTotalAmount(totalAmount);
+                    reservationId = reservationDAO.createReservation(reservation);
+                    if (reservationId <= 0) {
+                        logger.error("❌ Failed to create reservation");
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể tạo đơn đặt bàn");
+                        return;
+                    }
+                }
 
                 if (reservationId <= 0) {
                     logger.error("❌ Failed to create reservation");
@@ -191,7 +222,7 @@ public class CheckoutServlet extends HttpServlet {
 
                 logger.info("✅ Created reservation with ID: {}", reservationId);
 
-                // ✅ TẠO Order_Items trong DB
+                // ✅ Ghi Order_Items
                 if (orderItems != null && !orderItems.isEmpty()) {
                     for (OrderItem item : orderItems) {
                         OrderItem dbItem = new OrderItem(reservationId, item.getItemId(), item.getQuantity(), item.getUnitPrice());
@@ -202,7 +233,7 @@ public class CheckoutServlet extends HttpServlet {
                     logger.info("✅ Created {} order items", orderItems.size());
                 }
 
-                // ✅ TẠO Reservation_Tables trong DB
+                // ✅ Ghi Reservation_Tables
                 for (Integer tableId : selectedTableIds) {
                     reservationTableDAO.addTableToReservation(reservationId, tableId);
                     tableDAO.updateTableStatus(tableId, "RESERVED");
@@ -247,11 +278,12 @@ public class CheckoutServlet extends HttpServlet {
                     session.removeAttribute("requiredTime");
                     session.removeAttribute("guestCount");
                     session.removeAttribute("specialRequest");
+                    session.removeAttribute("editingReservationId");
 
                     logger.info("✅ Checkout completed successfully for reservation {}", reservationId);
 
-                    // ✅ Redirect to success page
-                    response.sendRedirect("orderHistory?success=true");
+                    // ✅ Redirect to details page for edited or new reservation
+                    response.sendRedirect("orderDetails?id=" + reservationId);
                 } else {
                     logger.error("❌ Failed to create payment");
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi khi xử lý thanh toán");
