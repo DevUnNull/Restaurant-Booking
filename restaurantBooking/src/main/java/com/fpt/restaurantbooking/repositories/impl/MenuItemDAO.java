@@ -131,6 +131,32 @@ public class MenuItemDAO {
         return categories;
     }
 
+    // Get menu items by service ID
+    public List<MenuItem> getMenuItemsByServiceId(int serviceId) {
+        String sql = "SELECT mi.*, mc.name AS category_name, u1.full_name AS created_by_name, u2.full_name AS updated_by_name " +
+                "FROM Menu_Items mi " +
+                "INNER JOIN service_menu_items smi ON mi.item_id = smi.item_id " +
+                "LEFT JOIN menu_category mc ON mi.category_id = mc.id " +
+                "LEFT JOIN Users u1 ON mi.created_by = u1.user_id " +
+                "LEFT JOIN Users u2 ON mi.updated_by = u2.user_id " +
+                "WHERE smi.service_id = ? AND mi.status = 'AVAILABLE' ORDER BY mc.name, mi.item_name ASC";
+        List<MenuItem> items = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, serviceId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapResultSetToMenuItem(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting menu items by service ID: " + serviceId, e);
+        }
+        return items;
+    }
+
     private MenuItem mapResultSetToMenuItem(ResultSet rs) throws SQLException {
         MenuItem item = new MenuItem();
         item.setItemId(rs.getInt("item_id"));

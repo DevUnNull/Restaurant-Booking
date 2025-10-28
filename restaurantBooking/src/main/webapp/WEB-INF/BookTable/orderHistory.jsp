@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
     <style>
         /* --- General Reset & Body Styling --- */
@@ -26,35 +27,38 @@
 
         body, html {
             font-family: 'Montserrat', sans-serif;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
-            color: #f0f0f0;
+            color: var(--text-primary);
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
             width: 90%;
             max-width: 1000px;
             margin: 40px auto;
-            background-color: rgba(20, 10, 10, 0.75);
+            background-color: var(--box-bg);
             backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 30px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 2.5em;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            transition: color 0.3s ease;
         }
 
         /* --- Messages --- */
@@ -84,9 +88,10 @@
             gap: 15px;
             margin-bottom: 30px;
             padding: 20px;
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: var(--table-bg);
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
 
         .search-box {
@@ -98,14 +103,14 @@
         .search-box input {
             width: 100%;
             padding: 12px 45px 12px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--input-border);
             border-radius: 8px;
-            background: rgba(0, 0, 0, 0.4);
-            color: #fff;
+            background: var(--table-bg);
+            color: var(--text-primary);
             font-family: 'Montserrat', sans-serif;
             font-size: 1em;
             outline: none;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .search-box input:focus {
@@ -113,7 +118,7 @@
         }
 
         .search-box input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
         }
 
         .search-box i {
@@ -121,7 +126,7 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
         }
 
         .filter-group {
@@ -131,21 +136,33 @@
         }
 
         .filter-group label {
-            color: #fff;
+            color: var(--text-primary);
             font-weight: 500;
             white-space: nowrap;
+            transition: color 0.3s ease;
         }
 
         .filter-group select {
             padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--input-border);
             border-radius: 8px;
-            background: rgba(0, 0, 0, 0.4);
-            color: #fff;
+            background: var(--table-bg);
+            color: var(--text-primary);
             font-family: 'Montserrat', sans-serif;
             outline: none;
             cursor: pointer;
             min-width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select option {
+            background: var(--box-bg);
+            color: var(--text-primary);
+        }
+
+        body.light-mode .filter-group select option {
+            background: #fff;
+            color: #2c3e50;
         }
 
         .filter-group select:focus {
@@ -197,13 +214,14 @@
             margin-bottom: 30px;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            background-color: var(--table-bg);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
 
         table th, table td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            border-bottom: 1px solid var(--table-border);
             padding: 18px 15px;
             text-align: center;
             vertical-align: middle;
@@ -262,7 +280,7 @@
             background: #17a2b8;
             color: white;
             border: none;
-            padding: 8px 16px; /* Giảm kích thước để gọn hơn */
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
@@ -271,34 +289,21 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.9em; /* Giảm kích thước chữ */
+            font-size: 0.95em;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            background: #138496; /* Tối hơn khi hover */
-        }
-
-        .btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .btn i {
-            font-size: 1em; /* Kích thước biểu tượng nhỏ hơn */
-            transition: transform 0.3s ease;
-        }
-
-        .btn:hover i {
-            transform: scale(1.2); /* Phóng to nhẹ biểu tượng khi hover */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .btn-detail {
             background: #17a2b8;
+        }
+
+        .btn-detail:hover {
+            background: #138496;
         }
 
         .btn-delete {
@@ -307,30 +312,6 @@
 
         .btn-delete:hover {
             background: #c82333;
-        }
-
-        /* Tooltip cho nút */
-        .btn::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            margin-bottom: 8px;
-        }
-
-        .btn:hover::after {
-            opacity: 1;
-            visibility: visible;
         }
 
         .back-link-container {
@@ -390,9 +371,16 @@
             color: rgba(255, 255, 255, 0.7);
             font-size: 0.95em;
         }
+
     </style>
 </head>
 <body>
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+    <span id="themeText">Chế độ tối</span>
+</button>
+
 <%
     // Lấy dữ liệu từ request attributes
     List<OrderHistoryServlet.ReservationWithTables> reservations =
@@ -568,15 +556,13 @@
             <td><%= r.getGuestCount() %></td>
             <td><span class="status <%= statusClass %>"><%= statusText %></span></td>
             <td>
-                <div style="display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
-                    <a href="orderDetails?id=<%= r.getReservationId() %>" class="btn btn-detail" title="Xem chi tiết đơn hàng">
+                <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                    <a href="orderDetails?id=<%= r.getReservationId() %>" class="btn btn-detail" title="Xem chi tiết">
                         <i class="fas fa-eye"></i> Chi tiết
                     </a>
-                    <% if (!"DONE".equals(r.getStatus()) && !"CANCELLED".equals(r.getStatus())) { %>
-                    <a href="cancelOrder?reservationId=<%= r.getReservationId() %>" class="btn btn-delete" title="Hủy đơn hàng" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn đặt bàn này?');">
-                        <i class="fas fa-trash-alt"></i> Hủy
+                    <a href="cancelOrder?reservationId=<%= r.getReservationId() %>" class="btn btn-delete" title="Hủy đơn hàng">
+                        <i class="fas fa-trash-alt"></i> Xóa
                     </a>
-                    <% } %>
                 </div>
             </td>
         </tr>
@@ -611,10 +597,11 @@
     </div>
 
     <div class="back-link-container">
-        <a href="home" class="btn" style="background-color: #6c757d;"><i class="fas fa-home"></i> Quay về trang chủ</a>
+        <a href="trangchu.jsp" class="btn" style="background-color: #6c757d;"><i class="fas fa-home"></i> Quay về trang chủ</a>
     </div>
 </div>
 
+<script src="${pageContext.request.contextPath}/js/theme-manager.js"></script>
 <script>
     const searchInput = document.getElementById('searchInput');
     const statusFilter = document.getElementById('statusFilter');
@@ -869,6 +856,7 @@
         );
         showCurrentPage(visibleRows);
     }
+
 
     function convertTimeToMinutes(time) {
         const parts = time.split(':');

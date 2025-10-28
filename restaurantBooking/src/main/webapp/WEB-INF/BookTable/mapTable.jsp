@@ -10,34 +10,37 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html {
             font-family: 'Montserrat', sans-serif;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)),
             url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
-            color: #f0f0f0;
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
             padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
         }
         .container {
             width: 95%;
             max-width: 1200px;
-            background-color: rgba(20, 10, 10, 0.75);
+            background-color: var(--box-bg);
             backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--input-border);
             margin-bottom: 30px;
+            transition: background-color 0.3s ease;
         }
 
         /* HEADER WITH NAVIGATION */
@@ -51,7 +54,7 @@
         }
 
         h2 {
-            color: #fff;
+            color: var(--text-primary);
             font-size: 2.5em;
             font-weight: 700;
             letter-spacing: 2px;
@@ -59,6 +62,7 @@
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
             flex: 1;
             min-width: 300px;
+            transition: color 0.3s ease;
         }
 
         .nav-buttons {
@@ -111,27 +115,37 @@
             gap: 15px;
             margin-bottom: 30px;
             padding: 20px;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: var(--table-bg);
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
         .controls label {
             font-size: 1.1em;
             font-weight: 500;
-            color: #fff;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 8px;
         }
         .controls select, .controls input[type="number"] {
             padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--input-border);
             border-radius: 8px;
             font-size: 1em;
-            background: rgba(0, 0, 0, 0.4);
-            color: #fff;
+            background: var(--table-bg);
+            color: var(--text-primary);
             font-family: 'Montserrat', sans-serif;
             outline: none;
+            transition: all 0.3s ease;
+        }
+        .controls select option {
+            background: var(--box-bg);
+            color: var(--text-primary);
+        }
+        body.light-mode .controls select option {
+            background: #fff;
+            color: #2c3e50;
         }
         .controls select { min-width: 180px; }
         .controls select:focus, .controls input[type="number"]:focus { border-color: #667eea; }
@@ -155,9 +169,10 @@
             gap: 20px;
             margin-top: 20px;
             padding: 15px;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: var(--table-bg);
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
         .legend-item {
             display: flex;
@@ -376,15 +391,21 @@
     </style>
 </head>
 <body>
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+    <span id="themeText">Chế độ tối</span>
+</button>
+
 <div class="container">
     <!-- HEADER WITH NAVIGATION -->
     <div class="header-section">
         <h2><i class="fas fa-map-marked-alt"></i> Sơ đồ Bàn Nhà hàng</h2>
         <div class="nav-buttons">
-            <a href="findViewTable" class="btn-nav btn-back">
+            <a href="findTable" class="btn-nav btn-back">
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
-            <a href="orderItems" class="btn-nav btn-order">
+            <a href="orderItems" class="btn-nav btn-order" id="orderItemsBtn">
                 <i class="fas fa-utensils"></i> Đặt món ăn
             </a>
         </div>
@@ -394,9 +415,10 @@
     <form action="findTableMap" method="get" class="controls">
         <input type="hidden" name="date" value="<%= request.getAttribute("requiredDate") %>">
         <input type="hidden" name="time" value="<%= request.getAttribute("requiredTime") %>">
+        <input type="hidden" name="floor" value="<%= request.getParameter("floor") != null ? request.getParameter("floor") : "all" %>">
 
         <label for="floorSelect"><i class="fas fa-layer-group"></i> Chọn tầng:</label>
-        <select name="floor" id="floorSelect" onchange="this.form.submit()">
+        <select id="floorSelect" disabled>
             <option value="all" <%= "all".equals(request.getParameter("floor")) ? "selected" : "" %>>Tất cả tầng</option>
             <option value="1" <%= "1".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 1</option>
             <option value="2" <%= "2".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 2</option>
@@ -472,7 +494,34 @@
 
 <div class="table-tooltip" id="tableTooltip"></div>
 
+<%
+    // Tính số bàn đã chọn từ session cho JavaScript
+    int selectedTableCountFromSession = 0;
+    try {
+        List<Integer> __tableIds = (List<Integer>) session.getAttribute("selectedTableIds");
+        selectedTableCountFromSession = (__tableIds != null) ? __tableIds.size() : 0;
+    } catch (Exception __e) {
+        selectedTableCountFromSession = 0;
+    }
+%>
+
+<script src="${pageContext.request.contextPath}/js/theme-manager.js"></script>
 <script>
+    // Số bàn đã chọn (khởi tạo từ session)
+    var selectedTableCount = <%= selectedTableCountFromSession %>;
+
+    // Chặn đặt món nếu chưa chọn bàn
+    (function() {
+        var btn = document.getElementById('orderItemsBtn');
+        if (btn) {
+            btn.addEventListener('click', function(e) {
+                if (!selectedTableCount || selectedTableCount <= 0) {
+                    e.preventDefault();
+                    alert('Bạn phải chọn ít nhất 1 bàn trước khi đặt món.');
+                }
+            });
+        }
+    })();
     const tooltip = document.getElementById('tableTooltip');
     const tables = document.querySelectorAll('.table');
     let currentTable = null;
@@ -593,6 +642,8 @@
                     tableElem.classList.add('booked');
                     tableElem.style.cursor = 'not-allowed';
                 }
+                // Tăng đếm bàn đã chọn để cho phép đặt món
+                try { selectedTableCount = (selectedTableCount || 0) + 1; } catch(__e) {}
             } else {
                 alert(result.message || 'Không thể thêm bàn.');
             }
