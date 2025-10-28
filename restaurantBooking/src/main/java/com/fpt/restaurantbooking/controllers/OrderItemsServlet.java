@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/orderItems")
@@ -36,8 +37,6 @@ public class OrderItemsServlet extends HttpServlet {
                 handleGetTotal(request, response, session);
                 return;
             }
-
-            Integer reservationId = (Integer) session.getAttribute("reservationId");
 
             // Lấy parameters
             String search = request.getParameter("search");
@@ -87,7 +86,6 @@ public class OrderItemsServlet extends HttpServlet {
             request.setAttribute("totalPages", totalPages);
 
             logger.info("✅ Loaded {} menu items for page {}/{}", menuItems.size(), currentPage, totalPages);
-            logger.info("✅ reservationId from session: {}", reservationId);
 
             request.getRequestDispatcher("/WEB-INF/BookTable/orderItem.jsp").forward(request, response);
 
@@ -99,26 +97,25 @@ public class OrderItemsServlet extends HttpServlet {
     }
 
     /**
-     * ✅ XỬ LÝ REQUEST LẤY TỔNG TIỀN (JSON)
+     * ✅ XỬ LÝ REQUEST LẤY TỔNG TIỀN (JSON) - TÍNH TỪ SESSION
      */
     private void handleGetTotal(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
 
         try {
-            Integer reservationId = (Integer) session.getAttribute("reservationId");
+            // Lấy danh sách món ăn từ session
+            @SuppressWarnings("unchecked")
+            List<OrderItem> sessionItems = (List<OrderItem>) session.getAttribute("cartItems");
 
-            if (reservationId == null) {
-                response.getWriter().write("{\"success\": false, \"total\": 0, \"totalItems\": 0}");
-                return;
-            }
-
-            // Tính tổng tiền và số lượng món
-            BigDecimal totalPrice = orderItemDAO.calculateTotalPrice(reservationId);
-            List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
-
+            BigDecimal totalPrice = BigDecimal.ZERO;
             int totalItems = 0;
-            for (OrderItem item : orderItems) {
-                totalItems += item.getQuantity();
+
+            if (sessionItems != null && !sessionItems.isEmpty()) {
+                for (OrderItem item : sessionItems) {
+                    BigDecimal itemTotal = item.getUnitPrice().multiply(new BigDecimal(item.getQuantity()));
+                    totalPrice = totalPrice.add(itemTotal);
+                    totalItems += item.getQuantity();
+                }
             }
 
             // Trả về JSON
@@ -128,8 +125,7 @@ public class OrderItemsServlet extends HttpServlet {
                     totalItems
             ));
 
-            logger.info("✅ getTotal: reservationId={}, total={}, items={}",
-                    reservationId, totalPrice, totalItems);
+            logger.info("✅ getTotal from session: total={}, items={}", totalPrice, totalItems);
 
         } catch (Exception e) {
             logger.error("❌ Error in handleGetTotal", e);
@@ -147,18 +143,11 @@ public class OrderItemsServlet extends HttpServlet {
 
         try {
             String action = request.getParameter("action");
-            Integer reservationId = (Integer) session.getAttribute("reservationId");
 
             logger.info(">>> action: {}", action);
-            logger.info(">>> reservationId: {}", reservationId);
-
-            if (reservationId == null) {
-                logger.error("❌ reservationId is NULL");
-                response.getWriter().write("{\"success\": false, \"message\": \"Không có đơn đặt bàn\"}");
-                return;
-            }
 
             if ("add".equals(action)) {
+                // 🔹 LẤY MÓN ĂN TỪ SESSION (không lưu vào DB)
                 String itemIdStr = request.getParameter("itemId");
                 String qtyStr = request.getParameter("quantity");
                 String note = request.getParameter("note");
@@ -183,37 +172,48 @@ public class OrderItemsServlet extends HttpServlet {
 
                 logger.info("✅ Found MenuItem: {} - {}", menuItem.getItemId(), menuItem.getItemName());
 
-                OrderItem orderItem = new OrderItem(reservationId, itemId, quantity, menuItem.getPrice());
-                orderItem.setSpecialInstructions(note);
+                // Lấy danh sách món từ session
+                @SuppressWarnings("unchecked")
+                List<OrderItem> sessionItems = (List<OrderItem>) session.getAttribute("cartItems");
 
-                logger.info(">>> Creating OrderItem: resId={}, itemId={}, qty={}, price={}",
-                        reservationId, itemId, quantity, menuItem.getPrice());
-
-                int orderItemId = orderItemDAO.addOrderItem(orderItem);
-
-                logger.info(">>> OrderItem created with ID: {}", orderItemId);
-
-                if (orderItemId > 0) {
-                    BigDecimal totalPrice = orderItemDAO.calculateTotalPrice(reservationId);
-                    reservationDAO.updateTotalAmount(reservationId, totalPrice);
-
-                    logger.info("✅ Added item {} to reservation {}, new total: {}",
-                            itemId, reservationId, totalPrice);
-
-                    response.getWriter().write("{\"success\": true, \"message\": \"Thêm món thành công\"}");
-                } else {
-                    logger.error("❌ Failed to add OrderItem");
-                    response.getWriter().write("{\"success\": false, \"message\": \"Lỗi khi thêm món\"}");
+                if (sessionItems == null) {
+                    sessionItems = new ArrayList<>();
                 }
-            }
-            else if ("updateQty".equals(action)) {
-                // Cập nhật số lượng món ăn
-                String orderItemIdStr = request.getParameter("orderItemId");
+
+                // Kiểm tra xem món đã có trong session chưa
+                boolean found = false;
+                for (OrderItem existingItem : sessionItems) {
+                    if (existingItem.getItemId() == itemId &&
+                            ((existingItem.getSpecialInstructions() == null && note == null) ||
+                                    (existingItem.getSpecialInstructions() != null && existingItem.getSpecialInstructions().equals(note)))) {
+                        // Tăng số lượng nếu cùng món và cùng note
+                        existingItem.setQuantity(existingItem.getQuantity() + quantity);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    // Tạo OrderItem mới (chưa có reservationId)
+                    OrderItem orderItem = new OrderItem(0, itemId, quantity, menuItem.getPrice());
+                    orderItem.setSpecialInstructions(note);
+                    sessionItems.add(orderItem);
+                }
+
+                // Lưu lại vào session
+                session.setAttribute("cartItems", sessionItems);
+
+                logger.info("✅ Added item {} to session cart. Total items: {}", itemId, sessionItems.size());
+                response.getWriter().write("{\"success\": true, \"message\": \"Thêm món thành công\"}");
+
+            } else if ("updateQty".equals(action)) {
+                // Cập nhật số lượng món ăn trong session
+                String itemIdStr = request.getParameter("itemId");
                 String qtyStr = request.getParameter("quantity");
 
-                logger.info(">>> updateQty: orderItemId={}, quantity={}", orderItemIdStr, qtyStr);
+                logger.info(">>> updateQty: itemId={}, quantity={}", itemIdStr, qtyStr);
 
-                int orderItemId = Integer.parseInt(orderItemIdStr);
+                int itemId = Integer.parseInt(itemIdStr);
                 int quantity = Integer.parseInt(qtyStr);
 
                 if (quantity <= 0) {
@@ -222,41 +222,42 @@ public class OrderItemsServlet extends HttpServlet {
                     return;
                 }
 
-                boolean updated = orderItemDAO.updateOrderItemQuantity(orderItemId, quantity);
+                @SuppressWarnings("unchecked")
+                List<OrderItem> sessionItems = (List<OrderItem>) session.getAttribute("cartItems");
 
-                if (updated) {
-                    BigDecimal totalPrice = orderItemDAO.calculateTotalPrice(reservationId);
-                    reservationDAO.updateTotalAmount(reservationId, totalPrice);
-
-                    logger.info("✅ Updated order item {} to quantity {}, new total: {}",
-                            orderItemId, quantity, totalPrice);
-
+                if (sessionItems != null) {
+                    for (OrderItem item : sessionItems) {
+                        if (item.getItemId() == itemId) {
+                            item.setQuantity(quantity);
+                            break;
+                        }
+                    }
+                    session.setAttribute("cartItems", sessionItems);
+                    logger.info("✅ Updated item {} to quantity {}", itemId, quantity);
                     response.getWriter().write("{\"success\": true, \"message\": \"Cập nhật thành công\"}");
                 } else {
-                    logger.error("❌ Failed to update order item");
-                    response.getWriter().write("{\"success\": false, \"message\": \"Lỗi khi cập nhật\"}");
+                    response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy món\"}");
                 }
             }
             else if ("remove".equals(action)) {
-                // Xóa món ăn
-                String orderItemIdStr = request.getParameter("orderItemId");
+                // Xóa món ăn khỏi session
+                String itemIdStr = request.getParameter("itemId");
 
-                logger.info(">>> remove: orderItemId={}", orderItemIdStr);
+                logger.info(">>> remove: itemId={}", itemIdStr);
 
-                int orderItemId = Integer.parseInt(orderItemIdStr);
+                int itemId = Integer.parseInt(itemIdStr);
 
-                boolean deleted = orderItemDAO.deleteOrderItem(orderItemId);
+                @SuppressWarnings("unchecked")
+                List<OrderItem> sessionItems = (List<OrderItem>) session.getAttribute("cartItems");
 
-                if (deleted) {
-                    BigDecimal totalPrice = orderItemDAO.calculateTotalPrice(reservationId);
-                    reservationDAO.updateTotalAmount(reservationId, totalPrice);
+                if (sessionItems != null) {
+                    sessionItems.removeIf(item -> item.getItemId() == itemId);
+                    session.setAttribute("cartItems", sessionItems);
 
-                    logger.info("✅ Deleted order item {}, new total: {}", orderItemId, totalPrice);
-
+                    logger.info("✅ Removed item {} from session", itemId);
                     response.getWriter().write("{\"success\": true, \"message\": \"Xóa thành công\"}");
                 } else {
-                    logger.error("❌ Failed to delete order item");
-                    response.getWriter().write("{\"success\": false, \"message\": \"Lỗi khi xóa\"}");
+                    response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy món\"}");
                 }
             }
 

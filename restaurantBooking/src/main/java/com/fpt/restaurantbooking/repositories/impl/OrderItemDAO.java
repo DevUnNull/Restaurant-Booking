@@ -152,6 +152,40 @@ public class OrderItemDAO {
         return false;
     }
 
+    // Upsert all order items for a reservation: remove existing and insert new
+    public boolean replaceOrderItemsForReservation(int reservationId, List<OrderItem> newItems) {
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM Order_Items WHERE reservation_id = ?")) {
+                deleteStmt.setInt(1, reservationId);
+                deleteStmt.executeUpdate();
+            }
+
+            if (newItems != null) {
+                try (PreparedStatement insertStmt = conn.prepareStatement(
+                        "INSERT INTO Order_Items (reservation_id, item_id, quantity, unit_price, special_instructions, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())")) {
+                    for (OrderItem item : newItems) {
+                        insertStmt.setInt(1, reservationId);
+                        insertStmt.setInt(2, item.getItemId());
+                        insertStmt.setInt(3, item.getQuantity());
+                        insertStmt.setBigDecimal(4, item.getUnitPrice());
+                        insertStmt.setString(5, item.getSpecialInstructions());
+                        insertStmt.setString(6, item.getStatus());
+                        insertStmt.addBatch();
+                    }
+                    insertStmt.executeBatch();
+                }
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            logger.error("Error replacing order items for reservation", e);
+        }
+        return false;
+    }
+
     // Calculate total price for reservation
     public BigDecimal calculateTotalPrice(int reservationId) {
         String sql = "SELECT SUM(quantity * unit_price) as total FROM Order_Items WHERE reservation_id = ?";

@@ -28,7 +28,6 @@ public class ExportReportController extends HttpServlet {
         final int REPORT_LIMIT = 10000;
         List<Map<String, Object>> dataToExport;
 
-        // --- LẤY DỮ LIỆU ---
         try {
             dataToExport = reportRepository.getTopSellingItems(REPORT_LIMIT);
 
@@ -42,7 +41,6 @@ public class ExportReportController extends HttpServlet {
             return;
         }
 
-        // --- XUẤT BÁO CÁO VÀ XỬ LÝ LỖI EXPORT ---
         try {
             if ("excel".equalsIgnoreCase(type)) {
 

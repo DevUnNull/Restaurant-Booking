@@ -69,11 +69,11 @@
 
                     <!-- Remember Me & Forgot Password -->
                     <div class="form-group form-row">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="rememberMe" name="rememberMe">
-                            <span class="checkmark"></span>
-                            Ghi nhớ đăng nhập
-                        </label>
+<%--                        <label class="checkbox-label">--%>
+<%--                            <input type="checkbox" id="rememberMe" name="rememberMe">--%>
+<%--                            <span class="checkmark"></span>--%>
+<%--                            Ghi nhớ đăng nhập--%>
+<%--                        </label>--%>
                         <a href="${pageContext.request.contextPath}/forgot-password" class="auth-link">Quên mật khẩu?</a>
                     </div>
 
