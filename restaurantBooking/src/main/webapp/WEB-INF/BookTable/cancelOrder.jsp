@@ -1,16 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.Map, java.util.LinkedHashMap, java.util.List, java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.fpt.restaurantbooking.models.Reservation" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Hủy đặt bàn</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
     <style>
         /* --- General Reset & Body Styling --- */
         * {
@@ -18,124 +18,103 @@
             margin: 0;
             padding: 0;
         }
-
         body, html {
             font-family: 'Montserrat', sans-serif;
-            /* THAY THẾ BẰNG URL ẢNH NỀN CỦA BẠN */
             background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
             color: #f0f0f0;
             min-height: 100vh;
-            display: flex; /* Dùng flexbox để căn giữa nội dung */
+            display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-
         .container {
             width: 90%;
-            max-width: 700px; /* Tăng chiều rộng để chứa chính sách */
-            background-color: rgba(20, 10, 10, 0.75); /* Frosted glass effect */
+            max-width: 700px;
+            background-color: rgba(20, 10, 10, 0.75);
             backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
         }
-
         h2 {
             text-align: center;
             margin-bottom: 30px;
             color: #fff;
-            font-size: 2.5em;
+            font-size: 2.2em; /* Giảm nhẹ kích thước để gọn hơn */
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
         }
-
         form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px; /* Giảm khoảng cách để bố cục chặt chẽ hơn */
         }
-
         label {
-            font-size: 1.1em;
+            font-size: 1em; /* Giảm kích thước chữ */
             font-weight: 600;
             color: #fff;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-
         select, textarea {
-            padding: 12px 15px;
+            padding: 10px 12px; /* Giảm padding để gọn hơn */
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
-            font-size: 1em;
-            background: rgba(0, 0, 0, 0.4); /* Darker background for inputs */
+            font-size: 0.95em; /* Giảm kích thước chữ */
+            background: rgba(0, 0, 0, 0.4);
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             outline: none;
-            transition: border-color 0.3s ease;
-            -webkit-appearance: none; /* Remove default dropdown arrow on WebKit browsers */
-            -moz-appearance: none; /* Remove default dropdown arrow on Firefox */
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e74c3c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Custom arrow for select */
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 20px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-
         select:focus, textarea:focus {
-            border-color: #e74c3c; /* Accent color on focus */
+            border-color: #e74c3c;
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.3);
         }
-
         textarea {
-            min-height: 120px;
-            resize: vertical; /* Allow vertical resizing */
-            background-image: none;
+            min-height: 100px; /* Giảm chiều cao để gọn hơn */
+            resize: vertical;
         }
-
         option {
-            background-color: #333; /* Dark background for options */
+            background-color: #333;
             color: #fff;
         }
-
         /* CHÍNH SÁCH HỦY */
         .policy-section {
             background: rgba(231, 76, 60, 0.1);
             border: 1px solid rgba(231, 76, 60, 0.3);
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px; /* Giảm padding */
             margin-bottom: 20px;
         }
-
         .policy-section h3 {
             color: #e74c3c;
-            font-size: 1.2em;
-            margin-bottom: 15px;
+            font-size: 1.1em; /* Giảm kích thước chữ */
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-
         .policy-section ul {
             list-style: none;
             padding-left: 0;
         }
-
         .policy-section li {
-            padding: 8px 0;
-            padding-left: 25px;
+            padding: 6px 0;
+            padding-left: 20px;
             position: relative;
-            line-height: 1.6;
+            line-height: 1.5;
             color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9em; /* Giảm kích thước chữ */
         }
-
         .policy-section li:before {
             content: "✓";
             position: absolute;
@@ -143,49 +122,78 @@
             color: #e74c3c;
             font-weight: bold;
         }
-
         .actions {
             display: flex;
-            justify-content: flex-end; /* Căn nút Hủy sang phải */
-            gap: 15px; /* Khoảng cách giữa các nút */
-            margin-top: 20px;
+            justify-content: flex-end;
+            gap: 10px; /* Giảm khoảng cách */
+            margin-top: 15px;
         }
-
         .btn {
             border: none;
-            padding: 14px 28px;
+            padding: 10px 20px; /* Giảm kích thước nút */
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1.05em;
+            font-size: 0.95em; /* Giảm kích thước chữ */
             font-weight: 600;
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            text-decoration: none; /* Cho thẻ <a> */
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
         }
-
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn i {
+            font-size: 0.9em; /* Giảm kích thước biểu tượng */
+            transition: transform 0.3s ease;
+        }
+        .btn:hover i {
+            transform: scale(1.2); /* Phóng to biểu tượng khi hover */
+        }
         .cancel-btn {
-            background: #e74c3c; /* Màu đỏ nổi bật cho hủy */
+            background: #e74c3c;
             color: white;
         }
         .cancel-btn:hover {
             background: #c0392b;
         }
-
         .back-btn {
-            background-color: #6c757d; /* Màu xám cho nút quay lại */
+            background-color: #6c757d;
             color: white;
         }
         .back-btn:hover {
             background-color: #5a6268;
         }
-
+        /* Tooltip cho nút */
+        .btn::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            margin-bottom: 8px;
+        }
+        .btn:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
         /* POPUP XÁC NHẬN */
         .popup-overlay {
             display: none;
@@ -199,164 +207,167 @@
             justify-content: center;
             align-items: center;
         }
-
         .popup-overlay.show {
             display: flex;
         }
-
         .popup-content {
             background: rgba(20, 10, 10, 0.95);
             backdrop-filter: blur(10px);
-            padding: 35px;
-            border-radius: 15px;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            padding: 25px; /* Giảm padding */
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             border: 2px solid rgba(231, 76, 60, 0.5);
-            max-width: 500px;
+            max-width: 450px; /* Giảm chiều rộng */
             width: 90%;
             animation: popupSlideIn 0.3s ease;
         }
-
         @keyframes popupSlideIn {
             from {
                 opacity: 0;
-                transform: translateY(-50px);
+                transform: translateY(-30px); /* Giảm khoảng cách trượt */
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
         .popup-content h3 {
             color: #e74c3c;
-            font-size: 1.8em;
-            margin-bottom: 20px;
+            font-size: 1.6em; /* Giảm kích thước chữ */
+            margin-bottom: 15px;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
-
         .popup-content p {
             color: #fff;
-            font-size: 1.1em;
-            line-height: 1.8;
-            margin-bottom: 15px;
+            font-size: 1em; /* Giảm kích thước chữ */
+            line-height: 1.6;
+            margin-bottom: 10px;
         }
-
         .popup-content .booking-info {
             background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #e74c3c;
+            margin: 15px 0;
+            border-left: 3px solid #e74c3c;
         }
-
         .popup-content .booking-info p {
-            margin: 8px 0;
-            font-size: 1em;
+            margin: 6px 0;
+            font-size: 0.9em; /* Giảm kích thước chữ */
         }
-
         .popup-buttons {
             display: flex;
-            gap: 15px;
-            margin-top: 25px;
+            gap: 10px; /* Giảm khoảng cách */
+            margin-top: 20px;
         }
-
         .popup-buttons button {
             flex: 1;
-            padding: 12px 20px;
+            padding: 10px 15px; /* Giảm kích thước nút */
             border: none;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 0.95em; /* Giảm kích thước chữ */
+            font予約
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Montserrat', sans-serif;
         }
-
         .popup-buttons .confirm-yes {
             background: #e74c3c;
             color: white;
         }
-
         .popup-buttons .confirm-yes:hover {
             background: #c0392b;
         }
-
         .popup-buttons .confirm-no {
             background: #6c757d;
             color: white;
         }
-
         .popup-buttons .confirm-no:hover {
             background: #5a6268;
         }
-
+        /* Thông báo lỗi */
+        .error-message {
+            background: rgba(231, 76, 60, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #e74c3c;
+            text-align: center;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        /* Thông báo không có dữ liệu */
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.8);
+        }
     </style>
 </head>
 <body>
+<%
+    Reservation reservation = (Reservation) request.getAttribute("reservation");
+    List<Integer> tableIds = (List<Integer>) request.getAttribute("tableIds");
+    String errorMessage = (String) request.getAttribute("errorMessage");
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+%>
 <div class="container">
     <h2><i class="fas fa-ban"></i> Hủy đặt bàn</h2>
-
+    <% if (errorMessage != null) { %>
+    <div class="error-message">
+        <i class="fas fa-exclamation-circle"></i> <%= errorMessage %>
+    </div>
+    <% } %>
+    <% if (reservation == null) { %>
+    <div class="no-data">
+        <i class="fas fa-info-circle" style="font-size: 2em; margin-bottom: 15px; color: rgba(255, 255, 255, 0.5);"></i>
+        <p>Không có thông tin đơn đặt bàn.</p>
+        <a href="orderHistory" class="btn back-btn" title="Quay về lịch sử đặt bàn">
+            <i class="fas fa-arrow-left"></i> Quay về lịch sử
+        </a>
+    </div>
+    <% } else { %>
     <!-- CHÍNH SÁCH HỦY -->
     <div class="policy-section">
         <h3><i class="fas fa-info-circle"></i> Chính sách hủy đặt bàn</h3>
         <ul>
             <li>Miễn phí hủy nếu hủy trước 24 giờ so với giờ đặt bàn</li>
-            <li>Hủy trong vòng 12-24 giờ: Phí hủy 50,000 VNĐ</li>
-            <li>Hủy trong vòng 12 giờ: Phí hủy 100,000 VNĐ</li>
             <li>Không hoàn lại tiền đặt cọc nếu hủy sau giờ đặt bàn</li>
             <li>Vui lòng cung cấp lý do hủy để chúng tôi cải thiện dịch vụ</li>
         </ul>
     </div>
-
-    <form id="cancelForm">
-        <label for="bookingId"><i class="fas fa-clipboard-list"></i> Chọn đơn đặt bàn muốn hủy:</label>
-        <select name="bookingId" id="bookingId" required>
-            <option value="">-- Chọn đơn đặt bàn --</option>
-            <%
-                // Dữ liệu giả định cho các đơn hàng có thể hủy
-                // Trong thực tế, bạn sẽ lấy từ database những đơn có trạng thái 'pending' hoặc 'confirmed'
-                Map<String, List<Object>> allOrdersData = (Map<String, List<Object>>) session.getAttribute("allOrdersData");
-                if (allOrdersData == null) {
-                    // Khởi tạo dữ liệu mẫu nếu chưa có (tương tự trang chi tiết)
-                    allOrdersData = new LinkedHashMap<>();
-                    List<Object> order1 = new ArrayList<>();
-                    order1.add("2025-09-15"); order1.add("18:30"); order1.add("Bàn 05"); order1.add(4); order1.add("pending"); order1.add("GIAM10"); order1.add(new LinkedHashMap<String, Object[]>());
-                    allOrdersData.put("DB001", order1);
-
-                    List<Object> order2 = new ArrayList<>();
-                    order2.add("2025-09-10"); order2.add("12:00"); order2.add("Bàn 02"); order2.add(2); order2.add("confirmed"); order2.add(null); order2.add(new LinkedHashMap<String, Object[]>());
-                    allOrdersData.put("DB002", order2);
-
-                    List<Object> order3 = new ArrayList<>();
-                    order3.add("2025-09-05"); order3.add("19:00"); order3.add("Bàn 08"); order3.add(6); order3.add("done"); order3.add("GIAM10"); order3.add(new LinkedHashMap<String, Object[]>());
-                    allOrdersData.put("DB003", order3);
-
-                    session.setAttribute("allOrdersData", allOrdersData);
-                }
-
-                // Lọc ra các đơn hàng có thể hủy (pending hoặc confirmed)
-                for (Map.Entry<String, List<Object>> entry : allOrdersData.entrySet()) {
-                    String orderId = entry.getKey();
-                    List<Object> orderData = entry.getValue();
-                    String status = (String) orderData.get(4);
-
-                    if ("pending".equals(status) || "confirmed".equals(status)) {
-                        String orderDate = (String) orderData.get(0);
-                        String orderTime = (String) orderData.get(1);
-                        String tableNumber = (String) orderData.get(2);
-                        int guests = (int) orderData.get(3);
-                        out.println("<option value=\"" + orderId + "\" data-date=\"" + orderDate + "\" data-time=\"" + orderTime + "\" data-table=\"" + tableNumber + "\" data-guests=\"" + guests + "\">" + orderId + " - " + tableNumber + " - " + orderTime + " (" + orderDate + ")</option>");
-                    }
-                }
-            %>
-        </select>
-
+    <!-- Thông tin đơn đặt bàn -->
+    <div class="policy-section" style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3);">
+        <h3 style="color: #667eea;"><i class="fas fa-info-circle"></i> Thông tin đơn đặt bàn</h3>
+        <ul style="list-style: none;">
+            <li style="padding-left: 0;"><strong>Mã đơn:</strong> DB<%= String.format("%03d", reservation.getReservationId()) %></li>
+            <li style="padding-left: 0;"><strong>Ngày:</strong> <%= reservation.getReservationDate() != null ? reservation.getReservationDate().format(dateFormatter) : "N/A" %></li>
+            <li style="padding-left: 0;"><strong>Giờ:</strong> <%= reservation.getReservationTime() != null ? reservation.getReservationTime().format(timeFormatter) : "N/A" %></li>
+            <li style="padding-left: 0;"><strong>Số người:</strong> <%= reservation.getGuestCount() %></li>
+            <li style="padding-left: 0;"><strong>Trạng thái:</strong> <%= reservation.getStatus() %></li>
+            <% if (tableIds != null && !tableIds.isEmpty()) { %>
+            <li style="padding-left: 0;"><strong>Bàn:</strong>
+                <% for (int i = 0; i < tableIds.size(); i++) { %>
+                Bàn <%= tableIds.get(i) %><%= i < tableIds.size() - 1 ? ", " : "" %>
+                <% } %>
+            </li>
+            <% } %>
+        </ul>
+    </div>
+    <form id="cancelForm" method="post" action="cancelOrder">
+        <input type="hidden" name="reservationId" value="<%= reservation.getReservationId() %>">
+        <input type="hidden" name="reason" id="reasonInput" required>
         <label for="reasonSelect"><i class="fas fa-comment-alt"></i> Lý do hủy:</label>
-        <select name="reasonSelect" id="reasonSelect" required>
+        <select name="reasonSelect" id="reasonSelect" onchange="handleReasonChange()">
             <option value="">-- Chọn lý do --</option>
             <option value="Thay đổi kế hoạch">Thay đổi kế hoạch</option>
             <option value="Đặt nhầm thời gian">Đặt nhầm thời gian</option>
@@ -365,96 +376,84 @@
             <option value="Vấn đề sức khỏe">Vấn đề sức khỏe</option>
             <option value="other">Lý do khác</option>
         </select>
-
         <div id="otherReasonContainer" style="display: none;">
             <label for="otherReason"><i class="fas fa-edit"></i> Chi tiết lý do:</label>
-            <textarea name="otherReason" id="otherReason" placeholder="Vui lòng nhập lý do cụ thể..."></textarea>
+            <textarea name="otherReason" id="otherReason" placeholder="Vui lòng nhập lý do cụ thể..." required></textarea>
         </div>
-
         <div class="actions">
-            <a href="lichsudat.jsp" class="btn back-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
-            <button type="button" class="btn cancel-btn" onclick="showConfirmPopup()"><i class="fas fa-times-circle"></i> Xác nhận hủy</button>
+            <a href="orderHistory" class="btn back-btn" title="Quay về lịch sử đặt bàn">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+            <button type="button" class="btn cancel-btn" title="Xác nhận hủy đặt bàn" onclick="showConfirmPopup()">
+                <i class="fas fa-times-circle"></i> Xác nhận hủy
+            </button>
         </div>
     </form>
+    <% } %>
 </div>
-
 <!-- POPUP XÁC NHẬN -->
 <div class="popup-overlay" id="confirmPopup">
     <div class="popup-content">
         <h3><i class="fas fa-exclamation-triangle"></i> Xác nhận hủy bàn</h3>
         <p>Bạn có chắc chắn muốn hủy đặt bàn này không?</p>
-
         <div class="booking-info" id="popupBookingInfo">
-            <!-- Thông tin đặt bàn sẽ được điền vào đây bằng JavaScript -->
+            <% if (reservation != null) { %>
+            <p><strong><i class="fas fa-hashtag"></i> Mã đặt bàn:</strong> DB<%= String.format("%03d", reservation.getReservationId()) %></p>
+            <p><strong><i class="fas fa-calendar-alt"></i> Ngày:</strong> <%= reservation.getReservationDate() != null ? reservation.getReservationDate().format(dateFormatter) : "N/A" %></p>
+            <p><strong><i class="fas fa-clock"></i> Giờ:</strong> <%= reservation.getReservationTime() != null ? reservation.getReservationTime().format(timeFormatter) : "N/A" %></p>
+            <p><strong><i class="fas fa-users"></i> Số người:</strong> <%= reservation.getGuestCount() %></p>
+            <p><strong><i class="fas fa-comment"></i> Lý do:</strong> <span id="popupReason">-</span></p>
+            <% } %>
         </div>
-
-        <p style="color: #ffc107; font-size: 0.95em;">
+        <p style="color: #ffc107; font-size: 0.9em;">
             <i class="fas fa-info-circle"></i> Lưu ý: Vui lòng xem chính sách hủy phía trên để biết chi tiết về phí hủy.
         </p>
-
         <div class="popup-buttons">
-            <button class="confirm-no" onclick="closeConfirmPopup()">
-                <i class="fas fa-times"></i> Không, giữ đặt bàn
+            <button class="confirm-no" title="Giữ lại đặt bàn" onclick="closeConfirmPopup()">
+                <i class="fas fa-times"></i> Không, giữ lại
             </button>
-            <button class="confirm-yes" onclick="submitCancellation()">
-                <i class="fas fa-check"></i> Có, xác nhận hủy
+            <button class="confirm-yes" title="Xác nhận hủy đặt bàn" onclick="submitCancellation()">
+                <i class="fas fa-check"></i> Có, hủy
             </button>
         </div>
     </div>
 </div>
-
 <script>
     const reasonSelect = document.getElementById('reasonSelect');
+    const reasonInput = document.getElementById('reasonInput');
     const otherReasonContainer = document.getElementById('otherReasonContainer');
     const otherReasonTextarea = document.getElementById('otherReason');
-    const bookingSelect = document.getElementById('bookingId');
     const confirmPopup = document.getElementById('confirmPopup');
-    const popupBookingInfo = document.getElementById('popupBookingInfo');
 
-    // Hiển thị textarea khi chọn "Lý do khác"
-    reasonSelect.addEventListener('change', function() {
-        if (this.value === 'other') {
+    function handleReasonChange() {
+        if (reasonSelect.value === 'other') {
             otherReasonContainer.style.display = 'block';
             otherReasonTextarea.required = true;
+            reasonInput.value = '';
         } else {
             otherReasonContainer.style.display = 'none';
             otherReasonTextarea.required = false;
             otherReasonTextarea.value = '';
+            reasonInput.value = reasonSelect.value;
         }
-    });
+    }
 
     function showConfirmPopup() {
-        // Kiểm tra form hợp lệ
-        const form = document.getElementById('cancelForm');
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        // Lấy thông tin đặt bàn được chọn
-        const selectedOption = bookingSelect.options[bookingSelect.selectedIndex];
-        const bookingId = selectedOption.value;
-        const date = selectedOption.getAttribute('data-date');
-        const time = selectedOption.getAttribute('data-time');
-        const table = selectedOption.getAttribute('data-table');
-        const guests = selectedOption.getAttribute('data-guests');
-
         // Lấy lý do hủy
         let reason = reasonSelect.value;
         if (reason === 'other') {
-            reason = otherReasonTextarea.value;
+            reason = otherReasonTextarea.value.trim();
+            if (!reason) {
+                alert('Vui lòng nhập lý do hủy.');
+                return;
+            }
+        } else if (!reason || reason === '') {
+            alert('Vui lòng chọn lý do hủy.');
+            return;
         }
-
-        // Điền thông tin vào popup
-        popupBookingInfo.innerHTML = `
-                <p><strong><i class="fas fa-hashtag"></i> Mã đặt bàn:</strong> ${bookingId}</p>
-                <p><strong><i class="fas fa-calendar-alt"></i> Ngày:</strong> ${date}</p>
-                <p><strong><i class="fas fa-clock"></i> Giờ:</strong> ${time}</p>
-                <p><strong><i class="fas fa-chair"></i> Bàn:</strong> ${table}</p>
-                <p><strong><i class="fas fa-users"></i> Số người:</strong> ${guests}</p>
-                <p><strong><i class="fas fa-comment"></i> Lý do:</strong> ${reason}</p>
-            `;
-
+        reasonInput.value = reason;
+        // Cập nhật lý do trong popup
+        document.getElementById('popupReason').textContent = reason || 'Không xác định';
         // Hiển thị popup
         confirmPopup.classList.add('show');
     }
@@ -466,8 +465,6 @@
     function submitCancellation() {
         // Gửi form đến server
         const form = document.getElementById('cancelForm');
-        form.action = 'xulyhuydatban.jsp';
-        form.method = 'post';
         form.submit();
     }
 
@@ -475,6 +472,18 @@
     confirmPopup.addEventListener('click', function(e) {
         if (e.target === confirmPopup) {
             closeConfirmPopup();
+        }
+    });
+
+    // Tự động ẩn thông báo lỗi sau 5 giây
+    window.addEventListener('DOMContentLoaded', function() {
+        const errorMsg = document.querySelector('.error-message');
+        if (errorMsg) {
+            setTimeout(function() {
+                errorMsg.style.transition = 'opacity 0.5s';
+                errorMsg.style.opacity = '0';
+                setTimeout(() => errorMsg.remove(), 500);
+            }, 5000);
         }
     });
 </script>

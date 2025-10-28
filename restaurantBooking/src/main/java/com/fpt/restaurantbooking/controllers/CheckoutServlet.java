@@ -183,9 +183,11 @@ public class CheckoutServlet extends HttpServlet {
                 reservation.setTotalAmount(totalAmount);
 
                 int reservationId;
+                boolean isEditing = false;
                 if (editingReservationId != null && editingReservationId > 0) {
                     // ✅ Chế độ chỉnh sửa: cập nhật đơn cũ
                     reservationId = editingReservationId;
+                    isEditing = true;
                     boolean updated = reservationDAO.updateReservationDetails(
                             reservationId,
                             reservation.getReservationDate(),
@@ -283,7 +285,11 @@ public class CheckoutServlet extends HttpServlet {
                     logger.info("✅ Checkout completed successfully for reservation {}", reservationId);
 
                     // ✅ Redirect to details page for edited or new reservation
-                    response.sendRedirect("orderDetails?id=" + reservationId);
+                    if (isEditing) {
+                        response.sendRedirect("orderDetails?id=" + reservationId + "&updated=true");
+                    } else {
+                        response.sendRedirect("orderDetails?id=" + reservationId + "&success=true");
+                    }
                 } else {
                     logger.error("❌ Failed to create payment");
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi khi xử lý thanh toán");

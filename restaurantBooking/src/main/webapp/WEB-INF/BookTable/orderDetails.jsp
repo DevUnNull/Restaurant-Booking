@@ -257,6 +257,37 @@
             font-size: 1.1em;
         }
 
+        /* --- Messages --- */
+        .message {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease;
+        }
+        .success-message {
+            background: rgba(40, 167, 69, 0.8);
+            color: white;
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+        .error-message {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -271,6 +302,25 @@
 
 <div class="container">
     <h2><i class="fas fa-receipt"></i> Chi tiết đơn DB<%= reservation != null && reservation.getReservationId() != null ? String.format("%03d", reservation.getReservationId()) : "---" %></h2>
+
+    <!-- Success Message -->
+    <%
+        String success = request.getParameter("success");
+        String updated = request.getParameter("updated");
+        if ("true".equals(success)) {
+    %>
+    <div class="message success-message">
+        <i class="fas fa-check-circle"></i> Đặt đơn bàn thành công! Cảm ơn bạn đã đặt bàn tại nhà hàng.
+    </div>
+    <%
+    } else if ("true".equals(updated)) {
+    %>
+    <div class="message success-message">
+        <i class="fas fa-check-circle"></i> Cập nhật đơn bàn thành công!
+    </div>
+    <%
+        }
+    %>
 
     <!-- SEARCH & FILTER SECTION -->
     <div class="filter-section">
@@ -411,7 +461,17 @@
     </div>
 </div>
 <script>
-    // No interactive JS needed on details page for now
+    // Auto hide success message after 5 seconds
+    window.addEventListener('DOMContentLoaded', function() {
+        const successMsg = document.querySelector('.success-message');
+        if (successMsg) {
+            setTimeout(function() {
+                successMsg.style.transition = 'opacity 0.5s';
+                successMsg.style.opacity = '0';
+                setTimeout(() => successMsg.remove(), 500);
+            }, 5000);
+        }
+    });
 </script>
 </body>
 </html>
