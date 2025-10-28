@@ -515,7 +515,7 @@
             <td><%= tableNames.toString() %></td>
             <td><%= r.getGuestCount() %></td>
             <td><span class="status <%= statusClass %>"><%= statusText %></span></td>
-            <td><a href="#" class="btn"><i class="fas fa-eye"></i> Chi tiết</a></td>
+            <td><a href="orderDetails?id=<%= r.getReservationId() %>" class="btn"><i class="fas fa-eye"></i> Chi tiết</a></td>
         </tr>
         <%
                 }
@@ -548,7 +548,7 @@
     </div>
 
     <div class="back-link-container">
-        <a href="trangchu.jsp" class="btn" style="background-color: #6c757d;"><i class="fas fa-home"></i> Quay về trang chủ</a>
+        <a href="home" class="btn" style="background-color: #6c757d;"><i class="fas fa-home"></i> Quay về trang chủ</a>
     </div>
 </div>
 
