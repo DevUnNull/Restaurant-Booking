@@ -7,7 +7,7 @@ public class GalleryImage extends BaseEntity {
     private Integer imageId;
     private String imageName;
     private String imageUrl;
-    private String imageType;
+    private String imageTile;
     private String description;
     private String status;
     private Integer uploadedBy;
@@ -42,12 +42,11 @@ public class GalleryImage extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
-    public String getImageType() {
-        return imageType;
+    public String getImageTile() {
+        return imageTile;
     }
-
-    public void setImageType(String imageType) {
-        this.imageType = imageType;
+    public void setImageTile(String imageTile) {
+        this.imageTile = imageTile;
     }
 
     public String getDescription() {

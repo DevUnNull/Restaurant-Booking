@@ -23,6 +23,11 @@ public class User extends BaseEntity {
         CUSTOMER, STAFF, ADMIN
     }
 
+    public User() {
+        super();
+        this.role = "CUSTOMER";
+        this.status = "ACTIVE";
+    }
     public User(Integer userId, Integer roleId, String fullName, String email, String phoneNumber, String promotion_level_id, LocalDate dateOfBirth, String gender) {
         this.userId = userId;
         this.roleId = roleId;
@@ -34,31 +39,29 @@ public class User extends BaseEntity {
         this.gender = gender;
     }
 
-    public User() {
-        super();
-        this.role = "CUSTOMER";
-        this.status = "ACTIVE";
-    }
-
     // Getters and Setters
     public Integer getUserId() {
         return userId;
     }
-
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
-
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
-
     public String getGender() {
         return gender;
     }
-
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getPromotion_level_id() {
+        return promotion_level_id;
+    }
+
+    public void setPromotion_level_id(String promotion_level_id) {
+        this.promotion_level_id = promotion_level_id;
     }
 
 
@@ -80,14 +83,6 @@ public class User extends BaseEntity {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getPromotion_level_id() {
-        return promotion_level_id;
-    }
-
-    public void setPromotion_level_id(String promotion_level_id) {
-        this.promotion_level_id = promotion_level_id;
     }
 
     public String getEmail() {
@@ -139,24 +134,8 @@ public class User extends BaseEntity {
     }
 
 
+
     public boolean getIsActive() {
         return isActive();
     }
-
-
-    public String toString() {
-        return "User{" +
-                "userId=" + userId +
-                "Pass= " + password +
-                ", roleId=" + roleId +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", status='" + status + '\'' +
-                ", role='" + role + '\'' +
-                '}';
-    }
-
-
 }

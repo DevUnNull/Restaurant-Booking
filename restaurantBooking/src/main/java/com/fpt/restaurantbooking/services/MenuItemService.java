@@ -10,22 +10,22 @@ import java.util.List;
 public interface MenuItemService extends BaseService<MenuItem, Long> {
 
     MenuItem save(MenuItem menuItem);
-
+    List<MenuItem> findAllAvailable();
     /**
      * Find featured menu items for home page display
      */
     List<MenuItem> findFeaturedItems();
-    
+
     /**
      * Find menu items by category
      */
     List<MenuItem> findByCategory(String category);
-    
+
     /**
      * Find active menu items
      */
     List<MenuItem> findActiveItems();
-    
+
     /**
      * Find menu items by status
      */
