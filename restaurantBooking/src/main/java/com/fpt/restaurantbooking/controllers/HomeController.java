@@ -1,79 +1,62 @@
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.models.MenuItem;
-import com.fpt.restaurantbooking.models.Promotion;
 import com.fpt.restaurantbooking.models.RestaurantInfo;
 import com.fpt.restaurantbooking.repositories.MenuItemRepository;
-import com.fpt.restaurantbooking.repositories.PromotionRepository;
 import com.fpt.restaurantbooking.repositories.RestaurantInfoRepository;
-import com.fpt.restaurantbooking.repositories.impl.PromotionRepositoryImpl;
+import com.fpt.restaurantbooking.repositories.impl.MenuItemDAO;
 import com.fpt.restaurantbooking.repositories.impl.RestaurantInfoRepositoryImpl;
 import com.fpt.restaurantbooking.services.MenuItemService;
-import com.fpt.restaurantbooking.services.PromotionService;
 import com.fpt.restaurantbooking.services.RestaurantInfoService;
 import com.fpt.restaurantbooking.services.impl.MenuItemServiceImpl;
-import com.fpt.restaurantbooking.services.impl.PromotionServiceImpl;
 import com.fpt.restaurantbooking.services.impl.RestaurantInfoServiceImpl;
-import com.fpt.restaurantbooking.utils.DatabaseUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
-import java.sql.Connection;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * Controller for handling home page requests
- */
 @WebServlet(name = "HomeController", urlPatterns = {"/", "/home"})
 public class HomeController extends BaseController {
 
-    private final PromotionService promotionService;
     private final RestaurantInfoService restaurantInfoService;
+    //private final MenuItemService menuItemService;
 
-    
     public HomeController() {
-        try {
-            Connection connection = DatabaseUtil.getConnection();
-            
-            // Initialize repositories
-            PromotionRepository promotionRepository = new PromotionRepositoryImpl(connection);
-            RestaurantInfoRepository restaurantInfoRepository = new RestaurantInfoRepositoryImpl(connection);
+        RestaurantInfoRepository restaurantInfoRepository = new RestaurantInfoRepositoryImpl();
+        //MenuItemRepository menuItemRepository = new MenuItemDAO();
 
-            
-            // Initialize services with dependency injection
-            this.promotionService = new PromotionServiceImpl(promotionRepository);
-            this.restaurantInfoService = new RestaurantInfoServiceImpl(restaurantInfoRepository);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize HomeController", e);
-        }
+        this.restaurantInfoService = new RestaurantInfoServiceImpl(restaurantInfoRepository);
+        //this.menuItemService = new MenuItemServiceImpl(menuItemRepository);
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Đặt khối try-catch ra ngoài để bao trọn cả forward
         try {
-            // Get active promotions for banners
-            List<Promotion> activePromotions = promotionService.findActivePromotionsForHomePage();
-            request.setAttribute("promotions", activePromotions);
-            
-            // Get restaurant info for opening hours and address
-            RestaurantInfo restaurantInfo = restaurantInfoService.getMainRestaurantInfo().orElse(null);
-            request.setAttribute("restaurantInfo", restaurantInfo);
-            
+            // Lấy tất cả dữ liệu
+            Optional<RestaurantInfo> restaurantInfoOpt = restaurantInfoService.getMainRestaurantInfo();
+            //List<MenuItem> featuredDishes = menuItemService.findFeaturedItems();
 
+            // Đặt các attribute vào request
+//            request.setAttribute("restaurantInfo", restaurantInfoOpt.orElse(null));
+//            request.setAttribute("featuredDishes", featuredDishes);
 
-            
-            // Forward to home page
+            // Chỉ forward khi tất cả đã xong
             forwardToPage(request, response, "/WEB-INF/views/home.jsp");
-            
+
         } catch (Exception e) {
-            // Log error and forward to home page anyway
-            System.err.println("Error loading home page data: " + e.getMessage());
+            // Nếu có lỗi, in ra và báo lỗi 500.
+            // KHÔNG forward nữa để tránh lỗi IllegalStateException
+            System.err.println("!!! LỖI NGHIÊM TRỌNG KHI TẢI TRANG CHỦ !!!");
             e.printStackTrace();
-            forwardToPage(request, response, "/WEB-INF/views/home.jsp");
+            if (!response.isCommitted()) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể tải dữ liệu trang chủ.");
+            }
         }
     }
 }
