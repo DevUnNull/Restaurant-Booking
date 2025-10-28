@@ -213,3 +213,37 @@
     background-color: #004085; /* Đậm hơn nữa */
     transform: translateY(1px); /* Tạo cảm giác nhấn xuống */
 }
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-form label {
+    font-weight: bold;
+}
+
+.filter-form select,
+.filter-form input[type="date"] {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.filter-form button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.filter-form .reset-btn {
+    color: #333;
+    text-decoration: none;
+    margin-left: 10px;
+}

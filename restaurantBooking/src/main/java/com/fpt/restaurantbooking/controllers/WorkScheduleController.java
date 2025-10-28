@@ -11,6 +11,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 
 @WebServlet(name = "WorkSchedule", urlPatterns = {"/WorkSchedule"})
@@ -59,13 +60,39 @@ public class WorkScheduleController extends HttpServlet {
         try {
             List<WorkSchedule> schedules = workScheduleDao.getAllWorkSchedules();
 
-            // Ẩn những lịch có trạng thái CANCELLED
+            // Ẩn CANCELLED
             schedules.removeIf(ws -> "CANCELLED".equalsIgnoreCase(ws.getStatus()));
 
-            // Lấy danh sách nhân viên để hiển thị trong popup
+            // Lấy danh sách nhân viên
             List<User> staffList = userDao.findAllStaff();
 
-            // Xử lý phân trang
+            // === Lọc theo Nhân viên ===
+            String userIdParam = request.getParameter("userId");
+            if (userIdParam != null && !userIdParam.isEmpty()) {
+                int userIdFilter = Integer.parseInt(userIdParam);
+                schedules.removeIf(ws -> ws.getUser() == null || ws.getUser().getUserId() != userIdFilter);
+            }
+
+            // === Lọc theo khoảng ngày ===
+            String startDateParam = request.getParameter("startDate");
+            String endDateParam = request.getParameter("endDate");
+            if (startDateParam != null && !startDateParam.isEmpty() &&
+                    endDateParam != null && !endDateParam.isEmpty()) {
+
+                LocalDate start = LocalDate.parse(startDateParam);
+                LocalDate end = LocalDate.parse(endDateParam);
+                schedules.removeIf(ws -> ws.getWorkDate().isBefore(start) || ws.getWorkDate().isAfter(end));
+            }
+
+            // === Sắp xếp theo scheduleId ===
+            String sortOrder = request.getParameter("sortOrder");
+            if ("asc".equalsIgnoreCase(sortOrder)) {
+                schedules.sort(Comparator.comparingInt(WorkSchedule::getScheduleId));
+            } else if ("desc".equalsIgnoreCase(sortOrder)) {
+                schedules.sort(Comparator.comparingInt(WorkSchedule::getScheduleId).reversed());
+            }
+
+            // Phân trang
             int page = 1;
             int recordsPerPage = 10;
             String pageParam = request.getParameter("page");
@@ -96,6 +123,8 @@ public class WorkScheduleController extends HttpServlet {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
+
+
 
     /**
      * Xử lý thêm lịch làm việc mới

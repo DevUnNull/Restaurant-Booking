@@ -44,6 +44,33 @@
             <!-- Nút mở popup -->
             <button id="openModalBtn">+ Thêm lịch làm việc</button>
 
+            <!-- Bộ lọc -->
+            <form method="get" action="WorkSchedule" class="filter-form">
+                <label>Sắp xếp theo Mã lịch:</label>
+                <select name="sortOrder">
+                    <option value="">-- Không sắp xếp --</option>
+                    <option value="asc" ${param.sortOrder == 'asc' ? 'selected' : ''}>Tăng dần</option>
+                    <option value="desc" ${param.sortOrder == 'desc' ? 'selected' : ''}>Giảm dần</option>
+                </select>
+
+                <label>Nhân viên:</label>
+                <select name="userId">
+                    <option value="">-- Tất cả --</option>
+                    <c:forEach var="u" items="${staffList}">
+                        <option value="${u.userId}" ${param.userId == u.userId ? 'selected' : ''}>${u.fullName}</option>
+                    </c:forEach>
+                </select>
+
+                <label>Từ ngày:</label>
+                <input type="date" name="startDate" value="${param.startDate}">
+
+                <label>Đến ngày:</label>
+                <input type="date" name="endDate" value="${param.endDate}">
+
+                <button type="submit">Lọc</button>
+                <a href="WorkSchedule" class="reset-btn">Xóa lọc</a>
+            </form>
+
             <c:if test="${not empty schedules}">
                 <table>
                     <thead>
@@ -216,6 +243,60 @@
         // sessionStorage.removeItem("currentPage");
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const filterElements = document.querySelectorAll("#userFilter, #startDateFilter, #endDateFilter, #sortFilter");
+        const clearBtn = document.getElementById("clearFilterBtn");
+
+        // Khi thay đổi bất kỳ bộ lọc nào
+        filterElements.forEach(el => {
+            el.addEventListener("change", applyFilters);
+        });
+
+        // Nút xóa lọc
+        clearBtn.addEventListener("click", function() {
+            sessionStorage.removeItem("workScheduleFilters");
+            window.location.href = "WorkSchedule";
+        });
+
+        // Khi tải lại trang, giữ nguyên các bộ lọc
+        const savedFilters = JSON.parse(sessionStorage.getItem("workScheduleFilters") || "{}");
+        for (const key in savedFilters) {
+            const element = document.getElementById(key);
+            if (element) element.value = savedFilters[key];
+        }
+
+        // Tự động áp dụng lại nếu đang có bộ lọc
+        if (Object.keys(savedFilters).length > 0) {
+            applyFilters(false);
+        }
+
+        function applyFilters(shouldSave = true) {
+            const userId = document.getElementById("userFilter").value;
+            const startDate = document.getElementById("startDateFilter").value;
+            const endDate = document.getElementById("endDateFilter").value;
+            const sort = document.getElementById("sortFilter").value;
+
+            const params = new URLSearchParams(window.location.search);
+            if (userId) params.set("userId", userId); else params.delete("userId");
+            if (startDate) params.set("startDate", startDate); else params.delete("startDate");
+            if (endDate) params.set("endDate", endDate); else params.delete("endDate");
+            if (sort) params.set("sort", sort); else params.delete("sort");
+
+            params.set("page", 1); // Reset về trang đầu khi lọc
+
+            // Lưu bộ lọc vào sessionStorage
+            if (shouldSave) {
+                const filtersToSave = { userFilter: userId, startDateFilter: startDate, endDateFilter: endDate, sortFilter: sort };
+                sessionStorage.setItem("workScheduleFilters", JSON.stringify(filtersToSave));
+            }
+
+            // Chuyển trang với các bộ lọc mới
+            window.location.href = "WorkSchedule?" + params.toString();
+        }
+    });
+</script>
+
 
 </body>
 </html>
