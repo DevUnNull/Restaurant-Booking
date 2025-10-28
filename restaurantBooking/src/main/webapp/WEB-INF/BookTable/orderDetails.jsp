@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
     <style>
         /* --- General Reset & Body Styling --- */
@@ -20,36 +21,38 @@
 
         body, html {
             font-family: 'Montserrat', sans-serif;
-            /* THAY THẾ BẰNG URL ẢNH NỀN CỦA BẠN */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
-            color: #f0f0f0;
+            color: var(--text-primary);
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
             width: 90%;
-            max-width: 1000px; /* Tăng chiều rộng cho phù hợp với bảng */
+            max-width: 1000px;
             margin: 40px auto;
-            background-color: rgba(20, 10, 10, 0.75); /* Frosted glass effect */
+            background-color: var(--box-bg);
             backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 30px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 2.5em;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            transition: color 0.3s ease;
         }
 
         /* --- SEARCH & FILTER SECTION --- */
@@ -291,6 +294,12 @@
     </style>
 </head>
 <body>
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+    <span id="themeText">Chế độ tối</span>
+</button>
+
 <%
     com.fpt.restaurantbooking.models.Reservation reservation = (com.fpt.restaurantbooking.models.Reservation) request.getAttribute("reservation");
     java.util.List<com.fpt.restaurantbooking.models.Table> tables = (java.util.List<com.fpt.restaurantbooking.models.Table>) request.getAttribute("tables");
@@ -454,12 +463,13 @@
 
     <div class="back-link-container">
         <a href="orderHistory" class="btn" style="background-color: #6c757d;"><i class="fas fa-arrow-left"></i> Lịch sử đặt bàn</a>
-        <a href="home" class="btn" style="margin-left: 10px; background-color: #6c757d;"><i class="fas fa-home"></i> Về trang chủ</a>
+        <a href="home.jsp" class="btn" style="margin-left: 10px; background-color: #6c757d;"><i class="fas fa-home"></i> Về trang chủ</a>
         <a href="editReservation?id=<%= reservation != null ? reservation.getReservationId() : 0 %>" class="btn" style="margin-left: 10px; background-color: #e67e22;">
             <i class="fas fa-edit"></i> Chỉnh sửa đơn hàng
         </a>
     </div>
 </div>
+<script src="${pageContext.request.contextPath}/js/theme-manager.js"></script>
 <script>
     // Auto hide success message after 5 seconds
     window.addEventListener('DOMContentLoaded', function() {

@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
     <style>
         /* --- General Reset & Body Styling --- */
@@ -21,12 +22,13 @@
 
         body, html {
             font-family: 'Montserrat', sans-serif;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
-            color: #f0f0f0;
+            color: var(--text-primary);
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .page-wrapper {
@@ -39,28 +41,30 @@
         h2 {
             text-align: center;
             margin-bottom: 30px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 2.5em;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            transition: color 0.3s ease;
         }
 
         /* --- Filter & Header Actions --- */
         .header-actions {
-            background-color: rgba(20, 10, 10, 0.75);
+            background-color: var(--box-bg);
             backdrop-filter: blur(8px);
             padding: 20px 25px;
             border-radius: 12px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--input-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
             gap: 20px;
             flex-wrap: wrap;
+            transition: all 0.3s ease;
         }
 
         .search-filter-form {
@@ -75,27 +79,34 @@
             display: flex;
             align-items: center;
             background: transparent;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            border-bottom: 1px solid var(--input-border);
             padding: 5px 0;
+            transition: border-color 0.3s ease;
         }
 
         .input-group i {
             margin-right: 10px;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-muted);
         }
 
         .search-filter-form input[type="text"], .search-filter-form select {
             background: transparent;
             border: none;
-            color: #fff;
+            color: var(--text-primary);
             font-family: 'Montserrat', sans-serif;
             padding: 8px 5px;
             font-size: 1em;
+            transition: color 0.3s ease;
         }
 
         .search-filter-form select option {
-            background: #333;
-            color: #fff;
+            background: var(--box-bg);
+            color: var(--text-primary);
+        }
+
+        body.light-mode .search-filter-form select option {
+            background: #fff;
+            color: #2c3e50;
         }
 
         .search-filter-form input[type="text"]::placeholder {
@@ -139,13 +150,13 @@
         }
 
         .menu-item {
-            background-color: rgba(20, 10, 10, 0.65);
+            background-color: var(--box-bg);
             backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--input-border);
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s ease;
             display: flex;
             flex-direction: column;
         }
@@ -164,12 +175,17 @@
 
         .item-details h3 {
             margin: 0 0 5px 0;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 1.3em;
             font-weight: 500;
+            transition: color 0.3s ease;
         }
 
-        .item-details p { margin: 5px 0; color: rgba(255,255,255,0.8); }
+        .item-details p {
+            margin: 5px 0;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
         .item-details .price { font-weight: bold; color: #ffc107; }
         .item-details .calories { font-style: italic; font-size: 0.9em; }
 
@@ -190,11 +206,12 @@
         .item-controls input[type="number"] {
             width: 60px;
             padding: 5px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid var(--input-border);
             border-radius: 4px;
             text-align: center;
-            background: rgba(0,0,0,0.3);
-            color: #fff;
+            background: var(--table-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
 
         .btn-add-cart {
@@ -214,14 +231,15 @@
             width: 100%;
             margin-top: 10px;
             padding: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid var(--input-border);
             border-radius: 6px;
             resize: vertical;
-            background: rgba(0,0,0,0.3);
-            color: #fff;
+            background: var(--table-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
         .note-input::placeholder {
-            color: rgba(255,255,255,0.5);
+            color: var(--text-muted);
         }
 
         /* --- Sticky Footer --- */
@@ -230,15 +248,16 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(10, 5, 5, 0.85);
+            background: var(--box-bg);
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--text-primary);
             padding: 15px 5%;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
         .sticky-footer .total {
             font-size: 1.4em;
@@ -313,15 +332,62 @@
             color: rgba(255, 255, 255, 0.5);
             cursor: not-allowed;
         }
+
+        /* --- Service Combo Highlight --- */
+        .menu-item.combo-item {
+            border: 2px solid #ffc107;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+            position: relative;
+        }
+
+        .menu-item.combo-item::before {
+            content: "🌟 COMBO DỊCH VỤ";
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: #ffc107;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.5);
+        }
+
+        .combo-notice {
+            background: rgba(255, 193, 7, 0.2);
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .combo-notice i {
+            font-size: 1.5em;
+            color: #ffc107;
+        }
     </style>
 </head>
 <body>
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+    <span id="themeText">Chế độ tối</span>
+</button>
+
 <%
     // Get data from request attributes (set by servlet)
     List<MenuItem> menuItems = (List<MenuItem>) request.getAttribute("menuItems");
     List<String> categories = (List<String>) request.getAttribute("categories");
     Integer currentPage = (Integer) request.getAttribute("currentPage");
     Integer totalPages = (Integer) request.getAttribute("totalPages");
+    List<MenuItem> serviceComboItems = (List<MenuItem>) request.getAttribute("serviceComboItems");
+    Integer selectedServiceId = (Integer) request.getAttribute("selectedServiceId");
 
     // Get current filter params
     String searchKeyword = request.getParameter("search");
@@ -336,10 +402,27 @@
     if (currentPage == null) currentPage = 1;
     if (totalPages == null) totalPages = 1;
     if (categoryFilter == null) categoryFilter = "all";
+    if (serviceComboItems == null) serviceComboItems = new ArrayList<>();
+
+    // Tạo set để kiểm tra nhanh món nào trong combo
+    java.util.Set<Integer> comboItemIds = new java.util.HashSet<>();
+    for (MenuItem comboItem : serviceComboItems) {
+        comboItemIds.add(comboItem.getItemId());
+    }
 %>
 
 <div class="page-wrapper">
     <h2>Our Menu</h2>
+
+    <% if (selectedServiceId != null && selectedServiceId > 0 && !serviceComboItems.isEmpty()) { %>
+    <div class="combo-notice">
+        <i class="fas fa-star"></i>
+        <div>
+            <strong>Đã thêm <%= serviceComboItems.size() %> món từ combo dịch vụ vào giỏ hàng!</strong><br>
+            <span style="font-size: 0.9em;">Các món được đánh dấu sao sẽ tự động được thêm vào khi bạn chọn bàn.</span>
+        </div>
+    </div>
+    <% } %>
 
     <div class="header-actions">
         <form class="search-filter-form" method="get" action="orderItems">
@@ -352,6 +435,9 @@
                 <i class="fas fa-utensils"></i>
                 <select name="category" onchange="this.form.submit()">
                     <option value="all">Tất cả danh mục</option>
+                    <% if (selectedServiceId != null && selectedServiceId > 0 && !serviceComboItems.isEmpty()) { %>
+                    <option value="combo" <%= "combo".equals(categoryFilter) ? "selected" : "" %>>🌟 Món trong Combo Dịch vụ</option>
+                    <% } %>
                     <% for (String category : categories) { %>
                     <option value="<%= category %>" <%= category.equals(categoryFilter) ? "selected" : "" %>><%= category %></option>
                     <% } %>
@@ -367,8 +453,10 @@
     </div>
 
     <div class="menu-list">
-        <% for (MenuItem item : menuItems) { %>
-        <div class="menu-item">
+        <% for (MenuItem item : menuItems) {
+            boolean isComboItem = comboItemIds.contains(item.getItemId());
+        %>
+        <div class="menu-item <%= isComboItem ? "combo-item" : "" %>">
             <img src="<%= item.getImageUrl() %>" alt="<%= item.getItemName() %>">
             <div class="item-details">
                 <h3><%= item.getItemName() %></h3>
@@ -431,6 +519,7 @@
     </div>
 </div>
 
+<script src="${pageContext.request.contextPath}/js/theme-manager.js"></script>
 <script>
     const contextPath = '<%= request.getContextPath() %>';
 

@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
     <style>
         /* --- General Reset & Body Styling --- */
@@ -26,35 +27,38 @@
 
         body, html {
             font-family: 'Montserrat', sans-serif;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
-            color: #f0f0f0;
+            color: var(--text-primary);
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
             width: 90%;
             max-width: 900px;
             margin: 40px auto;
-            background-color: rgba(20, 10, 10, 0.75);
+            background-color: var(--box-bg);
             backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 30px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 2.5em;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            transition: color 0.3s ease;
         }
 
         /* --- Messages --- */
@@ -85,12 +89,13 @@
             margin-bottom: 30px;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            background-color: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            background-color: var(--table-bg);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
         table th, table td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            border-bottom: 1px solid var(--table-border);
             padding: 18px 20px;
             text-align: left;
         }
@@ -459,9 +464,44 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
+        /* --- Combo Item Styling --- */
+        .combo-item-row {
+            background: linear-gradient(90deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
+            border-left: 4px solid #ffc107 !important;
+        }
+        .combo-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 700;
+            margin-left: 8px;
+            letter-spacing: 0.5px;
+        }
+        .combo-locked-notice {
+            font-size: 0.85em;
+            color: #ffc107;
+            font-style: italic;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .combo-locked-notice i {
+            font-size: 1em;
+        }
+
     </style>
 </head>
 <body>
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+    <span id="themeText">Chế độ tối</span>
+</button>
+
 <%
     // Lấy dữ liệu từ request attributes
     List<OrderItem> orderItems = (List<OrderItem>) request.getAttribute("currentItems");
@@ -469,9 +509,19 @@
     Reservation reservation = (Reservation) request.getAttribute("reservation");
     String errorMessage = (String) request.getAttribute("errorMessage");
     String successMessage = (String) request.getAttribute("successMessage");
+    List<MenuItem> serviceComboItems = (List<MenuItem>) request.getAttribute("serviceComboItems");
+    Integer selectedServiceId = (Integer) request.getAttribute("selectedServiceId");
 
     // Khởi tạo formatter
     DecimalFormat formatter = new DecimalFormat("###,###,### VNĐ");
+
+    // Tạo set để kiểm tra nhanh món nào là combo
+    java.util.Set<Integer> comboItemIds = new java.util.HashSet<>();
+    if (serviceComboItems != null) {
+        for (MenuItem comboItem : serviceComboItems) {
+            comboItemIds.add(comboItem.getItemId());
+        }
+    }
 
     // Tính tổng tiền
     BigDecimal totalAmount = BigDecimal.ZERO;
@@ -622,14 +672,21 @@
         <tbody>
         <%
             if (hasItems) {
-                int index = 1;
+                int displayIndex = 1;  // STT hiển thị (1, 2, 3...)
+                int arrayIndex = 0;     // Index thực trong list (0, 1, 2...)
                 for (OrderItem item : orderItems) {
                     BigDecimal itemTotal = item.getUnitPrice().multiply(new BigDecimal(item.getQuantity()));
+                    boolean isComboItem = comboItemIds.contains(item.getItemId());
         %>
-        <tr class="item-row" data-item-id="<%= item.getOrderItemId() %>">
-            <td style="text-align: center;"><%= index++ %></td>
+        <tr class="item-row <%= isComboItem ? "combo-item-row" : "" %>" data-item-index="<%= arrayIndex %>">
+            <td style="text-align: center;"><%= displayIndex++ %></td>
             <td>
-                <div><strong><%= menuItemNames.get(item.getItemId()) != null ? menuItemNames.get(item.getItemId()) : "Món #" + item.getItemId() %></strong></div>
+                <div>
+                    <strong><%= menuItemNames.get(item.getItemId()) != null ? menuItemNames.get(item.getItemId()) : "Món #" + item.getItemId() %></strong>
+                    <% if (isComboItem) { %>
+                    <span class="combo-badge">🌟 COMBO</span>
+                    <% } %>
+                </div>
                 <%
                     if (item.getSpecialInstructions() != null && !item.getSpecialInstructions().trim().isEmpty()) {
                 %>
@@ -638,27 +695,36 @@
                 </div>
                 <%
                     }
+                    if (isComboItem) {
+                %>
+                <div class="combo-locked-notice">
+                    <i class="fas fa-info-circle"></i> Món trong combo dịch vụ (có thể thay đổi số lượng)
+                </div>
+                <%
+                    }
                 %>
             </td>
             <td style="text-align: center;">
+                <!-- ✅ TẤT CẢ MÓN (COMBO + THƯỜNG) ĐỀU CHO PHÉP CHỈNH SỬA -->
                 <div class="quantity-controls">
-                    <button class="qty-btn" onclick="decreaseQty(<%= item.getOrderItemId() %>)">-</button>
-                    <input type="number" class="qty-input" id="qty-<%= item.getOrderItemId() %>" value="<%= item.getQuantity() %>" min="1" max="100">
-                    <button class="qty-btn" onclick="increaseQty(<%= item.getOrderItemId() %>)">+</button>
+                    <button class="qty-btn" onclick="decreaseQty(<%= arrayIndex %>)">-</button>
+                    <input type="number" class="qty-input" id="qty-<%= arrayIndex %>" value="<%= item.getQuantity() %>" min="1" max="100">
+                    <button class="qty-btn" onclick="increaseQty(<%= arrayIndex %>)">+</button>
                 </div>
                 <div class="item-actions">
-                    <button class="update-btn" onclick="updateItemQty(<%= item.getOrderItemId() %>)">
+                    <button class="update-btn" onclick="updateItemQty(<%= arrayIndex %>)">
                         <i class="fas fa-sync-alt"></i> Cập nhật
                     </button>
-                    <button class="remove-btn" onclick="removeItem(<%= item.getItemId() %>)">
+                    <button class="remove-btn" onclick="removeItem(<%= arrayIndex %>)">
                         <i class="fas fa-trash"></i> Xóa
                     </button>
                 </div>
             </td>
             <td class="price-col"><%= formatter.format(item.getUnitPrice()) %></td>
-            <td class="price-col" id="total-<%= item.getOrderItemId() %>"><%= formatter.format(itemTotal) %></td>
+            <td class="price-col" id="total-<%= arrayIndex %>"><%= formatter.format(itemTotal) %></td>
         </tr>
         <%
+                arrayIndex++;  // Tăng index thực
             }
         } else {
         %>
@@ -667,7 +733,7 @@
                 <i class="fas fa-shopping-cart" style="font-size: 3em; margin-bottom: 15px; color: rgba(255, 255, 255, 0.3);"></i>
                 <div style="font-size: 1.2em; font-weight: 500;">Chưa có món ăn nào</div>
                 <div style="font-size: 0.9em; margin-top: 5px;">Bạn có thể đặt bàn mà không cần chọn món</div>
-                <a href="orderItems" class="btn update-btn" style="margin-top: 15px; text-decoration: none; display: inline-flex;">
+                <a href="orderItems" class="btn update-btn" style="margin-top: 15px; text-decoration: none; display: inline-flex;" id="addItemsLink">
                     <i class="fas fa-utensils"></i> Thêm món ăn
                 </a>
             </td>
@@ -759,6 +825,7 @@
     %>
 </div>
 
+<script src="${pageContext.request.contextPath}/js/theme-manager.js"></script>
 <script>
     // Configuration - Mã giảm giá và phần trăm giảm
     const discountCodes = {
@@ -876,15 +943,15 @@
     // ===== CÁC HÀM QUẢN LÝ GIỎ HÀNG =====
 
     // Tăng số lượng
-    function increaseQty(orderItemId) {
-        const input = document.getElementById('qty-' + orderItemId);
+    function increaseQty(itemIndex) {
+        const input = document.getElementById('qty-' + itemIndex);
         let currentQty = parseInt(input.value) || 1;
         input.value = currentQty + 1;
     }
 
     // Giảm số lượng
-    function decreaseQty(orderItemId) {
-        const input = document.getElementById('qty-' + orderItemId);
+    function decreaseQty(itemIndex) {
+        const input = document.getElementById('qty-' + itemIndex);
         let currentQty = parseInt(input.value) || 1;
         if (currentQty > 1) {
             input.value = currentQty - 1;
@@ -892,8 +959,8 @@
     }
 
     // Cập nhật số lượng món ăn
-    function updateItemQty(orderItemId) {
-        const quantity = parseInt(document.getElementById('qty-' + orderItemId).value);
+    function updateItemQty(itemIndex) {
+        const quantity = parseInt(document.getElementById('qty-' + itemIndex).value);
 
         if (isNaN(quantity) || quantity < 1) {
             alert('Số lượng phải lớn hơn 0');
@@ -906,13 +973,11 @@
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: 'action=updateQty&orderItemId=' + orderItemId + '&quantity=' + quantity
+            body: 'action=updateQty&itemIndex=' + itemIndex + '&quantity=' + quantity
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Cập nhật thành tiền trong bảng
-                    updateItemTotal(orderItemId);
                     // Reload trang để cập nhật tổng tiền
                     location.reload();
                 } else {
@@ -926,7 +991,7 @@
     }
 
     // Xóa món ăn
-    function removeItem(itemId) {
+    function removeItem(itemIndex) {
         if (!confirm('Bạn có chắc muốn xóa món ăn này khỏi giỏ hàng?')) {
             return;
         }
@@ -937,17 +1002,12 @@
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: 'action=remove&itemId=' + itemId
+            body: 'action=remove&itemIndex=' + itemIndex
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Xóa dòng khỏi bảng
-                    const row = document.querySelector('[data-item-id="' + itemId + '"]');
-                    if (row) {
-                        row.remove();
-                    }
-                    // Reload trang để cập nhật tổng tiền
+                    // Reload trang để cập nhật
                     location.reload();
                 } else {
                     alert('Lỗi khi xóa: ' + (data.message || 'Vui lòng thử lại'));
@@ -1038,6 +1098,34 @@
         }
         %>
     });
+
+    // Ngăn thêm món khi chưa có bàn
+    (function() {
+        var addItemsLink = document.getElementById('addItemsLink');
+        if (addItemsLink) {
+            addItemsLink.addEventListener('click', function(e) {
+                var hasTables = <%= hasTables ? "true" : "false" %>;
+                if (!hasTables) {
+                    e.preventDefault();
+                    alert('Bạn phải chọn ít nhất 1 bàn trước khi chọn món.');
+                }
+            });
+        }
+    })();s
+
+    // Ngăn submit khi chưa có bàn (phòng hờ nếu người dùng bỏ qua link)
+    (function() {
+        var checkoutForm = document.getElementById('checkoutForm');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function(e) {
+                var hasTables = <%= hasTables ? "true" : "false" %>;
+                if (!hasTables) {
+                    e.preventDefault();
+                    alert('Bạn phải chọn ít nhất 1 bàn trước khi đặt món/thanh toán.');
+                }
+            });
+        }
+    })();
 </script>
 
 </body>

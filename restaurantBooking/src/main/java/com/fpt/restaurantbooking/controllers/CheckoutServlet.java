@@ -22,11 +22,12 @@ import java.util.ArrayList;
 @WebServlet("/checkout")
 public class CheckoutServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(CheckoutServlet.class);
-    private ReservationDAO reservationDAO = new ReservationDAO();
-    private PaymentDAO paymentDAO = new PaymentDAO();
-    private TableDAO tableDAO = new TableDAO();
-    private ReservationTableDAO reservationTableDAO = new ReservationTableDAO();
-    private OrderItemDAO orderItemDAO = new OrderItemDAO();
+    private final ReservationDAO reservationDAO = new ReservationDAO();
+    private final PaymentDAO paymentDAO = new PaymentDAO();
+    private final TableDAO tableDAO = new TableDAO();
+    private final ReservationTableDAO reservationTableDAO = new ReservationTableDAO();
+    private final OrderItemDAO orderItemDAO = new OrderItemDAO();
+    private final MenuItemDAO menuItemDAO = new MenuItemDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -96,10 +97,44 @@ public class CheckoutServlet extends HttpServlet {
                     orderItems != null ? orderItems.size() : 0,
                     selectedTables.size());
 
+            // ✅ Load service combo items (nếu có)
+            Integer selectedServiceId = (Integer) session.getAttribute("selectedServiceId");
+            List<MenuItem> serviceComboItems = new ArrayList<>();
+            java.util.Set<Integer> comboItemIds = new java.util.HashSet<>();
+            if (selectedServiceId != null && selectedServiceId > 0) {
+                serviceComboItems = menuItemDAO.getMenuItemsByServiceId(selectedServiceId);
+                for (MenuItem item : serviceComboItems) {
+                    comboItemIds.add(item.getItemId());
+                }
+                logger.info("✅ Loaded {} combo items for service {}", serviceComboItems.size(), selectedServiceId);
+            }
+
+            // 🔄 SẮP XẾP: Món combo lên đầu, món thường ở sau
+            if (orderItems != null && !orderItems.isEmpty() && !comboItemIds.isEmpty()) {
+                List<OrderItem> sortedItems = new ArrayList<>();
+                List<OrderItem> comboItems = new ArrayList<>();
+                List<OrderItem> regularItems = new ArrayList<>();
+
+                for (OrderItem item : orderItems) {
+                    if (comboItemIds.contains(item.getItemId())) {
+                        comboItems.add(item);
+                    } else {
+                        regularItems.add(item);
+                    }
+                }
+
+                sortedItems.addAll(comboItems);  // Combo items trước
+                sortedItems.addAll(regularItems); // Món thường sau
+                orderItems = sortedItems;
+                logger.info("✅ Sorted items: {} combo + {} regular", comboItems.size(), regularItems.size());
+            }
+
             // ✅ Set các attributes
             request.setAttribute("reservation", reservation);
             request.setAttribute("currentItems", orderItems != null ? orderItems : new ArrayList<>());
             request.setAttribute("selectedTables", selectedTables);
+            request.setAttribute("serviceComboItems", serviceComboItems);
+            request.setAttribute("selectedServiceId", selectedServiceId);
 
             request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
 

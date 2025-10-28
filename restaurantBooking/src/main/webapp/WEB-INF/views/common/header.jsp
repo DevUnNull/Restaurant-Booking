@@ -12,7 +12,7 @@
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
-            <li><a href="${pageContext.request.contextPath}/findViewTable">Đặt Bàn</a></li>
+            <li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li>
 
             <%-- Booking Management Dropdown (Role 2) --%>
             <c:if test="${sessionScope.userRole == 2}">

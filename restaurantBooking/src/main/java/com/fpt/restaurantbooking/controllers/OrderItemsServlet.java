@@ -55,10 +55,23 @@ public class OrderItemsServlet extends HttpServlet {
                 }
             }
 
+            // ✅ Lấy danh sách món trong service combo (nếu có) - TRƯỚC KHI LỌC
+            Integer selectedServiceId = (Integer) session.getAttribute("selectedServiceId");
+            List<MenuItem> serviceComboItems = new ArrayList<>();
+            if (selectedServiceId != null && selectedServiceId > 0) {
+                serviceComboItems = menuItemDAO.getMenuItemsByServiceId(selectedServiceId);
+                logger.info("✅ Loaded {} items from service combo (service_id={})",
+                        serviceComboItems.size(), selectedServiceId);
+            }
+
             // Lấy tất cả menu items
             List<MenuItem> allMenuItems;
             if (search != null && !search.trim().isEmpty()) {
                 allMenuItems = menuItemDAO.searchMenuItems(search);
+            } else if ("combo".equals(category) && !serviceComboItems.isEmpty()) {
+                // 🌟 LỌC CHỈ HIỂN THỊ MÓN TRONG COMBO
+                allMenuItems = new ArrayList<>(serviceComboItems);
+                logger.info("🌟 Filtering combo items only: {} items", allMenuItems.size());
             } else if (category != null && !category.isEmpty() && !"all".equals(category)) {
                 allMenuItems = menuItemDAO.getMenuItemsByCategory(category);
             } else {
@@ -84,6 +97,8 @@ public class OrderItemsServlet extends HttpServlet {
             request.setAttribute("categories", categories);
             request.setAttribute("currentPage", currentPage);
             request.setAttribute("totalPages", totalPages);
+            request.setAttribute("serviceComboItems", serviceComboItems);
+            request.setAttribute("selectedServiceId", selectedServiceId);
 
             logger.info("✅ Loaded {} menu items for page {}/{}", menuItems.size(), currentPage, totalPages);
 
@@ -180,16 +195,37 @@ public class OrderItemsServlet extends HttpServlet {
                     sessionItems = new ArrayList<>();
                 }
 
-                // Kiểm tra xem món đã có trong session chưa
+                // ✅ Kiểm tra xem món combo hay món thường
+                Integer selectedServiceId = (Integer) session.getAttribute("selectedServiceId");
+                boolean isComboItem = false;
+                if (selectedServiceId != null && selectedServiceId > 0) {
+                    List<MenuItem> comboItems = menuItemDAO.getMenuItemsByServiceId(selectedServiceId);
+                    for (MenuItem comboItem : comboItems) {
+                        if (comboItem.getItemId().equals(itemId)) {
+                            isComboItem = true;
+                            break;
+                        }
+                    }
+                }
+
+                // 🔄 Kiểm tra xem món đã có trong session chưa
                 boolean found = false;
                 for (OrderItem existingItem : sessionItems) {
-                    if (existingItem.getItemId() == itemId &&
-                            ((existingItem.getSpecialInstructions() == null && note == null) ||
-                                    (existingItem.getSpecialInstructions() != null && existingItem.getSpecialInstructions().equals(note)))) {
-                        // Tăng số lượng nếu cùng món và cùng note
-                        existingItem.setQuantity(existingItem.getQuantity() + quantity);
-                        found = true;
-                        break;
+                    if (existingItem.getItemId() == itemId) {
+                        if (isComboItem) {
+                            // 🌟 MÓN COMBO: Luôn cộng dồn (không quan tâm note)
+                            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+                            found = true;
+                            logger.info("✅ Combo item: Added {} to existing quantity", quantity);
+                            break;
+                        } else if ((existingItem.getSpecialInstructions() == null && (note == null || note.isEmpty())) ||
+                                (existingItem.getSpecialInstructions() != null && existingItem.getSpecialInstructions().equals(note))) {
+                            // 🍽️ MÓN THƯỜNG: Cộng dồn nếu cùng note
+                            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+                            found = true;
+                            logger.info("✅ Regular item: Added {} to existing quantity", quantity);
+                            break;
+                        }
                     }
                 }
 
@@ -198,6 +234,7 @@ public class OrderItemsServlet extends HttpServlet {
                     OrderItem orderItem = new OrderItem(0, itemId, quantity, menuItem.getPrice());
                     orderItem.setSpecialInstructions(note);
                     sessionItems.add(orderItem);
+                    logger.info("✅ Created new OrderItem for item {}", itemId);
                 }
 
                 // Lưu lại vào session
@@ -207,13 +244,18 @@ public class OrderItemsServlet extends HttpServlet {
                 response.getWriter().write("{\"success\": true, \"message\": \"Thêm món thành công\"}");
 
             } else if ("updateQty".equals(action)) {
-                // Cập nhật số lượng món ăn trong session
-                String itemIdStr = request.getParameter("itemId");
+                // Cập nhật số lượng món ăn trong session bằng INDEX
+                String itemIndexStr = request.getParameter("itemIndex");
                 String qtyStr = request.getParameter("quantity");
 
-                logger.info(">>> updateQty: itemId={}, quantity={}", itemIdStr, qtyStr);
+                logger.info(">>> updateQty: itemIndex={}, quantity={}", itemIndexStr, qtyStr);
 
-                int itemId = Integer.parseInt(itemIdStr);
+                if (itemIndexStr == null || qtyStr == null) {
+                    response.getWriter().write("{\"success\": false, \"message\": \"Thiếu thông tin\"}");
+                    return;
+                }
+
+                int itemIndex = Integer.parseInt(itemIndexStr);
                 int quantity = Integer.parseInt(qtyStr);
 
                 if (quantity <= 0) {
@@ -225,36 +267,37 @@ public class OrderItemsServlet extends HttpServlet {
                 @SuppressWarnings("unchecked")
                 List<OrderItem> sessionItems = (List<OrderItem>) session.getAttribute("cartItems");
 
-                if (sessionItems != null) {
-                    for (OrderItem item : sessionItems) {
-                        if (item.getItemId() == itemId) {
-                            item.setQuantity(quantity);
-                            break;
-                        }
-                    }
+                if (sessionItems != null && itemIndex >= 0 && itemIndex < sessionItems.size()) {
+                    OrderItem item = sessionItems.get(itemIndex);
+                    item.setQuantity(quantity);
                     session.setAttribute("cartItems", sessionItems);
-                    logger.info("✅ Updated item {} to quantity {}", itemId, quantity);
+                    logger.info("✅ Updated item at index {} to quantity {}", itemIndex, quantity);
                     response.getWriter().write("{\"success\": true, \"message\": \"Cập nhật thành công\"}");
                 } else {
                     response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy món\"}");
                 }
             }
             else if ("remove".equals(action)) {
-                // Xóa món ăn khỏi session
-                String itemIdStr = request.getParameter("itemId");
+                // Xóa món ăn khỏi session bằng INDEX
+                String itemIndexStr = request.getParameter("itemIndex");
 
-                logger.info(">>> remove: itemId={}", itemIdStr);
+                logger.info(">>> remove: itemIndex={}", itemIndexStr);
 
-                int itemId = Integer.parseInt(itemIdStr);
+                if (itemIndexStr == null) {
+                    response.getWriter().write("{\"success\": false, \"message\": \"Thiếu thông tin\"}");
+                    return;
+                }
+
+                int itemIndex = Integer.parseInt(itemIndexStr);
 
                 @SuppressWarnings("unchecked")
                 List<OrderItem> sessionItems = (List<OrderItem>) session.getAttribute("cartItems");
 
-                if (sessionItems != null) {
-                    sessionItems.removeIf(item -> item.getItemId() == itemId);
+                if (sessionItems != null && itemIndex >= 0 && itemIndex < sessionItems.size()) {
+                    OrderItem removedItem = sessionItems.remove(itemIndex);
                     session.setAttribute("cartItems", sessionItems);
 
-                    logger.info("✅ Removed item {} from session", itemId);
+                    logger.info("✅ Removed item at index {} from session", itemIndex);
                     response.getWriter().write("{\"success\": true, \"message\": \"Xóa thành công\"}");
                 } else {
                     response.getWriter().write("{\"success\": false, \"message\": \"Không tìm thấy món\"}");
