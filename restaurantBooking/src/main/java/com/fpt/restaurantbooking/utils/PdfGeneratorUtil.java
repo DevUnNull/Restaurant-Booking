@@ -75,4 +75,73 @@ public class PdfGeneratorUtil {
             throw new IOException("An error occurred during PDF generation: " + e.getMessage(), e);
         }
     }
+
+
+    public void generateOverviewReport(Map<String, Object> summaryData, List<Map<String, Object>> timeTrendData, OutputStream outputStream) throws IOException {
+        PdfFont font;
+        try {
+            font = PdfFontFactory.createFont(
+                    VIETNAMESE_FONT_PATH,
+                    PdfEncodings.IDENTITY_H,
+                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED
+            );
+        } catch (IOException e) {
+            throw new IOException("Font Error: Vietnamese font not found at path: "
+                    + VIETNAMESE_FONT_PATH + ". Please check the path.", e);
+        }
+
+        try {
+            PdfWriter writer = new PdfWriter(outputStream);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            document.setFont(font);
+            document.add(new Paragraph("OVERVIEW REPORT")
+                    .setBold().setFontSize(16).setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph("Report Date: " + LocalDate.now())
+                    .setFontSize(10).setMarginBottom(15).setTextAlignment(TextAlignment.CENTER));
+
+            // Summary Section
+            document.add(new Paragraph("Summary")
+                    .setBold().setFontSize(14).setMarginBottom(10));
+            document.add(new Paragraph("Total Bookings: " + summaryData.getOrDefault("totalBookings", 0))
+                    .setFont(font));
+            document.add(new Paragraph("Total Revenue (VND): " + summaryData.getOrDefault("totalRevenue", 0L))
+                    .setFont(font));
+            document.add(new Paragraph("Total Cancellations: " + summaryData.getOrDefault("totalCancellations", 0))
+                    .setFont(font));
+            document.add(new Paragraph("Cancellation Rate (%): " + String.format("%.2f", summaryData.getOrDefault("cancellationRate", 0.0)))
+                    .setFont(font));
+
+            // Time Trend Section
+            document.add(new Paragraph("\nTime Trend Data")
+                    .setBold().setFontSize(14).setMarginTop(15).setMarginBottom(10));
+            float[] columnWidths = {3, 3, 2, 2};
+            Table table = new Table(columnWidths);
+            table.setWidth(UnitValue.createPercentValue(100));
+
+            table.addHeaderCell(new Paragraph("Label").setBold().setFont(font));
+            table.addHeaderCell(new Paragraph("Revenue (VND)").setBold().setFont(font));
+            table.addHeaderCell(new Paragraph("Bookings").setBold().setFont(font));
+            table.addHeaderCell(new Paragraph("Cancellations").setBold().setFont(font));
+
+            if (timeTrendData != null) {
+                for (Map<String, Object> item : timeTrendData) {
+                    table.addCell(new Paragraph((String) item.getOrDefault("label", "")).setFont(font));
+                    table.addCell(new Paragraph(String.format("%,d", (Long) item.getOrDefault("totalRevenue", 0L)))
+                            .setTextAlignment(TextAlignment.RIGHT).setFont(font));
+                    table.addCell(new Paragraph(String.valueOf(item.getOrDefault("totalBookings", 0)))
+                            .setTextAlignment(TextAlignment.RIGHT).setFont(font));
+                    table.addCell(new Paragraph(String.valueOf(item.getOrDefault("totalCancellations", 0)))
+                            .setTextAlignment(TextAlignment.RIGHT).setFont(font));
+                }
+            }
+
+            document.add(table);
+            document.close();
+
+        } catch (Exception e) {
+            throw new IOException("An error occurred during PDF generation: " + e.getMessage(), e);
+        }
+    }
 }

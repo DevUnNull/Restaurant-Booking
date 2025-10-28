@@ -1,9 +1,6 @@
 package com.fpt.restaurantbooking.controllers;
 
-import com.fpt.restaurantbooking.models.OrderItem;
-import com.fpt.restaurantbooking.models.Payment;
-import com.fpt.restaurantbooking.models.Reservation;
-import com.fpt.restaurantbooking.models.Table;
+import com.fpt.restaurantbooking.models.*;
 import com.fpt.restaurantbooking.repositories.impl.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,8 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.ArrayList;
 
 @WebServlet("/checkout")
 public class CheckoutServlet extends HttpServlet {
@@ -31,38 +31,74 @@ public class CheckoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        Integer reservationId = (Integer) session.getAttribute("reservationId");
 
-        logger.info(">>> [CHECKOUT GET] reservationId: {}", reservationId);
-
-        if (reservationId == null) {
-            logger.warn("⚠️ No reservationId in session, redirecting to findTable");
-            response.sendRedirect("findTable");
-            return;
-        }
+        logger.info(">>> [CHECKOUT GET] Loading checkout page from session");
 
         try {
-            // ✅ Lấy thông tin reservation
-            Reservation reservation = reservationDAO.getReservationById(reservationId);
+            // ✅ Lấy dữ liệu từ SESSION (không phải DB)
+            @SuppressWarnings("unchecked")
+            List<Integer> selectedTableIds = (List<Integer>) session.getAttribute("selectedTableIds");
 
-            if (reservation == null) {
-                logger.error("❌ Reservation not found: {}", reservationId);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn đặt bàn");
+            @SuppressWarnings("unchecked")
+            List<OrderItem> orderItems = (List<OrderItem>) session.getAttribute("cartItems");
+
+            String dateStr = (String) session.getAttribute("requiredDate");
+            String timeStr = (String) session.getAttribute("requiredTime");
+            Integer guestCount = (Integer) session.getAttribute("guestCount");
+            String specialRequest = (String) session.getAttribute("specialRequest");
+
+            // Kiểm tra dữ liệu
+            if (selectedTableIds == null || selectedTableIds.isEmpty()) {
+                logger.warn("⚠️ No tables in session, redirecting to findTable");
+                response.sendRedirect("findTable");
                 return;
             }
 
-            // ✅ Lấy danh sách order items
-            List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
+            // Lấy thông tin bàn chi tiết
+            List<Table> selectedTables = new ArrayList<>();
+            for (Integer tableId : selectedTableIds) {
+                Table table = tableDAO.getTableById(tableId);
+                if (table != null) {
+                    selectedTables.add(table);
+                }
+            }
 
-            // ✅ Lấy danh sách bàn đã chọn
-            List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
+            // Tạo Reservation object tạm để hiển thị (chưa lưu DB)
+            Reservation reservation = new Reservation(
+                    0,
+                    (Integer) session.getAttribute("userId"),
+                    0,
+                    guestCount != null ? guestCount : 0,
+                    null,
+                    "PENDING",
+                    guestCount != null ? guestCount : 0
+            );
+            if (dateStr != null && !dateStr.isEmpty()) {
+                reservation.setReservationDate(LocalDate.parse(dateStr));
+            }
+            if (timeStr != null && !timeStr.isEmpty()) {
+                reservation.setReservationTime(LocalTime.parse(timeStr));
+            }
+            reservation.setSpecialRequests(specialRequest);
 
-            logger.info("✅ Found {} order items and {} tables for reservation {}", orderItems.size(), selectedTables.size(), reservationId);
-            logger.info("✅ Total amount: {}", reservation.getTotalAmount());
+            // Tính tổng tiền
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            if (orderItems != null && !orderItems.isEmpty()) {
+                for (OrderItem item : orderItems) {
+                    totalAmount = totalAmount.add(
+                            item.getUnitPrice().multiply(new BigDecimal(item.getQuantity()))
+                    );
+                }
+            }
+            reservation.setTotalAmount(totalAmount);
+
+            logger.info("✅ Loaded {} order items and {} tables from session",
+                    orderItems != null ? orderItems.size() : 0,
+                    selectedTables.size());
 
             // ✅ Set các attributes
             request.setAttribute("reservation", reservation);
-            request.setAttribute("currentItems", orderItems);
+            request.setAttribute("currentItems", orderItems != null ? orderItems : new ArrayList<>());
             request.setAttribute("selectedTables", selectedTables);
 
             request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
@@ -77,20 +113,40 @@ public class CheckoutServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-        Integer reservationId = (Integer) session.getAttribute("reservationId");
 
-        logger.info(">>> [CHECKOUT POST] reservationId: {}", reservationId);
-
-        if (reservationId == null) {
-            response.sendRedirect("findTable");
-            return;
-        }
+        logger.info(">>> [CHECKOUT POST] Confirming reservation");
 
         try {
             String action = request.getParameter("action");
             logger.info(">>> action: {}", action);
 
             if ("confirm".equals(action)) {
+                // ✅ Lấy dữ liệu từ SESSION
+                @SuppressWarnings("unchecked")
+                List<Integer> selectedTableIds = (List<Integer>) session.getAttribute("selectedTableIds");
+
+                @SuppressWarnings("unchecked")
+                List<OrderItem> orderItems = (List<OrderItem>) session.getAttribute("cartItems");
+
+                String dateStr = (String) session.getAttribute("requiredDate");
+                String timeStr = (String) session.getAttribute("requiredTime");
+                Integer guestCount = (Integer) session.getAttribute("guestCount");
+                String specialRequest = (String) session.getAttribute("specialRequest");
+                Integer userId = (Integer) session.getAttribute("userId");
+
+                // Kiểm tra dữ liệu
+                if (selectedTableIds == null || selectedTableIds.isEmpty()) {
+                    logger.error("❌ No tables in session");
+                    response.sendRedirect("findTable");
+                    return;
+                }
+
+                if (userId == null || dateStr == null || timeStr == null || guestCount == null) {
+                    logger.error("❌ Missing required data in session");
+                    response.sendRedirect("findTable");
+                    return;
+                }
+
                 // ✅ Lấy payment method từ form
                 String paymentMethod = request.getParameter("paymentMethod");
                 if (paymentMethod == null || paymentMethod.isEmpty()) {
@@ -99,33 +155,112 @@ public class CheckoutServlet extends HttpServlet {
 
                 logger.info(">>> paymentMethod: {}", paymentMethod);
 
-                // ✅ Lấy thông tin reservation
-                Reservation reservation = reservationDAO.getReservationById(reservationId);
-                if (reservation == null) {
-                    logger.error("❌ Reservation not found: {}", reservationId);
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn đặt bàn");
+                Integer editingReservationId = (Integer) session.getAttribute("editingReservationId");
+
+                // ✅ Chuẩn bị dữ liệu Reservation
+                Reservation reservation = new Reservation(
+                        0,
+                        userId,
+                        0,
+                        guestCount,
+                        null,
+                        "PENDING",
+                        guestCount
+                );
+                reservation.setReservationDate(LocalDate.parse(dateStr));
+                reservation.setReservationTime(LocalTime.parse(timeStr));
+                reservation.setSpecialRequests(specialRequest);
+
+                // Tính tổng tiền
+                BigDecimal totalAmount = BigDecimal.ZERO;
+                if (orderItems != null && !orderItems.isEmpty()) {
+                    for (OrderItem item : orderItems) {
+                        totalAmount = totalAmount.add(
+                                item.getUnitPrice().multiply(new BigDecimal(item.getQuantity()))
+                        );
+                    }
+                }
+                reservation.setTotalAmount(totalAmount);
+
+                int reservationId;
+                if (editingReservationId != null && editingReservationId > 0) {
+                    // ✅ Chế độ chỉnh sửa: cập nhật đơn cũ
+                    reservationId = editingReservationId;
+                    boolean updated = reservationDAO.updateReservationDetails(
+                            reservationId,
+                            reservation.getReservationDate(),
+                            reservation.getReservationTime(),
+                            reservation.getGuestCount(),
+                            reservation.getSpecialRequests(),
+                            totalAmount
+                    );
+                    if (!updated) {
+                        logger.error("❌ Failed to update reservation {}", reservationId);
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể cập nhật đơn đặt bàn");
+                        return;
+                    }
+
+                    // Ghi đè tables và items
+                    reservationTableDAO.removeAllTablesFromReservation(reservationId);
+                    orderItemDAO.deleteAllOrderItemsForReservation(reservationId);
+                } else {
+                    // ✅ Tạo mới
+                    reservation.setTotalAmount(totalAmount);
+                    reservationId = reservationDAO.createReservation(reservation);
+                    if (reservationId <= 0) {
+                        logger.error("❌ Failed to create reservation");
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể tạo đơn đặt bàn");
+                        return;
+                    }
+                }
+
+                if (reservationId <= 0) {
+                    logger.error("❌ Failed to create reservation");
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Không thể tạo đơn đặt bàn");
                     return;
                 }
+
+                logger.info("✅ Created reservation with ID: {}", reservationId);
+
+                // ✅ Ghi Order_Items
+                if (orderItems != null && !orderItems.isEmpty()) {
+                    for (OrderItem item : orderItems) {
+                        OrderItem dbItem = new OrderItem(reservationId, item.getItemId(), item.getQuantity(), item.getUnitPrice());
+                        dbItem.setSpecialInstructions(item.getSpecialInstructions());
+                        dbItem.setStatus(item.getStatus());
+                        orderItemDAO.addOrderItem(dbItem);
+                    }
+                    logger.info("✅ Created {} order items", orderItems.size());
+                }
+
+                // ✅ Ghi Reservation_Tables
+                for (Integer tableId : selectedTableIds) {
+                    reservationTableDAO.addTableToReservation(reservationId, tableId);
+                    tableDAO.updateTableStatus(tableId, "RESERVED");
+                }
+                logger.info("✅ Added {} tables to reservation", selectedTableIds.size());
 
                 // ✅ Kiểm tra có order items không
-                List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
-                if (orderItems.isEmpty()) {
+                if (orderItems == null || orderItems.isEmpty()) {
                     logger.warn("⚠️ No order items for reservation {}", reservationId);
-                    List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
-                    request.setAttribute("errorMessage", "Vui lòng chọn ít nhất 1 món ăn trước khi thanh toán");
-                    request.setAttribute("reservation", reservation);
-                    request.setAttribute("currentItems", orderItems);
-                    request.setAttribute("selectedTables", selectedTables);
-                    request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
-                    return;
                 }
 
-                logger.info("✅ Processing payment for reservation {} with {} items", reservationId, orderItems.size());
+                logger.info("✅ Processing payment for reservation {} with {} items",
+                        reservationId, orderItems != null ? orderItems.size() : 0);
 
-                // ✅ Tạo payment record
-                Payment payment = new Payment(reservationId, paymentMethod,
-                        reservation.getTotalAmount().longValue());
-                payment.setPaymentStatus("COMPLETED");
+                // ✅ TẠO PAYMENT record
+                Payment payment = new Payment(reservationId, paymentMethod, totalAmount.longValue());
+
+                // Tất cả đơn đặt bàn online đều bắt đầu ở trạng thái PENDING
+                // Payment status: PENDING vì chưa thanh toán
+                payment.setPaymentStatus("PENDING");
+
+                // Đối với CASH: sẽ thanh toán khi đến nhà hàng
+                // Đối với CREDIT_CARD/E_WALLET: sẽ xử lý thanh toán online (có thể kết hợp gateway)
+                // Tạm thời tất cả đều set PENDING
+
+                logger.info("💳 Payment method: {} - Status: PENDING", paymentMethod);
+
                 payment.setTransactionId(UUID.randomUUID().toString());
 
                 int paymentId = paymentDAO.createPayment(payment);
@@ -133,55 +268,31 @@ public class CheckoutServlet extends HttpServlet {
                 if (paymentId > 0) {
                     logger.info("✅ Payment created with ID: {}", paymentId);
 
-                    // ✅ Update reservation status to CONFIRMED
-                    reservationDAO.updateReservationStatus(reservationId, "CONFIRMED");
-
-                    // ✅ Update all table statuses to RESERVED
-                    List<Integer> tableIds = reservationTableDAO.getTablesByReservationId(reservationId);
-                    for (Integer tableId : tableIds) {
-                        tableDAO.updateTableStatus(tableId, "RESERVED");
-                        logger.info("✅ Updated table {} status to RESERVED", tableId);
-                    }
+                    // ✅ Reservation status vẫn giữ PENDING (đã set khi tạo reservation ở trên)
+                    logger.info("✅ Reservation status: PENDING - awaiting confirmation");
 
                     // ✅ Clear session
-                    session.removeAttribute("reservationId");
+                    session.removeAttribute("selectedTableIds");
+                    session.removeAttribute("cartItems");
                     session.removeAttribute("requiredDate");
                     session.removeAttribute("requiredTime");
                     session.removeAttribute("guestCount");
-                    session.removeAttribute("selectedTables");
+                    session.removeAttribute("specialRequest");
+                    session.removeAttribute("editingReservationId");
 
                     logger.info("✅ Checkout completed successfully for reservation {}", reservationId);
 
-                    // ✅ Redirect to success page
-                    response.sendRedirect("orderHistory?success=true");
+                    // ✅ Redirect to details page for edited or new reservation
+                    response.sendRedirect("orderDetails?id=" + reservationId);
                 } else {
                     logger.error("❌ Failed to create payment");
-                    List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
-                    request.setAttribute("errorMessage", "Lỗi khi xử lý thanh toán");
-                    request.setAttribute("reservation", reservation);
-                    request.setAttribute("currentItems", orderItems);
-                    request.setAttribute("selectedTables", selectedTables);
-                    request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi khi xử lý thanh toán");
                 }
             }
 
         } catch (Exception e) {
             logger.error("❌ Error in CheckoutServlet POST", e);
-            request.setAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
-
-            // ✅ Load lại data để hiển thị
-            try {
-                Reservation reservation = reservationDAO.getReservationById(reservationId);
-                List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
-                List<Table> selectedTables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
-                request.setAttribute("reservation", reservation);
-                request.setAttribute("currentItems", orderItems);
-                request.setAttribute("selectedTables", selectedTables);
-            } catch (Exception ex) {
-                logger.error("❌ Error loading data for error page", ex);
-            }
-
-            request.getRequestDispatcher("/WEB-INF/BookTable/cartCheckout.jsp").forward(request, response);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra: " + e.getMessage());
         }
     }
 }
