@@ -1,7 +1,7 @@
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.models.User;
-import com.fpt.restaurantbooking.repositories.impl.UserRepositoryImpl;
+import com.fpt.restaurantbooking.repositories.impl.UserDao;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,60 +15,77 @@ import java.util.List;
 @WebServlet(name = "EmployeeList", urlPatterns = {"/EmployeeList"})
 public class EmployeeListController extends HttpServlet {
 
-    private static final int PAGE_SIZE = 10; // số nhân viên mỗi trang
+    private static final int PAGE_SIZE = 10; // Số nhân viên mỗi trang
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String keyword = request.getParameter("search");
-        int page = 1;
+        // Nhận các tham số từ form
+        String search = request.getParameter("search");
+        String gender = request.getParameter("gender");
+        String status = request.getParameter("status");
 
-        // Lấy số trang từ request (nếu có)
+        // Xử lý phân trang
+        int page = 1;
         String pageParam = request.getParameter("page");
-        if (pageParam != null) {
+        if (pageParam != null && !pageParam.isEmpty()) {
             try {
                 page = Integer.parseInt(pageParam);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
         }
 
+        // Kết nối DB và lấy danh sách nhân viên
+        DatabaseUtil db = new DatabaseUtil();
         List<User> employees = new ArrayList<>();
-        long totalEmployees = 0;
+        int totalPages = 1;
 
-        try (Connection connection = DatabaseUtil.getConnection()) {
-            UserRepositoryImpl userRepo = new UserRepositoryImpl(connection);
-            int offset = (page - 1) * PAGE_SIZE;
+        try (Connection conn = db.getConnection()) {
+            UserDao userDao = new UserDao();
 
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                // Nếu có từ khóa tìm kiếm
-//                employees = userRepo.searchEmployees(keyword.trim(), offset, PAGE_SIZE);
-//                totalEmployees = userRepo.countSearchEmployees(keyword.trim());
+            // Gọi hàm tìm kiếm (lọc theo search, gender, status)
+            List<User> allStaff = userDao.searchEmployees(search, gender, status);
+
+            int totalRecords = allStaff.size();
+            totalPages = (int) Math.ceil((double) Math.max(totalRecords, 1) / PAGE_SIZE);
+
+            // Clamp page trong giới hạn [1, totalPages]
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            // Tính fromIndex/toIndex an toàn
+            int fromIndex = (page - 1) * PAGE_SIZE;
+            if (fromIndex < 0) fromIndex = 0;
+            int toIndex = Math.min(fromIndex + PAGE_SIZE, totalRecords);
+
+            // Lấy sublist nếu có phần tử, ngược lại trả list rỗng
+            if (totalRecords == 0) {
+                employees = new ArrayList<>();
             } else {
-                // Nếu không có từ khóa lấy toàn bộ nhân viên
-                employees.addAll(userRepo.findByRole(User.UserRole.STAFF));
-                employees.addAll(userRepo.findByRole(User.UserRole.ADMIN));
-                totalEmployees = employees.size();
+                employees = allStaff.subList(fromIndex, toIndex);
             }
+
+            // Exception khi ko tìm thấy
+            if (employees == null || employees.isEmpty()) {
+                request.setAttribute("message", "Không tìm thấy nhân viên phù hợp.");
+            }
+
+            // Gửi dữ liệu sang JSP
+            request.setAttribute("employees", employees);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("search", search);
+            request.setAttribute("gender", gender);
+            request.setAttribute("status", status);
 
         } catch (Exception e) {
             e.printStackTrace();
+            request.setAttribute("error", "Không thể tải danh sách nhân viên.");
         }
 
-        // Kiểm tra nếu không có kết quả
-        if (employees.isEmpty()) {
-            request.setAttribute("message", "Không tìm thấy nhân viên nào phù hợp!");
-        }
-
-        int totalPages = (int) Math.ceil((double) totalEmployees / PAGE_SIZE);
-
-        // Gửi dữ liệu sang JSP
-        request.setAttribute("employees", employees);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("search", keyword);
-
+        // Forward đến trang JSP
         request.getRequestDispatcher("/WEB-INF/StaffManage/EmployeeList.jsp").forward(request, response);
     }
 }
-
-
