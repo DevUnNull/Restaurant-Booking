@@ -5,6 +5,7 @@
 package com.fpt.restaurantbooking.repositories.impl;
 
 
+import com.fpt.restaurantbooking.models.MenuItem;
 import com.fpt.restaurantbooking.models.Service;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 
@@ -19,7 +20,7 @@ import java.util.List;
  *
  * @author Quandxnunxi28
  */
-public class ServiceRepository   {
+public class ServiceRepository {
 
     PreparedStatement stm;
     ResultSet rs;
@@ -30,7 +31,7 @@ public class ServiceRepository   {
         String query = "select * from Services";
         try (Connection conn = db.getConnection();
              PreparedStatement stm = conn.prepareStatement(query);
-             ResultSet rs = stm.executeQuery();){
+             ResultSet rs = stm.executeQuery();) {
 
             while (rs.next()) {
                 list.add(new Service(rs.getInt("service_id"), rs.getString("service_name"), rs.getString("service_code"), rs.getString("description"), rs.getString("price"),
@@ -53,15 +54,19 @@ public class ServiceRepository   {
                 " FROM Services s\n" +
                 " LEFT JOIN Users uc ON s.created_by = uc.user_id\n" +
                 " LEFT JOIN Users uu ON s.updated_by = uu.user_id";
+
         try(Connection conn = db.getConnection();
             PreparedStatement stm = conn.prepareStatement(query);
             ResultSet rs = stm.executeQuery();) {
 
 
+
             while (rs.next()) {
                 list.add(new Service(rs.getInt("service_id"), rs.getString("service_name"), rs.getString("service_code"), rs.getString("description"), rs.getString("price"),
                         rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status"), rs.getString("created_by_name"), // đổi sang name
+
                         rs.getString("updated_by_name") )); // đổi sang name));
+
             }
         } catch (Exception e) {
         }
@@ -69,7 +74,7 @@ public class ServiceRepository   {
         return list;
     }
 
-    public void updateService   (String serviceName, String description, String price, String status, String startDate, String endDate, String service_id) throws SQLException {
+    public void updateService(String serviceName, String description, String price, String status, String startDate, String endDate, String service_id) throws SQLException {
         String sql = "UPDATE Services SET service_name = ?, description = ? ,   price = ? , status= ?, start_date= ? , end_date=?  WHERE service_id = ?";
         try (Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql)) {
             stm.setString(1, serviceName);
@@ -100,7 +105,7 @@ public class ServiceRepository   {
 
     }
 
-    public void addService(String serviceName,String serviceCode, String description, String price, String status, String startDate, String endDate, int id) throws SQLException {
+    public void addService(String serviceName, String serviceCode, String description, String price, String status, String startDate, String endDate, int id) throws SQLException {
         String sql = " INSERT INTO Services (service_name,service_code, description, price, status, start_date, end_date, created_by, updated_by ) \n"
                 + " VALUES (?,?, ?, ?, ?, ?, ?,?,?);";
         try (Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql)) {
@@ -122,17 +127,20 @@ public class ServiceRepository   {
         }
 
     }
+
     public List<Service> getServicesByPageShowList(int offset, int limit) throws SQLException {
         List<Service> list = new ArrayList<>();
 
 
         String query = "SELECT * FROM Services ORDER BY service_id DESC limit ?,  ?";
+
         try(Connection conn = db.getConnection();
             PreparedStatement stm = conn.prepareStatement(query);) {
 
             stm.setInt(1, offset);
             stm.setInt(2, limit);
             try( ResultSet rs = stm.executeQuery();){
+
                 while (rs.next()) {
                     list.add(new Service(
                             rs.getInt("service_id"),
@@ -154,6 +162,7 @@ public class ServiceRepository   {
 
         return list;
     }
+
     public List<Service> getServicesByPage(int offset, int limit) throws SQLException {
         List<Service> list = new ArrayList<>();
         String sql = " SELECT  " +
@@ -167,12 +176,14 @@ public class ServiceRepository   {
                 " ORDER BY s.service_id DESC " +
                 " LIMIT ?, ? ";
 
+
         try(Connection conn = db.getConnection();
             PreparedStatement stm = conn.prepareStatement(sql);
         ){
             stm.setInt(1, offset);
             stm.setInt(2, limit);
             try(ResultSet rs = stm.executeQuery();){
+
                 while (rs.next()) {
                     list.add(new Service(
                             rs.getInt("service_id"),
@@ -188,6 +199,7 @@ public class ServiceRepository   {
                             rs.getString("updated_by_name")
                     ));
                 }
+
             }
         }
 
@@ -240,10 +252,12 @@ public class ServiceRepository   {
                         rs.getString("end_date"),
                         rs.getString("status")
                 ));
+
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
 
         return list;
     }
@@ -279,6 +293,40 @@ public class ServiceRepository   {
         }
 
         return null;
+    }
+
+
+
+
+    public List<MenuItem> getMenuItemsByService(int id) throws SQLException {
+        List<MenuItem> list = new ArrayList<>();
+        String sql = " SELECT\n" +
+                "m.item_id, m.item_name\n" +
+                "        FROM\n" +
+                "service_menu_items smi \n" +
+                " JOIN\n" +
+                "menu_items m ON smi.item_id = m.item_id\n" +
+                "        WHERE\n" +
+                "smi.service_id = ? ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+        ) {
+            stm.setInt(1, id);
+
+            try (ResultSet rs = stm.executeQuery();) {
+                while (rs.next()) {
+                    list.add(new MenuItem(
+                            rs.getInt("item_id"),
+                            rs.getString("item_name")
+
+                    ));
+                }
+            }
+        }
+
+
+        return list;
     }
 
 }

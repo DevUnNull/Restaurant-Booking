@@ -25,6 +25,11 @@ public class MenuItem extends BaseEntity {
         super();
         this.status = "ACTIVE";
     }
+    public MenuItem(Integer itemId, String itemName) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+
+    }
     public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
                     String status, String created_By, String updated_By, String created_At, String updated_At, String category_name) {
         this.itemId = itemId;

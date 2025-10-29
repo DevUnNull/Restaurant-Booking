@@ -121,6 +121,53 @@
         background-color: #d63a2a;
         transform: translateY(-2px);
     }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+    }
+
+    /* Khung popup */
+    .modal-content {
+        background: #fff;
+        margin: 5% auto;
+        padding: 20px 30px;
+        border-radius: 10px;
+        width: 70%;
+        max-height: 80vh; /* Giới hạn chiều cao */
+        overflow-y: auto; /* Thanh cuộn nếu nhiều món */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    /* Nút X */
+    .close {
+        float: right;
+        font-size: 26px;
+        cursor: pointer;
+        color: #333;
+    }
+    .close:hover {
+        color: #b52a1a;
+    }
+
+    /* Bảng món */
+    .combo-items table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .combo-items th, .combo-items td {
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+    .combo-items th {
+        background: #b52a1a;
+        color: #fff;
+    }
 
 </style>
 
@@ -258,6 +305,12 @@
                                     onclick="openDeleteModal(this)">
                                 Delete
                             </button>
+                            <button class="action-btn btn-detail"
+                                    onclick="openComboPopup(this)"
+                                    data-id="${o.serviceId}"
+                                    data-name="${o.serviceName}">
+                                Combo món
+                            </button>
                         </td>
                     </tr>
                 </c:forEach>
@@ -341,6 +394,47 @@
         </form>
     </div>
 </div>
+<!-- Popup Combo món -->
+<div id="comboPopup" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeComboPopup()">&times;</span>
+        <h2 style="text-align:center; color:#b52a1a;">Thông tin dịch vụ</h2>
+        <h3 id="combo-service-name" style="text-align:center; margin-bottom:15px;"></h3>
+
+        <div id="combo-items" class="combo-items">
+            <!-- Danh sách món sẽ được load tại đây -->
+            <p style="text-align:center; color:#777;">Đang tải...</p>
+        </div>
+    </div>
+</div>
+<script>
+    function openComboPopup(btn) {
+        const serviceId = btn.dataset.id;
+        const serviceName = btn.dataset.name;
+
+        document.getElementById("combo-service-name").innerText = "Dịch vụ: " + serviceName;
+        document.getElementById("comboPopup").style.display = "block";
+
+        const container = document.getElementById("combo-items");
+        container.innerHTML = "<p style='text-align:center;'>Đang tải...</p>";
+
+        // Gọi servlet JSP hoặc API để lấy danh sách món
+        fetch("ServiceItemList?serviceId=" + serviceId)
+            .then(res => res.text())
+            .then(html => container.innerHTML = html)
+            .catch(() => container.innerHTML = "<p style='color:red; text-align:center;'>Lỗi tải dữ liệu!</p>");
+    }
+
+    function closeComboPopup() {
+        document.getElementById("comboPopup").style.display = "none";
+    }
+
+    // Đóng popup khi click ra ngoài
+    window.onclick = function(e) {
+        const popup = document.getElementById("comboPopup");
+        if (e.target === popup) closeComboPopup();
+    }
+</script>
 <script>
     function openDeleteModal(btn) {
         document.getElementById("delete-id").value = btn.dataset.id;
