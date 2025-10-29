@@ -1,0 +1,568 @@
+/**
+ * Theme CSS Variables - Dùng chung cho tất cả các trang
+ * Dark Mode (mặc định) & Light Mode
+ */
+
+:root {
+    /* === DARK MODE (DEFAULT) === */
+    --bg-overlay: rgba(0, 0, 0, 0.6);
+    --bg-overlay-heavy: rgba(0, 0, 0, 0.75);
+    --text-primary: #ffffff;
+    --text-secondary: #dddddd;
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --box-bg: rgba(20, 10, 10, 0.75);
+    --box-bg-alt: rgba(94, 23, 23, 0.85);
+    --input-border: rgba(255, 255, 255, 0.2);
+    --input-border-focus: rgba(255, 255, 255, 0.5);
+    --table-border: rgba(255, 255, 255, 0.15);
+    --table-bg: rgba(255, 255, 255, 0.08);
+    --table-hover: rgba(255, 255, 255, 0.05);
+    --error-bg: rgba(231, 76, 60, 0.2);
+    --error-text: #e74c3c;
+    --success-bg: rgba(40, 167, 69, 0.2);
+    --success-text: #28a745;
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --button-text: #ffffff;
+    --border-visible: rgba(255, 255, 255, 0.3);
+}
+
+html.light-mode,
+body.light-mode {
+    /* === LIGHT MODE - Red & White Theme === */
+    --bg-overlay: rgba(255, 255, 255, 0.92);
+    --bg-overlay-heavy: rgba(255, 255, 255, 0.98);
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-muted: rgba(0, 0, 0, 0.6);
+    --box-bg: rgba(255, 255, 255, 0.98);
+    --box-bg-alt: rgba(255, 255, 255, 0.98);
+    --input-border: rgba(231, 76, 60, 0.4);
+    --input-border-focus: rgba(231, 76, 60, 0.8);
+    --table-border: rgba(231, 76, 60, 0.3);
+    --table-bg: rgba(255, 255, 255, 0.95);
+    --table-hover: rgba(231, 76, 60, 0.05);
+    --error-bg: rgba(231, 76, 60, 0.1);
+    --error-text: #c0392b;
+    --success-bg: rgba(40, 167, 69, 0.1);
+    --success-text: #1e7e34;
+    --shadow: 0 8px 32px 0 rgba(231, 76, 60, 0.2);
+    --button-text: #000000;
+    --border-visible: rgba(231, 76, 60, 0.5);
+}
+
+/* === THEME TOGGLE BUTTON === */
+.theme-toggle {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 10000;
+    background: var(--box-bg);
+    border: 2px solid var(--input-border);
+    padding: 12px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: var(--text-primary);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+body.light-mode .theme-toggle:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+
+.theme-toggle i {
+    font-size: 1.2em;
+}
+
+/* === GENERAL TRANSITIONS === */
+body,
+.container,
+.booking-box,
+table,
+.message,
+.btn {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* === LIGHT MODE SPECIFIC OVERRIDES - RED & WHITE THEME === */
+
+/* Input placeholders trong light mode */
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Table hover trong light mode */
+body.light-mode table tbody tr:hover {
+    background-color: rgba(231, 76, 60, 0.05) !important;
+}
+
+/* Table text - BLACK for visibility */
+body.light-mode table tbody td {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+/* Price columns - RED highlight */
+body.light-mode .price-col {
+    color: #e74c3c !important;
+    font-weight: 700 !important;
+    font-size: 1.05em !important;
+}
+
+/* Buttons - giữ text trắng cho contrast tốt */
+body.light-mode .btn-detail,
+body.light-mode .btn-delete,
+body.light-mode .sort-btn.active,
+body.light-mode .btn-filter,
+body.light-mode .remove-btn,
+body.light-mode .update-btn,
+body.light-mode .qty-btn,
+body.light-mode button[type="submit"],
+body.light-mode .action-btn,
+body.light-mode .btn-primary {
+    color: white !important;
+}
+
+/* +/- Buttons cho số khách (findTable.jsp) */
+body.light-mode #minus-btn,
+body.light-mode #plus-btn {
+    background: white !important;
+    border: 2px solid #e74c3c !important;
+    color: #e74c3c !important;
+    font-weight: bold !important;
+}
+
+body.light-mode #minus-btn:hover,
+body.light-mode #plus-btn:hover {
+    background: #e74c3c !important;
+    color: white !important;
+}
+
+/* Quantity input trong light mode */
+body.light-mode .qty-input {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+    font-weight: 700 !important;
+}
+
+/* Cart summary và total summary trong light mode - WHITE BG, RED BORDER */
+body.light-mode .total-summary {
+    background-color: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode .total-summary p {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .total-summary p strong {
+    color: #e74c3c !important;
+    font-weight: 800 !important;
+}
+
+body.light-mode .final-total {
+    color: #e74c3c !important;
+    border-top: 3px solid #e74c3c !important;
+    font-weight: 900 !important;
+}
+
+/* Discount section trong light mode - WHITE BG, RED BORDER */
+body.light-mode .discount-section {
+    background: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode .discount-header h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .discount-input input {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+}
+
+/* Note text và special text */
+body.light-mode .note-text,
+body.light-mode .special-request {
+    color: #000000 !important;
+    background: white !important;
+    border-left: 4px solid #e74c3c !important;
+}
+
+/* Cart item hover trong light mode */
+body.light-mode .item-row:hover {
+    background-color: rgba(231, 76, 60, 0.03) !important;
+}
+
+/* Sort buttons trong light mode */
+body.light-mode .sort-btn {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .sort-btn:hover,
+body.light-mode .sort-btn.active {
+    background: #e74c3c !important;
+    color: white !important;
+}
+
+/* Cart summary link */
+body.light-mode .cart-summary a {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .cart-summary a:hover {
+    color: #e74c3c !important;
+}
+
+/* Note input */
+body.light-mode .note-input {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+}
+
+body.light-mode .note-input::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Sticky footer */
+body.light-mode .sticky-footer {
+    background: white !important;
+    border-top: 3px solid #e74c3c !important;
+}
+
+body.light-mode .footer-content h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+/* Payment method select */
+body.light-mode .payment-method select {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+}
+
+/* Border cho các element cần nổi bật hơn - WHITE BG, RED BORDER */
+body.light-mode .container,
+body.light-mode .booking-box,
+body.light-mode .menu-item,
+body.light-mode .filter-section {
+    background: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+/* mapTable.jsp - Dining areas & floors - WHITE BG, RED BORDER */
+body.light-mode .dining-area,
+body.light-mode .office,
+body.light-mode .kitchen,
+body.light-mode .sushi-bar {
+    background-color: white !important;
+    border: 3px solid #e74c3c !important;
+    color: #e74c3c !important;
+    font-weight: 800 !important;
+}
+
+/* Item name & details - BLACK TEXT in checkout */
+body.light-mode .item-details h3,
+body.light-mode .item-name {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .item-details p {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .item-price,
+body.light-mode .price {
+    color: #e74c3c !important;
+    font-weight: 700 !important;
+}
+
+/* Checkout order item styling - BLACK TEXT */
+body.light-mode .order-item .item-name {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 1.15em !important;
+}
+
+body.light-mode .order-item .item-quantity {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .order-item .item-price {
+    color: #e74c3c !important;
+    font-weight: 700 !important;
+    font-size: 1.15em !important;
+}
+
+/* Selected table section - WHITE BG, RED BORDER */
+body.light-mode .selected-tables-section,
+body.light-mode .table-list,
+body.light-mode .table-item {
+    background: white !important;
+    border: 2px solid #e74c3c !important;
+    color: #000000 !important;
+}
+
+body.light-mode .selected-tables-section h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .table-item span {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+/* Payment method section - WHITE BG, RED BORDER */
+body.light-mode .payment-method {
+    background: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode .payment-method p {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .payment-method label {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .payment-method label:hover {
+    background: rgba(231, 76, 60, 0.05) !important;
+}
+
+/* Bàn đã chọn section (inline styled div) - WHITE BG, RED BORDER */
+body.light-mode div[style*="background-color: rgba(0, 0, 0, 0.5)"] {
+    background-color: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode div[style*="background-color: rgba(0, 0, 0, 0.5)"] h3 {
+    color: #000000 !important;
+}
+
+body.light-mode div[style*="background-color: rgba(0, 0, 0, 0.5)"] table {
+    background-color: white !important;
+}
+
+/* Yellow notice box - WHITE BG, YELLOW BORDER */
+body.light-mode div[style*="background: rgba(255, 193, 7"] {
+    background: white !important;
+    border: 3px solid #ffc107 !important;
+    color: #000000 !important;
+}
+
+/* orderItem.jsp - Combo notice box */
+body.light-mode .combo-notice {
+    background: white !important;
+    border: 3px solid #ffc107 !important;
+    color: #000000 !important;
+}
+
+body.light-mode .combo-notice i {
+    color: #ffc107 !important;
+}
+
+body.light-mode .combo-notice strong,
+body.light-mode .combo-notice span {
+    color: #000000 !important;
+}
+
+/* cancelOrder.jsp - Policy section text */
+body.light-mode .policy-section {
+    background: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode .policy-section h3 {
+    color: #e74c3c !important;
+}
+
+body.light-mode .policy-section li,
+body.light-mode .policy-section p,
+body.light-mode .policy-section strong {
+    color: #000000 !important;
+}
+
+body.light-mode .policy-section li:before {
+    color: #e74c3c !important;
+}
+
+/* cancelOrder.jsp - Booking info section (blue) */
+body.light-mode .policy-section[style*="rgba(102, 126, 234"] {
+    background: white !important;
+    border: 3px solid #667eea !important;
+}
+
+body.light-mode .policy-section[style*="rgba(102, 126, 234"] h3 {
+    color: #667eea !important;
+}
+
+/* cancelOrder.jsp - Popup content */
+body.light-mode .popup-content {
+    background: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode .popup-content h3 {
+    color: #e74c3c !important;
+}
+
+body.light-mode .popup-content p {
+    color: #000000 !important;
+}
+
+body.light-mode .popup-content .booking-info {
+    background: rgba(231, 76, 60, 0.05) !important;
+    border-left: 4px solid #e74c3c !important;
+}
+
+body.light-mode .popup-content .booking-info p {
+    color: #000000 !important;
+}
+
+/* orderItem.jsp - Sticky footer buttons */
+body.light-mode .sticky-footer {
+    background: white !important;
+    border-top: 3px solid #e74c3c !important;
+}
+
+body.light-mode .sticky-footer .total {
+    color: #000000 !important;
+}
+
+body.light-mode .sticky-footer .total span {
+    color: #ffc107 !important;    /* Giá tiền màu vàng */
+}
+
+body.light-mode .btn {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .btn:hover {
+    background: #000000 !important;
+    color: white !important;
+}
+
+body.light-mode .btn-confirm {
+    background: #e74c3c !important;
+    border: 2px solid #e74c3c !important;
+    color: white !important;
+}
+
+body.light-mode .btn-confirm:hover {
+    background: #c0392b !important;
+    border-color: #c0392b !important;
+}
+
+/* cartCheckout.jsp - Special request section */
+body.light-mode .special-request,
+body.light-mode div[style*="font-style: italic"] {
+    color: #000000 !important;
+}
+
+/* Star rating and icons - YELLOW */
+body.light-mode .fas.fa-star,
+body.light-mode i.fa-star {
+    color: #ffc107 !important;
+}
+
+/* orderItem.jsp - Pagination */
+body.light-mode .pagination a {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .pagination a:hover {
+    background: #e74c3c !important;
+    color: white !important;
+}
+
+body.light-mode .pagination a.active {
+    background: #e74c3c !important;
+    color: white !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .pagination a.disabled {
+    background: white !important;
+    color: rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    cursor: not-allowed !important;
+}
+
+/* cartCheckout.jsp - Payment info boxes */
+body.light-mode .payment-info {
+    background: white !important;
+    border: 2px solid #e74c3c !important;
+}
+
+body.light-mode .payment-info p {
+    color: #000000 !important;
+}
+
+body.light-mode .payment-info strong {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .payment-info i {
+    color: #e74c3c !important;
+}
+
+/* cartCheckout.jsp - Confirm button */
+body.light-mode .confirm-btn {
+    background: #e74c3c !important;
+    border: 2px solid #e74c3c !important;
+    color: white !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .confirm-btn:hover {
+    background: #c0392b !important;
+    border-color: #c0392b !important;
+}
+
+body.light-mode .back-btn {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .back-btn:hover {
+    background: #000000 !important;
+    color: white !important;
+}
+

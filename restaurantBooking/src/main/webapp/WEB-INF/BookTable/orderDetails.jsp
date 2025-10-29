@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
     <style>
         /* --- General Reset & Body Styling --- */
@@ -20,36 +21,38 @@
 
         body, html {
             font-family: 'Montserrat', sans-serif;
-            /* THAY THẾ BẰNG URL ẢNH NỀN CỦA BẠN */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
-            color: #f0f0f0;
+            color: var(--text-primary);
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
             width: 90%;
-            max-width: 1000px; /* Tăng chiều rộng cho phù hợp với bảng */
+            max-width: 1000px;
             margin: 40px auto;
-            background-color: rgba(20, 10, 10, 0.75); /* Frosted glass effect */
+            background-color: var(--box-bg);
             backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 30px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 2.5em;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            transition: color 0.3s ease;
         }
 
         /* --- SEARCH & FILTER SECTION --- */
@@ -257,11 +260,76 @@
             font-size: 1.1em;
         }
 
+        /* --- Messages --- */
+        .message {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease;
+        }
+        .success-message {
+            background: rgba(40, 167, 69, 0.8);
+            color: white;
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+        .error-message {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
     </style>
 </head>
 <body>
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+    <span id="themeText">Chế độ tối</span>
+</button>
+
+<%
+    com.fpt.restaurantbooking.models.Reservation reservation = (com.fpt.restaurantbooking.models.Reservation) request.getAttribute("reservation");
+    java.util.List<com.fpt.restaurantbooking.models.Table> tables = (java.util.List<com.fpt.restaurantbooking.models.Table>) request.getAttribute("tables");
+    java.util.List<com.fpt.restaurantbooking.models.OrderItem> orderItems = (java.util.List<com.fpt.restaurantbooking.models.OrderItem>) request.getAttribute("orderItems");
+    java.time.format.DateTimeFormatter dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+    java.util.Map<Integer, String> itemNames = (java.util.Map<Integer, String>) request.getAttribute("itemNames");
+%>
+
 <div class="container">
-    <h2><i class="fas fa-history"></i> Lịch sử đặt bàn</h2>
+    <h2><i class="fas fa-receipt"></i> Chi tiết đơn DB<%= reservation != null && reservation.getReservationId() != null ? String.format("%03d", reservation.getReservationId()) : "---" %></h2>
+
+    <!-- Success Message -->
+    <%
+        String success = request.getParameter("success");
+        String updated = request.getParameter("updated");
+        if ("true".equals(success)) {
+    %>
+    <div class="message success-message">
+        <i class="fas fa-check-circle"></i> Đặt đơn bàn thành công! Cảm ơn bạn đã đặt bàn tại nhà hàng.
+    </div>
+    <%
+    } else if ("true".equals(updated)) {
+    %>
+    <div class="message success-message">
+        <i class="fas fa-check-circle"></i> Cập nhật đơn bàn thành công!
+    </div>
+    <%
+        }
+    %>
 
     <!-- SEARCH & FILTER SECTION -->
     <div class="filter-section">
@@ -290,47 +358,102 @@
         </div>
     </div>
 
-    <table id="bookingTable">
+    <div style="margin-bottom:20px;">
+        <table style="width:100%;">
+            <tbody>
+            <tr>
+                <td><strong>Mã đơn:</strong></td>
+                <td>DB<%= reservation != null && reservation.getReservationId() != null ? String.format("%03d", reservation.getReservationId()) : "---" %></td>
+            </tr>
+            <tr>
+                <td><strong>Ngày - Giờ:</strong></td>
+                <td>
+                    <%= reservation != null && reservation.getReservationDate() != null ? reservation.getReservationDate().format(dateFormatter) : "N/A" %>
+                    -
+                    <%= reservation != null && reservation.getReservationTime() != null ? reservation.getReservationTime().format(timeFormatter) : "N/A" %>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Số người:</strong></td>
+                <td><%= reservation != null && reservation.getGuestCount() != null ? reservation.getGuestCount() : 0 %></td>
+            </tr>
+            <tr>
+                <td><strong>Trạng thái:</strong></td>
+                <td><%= reservation != null ? reservation.getStatus() : "N/A" %></td>
+            </tr>
+            <tr>
+                <td><strong>Yêu cầu đặc biệt:</strong></td>
+                <td><%= reservation != null && reservation.getSpecialRequests() != null ? reservation.getSpecialRequests() : "-" %></td>
+            </tr>
+            <tr>
+                <td><strong>Bàn:</strong></td>
+                <td>
+                    <%
+                        if (tables != null && !tables.isEmpty()) {
+                            for (int i = 0; i < tables.size(); i++) {
+                                com.fpt.restaurantbooking.models.Table t = tables.get(i);
+                    %>
+                    <%= t.getTableName() != null ? t.getTableName() : ("Bàn " + t.getTableId()) %><%= i < tables.size() - 1 ? ", " : "" %>
+                    <%
+                        }
+                    } else {
+                    %>
+                    -
+                    <%
+                        }
+                    %>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 style="margin: 10px 0 15px 0;">Món đã gọi</h3>
+    <table id="orderItemsTable">
         <thead>
         <tr>
-            <th>Mã đặt bàn</th>
-            <th>Ngày</th>
-            <th>Giờ</th>
-            <th>Số bàn</th>
-            <th>Số người</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
+            <th>#</th>
+            <th>Món</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Thành tiền</th>
+            <th>Ghi chú</th>
         </tr>
         </thead>
-        <tbody id="bookingTableBody">
-        <tr data-status="pending" data-date="2025-09-15" data-time="18:30">
-            <td>DB001</td>
-            <td>2025-09-15</td>
-            <td>18:30</td>
-            <td>Bàn 05</td>
-            <td>4</td>
-            <td><span class="status pending">⏳ Đang chờ</span></td>
-            <td><a href="#" class="btn"><i class="fas fa-eye"></i> Chi tiết</a></td>
+        <tbody>
+        <%
+            java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+            if (orderItems != null && !orderItems.isEmpty()) {
+                for (int i = 0; i < orderItems.size(); i++) {
+                    com.fpt.restaurantbooking.models.OrderItem it = orderItems.get(i);
+                    java.math.BigDecimal line = it.getTotal();
+                    if (line != null) total = total.add(line);
+        %>
+        <tr>
+            <td><%= i + 1 %></td>
+            <td><%= (itemNames != null && it.getItemId() != null) ? itemNames.getOrDefault(it.getItemId(), "Món #" + it.getItemId()) : "-" %></td>
+            <td><%= it.getQuantity() %></td>
+            <td><%= it.getUnitPrice() != null ? it.getUnitPrice() : java.math.BigDecimal.ZERO %></td>
+            <td><%= line != null ? line : java.math.BigDecimal.ZERO %></td>
+            <td><%= it.getSpecialInstructions() != null ? it.getSpecialInstructions() : "" %></td>
         </tr>
-        <tr data-status="confirmed" data-date="2025-09-10" data-time="12:00">
-            <td>DB002</td>
-            <td>2025-09-10</td>
-            <td>12:00</td>
-            <td>Bàn 02</td>
-            <td>2</td>
-            <td><span class="status confirmed">✅ Đã xác nhận</span></td>
-            <td><a href="#" class="btn"><i class="fas fa-eye"></i> Chi tiết</a></td>
+        <%
+            }
+        } else {
+        %>
+        <tr>
+            <td colspan="6" class="no-results">Chưa có món nào.</td>
         </tr>
-        <tr data-status="done" data-date="2025-09-05" data-time="19:00">
-            <td>DB003</td>
-            <td>2025-09-05</td>
-            <td>19:00</td>
-            <td>Bàn 08</td>
-            <td>6</td>
-            <td><span class="status done">✔️ Hoàn tất</span></td>
-            <td><a href="#" class="btn"><i class="fas fa-eye"></i> Chi tiết</a></td>
-        </tr>
+        <%
+            }
+        %>
         </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="4" style="text-align:right; font-weight: 600;">Tổng cộng</td>
+            <td colspan="2" style="text-align:left; font-weight: 600;"> <%= total %></td>
+        </tr>
+        </tfoot>
     </table>
 
     <div id="noResults" class="no-results" style="display: none;">
@@ -339,122 +462,26 @@
     </div>
 
     <div class="back-link-container">
-        <a href="trangchu.jsp" class="btn" style="background-color: #6c757d;"><i class="fas fa-home"></i> Quay về trang chủ</a>
+        <a href="orderHistory" class="btn" style="background-color: #6c757d;"><i class="fas fa-arrow-left"></i> Lịch sử đặt bàn</a>
+        <a href="home.jsp" class="btn" style="margin-left: 10px; background-color: #6c757d;"><i class="fas fa-home"></i> Về trang chủ</a>
+        <a href="editReservation?id=<%= reservation != null ? reservation.getReservationId() : 0 %>" class="btn" style="margin-left: 10px; background-color: #e67e22;">
+            <i class="fas fa-edit"></i> Chỉnh sửa đơn hàng
+        </a>
     </div>
 </div>
-
+<script src="${pageContext.request.contextPath}/js/theme-manager.js"></script>
 <script>
-    const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
-    const tableBody = document.getElementById('bookingTableBody');
-    const noResults = document.getElementById('noResults');
-    const sortDateBtn = document.getElementById('sortDateBtn');
-    const sortTimeBtn = document.getElementById('sortTimeBtn');
-
-    let currentSortOrder = 'desc'; // desc = mới nhất trước
-
-    // Tìm kiếm
-    searchInput.addEventListener('input', function() {
-        filterTable();
-    });
-
-    // Lọc theo trạng thái
-    statusFilter.addEventListener('change', function() {
-        filterTable();
-    });
-
-    function filterTable() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const statusValue = statusFilter.value;
-        const rows = tableBody.getElementsByTagName('tr');
-        let visibleCount = 0;
-
-        for (let row of rows) {
-            const cells = row.getElementsByTagName('td');
-            const rowStatus = row.getAttribute('data-status');
-
-            // Lấy nội dung các cột để tìm kiếm
-            const code = cells[0].textContent.toLowerCase();
-            const date = cells[1].textContent.toLowerCase();
-            const time = cells[2].textContent.toLowerCase();
-            const table = cells[3].textContent.toLowerCase();
-
-            const matchesSearch = !searchTerm ||
-                code.includes(searchTerm) ||
-                date.includes(searchTerm) ||
-                time.includes(searchTerm) ||
-                table.includes(searchTerm);
-
-            const matchesStatus = statusValue === 'all' || rowStatus === statusValue;
-
-            if (matchesSearch && matchesStatus) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
+    // Auto hide success message after 5 seconds
+    window.addEventListener('DOMContentLoaded', function() {
+        const successMsg = document.querySelector('.success-message');
+        if (successMsg) {
+            setTimeout(function() {
+                successMsg.style.transition = 'opacity 0.5s';
+                successMsg.style.opacity = '0';
+                setTimeout(() => successMsg.remove(), 500);
+            }, 5000);
         }
-
-        // Hiển thị thông báo nếu không có kết quả
-        if (visibleCount === 0) {
-            noResults.style.display = 'block';
-        } else {
-            noResults.style.display = 'none';
-        }
-    }
-
-    // Sắp xếp theo ngày
-    function sortByDate() {
-        sortTable('date');
-        sortDateBtn.classList.add('active');
-        sortTimeBtn.classList.remove('active');
-    }
-
-    // Sắp xếp theo giờ
-    function sortByTime() {
-        sortTable('time');
-        sortTimeBtn.classList.add('active');
-        sortDateBtn.classList.remove('active');
-    }
-
-    function sortTable(type) {
-        const rows = Array.from(tableBody.getElementsByTagName('tr'));
-
-        rows.sort((a, b) => {
-            let aValue, bValue;
-
-            if (type === 'date') {
-                aValue = new Date(a.getAttribute('data-date'));
-                bValue = new Date(b.getAttribute('data-date'));
-            } else if (type === 'time') {
-                const aTime = a.getAttribute('data-time');
-                const bTime = b.getAttribute('data-time');
-                aValue = convertTimeToMinutes(aTime);
-                bValue = convertTimeToMinutes(bTime);
-            }
-
-            // Đảo chiều sắp xếp
-            if (currentSortOrder === 'asc') {
-                return aValue > bValue ? 1 : -1;
-            } else {
-                return aValue < bValue ? 1 : -1;
-            }
-        });
-
-        // Đảo chiều cho lần sort tiếp theo
-        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-
-        // Xóa và thêm lại các hàng đã sắp xếp
-        rows.forEach(row => tableBody.appendChild(row));
-
-        // Giữ nguyên filter sau khi sort
-        filterTable();
-    }
-
-    function convertTimeToMinutes(time) {
-        const parts = time.split(':');
-        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-    }
+    });
 </script>
 </body>
 </html>

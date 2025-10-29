@@ -1,0 +1,97 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý khung thời gian</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link href="css/TimeDetail.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body>
+
+<!-- Header -->
+<div class="top-header d-flex align-items-center">
+  <div class="brand">Restaurant_Booking</div>
+  <div class="ml-auto d-none d-md-block">
+    <a style="color:#fff;margin-right:18px;text-decoration:none;">Trang chủ</a>
+    <a style="color:#fff;margin-right:18px;text-decoration:none;">Đặt bàn</a>
+    <a style="color:#fff;margin-right:18px;text-decoration:none;">Menu</a>
+    <a style="color:#fff;text-decoration:none;">Voucher</a>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <h4 style="text-align:center;margin-top:0;">Staff Panel</h4>
+  <div class="nav-item">Dashboard</div>
+  <div class="nav-item">Dịch vụ</div>
+  <div class="nav-item">Quản lý dịch vụ</div>
+  <div class="nav-item">Quản lý đánh giá bình luận</div>
+  <div class="nav-item">Quản lý Menu</div>
+  <div class="nav-item">Quản lý Voucher khuyến mãi</div>
+  <div class="nav-item">Quản lý khách hàng thân thiết</div>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- Banner -->
+  <div class="banner">
+    <div class="title">Quản lý khung thời gian</div>
+    <div class="actions">
+      <button class="btn">Khai Vị</button>
+      <button class="btn">+ Thêm mục mới</button>
+    </div>
+  </div>
+
+  <!-- NEW BODY: list các slot dưới dạng card -->
+  <div style="margin-top:20px;">
+
+
+
+
+
+
+        <div style="height:18px;"></div>
+
+        <div class="slots-area">
+          <!-- một card mẫu hiển thị khung giờ mặc định -->
+          <div class="slot-card">
+            <div class="slot-header">
+              <div class="date-badge"><div style="font-size:13px;color:#6b3b36;">Khung giờ mặc định</div><div style="font-size:20px;">—</div></div>
+              <div><span class="type-badge" style="background:#f4e7c8;color:#6b3b36;">DEFAULT</span></div>
+            </div>
+
+            <div class="slot-desc">Cảm ơn quý khách đã quan tâm — đây là khung giờ phục vụ trong ngày ${localDate} của nhà hàng.</div>
+
+            <div class="time-grid">
+              <div class="time-block"><span class="label">Buổi Sáng</span><span class="value">08:00 - 11:30</span></div>
+              <div class="time-block"><span class="label">Buổi Trưa</span><span class="value">11:30 - 14:00</span></div>
+              <div class="time-block"><span class="label">Buổi Chiều/ Tối</span><span class="value">17:30 - 21:30</span></div>
+            </div>
+
+            <div class="slot-footer">
+              <div class="slot-note">Bạn có thể thêm ngày đặc biệt hoặc bảo trì để thay đổi khung giờ.</div>
+              <div><button class="slot-action" onclick="location.href='Time?create=1'">Thêm ngày mới</button></div>
+            </div>
+          </div>
+        </div>
+
+
+
+    <!-- thank you -->
+    <div class="thankyou">
+      <div class="ornament"></div>
+      <h4>Cảm ơn quý khách</h4>
+      <p>Cảm ơn bạn đã quan tâm đến nhà hàng. Chúng tôi luôn nỗ lực mang đến trải nghiệm ẩm thực tốt nhất — hẹn gặp bạn tại bàn!</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

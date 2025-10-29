@@ -1,6 +1,7 @@
 package com.fpt.restaurantbooking.repositories.impl;
 
 import com.fpt.restaurantbooking.models.Promotions;
+import com.fpt.restaurantbooking.models.User;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 
 import java.sql.Connection;
@@ -24,12 +25,12 @@ public class VoucherRepository {
                 "ORDER BY promotion_id DESC \n" +
                 "LIMIT ?, ?  ";
 
-        try(Connection conn = db.getConnection();
-            PreparedStatement stm = conn.prepareStatement(sql);){
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);) {
             stm.setInt(1, levelId);   // truyền levelId vào câu query
             stm.setInt(2, start);   // truyền levelId vào câu query
             stm.setInt(3, end);   // truyền levelId vào câu query
-            try(ResultSet rs = stm.executeQuery() ){
+            try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     promotions.add(new Promotions(rs.getInt("promotion_id"), rs.getString("promotion_name"),
                             rs.getString("description"),
@@ -45,11 +46,7 @@ public class VoucherRepository {
                             rs.getInt("promotion_level_id")));
                 }
             }
-            }
-
-
-
-
+        }
 
 
         return promotions;
@@ -119,7 +116,7 @@ public class VoucherRepository {
         return promotion;
     }
 
-    public void UpdatePromotion(String id, String name, String des, String discount_p, String start_date, String end_Date, String updated_by)throws SQLException {
+    public void UpdatePromotion(String id, String name, String des, String discount_p, String start_date, String end_Date, String updated_by) throws SQLException {
         String sql = "UPDATE promotions \n " +
                 " SET \n " +
                 "    promotion_name = ?,\n " +
@@ -165,7 +162,7 @@ public class VoucherRepository {
 
     }
 
-    public void addVoucher(String promotionName, String description, String discount_percentage, String discount_amount, String start_date, String end_date, String status, String promotion_level_id, String created_by)throws SQLException {
+    public void addVoucher(String promotionName, String description, String discount_percentage, String discount_amount, String start_date, String end_date, String status, String promotion_level_id, String created_by) throws SQLException {
         String sql = " INSERT INTO promotions  \n" +
                 " ( promotion_name, description, discount_percentage, discount_amount, start_date, end_date, status,created_by,   promotion_level_id)\n" +
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)  ";
@@ -189,4 +186,71 @@ public class VoucherRepository {
         }
 
     }
+
+    public List<User> getAllUsertoPromotion_level_id() throws SQLException {
+        List<User> userList = new ArrayList<User>();
+        String sql = " select * from users where role_id = 3 ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery();) {
+
+
+            while (rs.next()) {
+                userList.add(new User(rs.getInt("user_id"), rs.getInt("role_id"),
+                        rs.getString("full_name"),
+                        rs.getString("email"),
+                        rs.getString("phone_number"),
+                        rs.getString("promotion_level_id"),rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender")));
+
+            }
+
+        }
+
+        return userList;
+    }
+    public int getAllUsertoPromotion_level_idd() throws SQLException {
+        int count = 0;
+        String sql = " SELECT COUNT(*) FROM Users where role_id = 3 ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery();) {
+            if (rs.next()) count = rs.getInt(1);
+
+
+
+        }
+
+        return count;
+    }
+    public List<User> getUsersByPagee(int start, int total) {
+        List<User> userList = new ArrayList<>();
+        String sql = "SELECT * FROM Users where role_id = 3  LIMIT ?, ?";
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(sql);
+            ) {
+
+
+            stm.setInt(1, start);
+            stm.setInt(2, total);
+            try(ResultSet rs = stm.executeQuery();){
+                while (rs.next()) {
+                    userList.add(new User(rs.getInt("user_id"), rs.getInt("role_id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            rs.getString("phone_number"),
+                            rs.getString("promotion_level_id"),rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender")));
+
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
 }
+
+

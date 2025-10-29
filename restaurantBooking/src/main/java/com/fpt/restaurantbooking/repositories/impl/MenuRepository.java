@@ -16,67 +16,148 @@ public class MenuRepository {
     PreparedStatement stm;
     ResultSet rs;
     DatabaseUtil db = new DatabaseUtil();
- public List<MenuCategory> getCateGory() throws SQLException {
-     List<MenuCategory> categoryList = new ArrayList<MenuCategory>();
-     String sql= " select * from menu_category  ";
-     try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql); ResultSet rs = stm.executeQuery();){
-         while (rs.next()) {
-             categoryList.add(new MenuCategory(rs.getInt("id"),rs.getString("name")));
-         }
-     }
+    public List<MenuCategory> getCateGory() throws SQLException {
+        List<MenuCategory> categoryList = new ArrayList<MenuCategory>();
+        String sql= " select * from menu_category  ";
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql); ResultSet rs = stm.executeQuery();){
+            while (rs.next()) {
+                categoryList.add(new MenuCategory(rs.getInt("id"),rs.getString("name")));
+            }
+        }
 
 
 
 
-     return categoryList;
+        return categoryList;
 
- }
+    }
 
- public List<MenuItem> getMenuItems(int id, int start, int end) throws SQLException {
-     List<MenuItem> menuItemList = new ArrayList<MenuItem>();
-     String sql= " SELECT \n " +
-             "    mi.item_id,\n " +
-             "    mi.item_name,\n " +
-             "    mi.item_code,\n " +
-             "    mi.description,\n " +
-             "    mi.price,\n " +
-             "    mi.image_url,\n " +
-             "    c.name AS category_name,\n " +
-             "    mi.calories,\n " +
-             "    mi.status,\n " +
-             "    u1.full_name AS created_by_name,\n " +
-             "    u2.full_name AS updated_by_name,\n " +
-             "    mi.created_at,\n " +
-             "    mi.updated_at\n " +
-             "FROM menu_items mi\n " +
-             "LEFT JOIN menu_category c ON mi.category_id = c.id \n " +
-             "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n " +
-             "LEFT JOIN users u2 ON mi.updated_by = u2.user_id\n " +
-             "WHERE mi.category_id = ?\n " +
-             "ORDER BY mi.item_id DESC\n " +
-             "LIMIT ? ,?  ";
-     try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql);) {
+    public List<MenuItem> getMenuItems(int id, int start, int end) throws SQLException {
+        List<MenuItem> menuItemList = new ArrayList<MenuItem>();
+        String sql= " SELECT \n " +
+                "    mi.item_id,\n " +
+                "    mi.item_name,\n " +
+                "    mi.item_code,\n " +
+                "    mi.description,\n " +
+                "    mi.price,\n " +
+                "    mi.image_url,\n " +
+                "    c.name AS category_name,\n " +
+                "    mi.calories,\n " +
+                "    mi.status,\n " +
+                "    u1.full_name AS created_by_name,\n " +
+                "    u2.full_name AS updated_by_name,\n " +
+                "    mi.created_at,\n " +
+                "    mi.updated_at\n " +
+                "FROM menu_items mi\n " +
+                "LEFT JOIN menu_category c ON mi.category_id = c.id \n " +
+                "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n " +
+                "LEFT JOIN users u2 ON mi.updated_by = u2.user_id\n " +
+                "WHERE mi.category_id = ?\n " +
+                "ORDER BY mi.item_id DESC\n " +
+                "LIMIT ? ,?  ";
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql);) {
 
-         stm.setInt(1, id );
-         stm.setInt(2, start );
-         stm.setInt(3, end );
-         try(ResultSet rs = stm.executeQuery();) {
-             while (rs.next()) {
-                 menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
-                         rs.getString("item_code"), rs.getString("description"),
-                         rs.getBigDecimal("price"), rs.getString("image_url"),
-                         rs.getString("status"),
-                         rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                         rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name")));
+            stm.setInt(1, id );
+            stm.setInt(2, start );
+            stm.setInt(3, end );
+            try(ResultSet rs = stm.executeQuery();) {
+                while (rs.next()) {
+                    menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
+                            rs.getString("item_code"), rs.getString("description"),
+                            rs.getBigDecimal("price"), rs.getString("image_url"),
+                            rs.getString("status"),
+                            rs.getString("created_by_name"), rs.getString("updated_by_name"),
+                            rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name")));
 
-             }
-         }
-     }
+                }
+            }
+        }
 
 
 
-     return menuItemList;
- }
+        return menuItemList;
+    }
+
+    public List<MenuItem> getMenuItemsSorted(int id, int start, int end, String sortDir) throws SQLException {
+        String safeDir = ("DESC".equalsIgnoreCase(sortDir)) ? "DESC" : "ASC";
+        List<MenuItem> menuItemList = new ArrayList<MenuItem>();
+        String sql= " SELECT \n " +
+                "    mi.item_id,\n " +
+                "    mi.item_name,\n " +
+                "    mi.item_code,\n " +
+                "    mi.description,\n " +
+                "    mi.price,\n " +
+                "    mi.image_url,\n " +
+                "    c.name AS category_name,\n " +
+                "    mi.calories,\n " +
+                "    mi.status,\n " +
+                "    u1.full_name AS created_by_name,\n " +
+                "    u2.full_name AS updated_by_name,\n " +
+                "    mi.created_at,\n " +
+                "    mi.updated_at\n " +
+                "FROM menu_items mi\n " +
+                "LEFT JOIN menu_category c ON mi.category_id = c.id \n " +
+                "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n " +
+                "LEFT JOIN users u2 ON mi.updated_by = u2.user_id\n " +
+                "WHERE mi.category_id = ?\n " +
+                "ORDER BY mi.price " + safeDir + "\n " +
+                "LIMIT ? ,?  ";
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql);) {
+            stm.setInt(1, id );
+            stm.setInt(2, start );
+            stm.setInt(3, end );
+            try(ResultSet rs = stm.executeQuery();) {
+                while (rs.next()) {
+                    menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
+                            rs.getString("item_code"), rs.getString("description"),
+                            rs.getBigDecimal("price"), rs.getString("image_url"),
+                            rs.getString("status"),
+                            rs.getString("created_by_name"), rs.getString("updated_by_name"),
+                            rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name")));
+                }
+            }
+        }
+        return menuItemList;
+    }
+
+    public List<MenuItem> getMenuItemsAll(int start, int end) throws SQLException {
+        List<MenuItem> menuItemList = new ArrayList<MenuItem>();
+        String sql = " SELECT \n " +
+                "    mi.item_id,\n " +
+                "    mi.item_name,\n " +
+                "    mi.item_code,\n " +
+                "    mi.description,\n " +
+                "    mi.price,\n " +
+                "    mi.image_url,\n " +
+                "    c.name AS category_name,\n " +
+                "    mi.calories,\n " +
+                "    mi.status,\n " +
+                "    u1.full_name AS created_by_name,\n " +
+                "    u2.full_name AS updated_by_name,\n " +
+                "    mi.created_at,\n " +
+                "    mi.updated_at\n " +
+                "FROM menu_items mi\n " +
+                "LEFT JOIN menu_category c ON mi.category_id = c.id \n " +
+                "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n " +
+                "LEFT JOIN users u2 ON mi.updated_by = u2.user_id\n " +
+                "ORDER BY mi.item_id DESC\n " +
+                "LIMIT ? ,?  ";
+        try (Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql)) {
+            stm.setInt(1, start);
+            stm.setInt(2, end);
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    menuItemList.add(new MenuItem(rs.getInt("item_id"), rs.getString("item_name"),
+                            rs.getString("item_code"), rs.getString("description"),
+                            rs.getBigDecimal("price"), rs.getString("image_url"),
+                            rs.getString("status"),
+                            rs.getString("created_by_name"), rs.getString("updated_by_name"),
+                            rs.getString("created_at"), rs.getString("updated_at"), rs.getString("category_name")));
+                }
+            }
+        }
+        return menuItemList;
+    }
     public List<MenuItem> getAllMenuItems(int id) throws SQLException {
         List<MenuItem> menuItemList = new ArrayList<MenuItem>();
         String sql= " SELECT \n" +
@@ -116,6 +197,41 @@ public class MenuRepository {
 
 
 
+        return menuItemList;
+    }
+
+    public List<MenuItem> getAllMenuItemsAll() throws SQLException {
+        List<MenuItem> menuItemList = new ArrayList<MenuItem>();
+        String sql= " SELECT \n" +
+                "    mi.item_id,\n" +
+                "    mi.item_name,\n" +
+                "    mi.item_code,\n" +
+                "    mi.description,\n" +
+                "    mi.price,\n" +
+                "    mi.image_url,\n" +
+                "    c.name AS category_name,\n" +
+                "    mi.calories,\n" +
+                "    mi.status,\n" +
+                "    u1.full_name AS created_by_name,\n" +
+                "    u2.full_name AS updated_by_name,\n" +
+                "    mi.created_at,\n" +
+                "    mi.updated_at\n" +
+                "FROM menu_items mi\n" +
+                "LEFT JOIN menu_category c ON mi.category_id = c.id\n" +
+                "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n" +
+                "LEFT JOIN users u2 ON mi.updated_by = u2.user_id";
+
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql); ResultSet rs = stm.executeQuery();){
+            while (rs.next()) {
+                menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
+                        rs.getString("item_code"), rs.getString("description"),
+                        rs.getBigDecimal("price"), rs.getString("image_url"),
+                        rs.getString("status"),
+                        rs.getString("created_by_name"), rs.getString("updated_by_name"),
+                        rs.getString("created_at"),rs.getString("updated_at"),rs.getString("category_name") ));
+
+            }
+        }
         return menuItemList;
     }
     public void addMenu(String name,String code, String description, String price, String category_id, String status, String created_by, String img_url) throws SQLException {
@@ -246,5 +362,46 @@ public class MenuRepository {
 
 
     }
+
+    public List<MenuItem> getMenuItemsAllSorted(int start, int end, String sortDir) throws SQLException {
+        String safeDir = ("DESC".equalsIgnoreCase(sortDir)) ? "DESC" : "ASC";
+        List<MenuItem> menuItemList = new ArrayList<MenuItem>();
+        String sql = " SELECT \n " +
+                "    mi.item_id,\n " +
+                "    mi.item_name,\n " +
+                "    mi.item_code,\n " +
+                "    mi.description,\n " +
+                "    mi.price,\n " +
+                "    mi.image_url,\n " +
+                "    c.name AS category_name,\n " +
+                "    mi.calories,\n " +
+                "    mi.status,\n " +
+                "    u1.full_name AS created_by_name,\n " +
+                "    u2.full_name AS updated_by_name,\n " +
+                "    mi.created_at,\n " +
+                "    mi.updated_at\n " +
+                "FROM menu_items mi\n " +
+                "LEFT JOIN menu_category c ON mi.category_id = c.id \n " +
+                "LEFT JOIN users u1 ON mi.created_by = u1.user_id\n " +
+                "LEFT JOIN users u2 ON mi.updated_by = u2.user_id\n " +
+                "ORDER BY mi.price " + safeDir + "\n " +
+                "LIMIT ? ,?  ";
+        try (Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql)) {
+            stm.setInt(1, start);
+            stm.setInt(2, end);
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    menuItemList.add(new MenuItem(rs.getInt("item_id"), rs.getString("item_name"),
+                            rs.getString("item_code"), rs.getString("description"),
+                            rs.getBigDecimal("price"), rs.getString("image_url"),
+                            rs.getString("status"),
+                            rs.getString("created_by_name"), rs.getString("updated_by_name"),
+                            rs.getString("created_at"), rs.getString("updated_at"), rs.getString("category_name")));
+                }
+            }
+        }
+        return menuItemList;
+    }
+
 
 }

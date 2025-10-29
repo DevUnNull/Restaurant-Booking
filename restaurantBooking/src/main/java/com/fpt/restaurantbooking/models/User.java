@@ -1,5 +1,7 @@
 package com.fpt.restaurantbooking.models;
 
+import java.time.LocalDate;
+
 /**
  * User entity representing customers and staff
  */
@@ -14,6 +16,9 @@ public class User extends BaseEntity {
     private String avatar;
     private String status;
     private String role;
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String promotion_level_id;
 
     public User(int userId, String fullName) {
         this.userId = userId;
@@ -39,11 +44,42 @@ public class User extends BaseEntity {
         this.role = "CUSTOMER";
         this.status = "ACTIVE";
     }
+    public User(Integer userId, Integer roleId, String fullName, String email, String phoneNumber, String promotion_level_id, LocalDate dateOfBirth, String gender) {
+        this.userId = userId;
+        this.roleId = roleId;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.promotion_level_id = promotion_level_id;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+    }
 
     // Getters and Setters
     public Integer getUserId() {
         return userId;
     }
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+    public String getGender() {
+        return gender;
+    }
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getPromotion_level_id() {
+        return promotion_level_id;
+    }
+
+    public void setPromotion_level_id(String promotion_level_id) {
+        this.promotion_level_id = promotion_level_id;
+    }
+
 
     public void setUserId(Integer userId) {
         this.userId = userId;
@@ -126,21 +162,4 @@ public class User extends BaseEntity {
     public boolean getIsActive() {
         return isActive();
     }
-
-
-    public String toString() {
-        return "User{" +
-                "userId=" + userId +
-                "Pass= "+ password +
-                ", roleId=" + roleId +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", status='" + status + '\'' +
-                ", role='" + role + '\'' +
-                '}';
-    }
-
-
 }

@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false" %>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-        <footer>
+        <footer style="background-color:#ad0505;">
     <div class="footer-container">
         <div class="footer-top">
             <div class="footer-section contact">

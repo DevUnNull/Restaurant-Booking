@@ -172,6 +172,29 @@ public class ReservationDAO {
         return false;
     }
 
+    // Update reservation core fields (date, time, guests, special requests, total)
+    public boolean updateReservationDetails(int reservationId, LocalDate date, LocalTime time,
+                                            int guestCount, String specialRequests, BigDecimal totalAmount) {
+        String sql = "UPDATE Reservations SET reservation_date = ?, reservation_time = ?, guest_count = ?, special_requests = ?, total_amount = ?, updated_at = NOW() WHERE reservation_id = ?";
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDate(1, Date.valueOf(date));
+            pstmt.setTime(2, Time.valueOf(time));
+            pstmt.setInt(3, guestCount);
+            pstmt.setString(4, specialRequests);
+            pstmt.setBigDecimal(5, totalAmount != null ? totalAmount : BigDecimal.ZERO);
+            pstmt.setInt(6, reservationId);
+
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            logger.error("Error updating reservation details", e);
+        }
+        return false;
+    }
+
     // Cancel reservation
     public boolean cancelReservation(int reservationId, String reason) {
         String sql = "UPDATE Reservations SET status = 'CANCELLED', cancellation_reason = ?, updated_at = NOW() WHERE reservation_id = ? AND status = 'PENDING'";
@@ -191,12 +214,16 @@ public class ReservationDAO {
     }
 
     private Reservation mapResultSetToReservation(ResultSet rs) throws SQLException {
+        // Lấy created_at từ DB trước
+        Timestamp createdAt = rs.getTimestamp("created_at");
+        Timestamp updatedAt = rs.getTimestamp("updated_at");
+
         Reservation reservation = new Reservation(
                 rs.getInt("reservation_id"),
                 rs.getInt("user_id"),
                 rs.getInt("table_id"),
                 rs.getInt("guest_count"),
-                rs.getTimestamp("created_at").toLocalDateTime(),
+                createdAt != null ? createdAt.toLocalDateTime() : null,
                 rs.getString("status"),
                 rs.getInt("guest_count")
         );
@@ -207,6 +234,13 @@ public class ReservationDAO {
         reservation.setSpecialRequests(rs.getString("special_requests"));
         reservation.setTotalAmount(rs.getBigDecimal("total_amount"));
         reservation.setCancellationReason(rs.getString("cancellation_reason"));
+
+        // Lấy updated_at từ DB, nếu null thì dùng created_at
+        if (updatedAt != null) {
+            reservation.setUpdatedAt(updatedAt.toLocalDateTime());
+        } else if (createdAt != null) {
+            reservation.setUpdatedAt(createdAt.toLocalDateTime());
+        }
 
         return reservation;
     }

@@ -5,6 +5,7 @@
 package com.fpt.restaurantbooking.repositories.impl;
 
 
+import com.fpt.restaurantbooking.models.MenuItem;
 import com.fpt.restaurantbooking.models.Service;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 
@@ -13,15 +14,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
  * @author Quandxnunxi28
  */
-public class ServiceRepository   {
+public class ServiceRepository {
 
     PreparedStatement stm;
     ResultSet rs;
@@ -32,11 +31,11 @@ public class ServiceRepository   {
         String query = "select * from Services";
         try (Connection conn = db.getConnection();
              PreparedStatement stm = conn.prepareStatement(query);
-             ResultSet rs = stm.executeQuery();){
+             ResultSet rs = stm.executeQuery();) {
 
             while (rs.next()) {
                 list.add(new Service(rs.getInt("service_id"), rs.getString("service_name"), rs.getString("service_code"), rs.getString("description"), rs.getString("price"),
-                         rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status")));
+                        rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status")));
             }
         } catch (Exception e) {
         }
@@ -47,23 +46,27 @@ public class ServiceRepository   {
     public List<Service> getAllService() throws SQLException {
         List<Service> list = new ArrayList<>();
         String query = "SELECT \n" +
-"    s.service_id,\n" +
-"    s.service_name, s.service_code, s.description, \n" +
-"    s.price, s.promotion_info, s.start_date, s.end_date, s.status,\n" +
-"    uc.full_name AS created_by_name,\n" +
-"    uu.full_name AS updated_by_name\n" +
-" FROM Services s\n" +
-" LEFT JOIN Users uc ON s.created_by = uc.user_id\n" +
-" LEFT JOIN Users uu ON s.updated_by = uu.user_id";
+                "    s.service_id,\n" +
+                "    s.service_name, s.service_code, s.description, \n" +
+                "    s.price, s.promotion_info, s.start_date, s.end_date, s.status,\n" +
+                "    uc.full_name AS created_by_name,\n" +
+                "    uu.full_name AS updated_by_name\n" +
+                " FROM Services s\n" +
+                " LEFT JOIN Users uc ON s.created_by = uc.user_id\n" +
+                " LEFT JOIN Users uu ON s.updated_by = uu.user_id";
+
         try(Connection conn = db.getConnection();
             PreparedStatement stm = conn.prepareStatement(query);
             ResultSet rs = stm.executeQuery();) {
 
 
+
             while (rs.next()) {
                 list.add(new Service(rs.getInt("service_id"), rs.getString("service_name"), rs.getString("service_code"), rs.getString("description"), rs.getString("price"),
-                         rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status"), rs.getString("created_by_name"), // đổi sang name
-    rs.getString("updated_by_name") )); // đổi sang name));
+                        rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status"), rs.getString("created_by_name"), // đổi sang name
+
+                        rs.getString("updated_by_name") )); // đổi sang name));
+
             }
         } catch (Exception e) {
         }
@@ -71,7 +74,7 @@ public class ServiceRepository   {
         return list;
     }
 
-    public void updateService   (String serviceName, String description, String price, String status, String startDate, String endDate, String service_id) throws SQLException {
+    public void updateService(String serviceName, String description, String price, String status, String startDate, String endDate, String service_id) throws SQLException {
         String sql = "UPDATE Services SET service_name = ?, description = ? ,   price = ? , status= ?, start_date= ? , end_date=?  WHERE service_id = ?";
         try (Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql)) {
             stm.setString(1, serviceName);
@@ -102,21 +105,21 @@ public class ServiceRepository   {
 
     }
 
-    public void addService(String serviceName,String serviceCode, String description, String price, String status, String startDate, String endDate, int id) throws SQLException {
+    public void addService(String serviceName, String serviceCode, String description, String price, String status, String startDate, String endDate, int id) throws SQLException {
         String sql = " INSERT INTO Services (service_name,service_code, description, price, status, start_date, end_date, created_by, updated_by ) \n"
                 + " VALUES (?,?, ?, ?, ?, ?, ?,?,?);";
         try (Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql)) {
 
             stm.setString(1, serviceName);
-                        stm.setString(2, serviceCode);
+            stm.setString(2, serviceCode);
 
             stm.setString(3, description);
             stm.setString(4, price);
             stm.setString(5, status);
             stm.setString(6, startDate);
             stm.setString(7, endDate);
-                        stm.setInt(8, id);
-                        stm.setInt(9, id);
+            stm.setInt(8, id);
+            stm.setInt(9, id);
 
             stm.executeUpdate();
         } catch (SQLException e) {
@@ -124,17 +127,119 @@ public class ServiceRepository   {
         }
 
     }
+
     public List<Service> getServicesByPageShowList(int offset, int limit) throws SQLException {
-    List<Service> list = new ArrayList<>();
-   
+        List<Service> list = new ArrayList<>();
 
-    String query = "SELECT * FROM Services ORDER BY service_id DESC limit ?,  ?";
-    try(Connection conn = db.getConnection();
-        PreparedStatement stm = conn.prepareStatement(query);) {
 
-        stm.setInt(1, offset);
-        stm.setInt(2, limit);
-       try( ResultSet rs = stm.executeQuery();){
+        String query = "SELECT * FROM Services ORDER BY service_id DESC limit ?,  ?";
+
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(query);) {
+
+            stm.setInt(1, offset);
+            stm.setInt(2, limit);
+            try( ResultSet rs = stm.executeQuery();){
+
+                while (rs.next()) {
+                    list.add(new Service(
+                            rs.getInt("service_id"),
+                            rs.getString("service_name"),
+                            rs.getString("service_code"),
+                            rs.getString("description"),
+                            rs.getString("price"),
+                            rs.getString("promotion_info"),
+                            rs.getString("start_date"),
+                            rs.getString("end_date"),
+                            rs.getString("status")
+                    ));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<Service> getServicesByPage(int offset, int limit) throws SQLException {
+        List<Service> list = new ArrayList<>();
+        String sql = " SELECT  " +
+                " s.service_id, s.service_name, s.service_code, s.description,  " +
+                " s.price, s.promotion_info, s.start_date, s.end_date, s.status,  " +
+                " uc.full_name AS created_by_name,  " +
+                " uu.full_name AS updated_by_name  " +
+                " FROM Services s  " +
+                " LEFT JOIN Users uc ON s.created_by = uc.user_id  " +
+                " LEFT JOIN Users uu ON s.updated_by = uu.user_id  " +
+                " ORDER BY s.service_id DESC " +
+                " LIMIT ?, ? ";
+
+
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(sql);
+        ){
+            stm.setInt(1, offset);
+            stm.setInt(2, limit);
+            try(ResultSet rs = stm.executeQuery();){
+
+                while (rs.next()) {
+                    list.add(new Service(
+                            rs.getInt("service_id"),
+                            rs.getString("service_name"),
+                            rs.getString("service_code"),
+                            rs.getString("description"),
+                            rs.getString("price"),
+                            rs.getString("promotion_info"),
+                            rs.getString("start_date"),
+                            rs.getString("end_date"),
+                            rs.getString("status"),
+                            rs.getString("created_by_name"),
+                            rs.getString("updated_by_name")
+                    ));
+                }
+
+            }
+        }
+
+
+
+
+
+        return list;
+    }
+
+    public int getTotalServiceCount() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM services ";
+
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();){
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+
+
+
+
+        return 0;
+    }
+
+    // Get active services for customer booking
+    public List<Service> getActiveServices() throws SQLException {
+        List<Service> list = new ArrayList<>();
+        String query = "SELECT service_id, service_name, service_code, description, price, " +
+                "promotion_info, start_date, end_date, status " +
+                "FROM Services " +
+                "WHERE UPPER(status) = 'ACTIVE' " +
+                "ORDER BY service_name ASC";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query);
+             ResultSet rs = stm.executeQuery()) {
+
             while (rs.next()) {
                 list.add(new Service(
                         rs.getInt("service_id"),
@@ -147,75 +252,81 @@ public class ServiceRepository   {
                         rs.getString("end_date"),
                         rs.getString("status")
                 ));
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        return list;
+    }
+
+    // Get service by ID
+    public Service getServiceById(int serviceId) throws SQLException {
+        String query = "SELECT service_id, service_name, service_code, description, price, " +
+                "promotion_info, start_date, end_date, status " +
+                "FROM Services " +
+                "WHERE service_id = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query)) {
+
+            stm.setInt(1, serviceId);
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    return new Service(
+                            rs.getInt("service_id"),
+                            rs.getString("service_name"),
+                            rs.getString("service_code"),
+                            rs.getString("description"),
+                            rs.getString("price"),
+                            rs.getString("promotion_info"),
+                            rs.getString("start_date"),
+                            rs.getString("end_date"),
+                            rs.getString("status")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+
+
+    public List<MenuItem> getMenuItemsByService(int id) throws SQLException {
+        List<MenuItem> list = new ArrayList<>();
+        String sql = " SELECT\n" +
+                "m.item_id, m.item_name\n" +
+                "        FROM\n" +
+                "service_menu_items smi \n" +
+                " JOIN\n" +
+                "menu_items m ON smi.item_id = m.item_id\n" +
+                "        WHERE\n" +
+                "smi.service_id = ? ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+        ) {
+            stm.setInt(1, id);
+
+            try (ResultSet rs = stm.executeQuery();) {
+                while (rs.next()) {
+                    list.add(new MenuItem(
+                            rs.getInt("item_id"),
+                            rs.getString("item_name")
+
+                    ));
+                }
             }
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+
+        return list;
     }
-
-    return list;
-}
-    public List<Service> getServicesByPage(int offset, int limit) throws SQLException {
-    List<Service> list = new ArrayList<>();
-   String sql = " SELECT  " +
-            " s.service_id, s.service_name, s.service_code, s.description,  " +
-            " s.price, s.promotion_info, s.start_date, s.end_date, s.status,  " +
-            " uc.full_name AS created_by_name,  " +
-            " uu.full_name AS updated_by_name  " +
-            " FROM Services s  " +
-            " LEFT JOIN Users uc ON s.created_by = uc.user_id  " +
-            " LEFT JOIN Users uu ON s.updated_by = uu.user_id  " +
-            " ORDER BY s.service_id DESC " +
-            " LIMIT ?, ? ";
-
-   try(Connection conn = db.getConnection();
-       PreparedStatement stm = conn.prepareStatement(sql);
-        ){
-       stm.setInt(1, offset);
-       stm.setInt(2, limit);
-       try(ResultSet rs = stm.executeQuery();){
-           while (rs.next()) {
-               list.add(new Service(
-                       rs.getInt("service_id"),
-                       rs.getString("service_name"),
-                       rs.getString("service_code"),
-                       rs.getString("description"),
-                       rs.getString("price"),
-                       rs.getString("promotion_info"),
-                       rs.getString("start_date"),
-                       rs.getString("end_date"),
-                       rs.getString("status"),
-                       rs.getString("created_by_name"),
-                       rs.getString("updated_by_name")
-               ));
-           }
-       }
-   }
-
-
-
-
-
-    return list;
-}
-
-public int getTotalServiceCount() throws SQLException {
-    String sql = "SELECT COUNT(*) FROM services ";
-
-    try(Connection conn = db.getConnection();
-        PreparedStatement stm = conn.prepareStatement(sql);
-        ResultSet rs = stm.executeQuery();){
-        if (rs.next()) {
-            return rs.getInt(1);
-        }
-    }
-
-
-
-
-    return 0;
-}
-
 
 }

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.time.*, java.time.format.TextStyle, java.util.*" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,176 +9,51 @@
 
   <!-- Bootstrap (optional) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link href="css/TimeManage.css" rel="stylesheet" type="text/css" />
 
-  <style>
-    /* ---------- layout giống voucher page ---------- */
-    body {
-      margin: 0;
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      background: #f6f6f6;
-    }
-    .top-header {
-      background: #a92e28; /* đỏ chủ đạo */
-      color: #fff;
-      padding: 18px 24px;
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: 0;
-      z-index: 1000;
-    }
-    .top-header .brand {
-      font-weight: 700;
-      font-size: 28px;
-    }
-    .sidebar {
-      width: 230px;
-      background: #7b1c1c;
-      color: #fff;
-      position: fixed;
-      top: 68px; /* dưới header */
-      bottom: 0;
-      padding: 20px 12px;
-      overflow-y: auto;
-    }
-    .sidebar .nav-item {
-      padding: 8px 6px;
-      border-radius: 4px;
-      margin-bottom: 6px;
-    }
-    .sidebar .nav-item:hover { background: rgba(255,255,255,0.06); cursor: pointer; }
+<style>
+  .fancy-btn {
+    background-color: #c0392b; /* đỏ đậm chủ đạo */
+    color: #fff;
+    border: none;
+    padding: 17px 5px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+  }
 
-    .content {
-      margin-left: 230px;
-      padding-top: 68px;
-      padding-left: 24px;
-      padding-right: 24px;
-      padding-bottom: 40px;
-    }
+  /* Hiệu ứng hover */
+  .fancy-btn:hover {
+    background-color: #e74c3c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(231, 76, 60, 0.4);
+  }
 
-    /* banner (khoanh đỏ) */
-    .banner {
-      margin-top: 18px;
-      background: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=60') center/cover no-repeat;
-      border-radius: 6px;
-      padding: 28px 20px;
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .banner .title {
-      font-size: 26px;
-      font-weight: 700;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-    }
-    .banner .actions { /* phần nút bên phải giống voucher */ }
-    .banner .actions .btn {
-      background: rgba(255,255,255,0.9);
-      color: #7b1c1c;
-      border: none;
-      margin-left: 8px;
-      border-radius: 6px;
-    }
+  /* Khi nhấn giữ */
+  .fancy-btn:active {
+    background-color: #a93226;
+    transform: translateY(0);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  }
 
-    /* legend + month selector */
-    .controls {
-      margin-top: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .legend {
-      display:flex;
-      align-items:center;
-      gap:18px;
-      color:#333;
-      font-weight:500;
-    }
-    .legend .dot {
-      width:14px; height:14px; display:inline-block; margin-right:6px; border-radius:3px;
-    }
-
-    /* month selector centered */
-    .month-selector {
-      text-align: center;
-      flex: 1;
-    }
-    .month-selector .nav {
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      background:#fff;
-      padding:6px 12px;
-      border-radius:8px;
-      box-shadow:0 1px 3px rgba(0,0,0,0.08);
-    }
-    .month-selector a {
-      color:#7b1c1c;
-      font-weight:700;
-      text-decoration:none;
-      padding:6px 10px;
-      border-radius:6px;
-    }
-    .month-selector .label {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-width: 160px;
-      text-align: center;
-      flex: 1 0 auto;   /* QUAN TRỌNG: không cho flex co về 0 */
-      font-weight: 700;
-      font-size: 16px;
-      color: #7b1c1c;
-      white-space: nowrap;
-    }
-
-    /* calendar table */
-    .calendar-wrap {
-      margin-top: 18px;
-      background: #fff;
-      padding: 18px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    }
-    table.calendar {
-      width:100%;
-      border-collapse: collapse;
-    }
-    table.calendar thead th {
-      background:#e9e9e9;
-      padding:10px 6px;
-      text-align:center;
-      font-weight:700;
-    }
-    table.calendar td {
-      border: 1px solid #eee;
-      height: 86px;
-      vertical-align: middle;
-      text-align: center;
-      font-size:18px;
-      font-weight:600;
-      padding:0;
-      cursor:pointer;
-    }
-
-    /* day color classes */
-    .day-cell { color:#fff; display:flex; align-items:center; justify-content:center; height:100%; }
-    .normal-day { background:#28a745; }       /* xanh */
-    .special-day { background:#dc3545; }      /* đỏ */
-    .maintenance-day { background:#111; }    /* đen */
-
-    /* empty cell */
-    .empty-cell { background:transparent; cursor:default; }
-
-    /* responsive tweaks */
-    @media (max-width: 900px) {
-      .sidebar { display:none; }
-      .content { margin-left: 0; padding-left: 12px; padding-right: 12px; }
-    }
-  </style>
-
+  /* Canh giữa hoặc thêm khoảng cách nếu cần */
+  .month-selector .nav {
+    position: relative;
+    top: -8px;
+    left: 118px;
+    right: 10px;
+    bottom: 10px;
+    padding: 10px 10px 10px 10px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    width: 297px;
+  }
+</style>
 </head>
 <body>
 
@@ -226,13 +102,23 @@
     </div>
 
     <!-- FIXED -->
-    <div class="month-selector">
+    <div class="month-selector kakaku">
       <div class="nav">
         <a href="javascript:void(0)" onclick="changeMonth(-1)">&lt;</a>
         <div id="monthLabel" class="label"></div>
         <a href="javascript:void(0)" onclick="changeMonth(1)">&gt;</a>
       </div>
     </div>
+    <c:if test="${sessionScope.userRole == 2}">
+      <div class="month-selectorr goku">
+        <div class="nav">
+          <button class="fancy-btn" onclick="window.location.href='ManageTime'">
+            Quản lý khung thời gian
+          </button>
+        </div>
+      </div>
+    </c:if>
+
     <!-- /FIXED -->
 
     <div style="width:140px;"></div>
@@ -261,7 +147,15 @@
   java.time.YearMonth ym = java.time.YearMonth.of(today.getYear(), today.getMonthValue());
 %>
 </body>
-
+<script>
+  let dbDays = [];
+  <c:forEach var="ts" items="${listTime}">
+  dbDays.push({
+    date: '${ts.applicableDate}',   // dạng yyyy-MM-dd
+    category: ${ts.category_id}      // 2 hoặc 3
+  });
+  </c:forEach>
+</script>
 <script>
   let currentYear = <%= ym.getYear() %>;
   let currentMonth = <%= ym.getMonthValue() %>;
@@ -284,7 +178,7 @@
       "Tháng Một","Tháng Hai","Tháng Ba","Tháng Tư","Tháng Năm","Tháng Sáu",
       "Tháng Bảy","Tháng Tám","Tháng Chín","Tháng Mười","Tháng Mười Một","Tháng Mười Hai"
     ];
-    monthLabel.innerText = `${MONTHS[month - 1]} / ${year}`;
+    monthLabel.innerText = MONTHS[month - 1] + " / " + year;
 
     const date = new Date(year, month - 1, 1);
     const tbody = document.getElementById("calendarBody");
@@ -302,10 +196,31 @@
         let cellIndex = week * 7 + dow;
 
         if (cellIndex >= startIndex && day <= lastDay) {
+          const link = document.createElement("a");
+          link.href = "Time?day=" + day + "&month=" + month + "&year=" + year;
+          link.style.textDecoration = "none";
+          link.style.color = "inherit"; // giữ nguyên màu
+
+// Tạo phần hiển thị ngày
           const div = document.createElement("div");
-          div.className = "day-cell normal-day";
           div.innerText = day;
-          cell.appendChild(div);
+          const thisDate = year + "-" + String(month).padStart(2, '0') + "-" + String(day).padStart(2, '0');
+          const found = dbDays.find(d => d.date === thisDate);
+          // mặc định
+          let css = "normal-day";
+
+          // nếu có category 2 → màu đỏ
+// category 3 → màu đen
+          if (found) {
+            if (found.category === 2) css = "special-day";
+            if (found.category === 3) css = "maintenance-day";
+          }
+
+          div.className = "day-cell " + css;
+// Gắn div vào link, rồi link vào ô
+          link.appendChild(div);
+          cell.appendChild(link);
+
           day++;
         } else {
           cell.className = "empty-cell";
