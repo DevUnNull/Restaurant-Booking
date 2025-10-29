@@ -29,8 +29,7 @@
                 <li><a href="EmployeeList">Danh sách nhân viên</a></li>
                 <li><a href="WorkSchedule">Phân lịch làm việc</a></li>
                 <li><a href="#">Lịch làm việc</a></li>
-                <li><a href="#">Trạng thái nhân sự</a></li>
-                <li><a href="apply-job-list">Đơn xin việc</a></li>
+                <li><a href="${pageContext.request.contextPath}/JobRequest?action=list">Đơn xin việc</a></li>
             </ul>
         </div>
 

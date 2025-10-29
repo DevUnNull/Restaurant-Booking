@@ -213,4 +213,15 @@ public class UserDao {
             return false;
         }
     }
+
+    public void updateRole(int userId, int newRoleId) throws SQLException {
+        String sql = "UPDATE Users SET role_id = ? WHERE user_id = ?";
+        try (Connection conn = db.getConnection()) {
+            stm = conn.prepareStatement(sql);
+            stm.setInt(1, newRoleId);
+            stm.setInt(2, userId);
+            stm.executeUpdate();
+        }
+    }
+
 }
