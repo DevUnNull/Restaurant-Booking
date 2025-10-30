@@ -59,9 +59,22 @@
         .summary-card.revenue { background-color: var(--revenue-color); }
 
         /* Customer Table Styles */
-        .customer-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; }
-        .customer-table th, .customer-table td { padding: 12px; border-bottom: 1px solid #eee; }
-        .customer-table th { background-color: #f8f8f8; color: var(--customer-color); font-weight: bold; text-transform: uppercase; }
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse; /* Đã sửa: dùng collapse để tạo đường kẻ */
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        .customer-table th, .customer-table td {
+            padding: 12px;
+            border: 1px solid #ddd; /* Đã sửa: thêm đường kẻ cho từng ô */
+        }
+        .customer-table th {
+            background-color: #f8f8f8;
+            color: var(--customer-color);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
         .customer-table tr:hover { background-color: #e3f2fd; }
         .status-active { color: var(--revenue-color); font-weight: bold; }
         .status-inactive { color: var(--cancellation-color); font-weight: bold; }
@@ -370,7 +383,7 @@
     </div>
 </div>
 
-<%-- JavaScript --%>
+<%-- JavaScript (ĐÃ SỬA LẠI LOGIC XÁC THỰC) --%>
 <script>
     const START_OF_BUSINESS_DATE = "2025-01-01";
 
@@ -391,6 +404,25 @@
     function submitFilterForm() {
         const startDate = document.getElementById('modalStartDate').value;
         const endDate = document.getElementById('modalEndDate').value;
+
+        // 1. Bắt buộc chọn Ngày Bắt đầu
+        if (!startDate) {
+            alert("Lỗi: Vui lòng chọn Ngày Bắt đầu (From Date) cho báo cáo.");
+            return;
+        }
+
+        // 2. Bắt buộc chọn Ngày Kết thúc
+        if (!endDate) {
+            alert("Lỗi: Vui lòng chọn Ngày Kết thúc (To Date) cho báo cáo.");
+            return;
+        }
+
+        // 3. Kiểm tra logic ngày
+        if (new Date(startDate) > new Date(endDate)) {
+            alert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
+            return;
+        }
+
         let url = 'user-report?startDate=' + startDate + '&endDate=' + endDate;
 
         window.location.href = url;

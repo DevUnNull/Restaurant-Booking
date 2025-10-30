@@ -19,7 +19,35 @@ public class EmployeeReportRepository {
     public EmployeeReportRepository() {
     }
 
-    public List<Map<String, Object>> getEmployeeOverviewData(String startDate, String endDate, String limitDate) throws SQLException {
+    /**
+     * Retrieves the total count of active staff members (role_id = 2).
+     */
+    public int getTotalActiveEmployees() throws SQLException {
+        String query = "SELECT COUNT(user_id) FROM Users WHERE role_id = 2 AND status = 'ACTIVE'";
+        int count = 0;
+        try (Connection con = db.getConnection();
+             PreparedStatement stm = con.prepareStatement(query);
+             ResultSet rs = stm.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return count;
+    }
+
+    /**
+     * Retrieves the performance overview for all active employees within a specified date range.
+     * Includes LIMIT and OFFSET for pagination.
+     */
+    public List<Map<String, Object>> getEmployeeOverviewData(
+            String startDate,
+            String endDate,
+            String limitDate,
+            int offset,
+            int pageSize) throws SQLException {
         List<Map<String, Object>> employeeList = new ArrayList<>();
 
         String query = """
@@ -27,24 +55,25 @@ public class EmployeeReportRepository {
                 U.user_id,
                 U.full_name AS employee_name,
                 U.status AS employee_status,
-                -- GIẢ LẬP DỮ LIỆU: 450 phút/ngày * Tổng số ngày SHIFT_WORK
-                (COUNT(DISTINCT CASE WHEN SAL.activity_type = 'SHIFT_WORK' AND SAL.activity_date BETWEEN ? AND ? THEN SAL.activity_date END) * 450) AS total_shift_minutes,
                 
-                SUM(CASE WHEN SAL.activity_type = 'RESERVATION_SERVE' AND SAL.activity_date BETWEEN ? AND ? THEN 1 ELSE 0 END) AS total_serves,
-                
-                COUNT(DISTINCT CASE WHEN SAL.activity_type = 'SHIFT_WORK' AND SAL.activity_date BETWEEN ? AND ? THEN SAL.activity_date END) AS total_shift_days
+                COUNT(CASE WHEN R.status = 'COMPLETED' AND R.reservation_date BETWEEN ? AND ? THEN R.reservation_id END) AS total_serves,
+                COUNT(DISTINCT CASE WHEN R.status = 'COMPLETED' AND R.reservation_date BETWEEN ? AND ? THEN R.reservation_date END) AS total_shift_days,
+                (COUNT(DISTINCT CASE WHEN R.status = 'COMPLETED' AND R.reservation_date BETWEEN ? AND ? THEN R.reservation_date END) * 450) AS total_shift_minutes
                 
             FROM
                 Users U
             LEFT JOIN
-                Staff_Activity_Log SAL ON U.user_id = SAL.staff_user_id
+                Reservation_Staff_Assignments RSA ON U.user_id = RSA.staff_user_id
+            LEFT JOIN
+                Reservations R ON RSA.reservation_id = R.reservation_id
             WHERE
                 U.role_id = 2 
                 AND U.status = 'ACTIVE' 
             GROUP BY
                 U.user_id, U.full_name, U.status
             ORDER BY
-                total_serves DESC;
+                total_serves DESC
+            LIMIT ? OFFSET ?;
         """;
 
         try (Connection con = db.getConnection();
@@ -55,6 +84,10 @@ public class EmployeeReportRepository {
             stm.setString(index++, startDate); stm.setString(index++, endDate);
             stm.setString(index++, startDate); stm.setString(index++, endDate);
             stm.setString(index++, startDate); stm.setString(index++, endDate);
+
+            // Tham số phân trang
+            stm.setInt(index++, pageSize);
+            stm.setInt(index++, offset);
 
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
@@ -76,6 +109,7 @@ public class EmployeeReportRepository {
                                 .divide(BigDecimal.valueOf(totalShiftDays), 2, RoundingMode.HALF_UP);
                     }
                     row.put("servePerShiftRate", servePerShiftRate);
+
                     BigDecimal totalWorkingHours = BigDecimal.valueOf(totalShiftMinutes)
                             .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
                     row.put("totalWorkingHours", totalWorkingHours);
@@ -90,34 +124,44 @@ public class EmployeeReportRepository {
         return employeeList;
     }
 
+    // ... (Giữ nguyên các phương thức khác: getEmployeeTimeTrend, getEmployeeDetailById, findEmployeeIdByName)
+
+    /**
+     * Retrieves the performance time trend for a specific employee.
+     * ... (Giữ nguyên phương thức này)
+     */
     public List<Map<String, Object>> getEmployeeTimeTrend(int employeeId, String startDate, String nextDayParam, String unit) throws SQLException {
+        // ... (Code không đổi)
         List<Map<String, Object>> trendList = new ArrayList<>();
         String groupByColumn;
 
         switch (unit.toLowerCase()) {
             case "week":
-                groupByColumn = "CONCAT(YEAR(SAL.activity_date), '-W', LPAD(WEEK(SAL.activity_date, 3), 2, '0'))";
+                groupByColumn = "CONCAT(YEAR(R.reservation_date), '-W', LPAD(WEEK(R.reservation_date, 3), 2, '0'))";
                 break;
             case "month":
-                groupByColumn = "DATE_FORMAT(SAL.activity_date, '%Y-%m')";
+                groupByColumn = "DATE_FORMAT(R.reservation_date, '%Y-%m')";
                 break;
             case "day":
             default:
-                groupByColumn = "DATE(SAL.activity_date)";
+                groupByColumn = "DATE(R.reservation_date)";
                 break;
         }
 
         String query = String.format("""
             SELECT
                 %s AS label,
-                COUNT(CASE WHEN SAL.activity_type = 'RESERVATION_SERVE' THEN SAL.log_id END) AS total_serves,
-                (COUNT(DISTINCT CASE WHEN SAL.activity_type = 'SHIFT_WORK' THEN SAL.activity_date END) * 450) AS total_shift_minutes
+                COUNT(R.reservation_id) AS total_serves,
+                (COUNT(DISTINCT R.reservation_date) * 450) AS total_shift_minutes
             FROM
-                Staff_Activity_Log SAL
+                Reservation_Staff_Assignments RSA
+            JOIN
+                Reservations R ON RSA.reservation_id = R.reservation_id
             WHERE
-                SAL.staff_user_id = ?
-                AND SAL.activity_date >= ?
-                AND SAL.activity_date < ?
+                RSA.staff_user_id = ?
+                AND R.status = 'COMPLETED'
+                AND R.reservation_date >= ?
+                AND R.reservation_date < ?
             GROUP BY
                 label
             ORDER BY
@@ -151,6 +195,7 @@ public class EmployeeReportRepository {
     }
 
     public Map<String, Object> getEmployeeDetailById(int employeeId) throws SQLException {
+        // ... (Code không đổi)
         Map<String, Object> employeeDetail = new HashMap<>();
         String query = "SELECT full_name, email, phone_number, status FROM Users WHERE user_id = ? AND role_id = 2";
         try (Connection con = db.getConnection();
@@ -163,6 +208,27 @@ public class EmployeeReportRepository {
                     employeeDetail.put("phoneNumber", rs.getString("phone_number"));
                     employeeDetail.put("status", rs.getString("status"));
                     return employeeDetail;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return null;
+    }
+
+    public Integer findEmployeeIdByName(String fullName) throws SQLException {
+        // ... (Code không đổi)
+        String query = "SELECT user_id FROM Users WHERE full_name LIKE ? AND role_id = 2 AND status = 'ACTIVE' LIMIT 1";
+
+        try (Connection con = db.getConnection();
+             PreparedStatement stm = con.prepareStatement(query)) {
+
+            stm.setString(1, "%" + fullName + "%");
+
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("user_id");
                 }
             }
         } catch (SQLException e) {
