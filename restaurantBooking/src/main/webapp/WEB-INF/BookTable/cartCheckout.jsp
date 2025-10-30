@@ -1111,7 +1111,7 @@
                 }
             });
         }
-    })();s
+    })();
 
     // Ngăn submit khi chưa có bàn (phòng hờ nếu người dùng bỏ qua link)
     (function() {

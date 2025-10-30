@@ -463,7 +463,7 @@
 
     <div class="back-link-container">
         <a href="orderHistory" class="btn" style="background-color: #6c757d;"><i class="fas fa-arrow-left"></i> Lịch sử đặt bàn</a>
-        <a href="home.jsp" class="btn" style="margin-left: 10px; background-color: #6c757d;"><i class="fas fa-home"></i> Về trang chủ</a>
+        <a href="home" class="btn" style="margin-left: 10px; background-color: #6c757d;"><i class="fas fa-home"></i> Về trang chủ</a>
         <a href="editReservation?id=<%= reservation != null ? reservation.getReservationId() : 0 %>" class="btn" style="margin-left: 10px; background-color: #e67e22;">
             <i class="fas fa-edit"></i> Chỉnh sửa đơn hàng
         </a>
