@@ -8,7 +8,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý đơn hàng - Restaurant Booking</title>
-
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -351,6 +350,87 @@
             color: #667eea;
         }
 
+        /* Payment Badges */
+        .payment-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .payment-cash {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .payment-card {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .payment-wallet {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Payment Status Badges */
+        .payment-status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .payment-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .payment-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .payment-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Confirm Payment Button */
+        .btn-confirm-payment {
+            padding: 6px 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-confirm-payment:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-confirm-payment:active {
+            transform: translateY(0);
+        }
+
         /* Actions Buttons */
         .actions {
             display: flex;
@@ -593,6 +673,7 @@
                         <th>Số khách</th>
                         <th>Số món</th>
                         <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
@@ -643,8 +724,64 @@
                                         </span>
                             </td>
                             <td>
+                                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+                                    <!-- Payment Method Badge -->
+                                    <c:choose>
+                                        <c:when test="${order.paymentMethod == 'CASH'}">
+                                                    <span class="payment-badge payment-cash">
+                                                        <i class="fas fa-money-bill-wave"></i> COD
+                                                    </span>
+                                        </c:when>
+                                        <c:when test="${order.paymentMethod == 'CREDIT_CARD'}">
+                                                    <span class="payment-badge payment-card">
+                                                        <i class="fas fa-credit-card"></i> Thẻ
+                                                    </span>
+                                        </c:when>
+                                        <c:when test="${order.paymentMethod == 'E_WALLET'}">
+                                                    <span class="payment-badge payment-wallet">
+                                                        <i class="fas fa-wallet"></i> Ví
+                                                    </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="payment-badge">-</span>
+                                        </c:otherwise>
+                                    </c:choose>
+
+                                    <!-- Payment Status Badge -->
+                                    <c:choose>
+                                        <c:when test="${order.paymentStatus == 'PENDING'}">
+                                                    <span class="payment-status-badge payment-pending">
+                                                        <i class="fas fa-clock"></i> Chờ
+                                                    </span>
+                                        </c:when>
+                                        <c:when test="${order.paymentStatus == 'COMPLETED'}">
+                                                    <span class="payment-status-badge payment-completed">
+                                                        <i class="fas fa-check-circle"></i> Đã TT
+                                                    </span>
+                                        </c:when>
+                                        <c:when test="${order.paymentStatus == 'FAILED'}">
+                                                    <span class="payment-status-badge payment-failed">
+                                                        <i class="fas fa-times-circle"></i> Thất bại
+                                                    </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="payment-status-badge">-</span>
+                                        </c:otherwise>
+                                    </c:choose>
+
+                                    <!-- Confirm Payment Button (CASH + PENDING only) -->
+                                    <c:if test="${order.paymentMethod == 'CASH' and order.paymentStatus == 'PENDING'}">
+                                        <button onclick="confirmPayment(${order.reservationId});"
+                                                class="btn-confirm-payment"
+                                                title="Xác nhận đã nhận tiền">
+                                            <i class="fas fa-check"></i> Nhận tiền
+                                        </button>
+                                    </c:if>
+                                </div>
+                            </td>
+                            <td>
                                 <div class="status-dropdown">
-                                    <select onchange="updateStatus(${order.reservationId}, this.value)"
+                                    <select onchange="updateStatus(${order.reservationId}, this.value);"
                                             data-original="${order.status}">
                                         <option value="PENDING" ${order.status == 'PENDING' ? 'selected' : ''}>Chờ xác nhận</option>
                                         <option value="CONFIRMED" ${order.status == 'CONFIRMED' ? 'selected' : ''}>Đã xác nhận</option>
@@ -656,7 +793,7 @@
                             </td>
                             <td>
                                 <div class="actions">
-                                    <a href="${pageContext.request.contextPath}/orderDetails?id=${order.reservationId}"
+                                    <a href="${pageContext.request.contextPath}/staffOrderDetails?id=${order.reservationId}"
                                        class="btn-action btn-view"
                                        title="Xem chi tiết">
                                         <i class="fas fa-eye"></i> Xem
@@ -718,6 +855,64 @@
     // Reset filter
     function resetFilter() {
         window.location.href = '${pageContext.request.contextPath}/OrderManagement';
+    }
+
+    // Confirm payment received (AJAX)
+    function confirmPayment(reservationId) {
+        if (!confirm('Xác nhận đã nhận tiền mặt từ khách?')) {
+            return;
+        }
+
+        // Disable button to prevent double click
+        const button = event.target.closest('.btn-confirm-payment');
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+        }
+
+        const url = '${pageContext.request.contextPath}/confirmPayment';
+        console.log('🔍 Calling API:', url);
+        console.log('📝 Reservation ID:', reservationId);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'reservationId=' + reservationId
+        })
+            .then(response => {
+                console.log('📡 Response Status:', response.status);
+                console.log('📡 Response OK:', response.ok);
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Response Data:', data);
+                if (data.success) {
+                    alert('✅ Đã xác nhận thanh toán thành công!');
+                    // Reload page to update UI
+                    location.reload();
+                } else {
+                    alert('❌ Lỗi: ' + (data.message || 'Không thể xác nhận thanh toán. Vui lòng thử lại.'));
+                    // Re-enable button
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-check"></i> Nhận tiền';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ Có lỗi xảy ra khi gửi yêu cầu. Vui lòng kiểm tra kết nối và thử lại.');
+                // Re-enable button
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check"></i> Nhận tiền';
+                }
+            });
     }
 
     // Update order status
