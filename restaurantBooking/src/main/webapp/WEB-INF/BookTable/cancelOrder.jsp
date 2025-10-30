@@ -1,7 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
 <%@ page import="com.fpt.restaurantbooking.models.Reservation" %>
+<%@ page import="com.fpt.restaurantbooking.models.Payment" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="java.time.LocalDateTime" %>
+<%@ page import="java.time.temporal.ChronoUnit" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -309,10 +312,28 @@
 <%
     Reservation reservation = (Reservation) request.getAttribute("reservation");
     List<Integer> tableIds = (List<Integer>) request.getAttribute("tableIds");
+    Payment payment = (Payment) request.getAttribute("payment");
     String errorMessage = (String) request.getAttribute("errorMessage");
 
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+    // Tính tiền đặt cọc
+    int tableCount = (tableIds != null) ? tableIds.size() : 0;
+    long depositAmount = 0;
+    boolean hasDeposit = false;
+    if (payment != null && "CASH".equals(payment.getPaymentMethod()) && tableCount > 0) {
+        depositAmount = tableCount * 20000L; // 20,000 VNĐ per table
+        hasDeposit = true;
+    }
+
+    // Kiểm tra nếu hủy sau thời gian đặt bàn
+    boolean isCancellingAfterReservationTime = false;
+    if (reservation != null && reservation.getReservationDate() != null && reservation.getReservationTime() != null) {
+        LocalDateTime reservationDateTime = reservation.getReservationDate().atTime(reservation.getReservationTime());
+        LocalDateTime now = LocalDateTime.now();
+        isCancellingAfterReservationTime = now.isAfter(reservationDateTime);
+    }
 %>
 
 <div class="container">
@@ -340,7 +361,10 @@
             <li>Miễn phí hủy nếu hủy trước 24 giờ so với giờ đặt bàn</li>
             <li>Hủy trong vòng 12-24 giờ: Phí hủy 50,000 VNĐ</li>
             <li>Hủy trong vòng 12 giờ: Phí hủy 100,000 VNĐ</li>
-            <li>Không hoàn lại tiền đặt cọc nếu hủy sau giờ đặt bàn</li>
+            <li><strong style="color: #e74c3c;">⚠️ QUAN TRỌNG - Về tiền đặt cọc:</strong></li>
+            <li style="padding-left: 40px;">Nếu bạn chọn thanh toán tại quán (COD), yêu cầu đặt cọc 20.000 VNĐ/bàn</li>
+            <li style="padding-left: 40px;">Tiền cọc sẽ được hoàn lại khi bạn đến quán và thanh toán đầy đủ</li>
+            <li style="padding-left: 40px;"><strong style="color: #ffc107;">Nếu hủy sau thời gian đặt bàn, tiền đặt cọc sẽ không được hoàn lại</strong></li>
             <li>Vui lòng cung cấp lý do hủy để chúng tôi cải thiện dịch vụ</li>
         </ul>
     </div>
@@ -360,6 +384,20 @@
                 Bàn <%= tableIds.get(i) %><%= i < tableIds.size() - 1 ? ", " : "" %>
                 <% } %>
             </li>
+            <% } %>
+            <% if (hasDeposit) { %>
+            <li style="padding-left: 0;">
+                <strong style="color: #ffc107;">
+                    <i class="fas fa-money-bill-wave"></i> Tiền đặt cọc:
+                    <%= String.format("%,d", depositAmount) %> VNĐ (<%= tableCount %> bàn × 20.000 VNĐ/bàn)
+                </strong>
+            </li>
+            <% if (isCancellingAfterReservationTime) { %>
+            <li style="padding-left: 0; color: #e74c3c; font-weight: 600;">
+                <i class="fas fa-exclamation-triangle"></i>
+                ⚠️ CẢNH BÁO: Bạn đang hủy sau thời gian đặt bàn. Tiền đặt cọc sẽ KHÔNG được hoàn lại!
+            </li>
+            <% } %>
             <% } %>
         </ul>
     </div>
@@ -408,6 +446,24 @@
             <% } %>
         </div>
 
+        <% if (hasDeposit) { %>
+        <div style="background: rgba(255, 193, 7, 0.2); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ffc107;">
+            <p style="color: #ffc107; font-weight: 600; margin-bottom: 10px;">
+                <i class="fas fa-exclamation-triangle"></i> Lưu ý về tiền đặt cọc:
+            </p>
+            <ul style="color: #fff; margin-left: 20px; line-height: 1.8;">
+                <li>Bạn đã đặt cọc: <strong><%= String.format("%,d", depositAmount) %> VNĐ</strong></li>
+                <% if (isCancellingAfterReservationTime) { %>
+                <li style="color: #e74c3c; font-weight: 600;">
+                    ⚠️ Vì bạn hủy sau thời gian đặt bàn, tiền đặt cọc sẽ KHÔNG được hoàn lại!
+                </li>
+                <% } else { %>
+                <li>Tiền đặt cọc sẽ được hoàn lại khi bạn đến quán và thanh toán đầy đủ</li>
+                <li>Nếu hủy sau thời gian đặt bàn, tiền đặt cọc sẽ không được hoàn lại</li>
+                <% } %>
+            </ul>
+        </div>
+        <% } %>
         <p style="color: #ffc107; font-size: 0.95em;">
             <i class="fas fa-info-circle"></i> Lưu ý: Vui lòng xem chính sách hủy phía trên để biết chi tiết về phí hủy.
         </p>

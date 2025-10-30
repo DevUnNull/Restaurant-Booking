@@ -304,9 +304,28 @@
     com.fpt.restaurantbooking.models.Reservation reservation = (com.fpt.restaurantbooking.models.Reservation) request.getAttribute("reservation");
     java.util.List<com.fpt.restaurantbooking.models.Table> tables = (java.util.List<com.fpt.restaurantbooking.models.Table>) request.getAttribute("tables");
     java.util.List<com.fpt.restaurantbooking.models.OrderItem> orderItems = (java.util.List<com.fpt.restaurantbooking.models.OrderItem>) request.getAttribute("orderItems");
+    com.fpt.restaurantbooking.models.Payment payment = (com.fpt.restaurantbooking.models.Payment) request.getAttribute("payment");
     java.time.format.DateTimeFormatter dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
     java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
     java.util.Map<Integer, String> itemNames = (java.util.Map<Integer, String>) request.getAttribute("itemNames");
+
+    // Tính tiền đặt cọc
+    int tableCount = (tables != null) ? tables.size() : 0;
+    long depositAmount = 0;
+    boolean hasDeposit = false;
+    if (payment != null && "CASH".equals(payment.getPaymentMethod()) && tableCount > 0) {
+        depositAmount = tableCount * 20000L; // 20,000 VNĐ per table
+        hasDeposit = true;
+    }
+
+    // Tính tổng tiền món ăn (không bao gồm deposit)
+    java.math.BigDecimal itemsTotal = java.math.BigDecimal.ZERO;
+    if (orderItems != null && !orderItems.isEmpty()) {
+        for (com.fpt.restaurantbooking.models.OrderItem it : orderItems) {
+            java.math.BigDecimal line = it.getTotal();
+            if (line != null) itemsTotal = itemsTotal.add(line);
+        }
+    }
 %>
 
 <div class="container">
@@ -422,12 +441,10 @@
         </thead>
         <tbody>
         <%
-            java.math.BigDecimal total = java.math.BigDecimal.ZERO;
             if (orderItems != null && !orderItems.isEmpty()) {
                 for (int i = 0; i < orderItems.size(); i++) {
                     com.fpt.restaurantbooking.models.OrderItem it = orderItems.get(i);
                     java.math.BigDecimal line = it.getTotal();
-                    if (line != null) total = total.add(line);
         %>
         <tr>
             <td><%= i + 1 %></td>
@@ -450,9 +467,40 @@
         </tbody>
         <tfoot>
         <tr>
-            <td colspan="4" style="text-align:right; font-weight: 600;">Tổng cộng</td>
-            <td colspan="2" style="text-align:left; font-weight: 600;"> <%= total %></td>
+            <td colspan="4" style="text-align:right; font-weight: 600;">Tổng tiền món ăn:</td>
+            <td colspan="2" style="text-align:left; font-weight: 600;"> <%= String.format("%,d", itemsTotal.longValue()) %> VNĐ</td>
         </tr>
+        <% if (hasDeposit) { %>
+        <tr style="background: rgba(255, 193, 7, 0.1);">
+            <td colspan="4" style="text-align:right; font-weight: 600; color: #ffc107;">
+                <i class="fas fa-info-circle"></i> Phí đặt cọc (<%= tableCount %> bàn × 20.000 VNĐ/bàn):
+            </td>
+            <td colspan="2" style="text-align:left; font-weight: 600; color: #ffc107;">
+                <%= String.format("%,d", depositAmount) %> VNĐ
+            </td>
+        </tr>
+        <tr style="background: rgba(255, 193, 7, 0.15);">
+            <td colspan="4" style="text-align:right; font-weight: 600; font-size: 1.05em;">
+                <strong>TỔNG CỘNG:</strong>
+            </td>
+            <td colspan="2" style="text-align:left; font-weight: 700; font-size: 1.05em;">
+                <strong><%= String.format("%,d", itemsTotal.add(new java.math.BigDecimal(depositAmount)).longValue()) %> VNĐ</strong>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align:center; padding: 10px; font-size: 0.9em; color: rgba(255, 255, 255, 0.8);">
+                <i class="fas fa-info-circle" style="color: #ffc107;"></i>
+                <strong>Lưu ý:</strong> Tiền đặt cọc <%= String.format("%,d", depositAmount) %> VNĐ sẽ được hoàn lại khi bạn đến quán và thanh toán đầy đủ.
+            </td>
+        </tr>
+        <% } else { %>
+        <tr>
+            <td colspan="4" style="text-align:right; font-weight: 600;">TỔNG CỘNG:</td>
+            <td colspan="2" style="text-align:left; font-weight: 700; font-size: 1.05em;">
+                <strong><%= String.format("%,d", itemsTotal.longValue()) %> VNĐ</strong>
+            </td>
+        </tr>
+        <% } %>
         </tfoot>
     </table>
 
@@ -484,4 +532,4 @@
     });
 </script>
 </body>
-</html>
+</html>s

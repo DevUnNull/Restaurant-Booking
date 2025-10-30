@@ -24,7 +24,7 @@
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffffff;
             min-height: 100vh;
             padding: 20px;
         }
@@ -32,20 +32,20 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
             padding: 40px;
         }
 
         .header {
             margin-bottom: 40px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #dc3545;
             padding-bottom: 20px;
         }
 
         .header h1 {
-            color: #2d3748;
+            color: #000000;
             font-size: 2.5em;
             font-weight: 700;
             display: flex;
@@ -54,22 +54,22 @@
         }
 
         .header h1 i {
-            color: #667eea;
+            color: #dc3545;
         }
 
         .header p {
-            color: #718096;
+            color: #000000;
             margin-top: 10px;
             font-size: 1.1em;
         }
 
         /* Filter Section */
         .filter-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
         }
 
         .filter-controls {
@@ -134,7 +134,7 @@
 
         .btn-filter {
             background: white;
-            color: #667eea;
+            color: #dc3545;
         }
 
         .btn-filter:hover {
@@ -150,7 +150,7 @@
 
         .btn-reset:hover {
             background: white;
-            color: #667eea;
+            color: #dc3545;
         }
 
         /* Statistics Cards */
@@ -162,11 +162,11 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             padding: 25px;
             border-radius: 15px;
             color: white;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
         }
 
         .stat-card h3 {
@@ -196,7 +196,7 @@
         }
 
         .orders-table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             color: white;
         }
 
@@ -221,12 +221,12 @@
 
         .orders-table td {
             padding: 15px;
-            color: #2d3748;
+            color: #000000;
         }
 
         .order-id {
             font-weight: 700;
-            color: #667eea;
+            color: #dc3545;
             font-size: 1.1em;
         }
 
@@ -238,12 +238,12 @@
 
         .customer-name {
             font-weight: 600;
-            color: #2d3748;
+            color: #000000;
         }
 
         .customer-contact {
             font-size: 0.85em;
-            color: #718096;
+            color: #000000;
         }
 
         .table-names {
@@ -329,13 +329,13 @@
         }
 
         .status-dropdown select:hover {
-            border-color: #667eea;
+            border-color: #dc3545;
         }
 
         .status-dropdown select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
         }
 
         .status-dropdown::after {
@@ -347,7 +347,7 @@
             top: 50%;
             transform: translateY(-50%);
             pointer-events: none;
-            color: #667eea;
+            color: #dc3545;
         }
 
         /* Payment Badges */
@@ -453,14 +453,14 @@
         }
 
         .btn-view {
-            background: #667eea;
+            background: #dc3545;
             color: white;
         }
 
         .btn-view:hover {
-            background: #5568d3;
+            background: #c82333;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
         }
 
         .btn-edit {
@@ -494,20 +494,20 @@
 
         .pagination a {
             background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            color: #dc3545;
+            border: 2px solid #dc3545;
         }
 
         .pagination a:hover {
-            background: #667eea;
+            background: #dc3545;
             color: white;
             transform: translateY(-2px);
         }
 
         .pagination .current {
-            background: #667eea;
+            background: #dc3545;
             color: white;
-            border: 2px solid #667eea;
+            border: 2px solid #dc3545;
         }
 
         .pagination .disabled {
@@ -530,13 +530,13 @@
         }
 
         .empty-state h3 {
-            color: #2d3748;
+            color: #000000;
             font-size: 1.5em;
             margin-bottom: 10px;
         }
 
         .empty-state p {
-            color: #718096;
+            color: #000000;
         }
 
         /* Loading Spinner */
@@ -547,7 +547,7 @@
 
         .spinner {
             border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #dc3545;
             border-radius: 50%;
             width: 50px;
             height: 50px;
