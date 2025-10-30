@@ -41,6 +41,7 @@ public class MenuRepository {
                 "    mi.description,\n " +
                 "    mi.price,\n " +
                 "    mi.image_url,\n " +
+                "    mi.category_id, \n" +
                 "    c.name AS category_name,\n " +
                 "    mi.calories,\n " +
                 "    mi.status,\n " +
@@ -67,7 +68,7 @@ public class MenuRepository {
                             rs.getBigDecimal("price"), rs.getString("image_url"),
                             rs.getString("status"),
                             rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                            rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name")));
+                            rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name"), rs.getInt("category_id")));
 
                 }
             }
@@ -88,6 +89,7 @@ public class MenuRepository {
                 "    mi.description,\n " +
                 "    mi.price,\n " +
                 "    mi.image_url,\n " +
+                "    mi.category_id, \n" +
                 "    c.name AS category_name,\n " +
                 "    mi.calories,\n " +
                 "    mi.status,\n " +
@@ -113,7 +115,7 @@ public class MenuRepository {
                             rs.getBigDecimal("price"), rs.getString("image_url"),
                             rs.getString("status"),
                             rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                            rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name")));
+                            rs.getString("created_at"),rs.getString("updated_at"), rs.getString("category_name"),rs.getInt("category_id")));
                 }
             }
         }
@@ -129,6 +131,7 @@ public class MenuRepository {
                 "    mi.description,\n " +
                 "    mi.price,\n " +
                 "    mi.image_url,\n " +
+                "    mi.category_id, \n" +
                 "    c.name AS category_name,\n " +
                 "    mi.calories,\n " +
                 "    mi.status,\n " +
@@ -152,7 +155,7 @@ public class MenuRepository {
                             rs.getBigDecimal("price"), rs.getString("image_url"),
                             rs.getString("status"),
                             rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                            rs.getString("created_at"), rs.getString("updated_at"), rs.getString("category_name")));
+                            rs.getString("created_at"), rs.getString("updated_at"), rs.getString("category_name"), rs.getInt("category_id")));
                 }
             }
         }
@@ -167,6 +170,7 @@ public class MenuRepository {
                 "    mi.description,\n" +
                 "    mi.price,\n" +
                 "    mi.image_url,\n" +
+                "    mi.category_id, \n" +
                 "    c.name AS category_name,\n" +
                 "    mi.calories,\n" +
                 "    mi.status,\n" +
@@ -189,7 +193,7 @@ public class MenuRepository {
                             rs.getBigDecimal("price"), rs.getString("image_url"),
                             rs.getString("status"),
                             rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                            rs.getString("created_at"),rs.getString("updated_at"),rs.getString("category_name") ));
+                            rs.getString("created_at"),rs.getString("updated_at"),rs.getString("category_name"), rs.getInt("category_id") ));
 
                 }
             }
@@ -209,6 +213,7 @@ public class MenuRepository {
                 "    mi.description,\n" +
                 "    mi.price,\n" +
                 "    mi.image_url,\n" +
+                "    mi.category_id, \n" +
                 "    c.name AS category_name,\n" +
                 "    mi.calories,\n" +
                 "    mi.status,\n" +
@@ -228,7 +233,7 @@ public class MenuRepository {
                         rs.getBigDecimal("price"), rs.getString("image_url"),
                         rs.getString("status"),
                         rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                        rs.getString("created_at"),rs.getString("updated_at"),rs.getString("category_name") ));
+                        rs.getString("created_at"),rs.getString("updated_at"),rs.getString("category_name"), rs.getInt("category_id") ));
 
             }
         }
@@ -362,6 +367,23 @@ public class MenuRepository {
 
 
     }
+    public void DeleteMenuItemInservice_menu_items(String id) throws SQLException {
+        String sql = " DELETE FROM service_menu_items\n" +
+                "WHERE item_id = ?; ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+        ) {
+
+            stm.setString(1, id);
+
+            stm.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
 
     public List<MenuItem> getMenuItemsAllSorted(int start, int end, String sortDir) throws SQLException {
         String safeDir = ("DESC".equalsIgnoreCase(sortDir)) ? "DESC" : "ASC";
@@ -373,6 +395,7 @@ public class MenuRepository {
                 "    mi.description,\n " +
                 "    mi.price,\n " +
                 "    mi.image_url,\n " +
+                "    mi.category_id, \n" +
                 "    c.name AS category_name,\n " +
                 "    mi.calories,\n " +
                 "    mi.status,\n " +
@@ -396,7 +419,7 @@ public class MenuRepository {
                             rs.getBigDecimal("price"), rs.getString("image_url"),
                             rs.getString("status"),
                             rs.getString("created_by_name"), rs.getString("updated_by_name"),
-                            rs.getString("created_at"), rs.getString("updated_at"), rs.getString("category_name")));
+                            rs.getString("created_at"), rs.getString("updated_at"), rs.getString("category_name"), rs.getInt("category_id")));
                 }
             }
         }

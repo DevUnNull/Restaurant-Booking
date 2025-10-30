@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý Voucher</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
   <style>
     body {
       background-color: #f8f9fa;
@@ -58,7 +59,7 @@
       width: 250px;
       background-color: #8c2a1f;
       position: fixed;
-      top: 65px;
+      top: 98px;
       bottom: 0;
       left: 0;
       color: #fff;
@@ -96,7 +97,7 @@
     }
     .content {
       margin-left: 250px;
-      margin-top: 70px;
+      margin-top: 0px;
       padding: 20px;
     }
 
@@ -105,16 +106,47 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #fff;
+      position: relative;
+
+      /* Ảnh nền */
+      background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80');
+      background-size: cover;
+      background-position: center;
+
+      /* Bo góc & đổ bóng */
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+      /* Padding & margin */
       padding: 15px 20px;
       margin-bottom: 25px;
+
+      /* Màu chữ mặc định sáng để nổi trên nền đỏ */
+      color: #fff;
+      overflow: hidden;
     }
+
+    /* Lớp phủ màu đỏ mờ lên trên ảnh nền */
+    .filter-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(139, 0, 0, 0.55); /* đỏ đậm, mờ 55% */
+      border-radius: 8px;
+      z-index: 0;
+    }
+
+    /* Nội dung hiển thị phía trên lớp phủ */
+    .filter-section > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Tiêu đề Voucher */
     .filter-section h3 {
       margin: 0;
-      color: #8b0000;
       font-weight: 600;
+      color: #fff; /* đổi từ đỏ sang trắng cho dễ đọc */
     }
     .voucher-select {
       position: relative;
@@ -208,17 +240,8 @@
 <%--    <a href="#" style="color:#fff; text-decoration:none;">Voucher</a>--%>
 <%--  </div>--%>
 <%--</div>--%>
-<div class="header">
-  <div class="logo">Restaurant_Booking</div>
-  <nav>
-    <ul>
-      <li><a href="#">Trang chủ</a></li>
-      <li><a href="#">Đặt bàn</a></li>
-      <li><a href="#">Menu</a></li>
-      <li><a href="Voucher" class="active">Voucher</a></li>
-    </ul>
-  </nav>
-</div>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
+
 
 <%--<ul>--%>
 <%--  <li><a href="#">Dashboard</a></li>--%>

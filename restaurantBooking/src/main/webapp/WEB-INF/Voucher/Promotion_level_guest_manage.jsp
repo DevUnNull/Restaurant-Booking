@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Quản lý khách hàng thân thiết</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+
     <style>
         :root {
             --wine: #8B0000; /* đỏ rượu vang */
@@ -302,17 +304,7 @@
 </head>
 <body>
 <!-- Header (kept) -->
-<div class="header">
-    <div class="logo">Restaurant_Booking</div>
-    <nav>
-        <ul>
-            <li><a href="#">Trang chủ</a></li>
-            <li><a href="#">Đặt bàn</a></li>
-            <li><a href="#">Menu</a></li>
-            <li><a href="#">Liên hệ</a></li>
-        </ul>
-    </nav>
-</div>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <div class="main-wrapper">
     <!-- Sidebar (kept) -->

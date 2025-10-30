@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="styless.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link href="css/ServiceManage.css" rel="stylesheet" type="text/css" />
-
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
   <style>
     .content-header {
       display: flex;
@@ -65,18 +65,7 @@
 <body>
 <div class="main">
   <!-- Header -->
-  <div class="header">
-    <div class="logo">Restaurant_Booking</div>
-    <nav>
-      <ul>
-        <li><a href="#">Trang chủ</a></li>
-        <li><a href="#">Đặt bàn</a></li>
-        <li><a href="#">Menu</a></li>
-        <li><a href="#">Liên hệ</a></li>
-        <li><a href="#">Giỏ hàng (0)</a></li>
-      </ul>
-    </nav>
-  </div>
+  <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
   <!-- Wrapper -->
   <div class="main-wrapper">
