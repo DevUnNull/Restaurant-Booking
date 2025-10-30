@@ -52,6 +52,18 @@
             <%-- Report Dropdown (Admin & Manager - Role 1 & 4) --%>
             <c:if test="${sessionScope.userRole == 1 || sessionScope.userRole == 4}">
                 <li class="user-dropdown">
+                    <div class="user-button" onclick="toggleDropdown('hrDropdown')">
+                        <span class="user-name">Quản lý nhân sự</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="hrDropdown" class="dropdown-content">
+                        <a href="${pageContext.request.contextPath}/EmployeeList">Quản Lý Nhân Sự</a>
+                        <a href="${pageContext.request.contextPath}/WorkSchedule">Phân lịch làm việc</a>
+                        <a href="#">Lịch làm việc</a>
+                        <a href="#">Đơn xin việc</a>
+                    </div>
+                </li>
+                <li class="user-dropdown">
                     <div class="user-button" onclick="toggleDropdown('reportDropdown')">
                         <span class="user-name">Report</span>
                         <i class="fas fa-chevron-down"></i>
@@ -85,10 +97,9 @@
                         </div>
                         <div id="userDropdown" class="dropdown-content">
                             <a href="${pageContext.request.contextPath}/profile"><i class="fas fa-user"></i> Hồ Sơ</a>
-                            <a href="${pageContext.request.contextPath}/orderHistory"><i
-                                    class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
-                            <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi
-                                Mật Khẩu</a>
+                            <a href="${pageContext.request.contextPath}/my-reservations"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
+                            <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi Mật Khẩu</a>
+                            <a href="${pageContext.request.contextPath}/JobRequest"> Đơn xin việc</a>
                             <div class="dropdown-divider"></div>
                             <a href="${pageContext.request.contextPath}/logout" class="logout-link"><i
                                     class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
