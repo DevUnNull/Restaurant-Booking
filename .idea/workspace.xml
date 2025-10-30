@@ -10,16 +10,48 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="174435c8-542b-4177-87b7-e2426fcf2677" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/StaffOrderDetailsServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/staffOrderDetails.jsp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/ConfirmDepositServlet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/data_source_mapping.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/data_source_mapping.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/webContexts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/webContexts.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/ReservationDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/ReservationDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/.idea/data_source_mapping.xml" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/.idea/data_source_mapping.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/.idea/sqldialects.xml" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/.idea/sqldialects.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/.idea/uiDesigner.xml" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/.idea/uiDesigner.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CancelOrderServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CancelOrderServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CancellationReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CancellationReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CheckoutServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CheckoutServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CustomerReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CustomerReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/EmployeeReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/EmployeeReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/ExportReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/ExportReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/OrderDetailsServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/OrderDetailsServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/OverviewReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/OverviewReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/ServiceReportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/ServiceReportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/StaffOrderDetailsServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/StaffOrderDetailsServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/models/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/models/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/CancellationReportRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/CancellationReportRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/EmployeeReportRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/EmployeeReportRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/OverviewReportRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/OverviewReportRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/ServiceReportRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/ServiceReportRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/MenuItemDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/MenuItemDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/PaymentDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/PaymentDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/DatabaseUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/DatabaseUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/ExcelGeneratorUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/ExcelGeneratorUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/PdfGeneratorUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/PdfGeneratorUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/resources/database.properties" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/resources/database.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/header.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/header.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/cancelOrder.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/cancelOrder.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/cartCheckout.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/cartCheckout.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/orderDetails.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/orderDetails.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/cancel-report.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/cancel-report.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/overview-report.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/overview-report.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/service-report.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/service-report.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/staff-report.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/staff-report.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/user-report.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/report/user-report.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/footer.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/common/footer.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/customer/restaurant-detail.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/customer/restaurant-detail.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/home.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/home.jsp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/orderManagement.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/orderManagement.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/staffOrderDetails.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/staffOrderDetails.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,8 +64,8 @@
         <option value="JavaScript File" />
         <option value="CSS File" />
         <option value="Jsp File" />
-        <option value="Class" />
         <option value="Jsp File" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -240,6 +272,7 @@
       <workItem from="1761639740569" duration="8843000" />
       <workItem from="1761665290712" duration="5826000" />
       <workItem from="1761826561687" duration="5140000" />
+      <workItem from="1761861086273" duration="4415000" />
     </task>
     <servers />
   </component>

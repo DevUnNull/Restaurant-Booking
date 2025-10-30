@@ -21,7 +21,7 @@
 
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffffff;
             min-height: 100vh;
             padding: 20px;
         }
@@ -29,9 +29,9 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
             padding: 40px;
         }
 
@@ -41,17 +41,17 @@
             align-items: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #dc3545;
         }
 
         .header h1 {
-            color: #2d3748;
+            color: #000000;
             font-size: 2em;
             font-weight: 700;
         }
 
         .btn-back {
-            background: #667eea;
+            background: #dc3545;
             color: white;
             padding: 12px 24px;
             border-radius: 10px;
@@ -64,9 +64,9 @@
         }
 
         .btn-back:hover {
-            background: #5568d3;
+            background: #c82333;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
         }
 
         .info-grid {
@@ -77,7 +77,7 @@
         }
 
         .info-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             padding: 20px;
             border-radius: 15px;
             color: white;
@@ -104,7 +104,7 @@
         .section-title {
             font-size: 1.3em;
             font-weight: 700;
-            color: #2d3748;
+            color: #000000;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -112,7 +112,7 @@
         }
 
         .section-title i {
-            color: #667eea;
+            color: #dc3545;
         }
 
         .detail-row {
@@ -127,13 +127,13 @@
 
         .detail-label {
             font-weight: 600;
-            color: #4a5568;
+            color: #000000;
             width: 200px;
             flex-shrink: 0;
         }
 
         .detail-value {
-            color: #2d3748;
+            color: #000000;
             flex-grow: 1;
         }
 
@@ -204,7 +204,7 @@
         }
 
         .table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             color: white;
         }
 
@@ -236,7 +236,7 @@
         }
 
         .total-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             color: white;
             padding: 25px;
             border-radius: 15px;
@@ -449,47 +449,97 @@
     </c:if>
 
     <!-- Service Menu Items (Combo Items) -->
-    <c:if test="${not empty serviceMenuItems}">
-        <div class="section">
-            <div class="section-title">
-                <i class="fas fa-box-open"></i>
-                Món Trong Combo/Dịch Vụ (${serviceMenuItems.size()} món)
-            </div>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Tên món</th>
-                    <th>Giá</th>
-                    <th>Loại</th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="item" items="${serviceMenuItems}" varStatus="loop">
-                    <tr>
-                        <td>${loop.index + 1}</td>
-                        <td>
-                            <strong>${item.itemName}</strong>
-                            <c:if test="${item.description != null}">
-                                <br><small style="color: #718096;">
-                                    ${item.description}
-                            </small>
-                            </c:if>
-                        </td>
-                        <td>
-                            <fmt:formatNumber value="${item.price}" pattern="#,###"/> VNĐ
-                        </td>
-                        <td>
-                                    <span class="table-badge">
-                                        Combo
-                                    </span>
-                        </td>
-                    </tr>
-                </c:forEach>
-                </tbody>
-            </table>
+    <div class="section">
+        <div class="section-title">
+            <i class="fas fa-box-open"></i>
+            Món Trong Combo/Dịch Vụ
         </div>
-    </c:if>
+
+        <c:choose>
+            <c:when test="${not empty serviceMenuItems}">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên món</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th>Loại</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="item" items="${serviceMenuItems}" varStatus="loop">
+                        <c:set var="foundOrderItem" value="${null}" />
+                        <c:forEach var="orderItem" items="${orderItems}">
+                            <c:if test="${orderItem.itemId == item.itemId}">
+                                <c:set var="foundOrderItem" value="${orderItem}" />
+                            </c:if>
+                        </c:forEach>
+
+                        <tr>
+                            <td>${loop.index + 1}</td>
+                            <td>
+                                <strong>${item.itemName}</strong>
+                                <c:if test="${item.description != null}">
+                                    <br><small style="color: #000000;">
+                                        ${item.description}
+                                </small>
+                                </c:if>
+                                <c:if test="${foundOrderItem != null && foundOrderItem.specialInstructions != null}">
+                                    <br><small style="color: #000000;">
+                                    <i class="fas fa-info-circle"></i> ${foundOrderItem.specialInstructions}
+                                </small>
+                                </c:if>
+                            </td>
+                            <td>
+                                <fmt:formatNumber value="${item.price}" pattern="#,###"/> VNĐ
+                            </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${foundOrderItem != null}">
+                                        <strong>${foundOrderItem.quantity}</strong>
+                                    </c:when>
+                                    <c:otherwise>
+                                        0
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${foundOrderItem != null}">
+                                        <strong>
+                                            <fmt:formatNumber value="${foundOrderItem.unitPrice * foundOrderItem.quantity}" pattern="#,###"/> VNĐ
+                                        </strong>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span style="color: #999;">-</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
+                                <span class="table-badge" style="background: #ffe0e0; color: #c82333;">
+                                    <i class="fas fa-gift"></i> Combo
+                                </span>
+                                <c:if test="${foundOrderItem != null}">
+                                    <br><span class="status-badge status-${foundOrderItem.status}" style="margin-top: 4px; display: inline-block;">
+                                        ${foundOrderItem.status}
+                                </span>
+                                </c:if>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </c:when>
+            <c:otherwise>
+                <p style="padding: 20px; text-align: center; color: #000000;">
+                    <i class="fas fa-info-circle"></i>
+                    Đơn hàng này không có món combo/dịch vụ
+                </p>
+            </c:otherwise>
+        </c:choose>
+    </div>
 
     <!-- Order Items (Additional Items) -->
     <div class="section">
@@ -527,7 +577,7 @@
                                                 'Món #' += item.itemId}
                                 </strong>
                                 <c:if test="${item.specialInstructions != null}">
-                                    <br><small style="color: #718096;">
+                                    <br><small style="color: #000000;">
                                     <i class="fas fa-info-circle"></i>
                                         ${item.specialInstructions}
                                 </small>
@@ -553,7 +603,7 @@
                 </table>
             </c:when>
             <c:otherwise>
-                <p style="padding: 20px; text-align: center; color: #718096;">
+                <p style="padding: 20px; text-align: center; color: #000000;">
                     <i class="fas fa-info-circle"></i>
                     Khách không đặt thêm món nào
                 </p>
@@ -563,12 +613,54 @@
 
     <!-- Total -->
     <div class="total-section">
+        <c:set var="tableCount" value="${tables.size()}" />
+        <c:set var="depositAmount" value="0" />
+        <c:set var="hasDeposit" value="false" />
+        <c:if test="${payment != null && payment.paymentMethod == 'CASH' && tableCount > 0}">
+            <c:set var="depositAmount" value="${tableCount * 20000}" />
+            <c:set var="hasDeposit" value="true" />
+        </c:if>
+
+        <c:set var="itemsTotal" value="${calculatedTotal}" />
+        <c:if test="${reservation.totalAmount != null}">
+            <c:choose>
+                <c:when test="${hasDeposit}">
+                    <c:set var="itemsTotal" value="${reservation.totalAmount - depositAmount}" />
+                </c:when>
+                <c:otherwise>
+                    <c:set var="itemsTotal" value="${reservation.totalAmount}" />
+                </c:otherwise>
+            </c:choose>
+        </c:if>
+
+        <div class="total-row">
+            <span>Tổng tiền món ăn:</span>
+            <span>
+                <fmt:formatNumber value="${itemsTotal}" pattern="#,###"/> VNĐ
+            </span>
+        </div>
+
+        <c:if test="${hasDeposit}">
+            <div class="total-row" style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; margin-top: 10px;">
+                <span>
+                    <i class="fas fa-info-circle"></i> Phí đặt cọc (${tableCount} bàn × 20.000 VNĐ/bàn):
+                </span>
+                <span style="color: #ffc107;">
+                    <fmt:formatNumber value="${depositAmount}" pattern="#,###"/> VNĐ
+                </span>
+            </div>
+            <div style="padding: 10px 0; font-size: 0.9em; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i>
+                <strong>Lưu ý:</strong> Tiền đặt cọc sẽ được hoàn lại khi khách đến quán và thanh toán đầy đủ.
+            </div>
+        </c:if>
+
         <div class="total-row grand-total">
             <span>TỔNG CỘNG:</span>
             <span>
-                    <fmt:formatNumber value="${reservation.totalAmount != null ? reservation.totalAmount : calculatedTotal}"
-                                      pattern="#,###"/> VNĐ
-                </span>
+                <fmt:formatNumber value="${reservation.totalAmount != null ? reservation.totalAmount : (calculatedTotal + depositAmount)}"
+                                  pattern="#,###"/> VNĐ
+            </span>
         </div>
     </div>
 </div>

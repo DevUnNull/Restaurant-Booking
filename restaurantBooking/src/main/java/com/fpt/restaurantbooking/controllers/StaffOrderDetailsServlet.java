@@ -89,11 +89,61 @@ public class StaffOrderDetailsServlet extends HttpServlet {
             List<OrderItem> orderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
             Payment payment = paymentDAO.getPaymentByReservationId(reservationId);
 
-            // Get service menu items (combo items) - query serviceId separately
+            // Get service menu items (combo items) - try multiple methods
             List<MenuItem> serviceMenuItems = new java.util.ArrayList<>();
-            Integer serviceId = reservationDAO.getServiceIdByReservationId(reservationId);
+            Integer serviceId = null;
+            List<Integer> itemIds = new java.util.ArrayList<>();
+
+            // Collect all itemIds from orderItems
+            if (orderItems != null && !orderItems.isEmpty()) {
+                for (OrderItem item : orderItems) {
+                    if (item.getItemId() != null) {
+                        itemIds.add(item.getItemId());
+                    }
+                }
+                logger.info("Reservation {} - Found {} items in orderItems: {}", reservationId, itemIds.size(), itemIds);
+            }
+
+            // Method 1: Try getting serviceId from Reservations table
+            serviceId = reservationDAO.getServiceIdByReservationId(reservationId);
+            logger.info("Reservation {} - ServiceId from Reservations table: {}", reservationId, serviceId);
+
+            // Method 2: If not found, try to find serviceId from orderItems
+            if (serviceId == null && !itemIds.isEmpty()) {
+                // Try to get serviceId from the first item
+                serviceId = menuItemDAO.getServiceIdByMenuItemId(itemIds.get(0));
+                logger.info("Reservation {} - ServiceId from first orderItem (itemId={}): {}",
+                        reservationId, itemIds.get(0), serviceId);
+
+                // If still null, try to find common service from all items
+                if (serviceId == null && itemIds.size() > 1) {
+                    serviceId = menuItemDAO.getServiceIdByMenuItemIds(itemIds);
+                    logger.info("Reservation {} - ServiceId from all orderItems: {}", reservationId, serviceId);
+                }
+            }
+
+            // Method 3: Load combo items from serviceId if found
             if (serviceId != null) {
                 serviceMenuItems = menuItemDAO.getMenuItemsByServiceId(serviceId);
+                logger.info("Reservation {} - Loaded {} combo items from serviceId {}",
+                        reservationId, serviceMenuItems.size(), serviceId);
+            }
+
+            // Method 4: If serviceId not found or no items loaded, get combo items directly from orderItems
+            if (serviceMenuItems.isEmpty() && !itemIds.isEmpty()) {
+                serviceMenuItems = menuItemDAO.getComboMenuItemsByItemIds(itemIds);
+                logger.info("Reservation {} - Loaded {} combo items directly from orderItems",
+                        reservationId, serviceMenuItems.size());
+
+                // If we found combo items but no serviceId, try to get serviceId from the first combo item
+                if (!serviceMenuItems.isEmpty() && serviceId == null) {
+                    serviceId = menuItemDAO.getServiceIdByMenuItemId(serviceMenuItems.get(0).getItemId());
+                    logger.info("Reservation {} - Found serviceId {} from combo items", reservationId, serviceId);
+                }
+            }
+
+            if (serviceMenuItems.isEmpty()) {
+                logger.warn("Reservation {} - No combo items found after all methods. ItemIds: {}", reservationId, itemIds);
             }
 
             // Resolve menu item names for display
