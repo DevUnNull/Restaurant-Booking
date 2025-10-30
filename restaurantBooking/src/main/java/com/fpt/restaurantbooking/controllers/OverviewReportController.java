@@ -43,7 +43,8 @@ public class OverviewReportController extends HttpServlet {
         }
 
         LocalDate currentDate = LocalDate.now();
-        LocalDate minDate = LocalDate.of(2025, 1, 1);
+        // Giữ nguyên Min/Max Date Bounds của bạn
+        LocalDate minDate = LocalDate.of(2025, 9, 1);
         LocalDate maxDate = LocalDate.of(2025, 10, 31);
 
         Map<String, Object> summaryData = new HashMap<>();
@@ -51,56 +52,75 @@ public class OverviewReportController extends HttpServlet {
         String warningMessage = null;
         String errorMessage = null;
 
+        // Logic gán ngày mặc định (chỉ chạy khi tải trang lần đầu)
         if (isInitialLoad) {
+            // Đặt ngày mặc định cho lần tải đầu tiên
             startDateParam = currentDate.minusMonths(1).toString();
             endDateParam = currentDate.toString();
         }
 
 
         try {
-            startDateParam = (startDateParam == null || startDateParam.isEmpty()) ? currentDate.minusYears(1).toString() : startDateParam;
-            endDateParam = (endDateParam == null || endDateParam.isEmpty()) ? currentDate.toString() : endDateParam;
+            // =========================================================
+            // ✅ VALIDATION BẮT BUỘC NHẬP NGÀY KHI CÓ SUBMIT
+            // =========================================================
+            if (!isInitialLoad && (startDateParam == null || startDateParam.trim().isEmpty() || endDateParam == null || endDateParam.trim().isEmpty())) {
 
-            LocalDate startDate = LocalDate.parse(startDateParam);
-            LocalDate endDate = LocalDate.parse(endDateParam);
+                // Xử lý trường hợp người dùng xóa ngày trong pop-up và submit
+                warningMessage = "Lỗi: Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.";
 
-            if (startDate.isBefore(minDate)) {
-                startDate = minDate;
-                startDateParam = minDate.toString();
-            }
-            if (endDate.isAfter(maxDate)) {
-                endDate = maxDate;
-                endDateParam = maxDate.toString();
-            }
+                // Đảm bảo các tham số vẫn được gửi đi để giữ lại các giá trị khác trong filter modal
+                startDateParam = request.getParameter("startDate");
+                endDateParam = request.getParameter("endDate");
 
-            summaryData = reportRepository.getSummaryData(startDateParam, endDateParam);
-            timeTrendData = reportRepository.getTimeTrendData(startDateParam, endDateParam, chartUnitParam);
+            } else if (warningMessage == null) {
+                // Nếu Validation ngày tháng đã qua (hoặc là Initial Load), tiến hành chạy báo cáo
 
-            BigDecimal revenueSummary = (BigDecimal) summaryData.getOrDefault("totalRevenue", BigDecimal.ZERO);
-            summaryData.put("totalRevenue", revenueSummary.longValue());
+                // Xử lý Min/Max Date Bounds (Nếu người dùng chọn ngoài phạm vi cho phép)
+                LocalDate startDate = LocalDate.parse(startDateParam);
+                LocalDate endDate = LocalDate.parse(endDateParam);
 
-            if (timeTrendData != null) {
-                for (Map<String, Object> item : timeTrendData) {
-                    BigDecimal itemRevenue = (BigDecimal) item.getOrDefault("totalRevenue", BigDecimal.ZERO);
-                    item.put("totalRevenue", itemRevenue.longValue());
+                if (startDate.isBefore(minDate)) {
+                    startDate = minDate;
+                    startDateParam = minDate.toString();
+                }
+                if (endDate.isAfter(maxDate)) {
+                    endDate = maxDate;
+                    endDateParam = maxDate.toString();
+                }
+
+                // Chạy Repository
+                summaryData = reportRepository.getSummaryData(startDateParam, endDateParam);
+                timeTrendData = reportRepository.getTimeTrendData(startDateParam, endDateParam, chartUnitParam);
+
+                // Xử lý dữ liệu (BigDecimal to Long)
+                BigDecimal revenueSummary = (BigDecimal) summaryData.getOrDefault("totalRevenue", BigDecimal.ZERO);
+                summaryData.put("totalRevenue", revenueSummary.longValue());
+
+                if (timeTrendData != null) {
+                    for (Map<String, Object> item : timeTrendData) {
+                        BigDecimal itemRevenue = (BigDecimal) item.getOrDefault("totalRevenue", BigDecimal.ZERO);
+                        item.put("totalRevenue", itemRevenue.longValue());
+                    }
+                }
+
+                Integer totalBookings = (Integer) summaryData.getOrDefault("totalBookings", 0);
+
+                // Cảnh báo không có dữ liệu
+                if (totalBookings == 0) {
+                    warningMessage = "Không có dữ liệu đặt bàn nào được tìm thấy trong khoảng thời gian đã chọn (" + startDateParam + " đến " + endDateParam + ").";
+                } else if (isInitialLoad) {
+                    warningMessage = "Hiển thị báo cáo cho thời gian mặc định (" + startDateParam + " đến " + endDateParam + "). Vui lòng sử dụng Filter Popup để tùy chỉnh.";
                 }
             }
-
-            Integer totalBookings = (Integer) summaryData.getOrDefault("totalBookings", 0);
-
-            if (totalBookings == 0) {
-                warningMessage = "No booking data found for the selected period (" + startDateParam + " to " + endDateParam + ").";
-            } else if (isInitialLoad) {
-                warningMessage = "Showing report for default period (" + startDateParam + " to " + endDateParam + "). Please use Filter Popup to customize the date range.";
-            }
-
+            // =========================================================
 
         } catch (SQLException e) {
             e.printStackTrace();
-            errorMessage = "Database query error: " + e.getMessage();
+            errorMessage = "Lỗi truy vấn cơ sở dữ liệu: " + e.getMessage();
         } catch (Exception e) {
             e.printStackTrace();
-            errorMessage = "Unknown error: " + e.getMessage();
+            errorMessage = "Lỗi không xác định: " + e.getMessage();
         }
 
         request.setAttribute("isInitialLoad", isInitialLoad);
@@ -119,6 +139,12 @@ public class OverviewReportController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }

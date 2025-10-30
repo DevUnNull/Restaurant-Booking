@@ -27,7 +27,10 @@ import java.util.Locale;
 public class EmployeeReportController extends HttpServlet {
 
     private final EmployeeReportRepository reportRepository = new EmployeeReportRepository();
-    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 1, 1);
+    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 9, 1);
+
+    // Khai báo hằng số phân trang
+    private final int PAGE_SIZE = 10;
 
     private LocalDate safeParseDate(String dateStr, LocalDate defaultValue) {
         if (dateStr == null || dateStr.isEmpty()) {
@@ -45,7 +48,7 @@ public class EmployeeReportController extends HttpServlet {
             LocalDate startDate,
             LocalDate endDate,
             String unit) {
-
+        // ... (Code không đổi)
         Map<String, Map<String, Object>> dataMap = new HashMap<>();
         for (Map<String, Object> item : rawData) {
             dataMap.put((String) item.get("label"), item);
@@ -110,7 +113,21 @@ public class EmployeeReportController extends HttpServlet {
         String endDateParam = request.getParameter("endDate");
         String employeeIdParam = request.getParameter("employeeId");
         String chartUnitParam = request.getParameter("chartUnit");
-        String searchStaffIdParam = request.getParameter("searchStaffId");
+        String searchStaffNameParam = request.getParameter("searchStaffName");
+
+        // Xử lý tham số phân trang
+        int currentPage = 1;
+        int totalRecords = 0;
+        int totalPages = 0;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            try {
+                currentPage = Math.max(1, Integer.parseInt(pageParam));
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+        int offset = (currentPage - 1) * PAGE_SIZE;
 
         String currentWarningMessage = null;
         String currentErrorMessage = null;
@@ -176,12 +193,41 @@ public class EmployeeReportController extends HttpServlet {
         String employeeTimeTrendJson = null;
 
         try {
-            if (searchStaffIdParam != null && !searchStaffIdParam.isEmpty()) {
-                employeeIdParam = searchStaffIdParam;
+            if (searchStaffNameParam != null && !searchStaffNameParam.isEmpty()) {
+                Integer foundEmployeeId = reportRepository.findEmployeeIdByName(searchStaffNameParam);
+
+                if (foundEmployeeId != null) {
+                    employeeIdParam = String.valueOf(foundEmployeeId);
+                } else {
+                    currentErrorMessage = ": Employee with name containing '" + searchStaffNameParam + "' not found or is not a staff member (role_id != 2). Displaying Overview.";
+                    employeeIdParam = null;
+                }
             }
 
             if (employeeIdParam == null || employeeIdParam.isEmpty()) {
-                employeeData = reportRepository.getEmployeeOverviewData(startDateParam, endDateParam, currentDate.toString());
+                // Chế độ Tổng quan (có phân trang)
+
+                // 1. Lấy tổng số bản ghi và tính tổng số trang
+                totalRecords = reportRepository.getTotalActiveEmployees();
+                totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
+
+                // Điều chỉnh trang hiện tại và offset
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                    offset = (currentPage - 1) * PAGE_SIZE;
+                } else if (totalPages == 0) {
+                    currentPage = 1;
+                    offset = 0;
+                }
+
+                // 2. Lấy dữ liệu phân trang
+                employeeData = reportRepository.getEmployeeOverviewData(
+                        startDateParam,
+                        endDateParam,
+                        currentDate.toString(),
+                        offset,
+                        PAGE_SIZE
+                );
 
                 if (employeeData != null) {
                     for (Map<String, Object> item : employeeData) {
@@ -197,6 +243,7 @@ public class EmployeeReportController extends HttpServlet {
                 }
 
             } else {
+                // Chế độ Chi tiết (không phân trang)
                 int employeeId = Integer.parseInt(employeeIdParam);
 
                 selectedEmployeeDetail = reportRepository.getEmployeeDetailById(employeeId);
@@ -257,7 +304,13 @@ public class EmployeeReportController extends HttpServlet {
         request.setAttribute("employeeData", employeeData);
         request.setAttribute("employeeTimeTrend", employeeTimeTrend);
         request.setAttribute("employeeTimeTrendJson", employeeTimeTrendJson);
-        request.setAttribute("searchStaffIdParam", searchStaffIdParam);
+        request.setAttribute("searchStaffNameParam", searchStaffNameParam);
+
+        // Thuộc tính phân trang
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        request.setAttribute("pageSize", PAGE_SIZE);
 
         request.setAttribute("isDetailMode", employeeIdParam != null && !employeeIdParam.isEmpty());
 

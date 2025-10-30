@@ -87,16 +87,16 @@
         .status-active { color: var(--revenue-color); font-weight: bold; }
         .status-inactive { color: var(--cancellation-color); font-weight: bold; }
 
-        /* Table Style */
+        /* Table Style (ĐÃ SỬA: Thêm đường kẻ rõ ràng) */
         .staff-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse; /* Đã thay đổi thành collapse */
             margin-top: 20px;
+            border: 1px solid #ddd; /* Đường kẻ bao ngoài */
         }
         .staff-table th, .staff-table td {
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border: 1px solid #ddd; /* Đường kẻ cho từng ô */
         }
         .staff-table th {
             background-color: #f8f8f8;
@@ -318,7 +318,9 @@
                                     </tr>
                                     </thead>
                                     <tbody>
+
                                     <c:forEach var="employee" items="${requestScope.employeeData}">
+
                                         <tr>
                                             <td>${employee.employeeId}</td>
                                             <td>${employee.employeeName}</td>
@@ -341,9 +343,66 @@
                                                 </a>
                                             </td>
                                         </tr>
+
                                     </c:forEach>
+
                                     </tbody>
                                 </table>
+
+                                <%-- PHẦN PHÂN TRANG (Pagination) --%>
+                                <div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+
+                                    <div class="pagination-info" style="color: #555;">
+                                        Hiển thị
+                                        <strong><fmt:formatNumber value="${(currentPage - 1) * pageSize + 1}" pattern="#,###"/></strong> đến
+                                        <strong><fmt:formatNumber value="${currentPage * pageSize > totalRecords ? totalRecords : currentPage * pageSize}" pattern="#,###"/></strong> trong số
+                                        <strong><fmt:formatNumber value="${totalRecords}" pattern="#,###"/></strong> nhân viên
+                                    </div>
+
+                                    <c:if test="${totalPages > 1}">
+                                        <div class="pagination-controls">
+                                            <ul style="list-style: none; padding: 0; margin: 0; display: flex; gap: 5px;">
+
+                                                    <%-- Nút Previous --%>
+                                                <li style="display: inline;">
+                                                    <a href="staff-report?startDate=${startDateParam}&endDate=${endDateParam}&page=${currentPage - 1}"
+                                                       class="btn-page ${currentPage == 1 ? 'disabled' : ''}"
+                                                       style="display: block; padding: 8px 12px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; color: #555; background-color: #f8f8f8; pointer-events: ${currentPage == 1 ? 'none' : 'auto'}; opacity: ${currentPage == 1 ? 0.6 : 1};">
+                                                        &laquo; Trước
+                                                    </a>
+                                                </li>
+
+                                                    <%-- Các nút số trang (hiển thị tối đa 5 trang xung quanh trang hiện tại) --%>
+                                                <c:forEach var="i"
+                                                           begin="${(currentPage > 2 && totalPages > 4) ? (currentPage < totalPages - 1 ? currentPage - 2 : totalPages - 4) : 1}"
+                                                           end="${(totalPages > 5) ? (currentPage < 3 ? 5 : (currentPage > totalPages - 2 ? totalPages : currentPage + 2)) : totalPages}"
+                                                           step="1">
+
+                                                    <c:if test="${i >= 1 && i <= totalPages}">
+                                                        <li style="display: inline;">
+                                                            <a href="staff-report?startDate=${startDateParam}&endDate=${endDateParam}&page=${i}"
+                                                               class="btn-page"
+                                                               style="display: block; padding: 8px 12px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; font-weight: ${i == currentPage ? 'bold' : 'normal'}; background-color: ${i == currentPage ? 'var(--main-color)' : '#fff'}; color: ${i == currentPage ? 'white' : '#555'}; border-color: ${i == currentPage ? 'var(--main-color)' : '#ccc'};">
+                                                                    ${i}
+                                                            </a>
+                                                        </li>
+                                                    </c:if>
+                                                </c:forEach>
+
+                                                    <%-- Nút Next --%>
+                                                <li style="display: inline;">
+                                                    <a href="staff-report?startDate=${startDateParam}&endDate=${endDateParam}&page=${currentPage + 1}"
+                                                       class="btn-page ${currentPage == totalPages ? 'disabled' : ''}"
+                                                       style="display: block; padding: 8px 12px; border: 1px solid #ccc; text-decoration: none; border-radius: 4px; color: #555; background-color: #f8f8f8; pointer-events: ${currentPage == totalPages ? 'none' : 'auto'}; opacity: ${currentPage == totalPages ? 0.6 : 1};">
+                                                        Tiếp &raquo;
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </c:if>
+                                </div>
+                                <%-- KẾT THÚC PHÂN TRANG --%>
+
                             </c:when>
                             <c:otherwise>
                                 <p>No employee data or assigned bookings found for the selected period.</p>
@@ -376,6 +435,7 @@
                 <label for="modalEndDate">To Date</label>
                 <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}">
             </div>
+
             <c:if test="${requestScope.isDetailMode}">
                 <div class="filter-item">
                     <label for="modalChartUnit">Chart Unit</label>
@@ -390,21 +450,24 @@
         </form>
     </div>
 </div>
+
 <div id="searchStaffModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Search Employee (ID)</h3>
+            <h3>Search Employee (Name)</h3>
             <span class="close" onclick="closeSearchModal()">&times;</span>
         </div>
         <form id="searchForm" class="modal-form" method="GET" action="staff-report">
             <input type="hidden" name="startDate" value="${requestScope.startDateParam}">
             <input type="hidden" name="endDate" value="${requestScope.endDateParam}">
+            <c:if test="${requestScope.isDetailMode}">
+                <input type="hidden" name="employeeId" value="${requestScope.selectedEmployeeId}">
+            </c:if>
 
-            <p>Enter an Employee ID to view their detailed performance chart.</p>
+            <p>Nhập tên nhân viên</p>
 
             <div class="filter-item">
-                <label for="searchStaffId">Enter Employee ID:</label>
-                <input type="number" id="searchStaffId" name="searchStaffId" placeholder="Example: 24" value="${requestScope.searchStaffIdParam}" required>
+                <input type="text" id="searchStaffName" name="searchStaffName" placeholder="Example: Anh Hoa" value="${requestScope.searchStaffNameParam}" required>
             </div>
 
             <button type="submit" class="btn-apply"><i class="fas fa-search"></i> Search & View Details</button>
@@ -418,7 +481,7 @@
     const isDetailMode = "${requestScope.isDetailMode}" === "true";
     const chartUnit = "${requestScope.chartUnitParam}" || "day";
     const chartContainer = document.getElementById('chartContainer');
-    const START_OF_BUSINESS_DATE = "2025-01-01";
+    const START_OF_BUSINESS_DATE = "2025-09-01";
     let trendChart;
 
     // --- FUNCTION TO REFORMAT X-AXIS LABELS ---
@@ -594,10 +657,20 @@
     // --- FUNCTIONS FOR DATE FILTER MODAL ---
     function openFilterModal() {
         const modalStartDateInput = document.getElementById('modalStartDate');
+        const modalEndDateInput = document.getElementById('modalEndDate');
+
+        // 1. Thiết lập min date cho StartDate
         modalStartDateInput.min = START_OF_BUSINESS_DATE;
         if (modalStartDateInput.value && modalStartDateInput.value < START_OF_BUSINESS_DATE) {
             modalStartDateInput.value = START_OF_BUSINESS_DATE;
         }
+
+        // 2. Thiết lập min date cho EndDate (Đảm bảo EndDate không sớm hơn ngày bắt đầu kinh doanh)
+        modalEndDateInput.min = START_OF_BUSINESS_DATE;
+        if (modalEndDateInput.value && modalEndDateInput.value < START_OF_BUSINESS_DATE) {
+            modalEndDateInput.value = START_OF_BUSINESS_DATE;
+        }
+
         document.getElementById('filterModal').style.display = 'block';
     }
 
@@ -605,9 +678,30 @@
         document.getElementById('filterModal').style.display = 'none';
     }
 
+
+
     function submitFilterForm() {
-        const startDate = document.getElementById('modalStartDate').value;
-        const endDate = document.getElementById('modalEndDate').value;
+        let startDate = document.getElementById('modalStartDate').value;
+        let endDate = document.getElementById('modalEndDate').value;
+
+        // 1. Bắt buộc chọn Ngày Bắt đầu
+        if (!startDate) {
+            alert("Lỗi: Vui lòng chọn Ngày Bắt đầu (From Date) cho báo cáo.");
+            return;
+        }
+
+        // 2. Bắt buộc chọn Ngày Kết thúc (Đã bỏ tự động gán)
+        if (!endDate) {
+            alert("Lỗi: Vui lòng chọn Ngày Kết thúc (To Date) cho báo cáo.");
+            return;
+        }
+
+        // 3. Kiểm tra logic ngày (Ngày Bắt đầu không được lớn hơn Ngày Kết thúc)
+        if (new Date(startDate) > new Date(endDate)) {
+            alert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Hệ thống sẽ không tự động hoán đổi. Vui lòng kiểm tra lại.");
+            return;
+        }
+
         let url = 'staff-report?startDate=' + startDate + '&endDate=' + endDate;
 
         if (isDetailMode) {
@@ -620,17 +714,18 @@
         closeFilterModal();
     }
 
+
     // --- FUNCTIONS FOR EMPLOYEE SEARCH MODAL ---
     function openSearchModal() {
-        const searchInput = document.getElementById('searchStaffId');
-        if (isDetailMode) {
-            const employeeId = "${requestScope.selectedEmployeeId}";
-            if (employeeId && employeeId !== '0') {
-                searchInput.value = employeeId;
-            }
+        const searchInput = document.getElementById('searchStaffName');
+
+        const searchNameParam = "${requestScope.searchStaffNameParam}";
+        if (searchNameParam) {
+            searchInput.value = searchNameParam;
         } else {
             searchInput.value = '';
         }
+
         document.getElementById('searchStaffModal').style.display = 'block';
     }
 

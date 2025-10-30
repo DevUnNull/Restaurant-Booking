@@ -1,8 +1,9 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Service Report Dashboard</title>
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
+        /* CSS KHÔNG THAY ĐỔI: Sử dụng lại CSS từ code cũ của bạn */
         :root {
             --main-color: #D32F2F;
             --light-red: #FFCDD2;
@@ -37,7 +39,7 @@
             position: relative;
         }
 
-        /* --- NAVBAR & HEADER  --- */
+        /* --- NAVBAR & HEADER  --- */
         .top-nav {
             position: fixed; top: 0; left: 0; right: 0; height: var(--top-nav-height);
             background-color: var(--main-color); color: var(--text-light);
@@ -146,6 +148,7 @@
         }
 
         .filter-item input[type="date"],
+        .filter-item select,
         .filter-item input[type="text"],
         .filter-item input[type="month"] {
             padding: 8px 10px;
@@ -153,6 +156,21 @@
             border-radius: 4px;
             min-width: 150px;
             font-size: 1em;
+        }
+
+        /* Bổ sung style cho nút trigger mới */
+        .popup-trigger {
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 1em;
+            min-width: 200px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .btn-apply {
@@ -362,7 +380,7 @@
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
-            width: 300px;
+            width: 300px; /* Tăng chiều rộng cho 4 trường */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: relative;
         }
@@ -405,22 +423,8 @@
             color: #721c24;
         }
 
-        .popup-trigger {
-            padding: 8px 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: white;
-            cursor: pointer;
-            font-size: 1em;
-            min-width: 150px;
-            text-align: left;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
         .popup-trigger i {
-            margin-left: 10px;
+            margin-right: 10px;
         }
 
         h1, h2, h3 { color: var(--dark-red); }
@@ -468,64 +472,84 @@
             <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Report Filters</h3>
             <form action="service-report" method="GET" id="filterForm">
                 <div class="filter-grid">
-                    <div class="filter-item">
-                        <label for="serviceTypeTrigger">Service Type</label>
-                        <button type="button" class="popup-trigger" id="serviceTypeTrigger">
-                            <span id="selectedServiceType">-- Service Type --</span>
-                            <i class="fas fa-caret-down"></i>
-                        </button>
-                        <input type="hidden" name="serviceType" id="hiddenServiceType" value="${requestScope.selectedServiceType}">
-                        <div id="serviceTypePopup" class="popup-overlay">
-                            <div class="popup-content">
-                                <h3>Select Service Type</h3>
-                                <ul class="popup-options" id="serviceTypeOptions">
-                                    <li data-value="">-- Service Type --</li>
-                                    <li data-value="Breakfast">Breakfast</li>
-                                    <li data-value="Lunch">Lunch</li>
-                                    <li data-value="Dinner">Dinner</li>
-                                    <li data-value="Party">Party/Other</li>
-                                </ul>
-                                <button class="close-popup" id="closeServiceType">&times;</button>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="filter-item">
-                        <label for="statusTrigger">Status</label>
-                        <button type="button" class="popup-trigger" id="statusTrigger">
-                            <span id="selectedStatus">-- Status --</span>
-                            <i class="fas fa-caret-down"></i>
+                        <button type="button" class="btn-apply popup-trigger" id="fullFilterTrigger" style="min-width: 200px; height: 38px;">
+                            <i class="fas fa-filter"></i> <span id="selectedFiltersText">Apply Filters</span>
                         </button>
-                        <input type="hidden" name="status" id="hiddenStatus" value="${requestScope.selectedStatus}">
-                        <div id="statusPopup" class="popup-overlay">
-                            <div class="popup-content">
-                                <h3>Select Status</h3>
-                                <ul class="popup-options" id="statusOptions">
-                                    <li data-value="">-- Status --</li>
-                                    <li data-value="Completed">Completed</li>
-                                    <li data-value="Cancelled">Cancelled</li>
-                                    <li data-value="Pending">Pending</li>
-                                    <li data-value="No show">No Show</li>
-                                </ul>
-                                <button class="close-popup" id="closeStatus">&times;</button>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="filter-item" style="padding-top: 5px;">
-                        <button type="submit" class="btn-apply"><i class="fas fa-check"></i> Apply</button>
+                        <button type="submit" class="btn-apply" style="display: none;"><i class="fas fa-check"></i> Apply</button>
                     </div>
                 </div>
+
+                <input type="hidden" name="serviceType" id="hiddenServiceType" value="${requestScope.selectedServiceType}">
+                <input type="hidden" name="status" id="hiddenStatus" value="${requestScope.selectedStatus}">
+                <input type="hidden" name="startDate" id="hiddenStartDate" value="${requestScope.startDate}">
+                <input type="hidden" name="endDate" id="hiddenEndDate" value="${requestScope.endDate}">
             </form>
         </div>
 
-        <c:if test="${not empty requestScope.warningMessage}">
-            <div id="alertWarning" style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <strong>Warning:</strong> ${requestScope.warningMessage}
-            </div>
-        </c:if>
+        <div id="fullFilterPopup" class="popup-overlay">
+            <div class="popup-content" style="width: 400px;">
+                <h3><i class="fas fa-search"></i> Select Report Filters</h3>
+                <button class="close-popup" id="closeFullFilter">&times;</button>
 
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">Service Type</label>
+                    <select id="selectServiceType"
+                            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        <option value="" ${requestScope.selectedServiceType eq null or requestScope.selectedServiceType eq '' ? 'selected' : ''}>--All Service Type --</option>
+                        <c:forEach var="type" items="${requestScope.serviceTypesList}">
+                            <option value="${type}" ${type eq requestScope.selectedServiceType ? 'selected' : ''}>${type}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">Status</label>
+                    <select id="selectStatus"
+                            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+
+                        <option value="" ${requestScope.selectedStatus eq null or requestScope.selectedStatus eq '' ? 'selected' : ''}>-- All Statuses --</option>
+                        <c:forEach var="stat" items="${requestScope.statusesList}">
+                            <option value="${stat}" ${stat eq requestScope.selectedStatus ? 'selected' : ''}>${stat}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">Start Date </label>
+                    <input type="date"
+                           id="inputStartDate"
+                           value="${requestScope.startDate}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                           min="2025-09-01"
+                           max="2025-10-31"
+                    >
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">End Date </label>
+                    <input type="date"
+                           id="inputEndDate"
+                           value="${requestScope.endDate}"
+                           style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
+                           min="2025-09-01"
+                           max="2025-10-31"
+                    >
+                </div>
+
+                <button type="button" class="btn-apply" id="applyFiltersBtn" style="width: 100%; padding: 10px 0;">
+                    <i class="fas fa-check"></i> Apply and View Report
+                </button>
+            </div>
+        </div>
+
+        <%-- ========================================================= --%>
+        <%-- LOGIC HIỂN THỊ CẢNH BÁO VÀ ẨN BÁO CÁO (Đã tích hợp) --%>
+        <%-- ========================================================= --%>
         <c:if test="${not empty requestScope.errorMessage}">
             <div id="alertError" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px;">
                 <i class="fas fa-times-circle"></i>
@@ -533,78 +557,180 @@
             </div>
         </c:if>
 
-        <div class="chart-options">
-            <h2 style="margin: 0; color: var(--main-color);">Revenue & Quantity Report</h2>
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div class="chart-toggle-group">
-                    <label style="font-size: 0.9em; color: #555; margin-right: 5px;">Chart Type:</label>
-                    <button class="active" data-type="bar"><i class="fas fa-chart-bar"></i> Bar</button>
-                    <button data-type="line"><i class="fas fa-chart-line"></i> Line</button>
-                    <button data-type="pie"><i class="fas fa-chart-pie"></i> Pie</button>
-                    <button data-type="doughnut"><i class="fas fa-chart-area"></i> Doughnut</button>
-                    <button data-type="polarArea"><i class="fas fa-compass"></i> Polar Area</button>
-                </div>
-                <div class="checkbox-option">
-                    <input type="checkbox" id="display-revenue">
-                    <label for="display-revenue">Show Revenue</label>
+        <c:if test="${not empty requestScope.warningMessage}">
+            <div id="alertWarning" style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
+                <strong>Cảnh báo Dữ liệu:</strong> ${requestScope.warningMessage}
+            </div>
+        </c:if>
+
+        <%-- BẮT ĐẦU KHỐI HIỂN THỊ BIỂU ĐỒ VÀ BẢNG (CHỈ KHI KHÔNG CÓ LỖI/CẢNH BÁO) --%>
+        <c:if test="${empty requestScope.errorMessage and empty requestScope.warningMessage}">
+
+            <div class="chart-options">
+                <h2 style="margin: 0; color: var(--main-color);">Revenue & Quantity Report</h2>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div class="chart-toggle-group">
+                        <label style="font-size: 0.9em; color: #555; margin-right: 5px;">Chart Type:</label>
+                        <button class="active" data-type="bar"><i class="fas fa-chart-bar"></i> Bar</button>
+                        <button data-type="line"><i class="fas fa-chart-line"></i> Line</button>
+                        <button data-type="pie"><i class="fas fa-chart-pie"></i> Pie</button>
+                        <button data-type="doughnut"><i class="fas fa-chart-area"></i> Doughnut</button>
+                        <button data-type="polarArea"><i class="fas fa-compass"></i> Polar Area</button>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="display-revenue">
+                        <label for="display-revenue">Show Revenue</label>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="chartContainer">
-            <canvas id="categoryChart"></canvas>
-        </div>
-
-        <hr/>
-
-        <div class="report-card">
-            <h2>Details: Top Best-Selling Dishes</h2>
-            <div class="table-controls">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="🔎 Search by dish name or Rank number...">
-                    <button id="btnSearch" class="btn-apply" style="padding: 8px 15px; margin-left: 10px; height: 38px;">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                </div>
-                <div class="export-group">
-                    <button type="button" id="btnExportExcel"><i class="fas fa-file-excel"></i> Export Excel</button>
-                    <button type="button" id="btnExportPDF"><i class="fas fa-file-pdf"></i> Export PDF</button>
-                </div>
+            <div id="chartContainer">
+                <canvas id="categoryChart"></canvas>
             </div>
-            <table border="1">
-                <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Dish Name</th>
-                    <th>Total Quantity Sold</th>
-                    <th>Revenue</th>
-                </tr>
-                </thead>
-                <tbody>
-                <%-- Real data from Controller --%>
-                <c:forEach var="item" items="${requestScope.topSellingItems}" varStatus="loop">
+
+            <hr/>
+
+            <div class="report-card">
+                <h2>Details: Top Best-Selling Dishes</h2>
+                <div class="table-controls">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="🔎 Search by dish name or Rank number...">
+                        <button id="btnSearch" class="btn-apply" style="padding: 8px 15px; margin-left: 10px; height: 38px;">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div class="export-group">
+                        <button type="button" id="btnExportExcel"><i class="fas fa-file-excel"></i> Export Excel</button>
+                        <button type="button" id="btnExportPDF"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                    </div>
+                </div>
+                <table border="1">
+                    <thead>
                     <tr>
-                        <td>${loop.index + 1}</td>
-                        <td>${item.item_name}</td>
-                        <td>${item.total_quantity_sold}</td>
-                        <td><fmt:formatNumber value="${item.total_revenue_from_item}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                        <th>Rank</th>
+                        <th>Dish Name</th>
+                        <th>Total Quantity Sold</th>
+                        <th>Revenue</th>
                     </tr>
-                </c:forEach>
-                <%-- Case for no initial data --%>
-                <c:if test="${empty requestScope.topSellingItems}">
-                    <tr><td colspan="4" style="text-align: center; color: #999;">No detailed data available.</td></tr>
-                </c:if>
-                </tbody>
-            </table>
-            <div class="table-controls" style="justify-content: flex-end;">
-                <div class="pagination"></div>
+                    </thead>
+                    <tbody>
+                        <%-- Real data from Controller --%>
+                    <c:forEach var="item" items="${requestScope.topSellingItems}" varStatus="loop">
+                        <tr>
+                            <td>${loop.index + 1}</td>
+                            <td>${item.item_name}</td>
+                            <td>${item.total_quantity_sold}</td>
+                            <td><fmt:formatNumber value="${item.total_revenue_from_item}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                        </tr>
+                    </c:forEach>
+                        <%-- Dòng này đã được xử lý bởi logic JS/Controller: Nếu có warningMessage, khối này sẽ không chạy --%>
+                    <c:if test="${empty requestScope.topSellingItems}">
+                        <tr><td colspan="4" style="text-align: center; color: #999;">No detailed data available.</td></tr>
+                    </c:if>
+                    </tbody>
+                </table>
+                <div class="table-controls" style="justify-content: flex-end;">
+                    <div class="pagination"></div>
+                </div>
             </div>
-        </div>
+
+        </c:if>
+        <%-- KẾT THÚC KHỐI HIỂN THỊ BÁO CÁO --%>
     </div>
 </div>
 
 <script>
     const hasWarning = "${requestScope.warningMessage}" !== "";
+
+    // ==================== POPUP LỌC TỔNG HỢP JAVASCRIPT (ĐÃ SỬA LỖI VỊ TRÍ) ====================
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Khai báo các phần tử DOM cho Pop-up mới ---
+        const fullFilterTrigger = document.getElementById('fullFilterTrigger');
+        const fullFilterPopup = document.getElementById('fullFilterPopup');
+        const closeFullFilter = document.getElementById('closeFullFilter');
+        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+        const filterForm = document.getElementById('filterForm');
+
+        // Select/Input controls trong Popup
+        const selectServiceType = document.getElementById('selectServiceType');
+        const selectStatus = document.getElementById('selectStatus');
+        const inputStartDate = document.getElementById('inputStartDate');
+        const inputEndDate = document.getElementById('inputEndDate');
+
+        // Hidden inputs trong form
+        const hiddenServiceType = document.getElementById('hiddenServiceType');
+        const hiddenStatus = document.getElementById('hiddenStatus');
+        const hiddenStartDate = document.getElementById('hiddenStartDate');
+        const hiddenEndDate = document.getElementById('hiddenEndDate');
+        const filtersTextSpan = document.getElementById('selectedFiltersText');
+
+        // Hàm cập nhật text trên nút Trigger
+        function updateFilterText() {
+            // Đếm số lượng filters đang được áp dụng (giá trị không rỗng/null)
+            const selectedCount = [hiddenServiceType.value, hiddenStatus.value, hiddenStartDate.value, hiddenEndDate.value].filter(v => v).length;
+            filtersTextSpan.textContent = selectedCount > 0 ? `Filters Applied ` : 'Apply Filters';
+        }
+
+        // Khởi tạo text
+        updateFilterText();
+
+        // --- 1. Sự kiện mở/đóng Pop-up ---
+        if (fullFilterTrigger) {
+            fullFilterTrigger.addEventListener('click', function () {
+                fullFilterPopup.style.display = 'flex';
+                // Đồng bộ dữ liệu hiện tại (từ URL/Hidden fields) vào Popup
+                selectServiceType.value = hiddenServiceType.value;
+                selectStatus.value = hiddenStatus.value;
+                inputStartDate.value = hiddenStartDate.value;
+                inputEndDate.value = hiddenEndDate.value;
+            });
+        }
+
+
+        if (closeFullFilter) {
+            closeFullFilter.addEventListener('click', function () {
+                fullFilterPopup.style.display = 'none';
+            });
+        }
+
+        // Đóng Popup khi click bên ngoài
+        document.addEventListener('click', function (e) {
+            if (fullFilterPopup.style.display === 'flex' &&
+                !fullFilterPopup.contains(e.target) &&
+                e.target !== fullFilterTrigger &&
+                !fullFilterTrigger.contains(e.target)) { // Kiểm tra cả element con của trigger
+                fullFilterPopup.style.display = 'none';
+            }
+        });
+
+        // --- 2. Sự kiện Apply Filters (Chuyển dữ liệu và Submit) ---
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener('click', function () {
+                const startDate = inputStartDate.value;
+                const endDate = inputEndDate.value;
+
+                // KIỂM TRA VALIDATION NGÀY BẮT ĐẦU VÀ KẾT THÚC (Chuyển logic bắt buộc nhập sang Controller)
+                // Giữ lại: Validation logic Ngày Bắt đầu > Ngày Kết thúc (chỉ để tối ưu UX)
+                if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+                    alert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc.");
+                    return;
+                }
+
+                // 1. Cập nhật các trường ẩn (Hidden Fields)
+                hiddenServiceType.value = selectServiceType.value;
+                hiddenStatus.value = selectStatus.value;
+                hiddenStartDate.value = startDate;
+                hiddenEndDate.value = endDate;
+
+                // 2. Cập nhật text trên nút Trigger (Tùy chọn)
+                updateFilterText();
+
+                // 3. Đóng Popup và Submit Form
+                fullFilterPopup.style.display = 'none';
+                filterForm.submit();
+            });
+        }
+    });
 
     // ==================== CHART JAVASCRIPT ====================
     const reportData = [
@@ -617,27 +743,28 @@
         </c:forEach>
     ];
 
-    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const ctx = document.getElementById('categoryChart')?.getContext('2d');
     let categoryChart;
     const chartContainer = document.getElementById('chartContainer');
 
     const redPalette = [
         'rgba(211, 47, 47, 0.7)', 'rgba(255, 99, 132, 0.7)', 'rgba(239, 83, 80, 0.7)',
-        'rgba(183, 28, 28, 0.7)', 'rgba(255, 138, 128, 0.7)', 'rgba(121, 85, 72, 0.7)'
+        'rgba(183, 28, 28, 0.7)', 'rgba(255, 138, 128, 0.7)', 'rgba(121, 85, 72, 0.7)',
+        'rgba(197, 17, 98, 0.7)', 'rgba(255, 61, 0, 0.7)', 'rgba(255, 179, 0, 0.7)',
+        'rgba(230, 74, 25, 0.7)', 'rgba(207, 102, 121, 0.7)', 'rgba(216, 27, 96, 0.7)'
     ];
     const redBorderPalette = redPalette.map(color => color.replace('0.7', '1'));
 
     function updateChart(chartType, isRevenue) {
+        if (!ctx) return;
+
         if (categoryChart) {
             categoryChart.destroy();
         }
 
-        if (hasWarning || reportData.length === 0) {
-            chartContainer.style.display = 'none';
+        if (reportData.length === 0) {
             return;
         }
-
-        chartContainer.style.display = 'block';
 
         const labels = reportData.map(item => item.category);
         const dataValues = reportData.map(item => isRevenue ? item.revenue : item.quantity);
@@ -646,7 +773,25 @@
         let chartOptions = {
             responsive: true,
             plugins: {
-                legend: { position: 'top' }
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                // Format cho Bar/Line
+                                label += new Intl.NumberFormat('vi-VN', { style: isRevenue ? 'currency' : 'decimal', currency: 'VND', minimumFractionDigits: 0 }).format(context.parsed.y);
+                            } else if (context.parsed !== null) {
+                                // Format cho Pie/Doughnut/PolarArea
+                                label += new Intl.NumberFormat('vi-VN', { style: isRevenue ? 'currency' : 'decimal', currency: 'VND', minimumFractionDigits: 0 }).format(context.parsed);
+                            }
+                            return label;
+                        }
+                    }
+                }
             }
         };
 
@@ -659,7 +804,12 @@
                         display: true,
                         text: dataLabel,
                         color: '#B71C1C'
-                    }
+                    },
+                    ticks: isRevenue ? {
+                        callback: function(value, index, ticks) {
+                            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
+                        }
+                    } : {}
                 }
             };
         }
@@ -688,7 +838,9 @@
         });
     }
 
-    updateChart('bar', false);
+    if (ctx) {
+        updateChart('bar', false);
+    }
 
     document.querySelectorAll('.chart-toggle-group button').forEach(button => {
         button.addEventListener('click', function() {
@@ -700,161 +852,170 @@
         });
     });
 
-    document.getElementById('display-revenue').addEventListener('change', function() {
+    document.getElementById('display-revenue')?.addEventListener('change', function() {
         const isRevenue = this.checked;
-        const chartType = document.querySelector('.chart-toggle-group .active').getAttribute('data-type');
+        const chartType = document.querySelector('.chart-toggle-group .active')?.getAttribute('data-type') || 'bar';
         updateChart(chartType, isRevenue);
     });
 
+
     // ==================== PAGINATION & SEARCH JAVASCRIPT ====================
-    const tableBody = document.querySelector('table tbody');
-    const paginationContainer = document.querySelector('.pagination');
-    const searchInput = document.getElementById('searchInput');
-    const btnSearch = document.getElementById('btnSearch');
-    const dataRows = Array.from(tableBody.querySelectorAll('tr')).filter(row => row.querySelector('td:not([colspan="4"])'));
-    const noDataRowContainer = tableBody.querySelector('tr td[colspan="4"]')?.parentElement;
-    if (noDataRowContainer && dataRows.length > 0) {
-        noDataRowContainer.style.display = 'none';
-    }
+    // LƯU Ý: Nếu không có dữ liệu, code JS này sẽ không chạy được
 
-    let filteredRows = [...dataRows];
-    const rowsPerPage = 5;
-    let currentPage = 1;
+    // Chỉ khởi tạo JS cho bảng khi có dữ liệu (để tránh lỗi)
+    if (!hasWarning) {
+        const tableBody = document.querySelector('table tbody');
+        const paginationContainer = document.querySelector('.pagination');
+        const searchInput = document.getElementById('searchInput');
+        const btnSearch = document.getElementById('btnSearch');
+        const dataRows = Array.from(tableBody.querySelectorAll('tr')).filter(row => row.querySelector('td:not([colspan="4"])'));
+        const noDataRowContainer = tableBody.querySelector('tr td[colspan="4"]')?.parentElement;
 
-    function displayPage(page) {
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-
-        dataRows.forEach(row => row.style.display = 'none');
-
-        for (let i = start; i < end && i < filteredRows.length; i++) {
-            filteredRows[i].style.display = 'table-row';
+        if (noDataRowContainer && dataRows.length > 0) {
+            noDataRowContainer.style.display = 'none';
         }
 
-        for (let i = 0; i < filteredRows.length; i++) {
-            const rankCell = filteredRows[i].querySelector('td:first-child');
-            if (rankCell && rankCell.getAttribute('data-fixed-rank') !== 'true') {
-                rankCell.textContent = i + 1;
+        let filteredRows = [...dataRows];
+        const rowsPerPage = 5;
+        let currentPage = 1;
+
+        function displayPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            dataRows.forEach(row => row.style.display = 'none');
+
+            for (let i = start; i < end && i < filteredRows.length; i++) {
+                filteredRows[i].style.display = 'table-row';
+            }
+
+            // Cập nhật lại cột Rank dựa trên filteredRows
+            for (let i = 0; i < filteredRows.length; i++) {
+                const rankCell = filteredRows[i].querySelector('td:first-child');
+                if (rankCell && rankCell.getAttribute('data-fixed-rank') !== 'true') {
+                    rankCell.textContent = i + 1;
+                }
+            }
+
+            if (noDataRowContainer) {
+                if (filteredRows.length === 0) {
+                    noDataRowContainer.style.display = 'table-row';
+                    noDataRowContainer.querySelector('td').textContent = "No dishes found matching your search criteria.";
+                } else {
+                    noDataRowContainer.style.display = 'none';
+                    noDataRowContainer.querySelector('td').textContent = "No detailed data available.";
+                }
             }
         }
 
-        if (noDataRowContainer) {
-            if (filteredRows.length === 0) {
-                noDataRowContainer.style.display = 'table-row';
-                noDataRowContainer.querySelector('td').textContent = "No dishes found matching your search criteria.";
-            } else {
-                noDataRowContainer.style.display = 'none';
-                noDataRowContainer.querySelector('td').textContent = "No detailed data available.";
+        function setupPagination() {
+            paginationContainer.innerHTML = '';
+            const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
+
+            if (pageCount <= 1 && filteredRows.length === 0) {
+                return;
             }
-        }
-    }
-
-    function setupPagination() {
-        paginationContainer.innerHTML = '';
-        const pageCount = Math.ceil(filteredRows.length / rowsPerPage);
-
-        if (pageCount <= 1) {
-            if (filteredRows.length === 1 && filteredRows[0].querySelector('td:first-child').getAttribute('data-fixed-rank') === 'true') {
-                dataRows.forEach(row => row.style.display = 'none');
-                filteredRows[0].style.display = 'table-row';
-            } else {
+            if (pageCount <= 1 && filteredRows.length > 0) {
                 displayPage(1);
+                return;
             }
-            return;
-        }
 
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Prev';
-        prevButton.disabled = currentPage === 1;
-        prevButton.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                displayPage(currentPage);
-                setupPagination();
-            }
-        });
-        paginationContainer.appendChild(prevButton);
-
-        for (let i = 1; i <= pageCount; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            pageButton.classList.toggle('active', i === currentPage);
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
-                displayPage(currentPage);
-                setupPagination();
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Prev';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayPage(currentPage);
+                    setupPagination();
+                }
             });
-            paginationContainer.appendChild(pageButton);
+            paginationContainer.appendChild(prevButton);
+
+            for (let i = 1; i <= pageCount; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.classList.toggle('active', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    displayPage(currentPage);
+                    setupPagination();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next';
+            nextButton.disabled = currentPage === pageCount;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < pageCount) {
+                    currentPage++;
+                    displayPage(currentPage);
+                    setupPagination();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
         }
 
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.disabled = currentPage === pageCount;
-        nextButton.addEventListener('click', () => {
-            if (currentPage < pageCount) {
-                currentPage++;
-                displayPage(currentPage);
-                setupPagination();
-            }
-        });
-        paginationContainer.appendChild(nextButton);
-    }
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
 
-    function handleSearch() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
+            dataRows.forEach(row => {
+                const rankCell = row.querySelector('td:first-child');
+                if (rankCell) rankCell.removeAttribute('data-fixed-rank');
+            });
 
-        dataRows.forEach(row => {
-            const rankCell = row.querySelector('td:first-child');
-            if (rankCell) rankCell.removeAttribute('data-fixed-rank');
-        });
+            if (searchTerm === "") {
+                filteredRows = [...dataRows];
+            } else {
+                const searchRank = parseInt(searchTerm);
+                const isRankSearch = !isNaN(searchRank) && searchRank.toString() === searchTerm && searchRank > 0;
 
-        if (searchTerm === "") {
-            filteredRows = [...dataRows];
-        } else {
-            const searchRank = parseInt(searchTerm);
-            const isRankSearch = !isNaN(searchRank) && searchRank.toString() === searchTerm && searchRank > 0;
-
-            if (isRankSearch) {
-                const row = dataRows[searchRank - 1];
-                if (row) {
-                    filteredRows = [row];
-                    const rankCell = row.querySelector('td:first-child');
-                    if (rankCell) {
-                        rankCell.textContent = searchRank;
-                        rankCell.setAttribute('data-fixed-rank', 'true');
+                if (isRankSearch) {
+                    const row = dataRows[searchRank - 1];
+                    if (row) {
+                        filteredRows = [row];
+                        const rankCell = row.querySelector('td:first-child');
+                        if (rankCell) {
+                            rankCell.textContent = searchRank;
+                            rankCell.setAttribute('data-fixed-rank', 'true');
+                        }
+                    } else {
+                        filteredRows = [];
                     }
                 } else {
-                    filteredRows = [];
+                    const standardizedSearch = searchTerm.replace(/\s/g, '');
+                    filteredRows = dataRows.filter(row => {
+                        const dishNameCell = row.querySelector('td:nth-child(2)');
+                        if (!dishNameCell) return false;
+                        const standardizedDishName = dishNameCell.textContent.toLowerCase().replace(/\s/g, '');
+                        return standardizedDishName.includes(standardizedSearch);
+                    });
                 }
-            } else {
-                const standardizedSearch = searchTerm.replace(/\s/g, '');
-                filteredRows = dataRows.filter(row => {
-                    const dishNameCell = row.querySelector('td:nth-child(2)');
-                    if (!dishNameCell) return false;
-                    const standardizedDishName = dishNameCell.textContent.toLowerCase().replace(/\s/g, '');
-                    return standardizedDishName.includes(standardizedSearch);
-                });
             }
+
+            currentPage = 1;
+            setupPagination();
+            displayPage(currentPage);
         }
 
-        currentPage = 1;
+        btnSearch?.addEventListener('click', handleSearch);
+
+        searchInput?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSearch();
+                e.preventDefault();
+            }
+        });
+
         setupPagination();
         displayPage(currentPage);
     }
 
-    btnSearch.addEventListener('click', handleSearch);
-
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleSearch();
-            e.preventDefault();
-        }
-    });
-
-    setupPagination();
-    displayPage(currentPage);
 
     // ==================== EXPORT LOGIC ====================
+
+    // Hàm lấy tham số lọc
     function getFilterParams() {
         const urlParams = new URLSearchParams(window.location.search);
         let params = '';
@@ -862,11 +1023,13 @@
         const endDate = urlParams.get('endDate') || '';
         const serviceType = urlParams.get('serviceType') || '';
         const status = urlParams.get('status') || '';
+        const timeRange = urlParams.get('timeRange') || '';
 
         if (startDate) params += '&startDate=' + startDate;
         if (endDate) params += '&endDate=' + endDate;
         if (serviceType) params += '&serviceType=' + serviceType;
         if (status) params += '&status=' + status;
+        if (timeRange) params += '&timeRange=' + timeRange;
 
         return params;
     }
@@ -874,86 +1037,40 @@
     const btnExportExcel = document.getElementById('btnExportExcel');
     const btnExportPDF = document.getElementById('btnExportPDF');
 
-    btnExportExcel.addEventListener('click', function() {
+    // Hàm xử lý việc Export (áp dụng Pop-up xác nhận)
+    function handleExport(type) {
+        // KIỂM TRA NGHIỆP VỤ: Không cho export nếu đang có cảnh báo (không có dữ liệu)
+        if (hasWarning) {
+            alert("Không thể Export. Vui lòng điều chỉnh bộ lọc để có dữ liệu báo cáo.");
+            return;
+        }
+
         const params = getFilterParams();
-        window.location.href = "ExportReportServlet?type=excel" + params;
-        alert("Downloading Excel file...");
+        let message;
+
+        if (type === 'excel') {
+            message = "Bạn có chắc chắn muốn tải xuống báo cáo dưới dạng tệp Excel không?";
+        } else if (type === 'pdf') {
+            message = "Bạn có chắc chắn muốn tải xuống báo cáo dưới dạng tệp PDF không?";
+        } else {
+            return;
+        }
+
+        const userConfirmed = confirm(message);
+
+        if (userConfirmed) {
+            // Giả định bạn có Servlet ExportReportServlet để xử lý export
+            window.location.href = "ExportReportServlet?type=" + type + params;
+        }
+    }
+
+    // Gắn sự kiện click vào các nút Export
+    btnExportExcel?.addEventListener('click', function () {
+        handleExport('excel');
     });
 
-    btnExportPDF.addEventListener('click', function() {
-        const params = getFilterParams();
-        window.location.href = "ExportReportServlet?type=pdf" + params;
-        alert("Downloading PDF file...");
-    });
-
-    // ==================== POPUP JAVASCRIPT ====================
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize selected values
-        const selectedServiceType = "${requestScope.selectedServiceType}" || "";
-        const selectedStatus = "${requestScope.selectedStatus}" || "";
-        if (selectedServiceType) document.getElementById('selectedServiceType').textContent = selectedServiceType;
-        if (selectedStatus) document.getElementById('selectedStatus').textContent = selectedStatus;
-        document.getElementById('hiddenServiceType').value = selectedServiceType;
-        document.getElementById('hiddenStatus').value = selectedStatus;
-
-        // Service Type Popup
-        const serviceTypeTrigger = document.getElementById('serviceTypeTrigger');
-        const serviceTypePopup = document.getElementById('serviceTypePopup');
-        const serviceTypeOptions = document.getElementById('serviceTypeOptions');
-        const closeServiceType = document.getElementById('closeServiceType');
-
-        serviceTypeTrigger.addEventListener('click', function() {
-            serviceTypePopup.style.display = 'flex';
-        });
-
-        closeServiceType.addEventListener('click', function() {
-            serviceTypePopup.style.display = 'none';
-        });
-
-        serviceTypeOptions.addEventListener('click', function(e) {
-            if (e.target.tagName === 'LI') {
-                const value = e.target.getAttribute('data-value');
-                document.getElementById('selectedServiceType').textContent = value || "-- Service Type --";
-                document.getElementById('hiddenServiceType').value = value;
-                serviceTypePopup.style.display = 'none';
-                serviceTypeOptions.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
-                e.target.classList.add('selected');
-            }
-        });
-
-        // Status Popup
-        const statusTrigger = document.getElementById('statusTrigger');
-        const statusPopup = document.getElementById('statusPopup');
-        const statusOptions = document.getElementById('statusOptions');
-        const closeStatus = document.getElementById('closeStatus');
-
-        statusTrigger.addEventListener('click', function() {
-            statusPopup.style.display = 'flex';
-        });
-
-        closeStatus.addEventListener('click', function() {
-            statusPopup.style.display = 'none';
-        });
-
-        statusOptions.addEventListener('click', function(e) {
-            if (e.target.tagName === 'LI') {
-                const value = e.target.getAttribute('data-value');
-                document.getElementById('selectedStatus').textContent = value || "-- Status --";
-                document.getElementById('hiddenStatus').value = value;
-                statusPopup.style.display = 'none';
-                statusOptions.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
-                e.target.classList.add('selected');
-            }
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!serviceTypeTrigger.contains(e.target) && !serviceTypePopup.contains(e.target)) {
-                serviceTypePopup.style.display = 'none';
-            }
-            if (!statusTrigger.contains(e.target) && !statusPopup.contains(e.target)) {
-                statusPopup.style.display = 'none';
-            }
-        });
+    btnExportPDF?.addEventListener('click', function () {
+        handleExport('pdf');
     });
 </script>
 </body>

@@ -17,7 +17,6 @@ public class User extends BaseEntity {
     private String status;
     private String role;
     private LocalDate dateOfBirth;
-    private String gender;
     private String promotion_level_id;
 
     public User(int userId, String fullName) {
@@ -59,17 +58,13 @@ public class User extends BaseEntity {
     public Integer getUserId() {
         return userId;
     }
+
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
+
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
-    }
-    public String getGender() {
-        return gender;
-    }
-    public void setGender(String gender) {
-        this.gender = gender;
     }
 
     public String getPromotion_level_id() {
@@ -79,7 +74,6 @@ public class User extends BaseEntity {
     public void setPromotion_level_id(String promotion_level_id) {
         this.promotion_level_id = promotion_level_id;
     }
-
 
     public void setUserId(Integer userId) {
         this.userId = userId;
