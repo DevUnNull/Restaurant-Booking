@@ -340,6 +340,24 @@ public class ReservationDAO {
     }
 
     // Get total count of reservations (for pagination)
+    // Get service ID by reservation ID
+    public Integer getServiceIdByReservationId(int reservationId) {
+        String sql = "SELECT service_id FROM Reservations WHERE reservation_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, reservationId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int serviceId = rs.getInt("service_id");
+                    return rs.wasNull() ? null : serviceId;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting service ID for reservation {}", reservationId, e);
+        }
+        return null;
+    }
+
     public int getTotalReservationsCount(String statusFilter, String searchQuery) {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT COUNT(DISTINCT r.reservation_id) as total ");
