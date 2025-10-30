@@ -4,7 +4,7 @@
 #welcome {
     position: relative;
     height: 100vh;
-    background: url('/assets/template/Menu/taco-image.png') no-repeat center center/cover;
+    background: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,7 +17,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(139, 0, 0, 0.55); /* 🔴 lớp phủ đỏ */
     z-index: 1;
 }
 
@@ -27,45 +27,8 @@
     color: #fff;
 }
 
-#welcome h2 {
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.5em;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-}
+/* Các phần còn lại của bạn giữ nguyên */
 
-#welcome h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 5em;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    margin-bottom: 30px;
-    position: relative;
-}
-
-#welcome h1::after {
-    content: '';
-    display: block;
-    width: 0;
-    height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-top: 10px solid #d4af37;
-    margin: 10px auto;
-    position: relative;
-}
-
-#welcome p {
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.2em;
-    font-weight: 300;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-top: 20px;
-}
 
 /* Scroll Down Button */
 .scroll-down {

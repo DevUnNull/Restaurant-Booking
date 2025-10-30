@@ -1,5 +1,6 @@
 package com.fpt.restaurantbooking.controllers;
 
+import com.fpt.restaurantbooking.models.MenuCategory;
 import com.fpt.restaurantbooking.models.MenuItem;
 import com.fpt.restaurantbooking.models.Promotions;
 import com.fpt.restaurantbooking.repositories.impl.MenuRepository;
@@ -44,12 +45,15 @@ public class DeleteMenu
 
         int offset = (page - 1) * recordsPerPage;
 
-
+List<MenuCategory> listMenuCategory =  new ArrayList<>();
         MenuRepository vrepo = new MenuRepository();
         try {
+
+            listMenuCategory = vrepo.getCateGory();
             List<MenuItem> menuList = vrepo.getMenuItems(1, offset, recordsPerPage);
             int totalRecords = vrepo.getAllMenuItems(1).size();
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+            request.setAttribute("listMenuCategory", listMenuCategory);
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("menuList", menuList);
@@ -96,6 +100,7 @@ public class DeleteMenu
         String id = request.getParameter("id");
         MenuRepository vrepo = new MenuRepository();
         try {
+            vrepo.DeleteMenuItemInservice_menu_items(id);
             vrepo.DeleteMenu(id);
             processRequest(request, response);
             return;

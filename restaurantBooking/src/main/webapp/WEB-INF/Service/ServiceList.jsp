@@ -7,22 +7,12 @@
         <title>Quản lý dịch vụ</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
         <link href="css/ServiceList.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     </head>
     <body>
 
         <!-- Header -->
-        <div class="header">
-            <div class="logo">Tica's Tacos</div>
-            <nav>
-                <ul>
-                    <li><a href="#">Trang chủ</a></li>
-                    <li><a href="#">Đặt bàn</a></li>
-                    <li><a href="#">Menu</a></li>
-                    <li><a href="#">Liên hệ</a></li>
-                    <li><a href="#">Giỏ hàng (0)</a></li>
-                </ul>
-            </nav>
-        </div>
+        <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
         <!-- Layout -->
         <div class="main-wrapper">

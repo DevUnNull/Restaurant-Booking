@@ -9,21 +9,13 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
   <link href="css/TimeDetail.css" rel="stylesheet" type="text/css" />
-
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
 
 </head>
 <body>
 
 <!-- Header -->
-<div class="top-header d-flex align-items-center">
-  <div class="brand">Restaurant_Booking</div>
-  <div class="ml-auto d-none d-md-block">
-    <a style="color:#fff;margin-right:18px;text-decoration:none;">Trang chủ</a>
-    <a style="color:#fff;margin-right:18px;text-decoration:none;">Đặt bàn</a>
-    <a style="color:#fff;margin-right:18px;text-decoration:none;">Menu</a>
-    <a style="color:#fff;text-decoration:none;">Voucher</a>
-  </div>
-</div>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <!-- Sidebar -->
 <div class="sidebar">

@@ -23,13 +23,13 @@
                     </div>
                     <div id="bookingDropdown" class="dropdown-content">
                         <a href="${pageContext.request.contextPath}/ServiceList"><i class="fas fa-concierge-bell"></i>
-                            Service Management</a>
-                        <a href="${pageContext.request.contextPath}/Menu_manage"><i class="fas fa-utensils"></i> Menu
-                            Management</a>
-                        <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý Voucher</a>
+                            Quản lý dịch vụ</a>
+                        <a href="${pageContext.request.contextPath}/OrderManagement"><i class="fas fa-receipt"></i> Quản lý đơn hàng</a>
+                        <a href="${pageContext.request.contextPath}/Menu_manage"><i class="fas fa-utensils"></i> Quản lý menu</a>
+                        <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý voucher</a>
                         <a href="${pageContext.request.contextPath}/Promotion_level"><i class="fas fa-users"></i> Quản lý khách hàng</a>
                         <a href="${pageContext.request.contextPath}/Timedirect"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
-                        <a href="${pageContext.request.contextPath}/Blog"><i class="fas fa-newspaper"></i> Blog Nhà Hàng</a>
+                        <a href="${pageContext.request.contextPath}/Blog"><i class="fas fa-newspaper"></i> Blog nhà Hàng</a>
                     </div>
                 </li>
             </c:if>
@@ -98,7 +98,7 @@
                         </div>
                         <div id="userDropdown" class="dropdown-content">
                             <a href="${pageContext.request.contextPath}/profile"><i class="fas fa-user"></i> Hồ Sơ</a>
-                            <a href="${pageContext.request.contextPath}/my-reservations"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
+                            <a href="${pageContext.request.contextPath}/orderHistory"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
                             <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi Mật Khẩu</a>
                             <a href="${pageContext.request.contextPath}/JobRequest"> Đơn xin việc</a>
                             <div class="dropdown-divider"></div>

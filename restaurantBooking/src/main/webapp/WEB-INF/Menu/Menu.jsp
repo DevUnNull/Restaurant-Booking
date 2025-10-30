@@ -353,7 +353,7 @@
             <!-- xây sẵn đường dẫn ảnh an toàn (bao gồm context path) -->
             <c:choose>
                 <c:when test="${not empty o.imageUrl}">
-                    <c:set var="imgPath" value="${pageContext.request.contextPath}/images/${o.imageUrl}" />
+                    <c:set var="imgPath" value="${o.imageUrl}" />
                 </c:when>
                 <c:otherwise>
                     <c:set var="imgPath" value="${pageContext.request.contextPath}/images/no-image.png" />
@@ -393,9 +393,10 @@
                                     data-desc="${o.description}"
                                     data-price="${o.price}"
                                     data-code="${o.itemCode}"
-                                    data-image="/images/${o.imageUrl}"
+                                    data-image="${o.imageUrl}"
                                     data-status="${o.status}"
-                                    data-category="${o.category_name}">
+                                    data-category="${o.category_id}"
+                                    data-category-name="${o.category_name}">
                                 Sửa
                             </button>
                             <button class="btn btn-sm btn-danger btn-delete"
@@ -430,20 +431,31 @@
                 const code = btn.dataset.code || '';
                 const image = btn.dataset.image || '';
                 const status = btn.dataset.status || 'AVAILABLE';
-                const category = btn.dataset.category || '';
+                const categoryId = btn.dataset.category || '';
+                const categoryName = btn.dataset.categoryName || ''; // ✅ lấy tên thể loại
 
+                // --- Gán giá trị vào modal ---
                 document.getElementById("menuIdEdit").value = id;
                 document.getElementById("menuNameEdit").value = name;
                 document.getElementById("menuDescriptionEdit").value = desc;
                 document.getElementById("priceEdit").value = price;
                 document.getElementById("menuCodeEdit").value = code;
-
                 document.getElementById("menuStatusEdit").value = status;
-                document.getElementById("menuCategoryEdit").value = category;
 
+                // ✅ chọn đúng option theo category_id
+                const categorySelect = document.getElementById("menuCategoryEdit");
+                if (categorySelect) categorySelect.value = categoryId;
+
+                // ✅ hiển thị tên thể loại hiện tại
+                const currentCategory = document.getElementById("currentCategoryName");
+                if (currentCategory) {
+                    currentCategory.textContent = `Thể loại hiện tại: ${categoryName}`;
+                }
+
+                // ✅ xử lý ảnh xem trước
                 const preview = document.getElementById("imagePreviewEdit");
                 if (preview && image) {
-                    preview.src = `${ctx}/images/${image}`;
+                    preview.src = image.startsWith("http") ? image : `${ctx}/images/${image}`;
                 }
 
                 editModal.show();
@@ -637,6 +649,7 @@
 
                     <div class="mb-3">
                         <label for="addMenuCategory" class="form-label">Thể loại</label>
+                        <div id="currentCategoryName" class="mb-2 text-muted fst-italic"></div>
                         <select class="form-select" id="menuCategoryEdit" name="categoryId">
                             <c:forEach var="o" items="${listMenuCategory}">
                                 <option value="${o.id_menuCategory}">${o.categoryName}</option>

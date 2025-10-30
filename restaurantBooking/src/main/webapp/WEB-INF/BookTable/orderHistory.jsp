@@ -597,7 +597,7 @@
     </div>
 
     <div class="back-link-container">
-        <a href="trangchu.jsp" class="btn" style="background-color: #6c757d;"><i class="fas fa-home"></i> Quay về trang chủ</a>
+        <a href="home" class="btn" style="background-color: #6c757d;"><i class="fas fa-home"></i> Quay về trang chủ</a>
     </div>
 </div>
 
