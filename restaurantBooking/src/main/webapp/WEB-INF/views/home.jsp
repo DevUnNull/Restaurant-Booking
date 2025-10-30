@@ -18,7 +18,20 @@
 <jsp:include page="common/header.jsp" />
 <main>
     <!-- Welcome Section -->
-    <section id="welcome">
+    <section id="welcome"
+             style="
+                     position: relative;
+                     height: 100vh;
+                     background: url('${pageContext.request.contextPath}/images/img.png') no-repeat center center/cover;
+                     display: flex;
+                     flex-direction: column;
+                     justify-content: center;
+                     align-items: center;
+                     text-align: center;
+                     color: #fff;
+                     overflow: hidden;
+                     font-family: Arial, Helvetica, sans-serif;
+                     ">
         <div class="overlay"></div>
         <div class="welcome-content">
             <h2>WELCOME TO</h2>
