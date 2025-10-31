@@ -72,7 +72,7 @@ public class AddMenu  extends HttpServlet {
         String itemName = request.getParameter("itemName");
         String code_dish= request.getParameter("code_dish");
         String description = request.getParameter("description");
-        String img_url= request.getParameter("imageFile");
+        String img_url= request.getParameter("imageUrl");
         String price= request.getParameter("price");
         String categoryId = request.getParameter("categoryId");
         String status = request.getParameter("status");

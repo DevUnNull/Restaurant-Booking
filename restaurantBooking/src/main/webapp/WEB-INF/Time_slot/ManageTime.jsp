@@ -58,13 +58,14 @@
 <body>
 
 <!-- Header -->
-<<jsp:include page="/WEB-INF/views/common/header.jsp" />
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <!-- Sidebar -->
 <div class="sidebar">
   <h4 style="text-align:center;margin-top:0;">Staff Panel</h4>
   <div class="nav-item">Dashboard</div>
-  <div class="nav-item">Dịch vụ</div>
+
+
   <div class="nav-item">Quản lý dịch vụ</div>
   <div class="nav-item">Quản lý đánh giá bình luận</div>
   <div class="nav-item">Quản lý Menu</div>

@@ -31,7 +31,42 @@ public class MenuRepository {
         return categoryList;
 
     }
+    public List<MenuItem> getMenuItemsAlk() throws SQLException {
+        List<MenuItem> menuItemList = new ArrayList<MenuItem>();
+        String sql= " SELECT \n" +
+                "    mi.item_id,\n" +
+                "    mi.item_name,\n" +
+                "    mi.item_code,\n" +
+                "    mi.price,\n" +
+                "    mi.status,\n" +
+                "    mi.image_url,\n" +
+                "    mi.description,\n" +
+                "    mi.created_at,\n" +
+                "    mi.updated_at,\n" +
+                "    mi.category_id,\n" +
+                "    mc.name AS category_name\n" +
+                "FROM menu_items mi\n" +
+                "JOIN menu_category mc ON mi.category_id = mc.id;  ";
+        try(Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql);) {
 
+
+            try(ResultSet rs = stm.executeQuery();) {
+                while (rs.next()) {
+                    menuItemList.add(new MenuItem(rs.getInt("item_id"),rs.getString("item_name"),
+                            rs.getString("item_code"), rs.getString("description"),
+                            rs.getBigDecimal("price"), rs.getString("image_url"),
+                            rs.getString("status"),
+
+                            rs.getInt("category_id") ,rs.getString("category_name")));
+
+                }
+            }
+        }
+
+
+
+        return menuItemList;
+    }
     public List<MenuItem> getMenuItems(int id, int start, int end) throws SQLException {
         List<MenuItem> menuItemList = new ArrayList<MenuItem>();
         String sql= " SELECT \n " +

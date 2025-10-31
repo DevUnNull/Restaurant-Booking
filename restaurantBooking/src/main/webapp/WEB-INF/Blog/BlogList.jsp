@@ -19,22 +19,11 @@
     <div class="overlay"></div>
     <div class="hero-content">
         <h2>Blog & Tin tức</h2>
-        <p>Khám phá những câu chuyện, sự kiện và món ăn hấp dẫn tại Tica’s Tacos</p>
+        <p>Khám phá những câu chuyện, sự kiện và món ăn hấp dẫn tại nhà hàng</p>
     </div>
 </section>
 
-<!-- CATEGORY FILTER -->
-<section class="category-nav">
-    <div class="container">
-        <ul class="category-list">
-            <li class="active"><a href="#">Tất cả</a></li>
-            <li><a href="#">Ẩm thực</a></li>
-            <li><a href="#">Sự kiện</a></li>
-            <li><a href="#">Ưu đãi</a></li>
-            <li><a href="#">Tin tức</a></li>
-        </ul>
-    </div>
-</section>
+
 
 <!-- BLOG GRID -->
 <main class="container blog-section">

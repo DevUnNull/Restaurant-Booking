@@ -64,10 +64,94 @@ String date= request.getParameter("applicable_date");
 
         TimeRepository timeRepository = new TimeRepository();
         try {
+            if(description.isEmpty() || description==null){
+                String er= "cột mô tả không được null";
+                request.setAttribute("er", er);
+                request.setAttribute("actionType", "BLOCK"); // để popup mở đúng form
+                int pageSize = 11; // mỗi trang 11 item
+                int page = 1;
+
+                // Lấy tham số ?page=... từ URL nếu có
+                String pageParam = request.getParameter("page");
+                if (pageParam != null) {
+                    try {
+                        page = Integer.parseInt(pageParam);
+                    } catch (NumberFormatException ignored) { }
+                }
+
+                int totalItems = timeRepository.countTimeSlots();
+                int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+                // Lấy dữ liệu trang hiện tại
+                List<TimeSlot> timeSlots = timeRepository.getTimeSlotPage(page, pageSize);
+
+                // Gửi sang JSP
+                request.setAttribute("timeSlots", timeSlots);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
+
+                request.setAttribute("applicable_datee", mysqlDate);
+
+                request.getRequestDispatcher("/WEB-INF/Time_slot/ManageSingleTime.jsp").forward(request, response);
+                return;
+            }
+            TimeSlot tim = timeRepository.getTime(mysqlDate);
+            String er= "ngày này là 1 ngày đã ằm trong danh sách";
+            if(tim !=null){
+                request.setAttribute("er", er);
+                request.setAttribute("slot_descriptionn", description);
+                request.setAttribute("applicable_datee", mysqlDate);
+                request.setAttribute("actionType", "BLOCK"); // để popup mở đúng form
+                int pageSize = 11; // mỗi trang 11 item
+                int page = 1;
+
+                // Lấy tham số ?page=... từ URL nếu có
+                String pageParam = request.getParameter("page");
+                if (pageParam != null) {
+                    try {
+                        page = Integer.parseInt(pageParam);
+                    } catch (NumberFormatException ignored) { }
+                }
+
+                int totalItems = timeRepository.countTimeSlots();
+                int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+                // Lấy dữ liệu trang hiện tại
+                List<TimeSlot> timeSlots = timeRepository.getTimeSlotPage(page, pageSize);
+
+                // Gửi sang JSP
+                request.setAttribute("timeSlots", timeSlots);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
+
+                request.setAttribute("applicable_date", mysqlDate);
+
+                request.getRequestDispatcher("/WEB-INF/Time_slot/ManageSingleTime.jsp").forward(request, response);
+                return;
+            }
+
             timeRepository.insertBlockTime(mysqlDate,description);
-            List<TimeSlot> timeSlots = new ArrayList<>();
-            timeSlots = timeRepository.getAllTimeSlot();
+            int pageSize = 11; // mỗi trang 11 item
+            int page = 1;
+
+            // Lấy tham số ?page=... từ URL nếu có
+            String pageParam = request.getParameter("page");
+            if (pageParam != null) {
+                try {
+                    page = Integer.parseInt(pageParam);
+                } catch (NumberFormatException ignored) { }
+            }
+
+            int totalItems = timeRepository.countTimeSlots();
+            int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+            // Lấy dữ liệu trang hiện tại
+            List<TimeSlot> timeSlots = timeRepository.getTimeSlotPage(page, pageSize);
+
+            // Gửi sang JSP
             request.setAttribute("timeSlots", timeSlots);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("/WEB-INF/Time_slot/ManageSingleTime.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new RuntimeException(e);

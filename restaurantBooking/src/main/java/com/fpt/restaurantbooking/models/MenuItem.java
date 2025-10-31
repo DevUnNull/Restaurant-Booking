@@ -31,6 +31,18 @@ public class MenuItem extends BaseEntity {
 
     }
     public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
+                    String status,  int category_id, String category_name) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemCode = itemCode;
+        this.description = description;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.status = status;
+this.category_name=category_name;
+        this.category_id = category_id;
+    }
+    public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
                     String status, String created_By, String updated_By, String created_At, String updated_At, String category_name, int category_id) {
         this.itemId = itemId;
         this.itemName = itemName;

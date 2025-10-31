@@ -260,12 +260,11 @@
   <h2>Staff Panel</h2>
   <ul>
     <li><a href="#">Dashboard</a></li>
-    <li><a href="ServiceList">Dịch vụ</a></li>
     <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-    <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
-    <li><a href="#">Quản lý Menu</a></li>
-    <li><a href="Voucher" class="active">Quản lý Voucher khuyến mãi</a></li>
-    <li><a href="#">Quản lý khách hàng thân thiết</a></li>
+    <li><a href="Menu_manage">Quản lý Menu</a></li>
+    <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+    <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+    <li><a href="Timedirect">Quản lý khung giờ </a></li>
   </ul>
 </div>
 

@@ -256,12 +256,11 @@
     <h2>Staff Panel</h2>
     <ul>
         <li><a href="#">Dashboard</a></li>
-        <li><a href="ServiceList">Dịch vụ</a></li>
         <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-        <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
-        <li><a href="#">Quản lý Menu</a></li>
-        <li><a href="Voucher" class="active">Quản lý Voucher khuyến mãi</a></li>
-        <li><a href="#">Quản lý khách hàng thân thiết</a></li>
+        <li><a href="Menu_manage">Quản lý Menu</a></li>
+        <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+        <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+        <li><a href="Timedirect">Quản lý khung giờ </a></li>
     </ul>
 </div>
 
@@ -315,11 +314,20 @@
                             <input type="number" class="form-control" id="addMenuPrice" name="price" min="0" value="${param.price != null ? param.price : ''}">
                         </div>
                         <div class="mb-3">
-                            <label for="addDishImage" class="form-label">Ảnh món ăn</label>
+                            <label for="addDishImageUrl" class="form-label">Ảnh món ăn (URL)</label>
                             <div class="mb-2 text-center">
-                                <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
+                                <img id="imagePreview"
+                                     src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}"
+                                     alt="Xem trước ảnh"
+                                     class="img-thumbnail"
+                                     style="max-width:200px; max-height:200px;">
                             </div>
-                            <input type="file" class="form-control" id="addDishImage" name="imageFile" accept="image/*" onchange="previewImage(event)">
+                            <input type="text"
+                                   class="form-control"
+                                   id="addDishImageUrl"
+                                   name="imageUrl"
+                                   placeholder="Dán link ảnh HTTPS vào đây (vd: https://i.ibb.co/xxxx.jpg)"
+                                   oninput="previewImageFromUrl(this.value)">
                         </div>
                         <div class="mb-3">
                             <label for="addMenuStatus" class="form-label">Trạng thái</label>
@@ -413,6 +421,20 @@
 
 
 </div>
+
+<script>
+    function previewImageFromUrl(url) {
+        const img = document.getElementById("imagePreview");
+        if (url && url.startsWith("http")) {
+            img.src = url;
+        } else {
+            img.src = "/images/no-image.png"; // ảnh mặc định khi không hợp lệ
+        }
+    }
+</script>
+
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const editButtons = document.querySelectorAll(".btn-edit");
@@ -630,12 +652,21 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="addDishImage" class="form-label">Ảnh món ăn</label>
+                        <label for="menuImageEditUrl" class="form-label">Ảnh món ăn (URL)</label>
                         <div class="mb-2 text-center">
-                            <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
+                            <img id="imagePreview"
+                                 src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}"
+                                 alt="Xem trước ảnh"
+                                 class="img-thumbnail"
+                                 style="max-width:200px; max-height:200px;">
                         </div>
-                        <input type="file" class="form-control" id="menuImageEdit" name="imageFile" accept="image/*" onchange="previewImage(event)">
-                        <small class="text-muted">Nếu không chọn file mới, ảnh cũ sẽ được giữ.</small>
+                        <input type="text"
+                               class="form-control"
+                               id="menuImageEditUrl"
+                               name="imageUrl"
+                               placeholder="Dán link ảnh HTTPS vào đây (vd: https://i.ibb.co/xxxx.jpg)"
+                               oninput="previewImageFromUrlEdit(this.value)">
+                        <small class="text-muted">Nếu không nhập link mới, ảnh cũ sẽ được giữ lại.</small>
                     </div>
 
                     <div class="mb-3">
@@ -667,6 +698,16 @@
         </div>
     </div>
 </div>
+<script>
+    function previewImageFromUrlEdit(url) {
+        const img = document.getElementById("imagePreview");
+        if (url && url.startsWith("http")) {
+            img.src = url;
+        } else {
+            img.src = "/images/no-image.png"; // ảnh mặc định
+        }
+    }
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const modals = document.querySelectorAll('.modal');

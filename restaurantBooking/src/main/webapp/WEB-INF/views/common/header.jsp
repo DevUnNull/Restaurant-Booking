@@ -18,11 +18,11 @@
             <c:if test="${sessionScope.userRole == 2}">
                 <li class="user-dropdown">
                     <div class="user-button" onclick="toggleDropdown('bookingDropdown')">
-                        <span class="user-name">Booking Management</span>
+                        <span class="user-name">Quản lý nhà hàng</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div id="bookingDropdown" class="dropdown-content">
-                        <a href="${pageContext.request.contextPath}/ServiceList"><i class="fas fa-concierge-bell"></i>
+                        <a href="${pageContext.request.contextPath}/ServiceManage"><i class="fas fa-concierge-bell"></i>
                             Quản lý dịch vụ</a>
                         <a href="${pageContext.request.contextPath}/Menu_manage"><i class="fas fa-utensils"></i> Quản lý menu</a>
                         <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý voucher</a>

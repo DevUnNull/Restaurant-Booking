@@ -21,12 +21,11 @@
 <div class="sidebar">
   <h4 style="text-align:center;margin-top:0;">Staff Panel</h4>
   <div class="nav-item">Dashboard</div>
-  <div class="nav-item">Dịch vụ</div>
-  <div class="nav-item">Quản lý dịch vụ</div>
-  <div class="nav-item">Quản lý đánh giá bình luận</div>
-  <div class="nav-item">Quản lý Menu</div>
-  <div class="nav-item">Quản lý Voucher khuyến mãi</div>
-  <div class="nav-item">Quản lý khách hàng thân thiết</div>
+  <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
+  <li><a href="Menu_manage">Quản lý Menu</a></li>
+  <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+  <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+  <li><a href="Timedirect">Quản lý khung giờ </a></li>
 </div>
 
 <!-- Content -->

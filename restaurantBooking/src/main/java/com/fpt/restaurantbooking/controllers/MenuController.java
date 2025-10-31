@@ -133,7 +133,7 @@ public class MenuController extends HttpServlet {
         String menuName = request.getParameter("menuName");
         String description = request.getParameter("description");
         String price= request.getParameter("price");
-        String imageFile =  request.getParameter("imageFile");
+        String imageFile =  request.getParameter("imageUrl");
         String updated_by= request.getParameter("updated_by");
         String status= request.getParameter("status");
         String categoryId = request.getParameter("categoryId");

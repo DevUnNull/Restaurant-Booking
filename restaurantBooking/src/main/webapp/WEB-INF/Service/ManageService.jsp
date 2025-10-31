@@ -168,6 +168,33 @@
         background: #b52a1a;
         color: #fff;
     }
+    .menu-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 cột */
+        gap: 10px 20px; /* khoảng cách giữa các item */
+    }
+
+    .menu-grid label {
+        display: flex;
+        align-items: center;
+        background: #fafafa;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .menu-grid label:hover {
+        background-color: #ffeae7;
+        border-color: #b52a1a;
+    }
+
+    .menu-grid input[type="checkbox"] {
+        margin-right: 10px;
+        transform: scale(1.2);
+        accent-color: #b52a1a; /* màu đỏ cho checkbox */
+    }
 
 </style>
 
@@ -185,15 +212,14 @@
             <h2>Staff Panel</h2>
             <ul>
                 <li><a href="#">Dashboard</a></li>
-                <li><a href="ServiceList">Dịch vụ</a></li>
+
                 <!-- nếu quyền là admin Restaurant thì hiện  -->
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-                <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
-                <li><a href="Timedirect">Quản lý đánh giá bình luận</a></li>
-
-                <li><a href="#">Quản lý Menu</a></li>
+                <li><a href="Menu_manage">Quản lý Menu</a></li>
                 <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
-                <li><a href="#">Quản lý khách hàng thân thiết </a></li>
+                <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+                <li><a href="Timedirect">Quản lý khung giờ </a></li>
+
             </ul>
         </div>
 
@@ -251,7 +277,31 @@
                         <label>Ngày kết thúc:</label>
                         <input type="date" id="add-end" name="endDate" value="${param.endDate}">
 
+
+
+
+                        <!-- Popup chọn món combo (bước 2) -->
+                        <div id="comboStep" style="display:none; margin-top:20px;">
+                            <h3 style="text-align:center; color:#b52a1a;">Chọn món cho Combo</h3>
+                            <p style="text-align:center; color:#555;">Chọn các món ăn muốn thêm vào combo dịch vụ:</p>
+
+                            <!-- Danh sách món: chia làm 2 cột -->
+                            <div id="menu-list"
+                                 style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:15px; border-radius:8px;">
+                                <div class="menu-grid">
+                                    <c:forEach var="m" items="${listmenuItem}">
+                                        <label><input type="checkbox" name="menuItems" value="${m.itemId}"> ${m.itemName}</label>
+                                    </c:forEach>
+                                </div>
+                            </div>
+
+                            <div style="text-align:center; margin-top:20px;">
+                                <button type="button" class="action-btn btn-update" onclick="prevStep()">Quay lại</button>
+                                <button type="submit" class="action-btn btn-update">Hoàn tất</button>
+                            </div>
+                        </div>
                         <button type="submit" class="action-btn btn-update">Thêm dịch vụ</button>
+<%--                        <button type="button" class="action-btn btn-update" onclick="nextStep()">Tiếp theo</button>--%>
                     </form>
                 </div>
             </div>
@@ -276,7 +326,7 @@
                     <tr>
                         <td>${o.serviceName}</td>
                         <td>${o.serviceCode}</td>
-                        <td>${o.description}</td>
+                        <td>.....</td>
                         <td>${o.price} VND</td>
                         <td class="${o.status eq 'ACTIVE' ? 'status-active' : 'status-inactive'}">
                                 ${o.status}
@@ -518,6 +568,42 @@ window.onclick = function (event) {
     // Đóng popup
     function closeAddModal() {
         document.getElementById("addModal").style.display = "none";
+    }
+</script>
+<script>
+    function nextStep() {
+        // Kiểm tra dữ liệu bắt buộc
+        const name = document.getElementById("add-name").value.trim();
+        const price = document.getElementById("add-price").value.trim();
+
+        if (!name || !price) {
+            alert("Vui lòng nhập đầy đủ tên và giá dịch vụ!");
+            return;
+        }
+
+        // Ẩn form nhập, hiện bước chọn món
+        document.querySelector("#addModal form > *:not(#comboStep)").style.display = "none";
+        document.getElementById("comboStep").style.display = "block";
+
+        // Tải danh sách món ăn (nếu chưa có)
+        const menuList = document.getElementById("menu-list");
+        if (!menuList.dataset.loaded) {
+            fetch("MenuList") // servlet JSP trả danh sách món ăn
+                .then(res => res.text())
+                .then(html => {
+                    menuList.innerHTML = html;
+                    menuList.dataset.loaded = "true";
+                })
+                .catch(() => {
+                    menuList.innerHTML = "<p style='color:red;'>Không thể tải danh sách món!</p>";
+                });
+        }
+    }
+
+    function prevStep() {
+        // Quay lại bước nhập thông tin
+        document.getElementById("comboStep").style.display = "none";
+        document.querySelectorAll("#addModal form > *:not(#comboStep)").forEach(el => el.style.display = "");
     }
 </script>
 </body>
