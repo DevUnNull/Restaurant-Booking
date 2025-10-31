@@ -18,6 +18,7 @@ public class CancellationReportController extends HttpServlet {
 
     private final CancellationReportRepository reportRepository = new CancellationReportRepository();
     private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 1, 1);
+    private static final int DEFAULT_PAGE_SIZE = 10; // Số lượng bản ghi mặc định trên mỗi trang
 
     private LocalDate safeParseDate(String dateStr, LocalDate defaultValue) {
         if (dateStr == null || dateStr.isEmpty()) {
@@ -26,6 +27,17 @@ public class CancellationReportController extends HttpServlet {
         try {
             return LocalDate.parse(dateStr);
         } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    private int safeParseInt(String intStr, int defaultValue) {
+        if (intStr == null || intStr.isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(intStr);
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -41,33 +53,37 @@ public class CancellationReportController extends HttpServlet {
             return;
         }
 
+        // 1. Xử lý tham số Phân Trang
+        int currentPage = safeParseInt(request.getParameter("page"), 1);
+        int pageSize = safeParseInt(request.getParameter("pageSize"), DEFAULT_PAGE_SIZE);
+
+        // Đảm bảo trang và kích thước trang hợp lệ
+        if (currentPage < 1) currentPage = 1;
+        if (pageSize < 1) pageSize = DEFAULT_PAGE_SIZE;
+
+        int offset = (currentPage - 1) * pageSize;
+        int totalRecords = 0;
+        int totalPages = 0;
+
+        // 2. Xử lý tham số Lọc Ngày
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
-
         String warningMessage = null;
 
         LocalDate currentDate = LocalDate.now();
-
         LocalDate endDate = safeParseDate(endDateParam, currentDate);
         LocalDate startDate = safeParseDate(startDateParam, START_OF_BUSINESS);
 
+        // ... (Logic Validation Ngày giữ nguyên)
         if (endDate.isAfter(currentDate)) {
             String futureWarning = "Warning: The end date (" + endDate.toString() + ") cannot exceed the current date. The system has adjusted the end date to **" + currentDate.toString() + "**.";
-            if (warningMessage != null) {
-                warningMessage += "<br/>" + futureWarning;
-            } else {
-                warningMessage = futureWarning;
-            }
+            if (warningMessage != null) warningMessage += "<br/>" + futureWarning; else warningMessage = futureWarning;
             endDate = currentDate;
         }
 
         if (startDate.isBefore(START_OF_BUSINESS)) {
             String pastWarning = "Warning: The start date (" + startDate.toString() + ") was adjusted to the business start date (" + START_OF_BUSINESS.toString() + ").";
-            if (warningMessage != null) {
-                warningMessage += "<br/>" + pastWarning;
-            } else {
-                warningMessage = pastWarning;
-            }
+            if (warningMessage != null) warningMessage += "<br/>" + pastWarning; else warningMessage = pastWarning;
             startDate = START_OF_BUSINESS;
         }
 
@@ -81,13 +97,10 @@ public class CancellationReportController extends HttpServlet {
 
             String swapMessage = "Warning: The start date (" + originalStartDate.toString() + ") was later than the end date (" + originalEndDate.toString() + "). The system automatically **swapped** the two dates (From " + startDate.toString() + " to " + endDate.toString() + ") to display valid data.";
 
-            if (warningMessage != null) {
-                warningMessage += "<br/>" + swapMessage;
-            } else {
-                warningMessage = swapMessage;
-            }
+            if (warningMessage != null) warningMessage += "<br/>" + swapMessage; else warningMessage = swapMessage;
         }
 
+        // Cập nhật lại chuỗi ngày sau khi đã validate
         startDateParam = startDate.toString();
         endDateParam = endDate.toString();
 
@@ -95,7 +108,21 @@ public class CancellationReportController extends HttpServlet {
         List<Map<String, Object>> cancellationData = null;
 
         try {
-            cancellationData = reportRepository.getCancellationData(startDateParam, endDateParam);
+            // 3. Lấy Tổng số bản ghi (Cần thiết cho phân trang)
+            totalRecords = reportRepository.getTotalCancellationCount(startDateParam, endDateParam);
+            totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+            // Điều chỉnh currentPage nếu nó lớn hơn totalPages
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+                offset = (currentPage - 1) * pageSize;
+            } else if (totalPages == 0) {
+                currentPage = 1;
+                offset = 0;
+            }
+
+            // 4. Lấy Dữ liệu đã phân trang
+            cancellationData = reportRepository.getCancellationData(startDateParam, endDateParam, pageSize, offset);
 
         } catch (SQLException e) {
             errorMessage = "Database query error: " + e.getMessage();
@@ -105,11 +132,19 @@ public class CancellationReportController extends HttpServlet {
             e.printStackTrace();
         }
 
+        // 5. Thiết lập thuộc tính cho JSP
         request.setAttribute("warningMessage", warningMessage);
         request.setAttribute("errorMessage", errorMessage);
         request.setAttribute("startDateParam", startDateParam);
         request.setAttribute("endDateParam", endDateParam);
         request.setAttribute("cancellationData", cancellationData);
+
+        // Thông tin phân trang
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        request.setAttribute("pageSize", pageSize);
+
 
         request.getRequestDispatcher("/WEB-INF/report/cancel-report.jsp").forward(request, response);
     }

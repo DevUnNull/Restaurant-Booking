@@ -59,9 +59,11 @@ public class User extends BaseEntity {
     public Integer getUserId() {
         return userId;
     }
+
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
+
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
@@ -74,7 +76,6 @@ public class User extends BaseEntity {
     public void setPromotion_level_id(String promotion_level_id) {
         this.promotion_level_id = promotion_level_id;
     }
-
 
     public void setUserId(Integer userId) {
         this.userId = userId;

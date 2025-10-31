@@ -17,7 +17,7 @@ import java.util.Map;
 public class CustomerReportController extends HttpServlet {
 
     private final CustomerReportRepository reportRepository = new CustomerReportRepository();
-    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 1, 1);
+    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 9, 1);
 
     private static final int PAGE_SIZE = 10;
 

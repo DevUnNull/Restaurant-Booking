@@ -15,11 +15,8 @@ public class OverviewReportRepository {
 
     private final DatabaseUtil db = new DatabaseUtil();
 
-    public OverviewReportRepository() {
-        // Constructor mặc định (Non-Singleton)
-    }
+    public OverviewReportRepository() {}
 
-    // PHƯƠNG THỨC 1: LẤY DỮ LIỆU TÓM TẮT (Summary Data)
     public Map<String, Object> getSummaryData(String startDate, String endDate) throws SQLException {
         Map<String, Object> summary = new HashMap<>();
 
@@ -102,7 +99,7 @@ public class OverviewReportRepository {
 
         String query = String.format("""
             SELECT
-                %s AS label,
+                %s AS date,
                 SUM(RS.total_bookings) AS total_bookings,
                 SUM(RS.total_revenue) AS total_revenue,
                 SUM(RS.cancelled_bookings) AS total_cancellations
@@ -126,7 +123,7 @@ public class OverviewReportRepository {
             GROUP BY
                 %s
             ORDER BY
-                label ASC;
+                date ASC;
         """, groupByColumn);
 
         try (Connection con = db.getConnection();
@@ -139,7 +136,7 @@ public class OverviewReportRepository {
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> row = new HashMap<>();
-                    row.put("label", rs.getString("label"));
+                    row.put("date", rs.getString("date"));
                     row.put("totalRevenue", rs.getBigDecimal("total_revenue"));
                     row.put("totalBookings", rs.getInt("total_bookings"));
                     row.put("totalCancellations", rs.getInt("total_cancellations"));

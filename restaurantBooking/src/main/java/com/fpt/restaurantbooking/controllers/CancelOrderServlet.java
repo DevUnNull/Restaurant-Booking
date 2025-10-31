@@ -1,9 +1,11 @@
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.models.Reservation;
+import com.fpt.restaurantbooking.models.Payment;
 import com.fpt.restaurantbooking.repositories.impl.ReservationDAO;
 import com.fpt.restaurantbooking.repositories.impl.ReservationTableDAO;
 import com.fpt.restaurantbooking.repositories.impl.TableDAO;
+import com.fpt.restaurantbooking.repositories.impl.PaymentDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @WebServlet("/cancelOrder")
@@ -23,6 +26,7 @@ public class CancelOrderServlet extends HttpServlet {
     private final ReservationDAO reservationDAO = new ReservationDAO();
     private final ReservationTableDAO reservationTableDAO = new ReservationTableDAO();
     private final TableDAO tableDAO = new TableDAO();
+    private final PaymentDAO paymentDAO = new PaymentDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -66,8 +70,12 @@ public class CancelOrderServlet extends HttpServlet {
             // Get tables for this reservation
             List<Integer> tableIds = reservationTableDAO.getTablesByReservationId(reservationId);
 
+            // Get payment information to check for deposit
+            Payment payment = paymentDAO.getPaymentByReservationId(reservationId);
+
             request.setAttribute("reservation", reservation);
             request.setAttribute("tableIds", tableIds);
+            request.setAttribute("payment", payment);
             request.getRequestDispatcher("/WEB-INF/BookTable/cancelOrder.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
@@ -101,6 +109,32 @@ public class CancelOrderServlet extends HttpServlet {
             if (reservation == null || !reservation.getUserId().equals(userId)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
+            }
+
+            // Kiểm tra nếu hủy sau thời gian đặt bàn và có tiền cọc
+            Payment payment = paymentDAO.getPaymentByReservationId(reservationId);
+            boolean isCancellingAfterReservationTime = false;
+            if (reservation.getReservationDate() != null && reservation.getReservationTime() != null) {
+                LocalDateTime reservationDateTime = reservation.getReservationDate().atTime(reservation.getReservationTime());
+                LocalDateTime now = LocalDateTime.now();
+                isCancellingAfterReservationTime = now.isAfter(reservationDateTime);
+            }
+
+            // Nếu hủy sau thời gian đặt bàn và có tiền cọc, cập nhật notes trong payment
+            if (isCancellingAfterReservationTime && payment != null &&
+                    "CASH".equals(payment.getPaymentMethod())) {
+                List<Integer> tableIds = reservationTableDAO.getTablesByReservationId(reservationId);
+                int tableCount = tableIds != null ? tableIds.size() : 0;
+                long depositAmount = tableCount * 20000L;
+
+                if (depositAmount > 0 && payment.getPaymentId() != null) {
+                    String notes = payment.getNotes();
+                    if (notes == null) notes = "";
+                    notes += String.format("\n[CANCELLED] Deposit %d VNĐ forfeited due to cancellation after reservation time.", depositAmount);
+                    paymentDAO.updatePaymentNotes(payment.getPaymentId(), notes);
+                    logger.warn("⚠️ Reservation {} cancelled after reservation time. Deposit {} VNĐ will be forfeited.",
+                            reservationId, depositAmount);
+                }
             }
 
             // Cancel reservation
