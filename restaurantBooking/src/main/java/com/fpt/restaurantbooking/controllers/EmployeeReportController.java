@@ -30,7 +30,7 @@ public class EmployeeReportController extends HttpServlet {
     private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 9, 1);
 
     // Khai báo hằng số phân trang
-    private final int PAGE_SIZE = 10;
+    private final int PAGE_SIZE = 5;
 
     private LocalDate safeParseDate(String dateStr, LocalDate defaultValue) {
         if (dateStr == null || dateStr.isEmpty()) {
@@ -115,27 +115,54 @@ public class EmployeeReportController extends HttpServlet {
         String chartUnitParam = request.getParameter("chartUnit");
         String searchStaffNameParam = request.getParameter("searchStaffName");
 
-        // Xử lý tham số phân trang
-        int currentPage = 1;
-        int totalRecords = 0;
-        int totalPages = 0;
-        String pageParam = request.getParameter("page");
-        if (pageParam != null && !pageParam.isEmpty()) {
-            try {
-                currentPage = Math.max(1, Integer.parseInt(pageParam));
-            } catch (NumberFormatException e) {
-                currentPage = 1;
+        // --- LOGIC MỚI: Bỏ tự chọn ngày mặc định ---
+        // Nếu không có tham số ngày nào, không gán giá trị và không tính toán
+        if (startDateParam == null || startDateParam.isEmpty() || endDateParam == null || endDateParam.isEmpty()) {
+
+            // Nếu có tham số tìm kiếm tên nhưng không có ngày, vẫn cho phép tìm kiếm
+            if (searchStaffNameParam == null || searchStaffNameParam.isEmpty()) {
+                request.setAttribute("startDateParam", "");
+                request.setAttribute("endDateParam", "");
+                // Gán cảnh báo yêu cầu nhập ngày, chỉ khi không có tìm kiếm tên
+                session.setAttribute("sessionWarningMessage",
+                        "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.");
+
+                request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
+                return; // Dừng xử lý nếu thiếu ngày và không tìm kiếm tên
             }
         }
-        int offset = (currentPage - 1) * PAGE_SIZE;
-
-        String currentWarningMessage = null;
-        String currentErrorMessage = null;
 
         LocalDate currentDate = LocalDate.now();
 
-        LocalDate endDate = safeParseDate(endDateParam, currentDate);
-        LocalDate startDate = safeParseDate(startDateParam, START_OF_BUSINESS);
+        LocalDate endDate = null;
+        LocalDate startDate = null;
+
+        // Chỉ parse ngày nếu tham số có giá trị
+        if (startDateParam != null && !startDateParam.isEmpty()) {
+            startDate = safeParseDate(startDateParam, null);
+        }
+        if (endDateParam != null && !endDateParam.isEmpty()) {
+            endDate = safeParseDate(endDateParam, null);
+        }
+
+        // Gán lại các param String đã có để truyền lại cho JSP
+        request.setAttribute("startDateParam", startDateParam);
+        request.setAttribute("endDateParam", endDateParam);
+
+        // Nếu ngày bị null sau khi parse (do định dạng sai), dừng và báo lỗi (hoặc sẽ bị xử lý ở logic tiếp theo)
+        if (startDate == null || endDate == null) {
+            // Trường hợp này chỉ xảy ra khi ngày được nhập nhưng định dạng sai (trường hợp hiếm)
+            // Giữ lại logic cảnh báo để hiển thị message
+            request.setAttribute("startDateParam", startDateParam);
+            request.setAttribute("endDateParam", endDateParam);
+            request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
+            return;
+        }
+
+        // --- Bắt đầu Logic Xử lý Ngày (chỉ chạy khi cả startDate và endDate đã được định nghĩa) ---
+        String currentWarningMessage = null;
+        String currentErrorMessage = null;
+
 
         if (startDate.isBefore(START_OF_BUSINESS)) {
             currentWarningMessage = ": The start date (" + startDate.toString() + ") has been adjusted to the opening date (" + START_OF_BUSINESS.toString() + ").";
@@ -179,8 +206,26 @@ public class EmployeeReportController extends HttpServlet {
             session.removeAttribute("sessionWarningMessage");
         }
 
+        // Cập nhật lại param string sau khi có thể bị hoán đổi/điều chỉnh
         startDateParam = startDate.toString();
         endDateParam = endDate.toString();
+        request.setAttribute("startDateParam", startDateParam);
+        request.setAttribute("endDateParam", endDateParam);
+
+
+        // Xử lý tham số phân trang
+        int currentPage = 1;
+        int totalRecords = 0;
+        int totalPages = 0;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            try {
+                currentPage = Math.max(1, Integer.parseInt(pageParam));
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+        int offset = (currentPage - 1) * PAGE_SIZE;
 
         if (chartUnitParam == null || chartUnitParam.isEmpty()) {
             chartUnitParam = "month";
@@ -298,8 +343,7 @@ public class EmployeeReportController extends HttpServlet {
             session.removeAttribute("sessionErrorMessage");
         }
 
-        request.setAttribute("startDateParam", startDateParam);
-        request.setAttribute("endDateParam", endDateParam);
+
         request.setAttribute("chartUnitParam", chartUnitParam);
         request.setAttribute("employeeData", employeeData);
         request.setAttribute("employeeTimeTrend", employeeTimeTrend);

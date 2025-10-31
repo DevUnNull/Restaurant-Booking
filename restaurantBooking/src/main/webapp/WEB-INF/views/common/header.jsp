@@ -64,6 +64,7 @@
                         <a href="#">Đơn xin việc</a>
                     </div>
                 </li>
+
                 <li class="user-dropdown">
                     <div class="user-button" onclick="toggleDropdown('reportDropdown')">
                         <span class="user-name">Report</span>
@@ -85,8 +86,8 @@
 
 
             <li><a href="${pageContext.request.contextPath}/about">Giới Thiệu</a></li>
-            <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>
-            <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
+<%--            <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>--%>
+<%--            <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>--%>
 
 
             <c:choose>
