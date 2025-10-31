@@ -12,13 +12,23 @@
 
     <style>
         :root {
-            --main-color: #D32F2F; --light-red: #FFCDD2; --dark-red: #B71C1C;
-            --menu-bg: #8B0000; --menu-hover: #A52A2A; --text-light: #f8f8f8;
-            --sidebar-width: 250px; --top-nav-height: 60px;
-
-            --revenue-color: #4CAF50;
-            --cancellation-color: #E91E63;
-            --customer-color: #1976D2;
+            /* Color Variables */
+            --main-color: #D32F2F; /* Red - Primary Button, Top Nav, Headings border */
+            --light-red: #FFCDD2; /* Light Red - HR, Table hover, Chart border */
+            --dark-red: #B71C1C; /* Dark Red - Headings, Strong text */
+            --menu-bg: #8B0000; /* Menu Background - Sidebar */
+            --menu-hover: #A52A2A; /* Menu Hover */
+            --text-light: #f8f8f8;
+            --text-dark: #333;
+            --sidebar-width: 250px;
+            --top-nav-height: 60px;
+            --booking-color: #2196F3; /* Blue */
+            --revenue-color: #4CAF50; /* Green */
+            --cancellation-color: #E91E63; /* Pink/Red */
+            --rate-color: #FF9800; /* Orange/Warning */
+            --staff-chart-color: #00897B; /* Teal */
+            --staff-border-color: #00897B;
+            --customer-color: #1976D2; /* Customer blue */
         }
 
         /* Base & Layout */
@@ -61,13 +71,13 @@
         /* Customer Table Styles */
         .customer-table {
             width: 100%;
-            border-collapse: collapse; /* Đã sửa: dùng collapse để tạo đường kẻ */
+            border-collapse: collapse;
             margin-top: 20px;
             border: 1px solid #ddd;
         }
         .customer-table th, .customer-table td {
             padding: 12px;
-            border: 1px solid #ddd; /* Đã sửa: thêm đường kẻ cho từng ô */
+            border: 1px solid #ddd;
         }
         .customer-table th {
             background-color: #f8f8f8;
@@ -90,10 +100,10 @@
         .filter-grid { display: flex; gap: 15px; align-items: flex-end; }
 
 
+        /* Pagination Styles (CHUẨN HÓA) */
         .pagination-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-end; /* Căn lề phải */
             margin-top: 25px;
         }
         .pagination {
@@ -129,16 +139,39 @@
             font-weight: bold;
             border-color: var(--main-color);
         }
-        .pagination li.disabled span {
+        .pagination li.disabled span, .pagination li.disabled a {
             color: #ccc;
             background-color: #fff;
+            pointer-events: none;
+            opacity: 0.6;
         }
 
-
+        /* === NEW POPUP STYLE (From Overview/Service Report) === */
+        #missingDateAlert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 30px;
+            min-width: 300px;
+            max-width: 90%;
+            background-color: #E65100; /* Deep Orange/Rust */
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            z-index: 1002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        /* ==================================================== */
     </style>
 </head>
 <body>
-
+<c:set var="pageSize" value="5" scope="request"/>
 <%-- Top Nav --%>
 <div class="top-nav">
     <div class="restaurant-group">
@@ -148,16 +181,16 @@
         <span class="restaurant-name">Restaurant Booking</span>
     </div>
     <div class="user-info">
-        <span>User:
-            <c:choose>
-                <c:when test="${not empty sessionScope.userName}">
-                    ${sessionScope.userName}
-                </c:when>
-                <c:otherwise>
-                    Guest
-                </c:otherwise>
-            </c:choose>
-        </span>
+    <span>User:
+        <c:choose>
+            <c:when test="${not empty sessionScope.currentUser}">
+                ${sessionScope.currentUser.fullName}
+            </c:when>
+            <c:otherwise>
+                Guest
+            </c:otherwise>
+        </c:choose>
+    </span>
     </div>
 </div>
 
@@ -298,59 +331,105 @@
                     </c:otherwise>
                 </c:choose>
 
-                <%-- === KHỐI PHÂN TRANG === --%>
-                <c:if test="${requestScope.totalPages > 1}">
+                <%-- === KHỐI PHÂN TRANG - ĐÃ CHUẨN HÓA === --%>
+                <c:set var="currentPage" value="${requestScope.currentPage}"/>
+                <c:set var="totalPages" value="${requestScope.totalPages}"/>
+                <c:set var="startDateParam" value="${requestScope.startDateParam}"/>
+                <c:set var="endDateParam" value="${requestScope.endDateParam}"/>
+
+                <c:if test="${totalPages > 1}">
                     <div class="pagination-container">
                         <ul class="pagination">
 
-
+                                <%-- Nút Previous --%>
+                            <c:url var="prevUrl" value="user-report">
+                                <c:param name="page" value="${currentPage - 1}"/>
+                                <c:param name="pageSize" value="5"/>
+                                <c:param name="startDate" value="${startDateParam}"/>
+                                <c:param name="endDate" value="${endDateParam}"/>
+                            </c:url>
                             <c:choose>
-                                <c:when test="${requestScope.currentPage > 1}">
-                                    <li>
-                                        <a href="user-report?startDate=${requestScope.startDateParam}&endDate=${requestScope.endDateParam}&page=${requestScope.currentPage - 1}">
-                                            Prev
-                                        </a>
-                                    </li>
+                                <c:when test="${currentPage > 1}">
+                                    <li><a href="${prevUrl}">Prev</a></li>
                                 </c:when>
                                 <c:otherwise>
-                                    <li class="disabled">
-                                        <span>Prev</span>
-                                    </li>
+                                    <li class="disabled"><span>Prev</span></li>
                                 </c:otherwise>
                             </c:choose>
 
+                                <%-- Hiển thị các số trang (tối đa 5 trang) --%>
+                            <c:set var="startPage" value="${(currentPage - 2) > 1 ? (currentPage - 2) : 1}"/>
+                            <c:set var="endPage" value="${(currentPage + 2) < totalPages ? (currentPage + 2) : totalPages}"/>
 
-                            <c:forEach var="i" begin="1" end="${requestScope.totalPages}">
+                                <%-- Logic điều chỉnh để đảm bảo luôn hiện tối đa 5 nút trang (nếu có đủ) --%>
+                            <c:if test="${endPage - startPage < 4}">
+                                <c:set var="newStart" value="${endPage - 4}"/>
+                                <c:if test="${newStart > 1}">
+                                    <c:set var="startPage" value="${newStart}"/>
+                                </c:if>
+                                <c:if test="${startPage < 1}">
+                                    <c:set var="startPage" value="1"/>
+                                </c:if>
+                                <c:set var="endPage" value="${startPage + 4}"/>
+                                <c:if test="${endPage > totalPages}">
+                                    <c:set var="endPage" value="${totalPages}"/>
+                                </c:if>
+                            </c:if>
+
+                            <c:if test="${startPage > 1}">
+                                <c:url var="page1Url" value="user-report">
+                                    <c:param name="page" value="1"/>
+                                    <c:param name="pageSize" value="5"/>
+                                    <c:param name="startDate" value="${startDateParam}"/>
+                                    <c:param name="endDate" value="${endDateParam}"/>
+                                </c:url>
+                                <li><a href="${page1Url}">1</a></li>
+                                <c:if test="${startPage > 2}"><li><span>...</span></li></c:if>
+                            </c:if>
+
+                            <c:forEach begin="${startPage}" end="${endPage}" var="i">
+                                <c:url var="pageUrl" value="user-report">
+                                    <c:param name="page" value="${i}"/>
+                                    <c:param name="pageSize" value="5"/>
+                                    <c:param name="startDate" value="${startDateParam}"/>
+                                    <c:param name="endDate" value="${endDateParam}"/>
+                                </c:url>
                                 <c:choose>
-                                    <c:when test="${requestScope.currentPage == i}">
-                                        <li class="active">
-                                            <span>${i}</span>
-                                        </li>
+                                    <c:when test="${i == currentPage}">
+                                        <li class="active"><span>${i}</span></li>
                                     </c:when>
                                     <c:otherwise>
-                                        <li>
-                                            <a href="user-report?startDate=${requestScope.startDateParam}&endDate=${requestScope.endDateParam}&page=${i}">${i}</a>
-                                        </li>
+                                        <li><a href="${pageUrl}">${i}</a></li>
                                     </c:otherwise>
                                 </c:choose>
                             </c:forEach>
 
+                            <c:if test="${endPage < totalPages}">
+                                <c:if test="${endPage < totalPages - 1}"><li><span>...</span></c:if>
+                                <c:url var="lastPageUrl" value="user-report">
+                                    <c:param name="page" value="${totalPages}"/>
+                                    <c:param name="pageSize" value="5"/>
+                                    <c:param name="startDate" value="${startDateParam}"/>
+                                    <c:param name="endDate" value="${endDateParam}"/>
+                                </c:url>
+                                <li><a href="${lastPageUrl}">${totalPages}</a></li>
+                            </c:if>
 
+                                <%-- Nút Next --%>
+                            <c:url var="nextUrl" value="user-report">
+                                <c:param name="page" value="${currentPage + 1}"/>
+                                <c:param name="pageSize" value="5"/>
+                                <c:param name="startDate" value="${startDateParam}"/>
+                                <c:param name="endDate" value="${endDateParam}"/>
+                            </c:url>
                             <c:choose>
-                                <c:when test="${requestScope.currentPage < requestScope.totalPages}">
-                                    <li>
-                                        <a href="user-report?startDate=${requestScope.startDateParam}&endDate=${requestScope.endDateParam}&page=${requestScope.currentPage + 1}">
-                                            Next
-                                        </a>
-                                    </li>
+                                <c:when test="${currentPage < totalPages}">
+                                    <li><a href="${nextUrl}">Next</a></li>
                                 </c:when>
                                 <c:otherwise>
-                                    <li class="disabled">
-                                        <span>Next</span>
-                                    </li>
+                                    <li class="disabled"><span>Next</span></li>
                                 </c:otherwise>
                             </c:choose>
-
                         </ul>
                     </div>
                 </c:if>
@@ -383,9 +462,40 @@
     </div>
 </div>
 
+<div id="missingDateAlert">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span id="missingDateAlertText"></span>
+</div>
+
 <%-- JavaScript (ĐÃ SỬA LẠI LOGIC XÁC THỰC) --%>
 <script>
     const START_OF_BUSINESS_DATE = "2025-01-01";
+    const TARGET_PAGE_SIZE = 5;
+
+    // --- KHAI BÁO CÁC BIẾN POPUP CẢNH BÁO ---
+    const missingDateAlert = document.getElementById('missingDateAlert');
+    const missingDateAlertText = document.getElementById('missingDateAlertText');
+
+    function showAlert(message) {
+        missingDateAlertText.textContent = message;
+
+        // 1. Hiển thị Popup
+        missingDateAlert.style.display = 'block';
+        setTimeout(() => {
+            missingDateAlert.style.opacity = '1';
+        }, 10);
+
+        // 2. Tự động ẩn Popup sau 5 giây (5000ms)
+        setTimeout(() => {
+            missingDateAlert.style.opacity = '0';
+            // Ẩn hoàn toàn sau khi transition (0.3s) kết thúc
+            setTimeout(() => {
+                missingDateAlert.style.display = 'none';
+                missingDateAlertText.textContent = ''; // Xóa nội dung
+            }, 300); // 300ms = 0.3 giây
+        }, 5000); // 5 giây
+    }
+
 
     // --- FUNCTIONS FOR DATE FILTER MODAL ---
     function openFilterModal() {
@@ -407,23 +517,27 @@
 
         // 1. Bắt buộc chọn Ngày Bắt đầu
         if (!startDate) {
-            alert("Lỗi: Vui lòng chọn Ngày Bắt đầu (From Date) cho báo cáo.");
+            closeFilterModal();
+            showAlert("Vui lòng chọn Ngày Bắt đầu (From Date) cho báo cáo.");
             return;
         }
 
         // 2. Bắt buộc chọn Ngày Kết thúc
         if (!endDate) {
-            alert("Lỗi: Vui lòng chọn Ngày Kết thúc (To Date) cho báo cáo.");
+            closeFilterModal();
+            showAlert("Vui lòng chọn Ngày Kết thúc (To Date) cho báo cáo.");
             return;
         }
 
         // 3. Kiểm tra logic ngày
         if (new Date(startDate) > new Date(endDate)) {
-            alert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
+            closeFilterModal();
+            showAlert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
             return;
         }
 
-        let url = 'user-report?startDate=' + startDate + '&endDate=' + endDate;
+        // Luôn reset về trang 1 khi thay đổi bộ lọc ngày, và set cứng pageSize = 5
+        let url = 'user-report?startDate=' + startDate + '&endDate=' + endDate + '&page=1&pageSize=' + TARGET_PAGE_SIZE;
 
         window.location.href = url;
         closeFilterModal();

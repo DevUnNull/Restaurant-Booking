@@ -35,6 +35,7 @@ public class OverviewReportController extends HttpServlet {
         String endDateParam = request.getParameter("endDate");
         String chartUnitParam = request.getParameter("chartUnit");
 
+        // isInitialLoad là true nếu cả hai ngày đều null hoặc empty
         boolean isInitialLoad = (startDateParam == null || startDateParam.isEmpty())
                 && (endDateParam == null || endDateParam.isEmpty());
 
@@ -52,29 +53,34 @@ public class OverviewReportController extends HttpServlet {
         String warningMessage = null;
         String errorMessage = null;
 
-        // Logic gán ngày mặc định (chỉ chạy khi tải trang lần đầu)
+        // =========================================================
+        // ✅ ĐÃ BỎ LOGIC GÁN NGÀY MẶC ĐỊNH
+        // =========================================================
+        // Logic gán ngày mặc định (KHÔNG CÒN)
+        /*
         if (isInitialLoad) {
-            // Đặt ngày mặc định cho lần tải đầu tiên
             startDateParam = currentDate.minusMonths(1).toString();
             endDateParam = currentDate.toString();
         }
+        */
 
 
         try {
             // =========================================================
-            // ✅ VALIDATION BẮT BUỘC NHẬP NGÀY KHI CÓ SUBMIT
+            // ✅ XỬ LÝ KHI NGÀY BỊ THIẾU HOẶC TẢI LẦN ĐẦU
             // =========================================================
-            if (!isInitialLoad && (startDateParam == null || startDateParam.trim().isEmpty() || endDateParam == null || endDateParam.trim().isEmpty())) {
+            if (startDateParam == null || startDateParam.trim().isEmpty() || endDateParam == null || endDateParam.trim().isEmpty()) {
 
-                // Xử lý trường hợp người dùng xóa ngày trong pop-up và submit
-                warningMessage = "Lỗi: Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.";
+                // Nếu là Initial Load HOẶC người dùng submit filter mà thiếu ngày
+                warningMessage = " Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.";
 
-                // Đảm bảo các tham số vẫn được gửi đi để giữ lại các giá trị khác trong filter modal
+                // Đảm bảo các tham số vẫn được gửi đi (nếu có) để giữ lại các giá trị khác trong filter modal
+                // Nhưng giữ nguyên null/empty cho startDateParam/endDateParam để báo hiệu chưa có ngày
                 startDateParam = request.getParameter("startDate");
                 endDateParam = request.getParameter("endDate");
 
-            } else if (warningMessage == null) {
-                // Nếu Validation ngày tháng đã qua (hoặc là Initial Load), tiến hành chạy báo cáo
+            } else {
+                // Nếu cả hai ngày đều có giá trị, tiến hành chạy báo cáo
 
                 // Xử lý Min/Max Date Bounds (Nếu người dùng chọn ngoài phạm vi cho phép)
                 LocalDate startDate = LocalDate.parse(startDateParam);
@@ -109,8 +115,6 @@ public class OverviewReportController extends HttpServlet {
                 // Cảnh báo không có dữ liệu
                 if (totalBookings == 0) {
                     warningMessage = "Không có dữ liệu đặt bàn nào được tìm thấy trong khoảng thời gian đã chọn (" + startDateParam + " đến " + endDateParam + ").";
-                } else if (isInitialLoad) {
-                    warningMessage = "Hiển thị báo cáo cho thời gian mặc định (" + startDateParam + " đến " + endDateParam + "). Vui lòng sử dụng Filter Popup để tùy chỉnh.";
                 }
             }
             // =========================================================

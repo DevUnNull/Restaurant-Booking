@@ -1,32 +1,35 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Overview Report Dashboard</title>
+    <title>Overview Statistics Report Dashboard</title>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         :root {
-            --main-color: #D32F2F;
-            --light-red: #FFCDD2;
-            --dark-red: #B71C1C;
-            --menu-bg: #8B0000;
-            --menu-hover: #A52A2A;
+            /* Color Variables */
+            --main-color: #D32F2F; /* Red - Primary Button, Top Nav, Headings border */
+            --light-red: #FFCDD2; /* Light Red - HR, Table hover, Chart border */
+            --dark-red: #B71C1C; /* Dark Red - Headings, Strong text */
+            --menu-bg: #8B0000; /* Menu Background - Sidebar */
+            --menu-hover: #A52A2A; /* Menu Hover */
             --text-light: #f8f8f8;
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3;
-            --revenue-color: #4CAF50;
-            --cancellation-color: #E91E63;
-            --rate-color: #FF9800;
+            --booking-color: #2196F3; /* Blue */
+            --revenue-color: #4CAF50; /* Green */
+            --cancellation-color: #E91E63; /* Pink/Red */
+            --rate-color: #FF9800; /* Orange/Warning */
+            --staff-chart-color: #00897B; /* Teal */
+            --staff-border-color: #00897B;
+            --customer-color: #1976D2; /* Customer blue */
         }
 
         body {
@@ -393,6 +396,35 @@
             width: 100%;
         }
 
+        /* NEW POPUP STYLE */
+        #missingDateAlert {
+            position: fixed;
+            /* Vị trí: Trên cùng (cách 20px) */
+            top: 20px;
+            left: 50%;
+            /* Căn giữa theo chiều ngang */
+            transform: translateX(-50%);
+
+            padding: 20px 30px;
+            min-width: 300px;
+            max-width: 90%;
+
+            /* Màu sắc bớt chói: Cam đậm/Đất sét */
+            background-color: #fff3e0; /* Deep Orange/Rust */
+            color: red;
+
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            z-index: 1002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -454,16 +486,16 @@
         <span class="restaurant-name">Restaurant Booking</span>
     </div>
     <div class="user-info">
-        <span>User:
-            <c:choose>
-                <c:when test="${not empty sessionScope.userName}">
-                    ${sessionScope.userName}
-                </c:when>
-                <c:otherwise>
-                    Guest
-                </c:otherwise>
-            </c:choose>
-        </span>
+    <span>User:
+        <c:choose>
+            <c:when test="${not empty sessionScope.currentUser}">
+                ${sessionScope.currentUser.fullName}
+            </c:when>
+            <c:otherwise>
+                Guest
+            </c:otherwise>
+        </c:choose>
+    </span>
     </div>
 </div>
 
@@ -473,8 +505,8 @@
             <li><a href="<%= request.getContextPath() %>/overview-report" ${request.getRequestURI().contains("overview-report") ? "class=\"active\"" : ""}>Overview Report</a></li>
             <li><a href="<%= request.getContextPath() %>/service-report" ${request.getRequestURI().contains("service-report") ? "class=\"active\"" : ""}>Service Report</a></li>
             <li><a href="<%= request.getContextPath() %>/staff-report" ${request.getRequestURI().contains("staff-report") ? "class=\"active\"" : ""}>Staff Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("customer-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancellation-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("user-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancel-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
         </ul>
     </div>
 
@@ -655,6 +687,11 @@
             <button type="button" class="btn-apply" onclick="submitModalForm()">Apply Filter</button>
         </form>
     </div>
+</div>
+
+<div id="missingDateAlert">
+    <i class="fas fa-exclamation-triangle"></i>
+     Vui lòng chọn đầy đủ Ngày Bắt đầu và Ngày Kết thúc!
 </div>
 
 <script>
@@ -895,17 +932,34 @@
         const startDate = document.getElementById('modalStartDate').value;
         const endDate = document.getElementById('modalEndDate').value;
         const chartUnit = document.getElementById('modalChartUnit').value;
+        const missingDateAlert = document.getElementById('missingDateAlert'); // Lấy element popup
 
         const minDate = new Date('2025-09-01');
         const maxDate = new Date('2025-10-31');
         let start = new Date(startDate);
         let end = new Date(endDate);
 
-        // ✅ VALIDATION BẮT BUỘC NHẬP NGÀY (Client-side)
+        // ✅ LOGIC CẢNH BÁO POPUP TỰ ĐỘNG MẤT
         if (!startDate || !endDate) {
-            alert("Lỗi: Vui lòng chọn cả Ngày Bắt đầu và Ngày Kết thúc.");
+            // 1. Hiển thị Popup
+            missingDateAlert.style.display = 'block';
+            setTimeout(() => {
+                missingDateAlert.style.opacity = '1';
+            }, 10); // Đảm bảo chuyển đổi opacity hoạt động
+
+            // 2. Tự động ẩn Popup sau 5 giây (5000ms)
+            setTimeout(() => {
+                missingDateAlert.style.opacity = '0';
+                // Ẩn hoàn toàn sau khi transition (0.5s) kết thúc
+                setTimeout(() => {
+                    missingDateAlert.style.display = 'none';
+                }, 500);
+            }, 5000); // 5 giây
+
             return; // Dừng submit
         }
+        // -----------------------------------------------------------------
+
 
         // Validation logic Ngày Bắt đầu > Ngày Kết thúc
         if (start > end) {
@@ -914,7 +968,6 @@
         }
 
         // Xử lý Min/Max (giữ nguyên logic của bạn)
-        // Chú ý: Cần chuyển sang format string cho Controller xử lý
         const getFormattedDate = (dateObj) => dateObj.toISOString().split('T')[0];
 
         let finalStartDate = startDate;
