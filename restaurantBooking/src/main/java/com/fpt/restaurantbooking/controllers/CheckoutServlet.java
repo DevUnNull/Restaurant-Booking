@@ -215,7 +215,18 @@ public class CheckoutServlet extends HttpServlet {
                         );
                     }
                 }
-                reservation.setTotalAmount(totalAmount);
+
+                // Tính phí đặt cọc nếu thanh toán tại quán (CASH)
+                BigDecimal depositAmount = BigDecimal.ZERO;
+                int tableCount = selectedTableIds != null ? selectedTableIds.size() : 0;
+                if ("CASH".equals(paymentMethod) && tableCount > 0) {
+                    depositAmount = new BigDecimal(tableCount).multiply(new BigDecimal(20000)); // 20,000 VNĐ per table
+                    logger.info("💳 Deposit calculated: {} tables × 20,000 = {} VNĐ", tableCount, depositAmount);
+                }
+
+                // Tổng tiền bao gồm cả tiền cọc
+                BigDecimal finalAmount = totalAmount.add(depositAmount);
+                reservation.setTotalAmount(finalAmount);
 
                 int reservationId;
                 boolean isEditing = false;
@@ -286,7 +297,7 @@ public class CheckoutServlet extends HttpServlet {
                         reservationId, orderItems != null ? orderItems.size() : 0);
 
                 // ✅ TẠO PAYMENT record
-                Payment payment = new Payment(reservationId, paymentMethod, totalAmount.longValue());
+                Payment payment = new Payment(reservationId, paymentMethod, finalAmount.longValue());
 
                 // Tất cả đơn đặt bàn online đều bắt đầu ở trạng thái PENDING
                 // Payment status: PENDING vì chưa thanh toán
@@ -296,7 +307,16 @@ public class CheckoutServlet extends HttpServlet {
                 // Đối với CREDIT_CARD/E_WALLET: sẽ xử lý thanh toán online (có thể kết hợp gateway)
                 // Tạm thời tất cả đều set PENDING
 
-                logger.info("💳 Payment method: {} - Status: PENDING", paymentMethod);
+                // Lưu thông tin deposit trong notes
+                if (depositAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    payment.setNotes(String.format("Deposit: %s VNĐ (%d tables × 20,000 VNĐ). " +
+                                    "Deposit will be refunded when customer arrives and pays in full.",
+                            depositAmount, tableCount));
+                    logger.info("💳 Deposit saved in payment notes: {} VNĐ", depositAmount);
+                }
+
+                logger.info("💳 Payment method: {} - Total: {} VNĐ (Items: {} + Deposit: {}) - Status: PENDING",
+                        paymentMethod, finalAmount, totalAmount, depositAmount);
 
                 payment.setTransactionId(UUID.randomUUID().toString());
 

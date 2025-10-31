@@ -157,6 +157,107 @@ public class MenuItemDAO {
         return items;
     }
 
+    // Get service ID by menu item ID
+    public Integer getServiceIdByMenuItemId(int itemId) {
+        String sql = "SELECT DISTINCT service_id FROM service_menu_items WHERE item_id = ? LIMIT 1";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, itemId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int serviceId = rs.getInt("service_id");
+                    return rs.wasNull() ? null : serviceId;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting service ID for menu item: " + itemId, e);
+        }
+        return null;
+    }
+
+    // Get service ID from a list of menu item IDs (find common service)
+    public Integer getServiceIdByMenuItemIds(List<Integer> itemIds) {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return null;
+        }
+
+        // Create placeholders for IN clause
+        StringBuilder placeholders = new StringBuilder();
+        for (int i = 0; i < itemIds.size(); i++) {
+            if (i > 0) placeholders.append(",");
+            placeholders.append("?");
+        }
+
+        // Find service_id that contains ALL the items (or at least some of them)
+        String sql = "SELECT service_id, COUNT(DISTINCT item_id) as item_count " +
+                "FROM service_menu_items " +
+                "WHERE item_id IN (" + placeholders + ") " +
+                "GROUP BY service_id " +
+                "ORDER BY item_count DESC " +
+                "LIMIT 1";
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < itemIds.size(); i++) {
+                pstmt.setInt(i + 1, itemIds.get(i));
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int serviceId = rs.getInt("service_id");
+                    return rs.wasNull() ? null : serviceId;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting service ID for menu items", e);
+        }
+        return null;
+    }
+
+    // Get all menu items that belong to ANY service from a list of item IDs
+    public List<MenuItem> getComboMenuItemsByItemIds(List<Integer> itemIds) {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Create placeholders for IN clause
+        StringBuilder placeholders = new StringBuilder();
+        for (int i = 0; i < itemIds.size(); i++) {
+            if (i > 0) placeholders.append(",");
+            placeholders.append("?");
+        }
+
+        String sql = "SELECT DISTINCT mi.*, mc.name AS category_name, u1.full_name AS created_by_name, u2.full_name AS updated_by_name " +
+                "FROM Menu_Items mi " +
+                "INNER JOIN service_menu_items smi ON mi.item_id = smi.item_id " +
+                "LEFT JOIN menu_category mc ON mi.category_id = mc.id " +
+                "LEFT JOIN Users u1 ON mi.created_by = u1.user_id " +
+                "LEFT JOIN Users u2 ON mi.updated_by = u2.user_id " +
+                "WHERE mi.item_id IN (" + placeholders + ") AND mi.status = 'AVAILABLE' " +
+                "ORDER BY mc.name, mi.item_name ASC";
+
+        List<MenuItem> items = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < itemIds.size(); i++) {
+                pstmt.setInt(i + 1, itemIds.get(i));
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapResultSetToMenuItem(rs));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting combo menu items by item IDs", e);
+        }
+        return items;
+    }
+
     private MenuItem mapResultSetToMenuItem(ResultSet rs) throws SQLException {
         MenuItem item = new MenuItem();
         item.setItemId(rs.getInt("item_id"));

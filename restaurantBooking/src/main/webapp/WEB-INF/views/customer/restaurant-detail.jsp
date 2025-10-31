@@ -34,7 +34,7 @@
                     <p><i class="fas fa-phone"></i> ${restaurantInfo.contactPhone}</p>
                 </div>
                 <div>
-                    <img src="${pageContext.request.contextPath}/images/restaurant-exterior.jpg" alt="Nhà hàng" style="width: 100%; border-radius: 8px;">
+                    <img src="${pageContext.request.contextPath}/images/img_2.png" alt="Nhà hàng" style="width: 100%; border-radius: 8px;">
                 </div>
             </div>
         </c:if>
@@ -45,33 +45,11 @@
         <div class="gallery-grid">
             <c:if test="${not empty galleryImages}">
                 <c:forEach items="${galleryImages}" var="image">
-                    <img src="${pageContext.request.contextPath}/images/gallery/${image.imageUrl}" alt="${image.imageTile}">
+                    <img src="${pageContext.request.contextPath}${image.imageUrl}" alt="${image.imageTile}">
                 </c:forEach>
             </c:if>
             <c:if test="${empty galleryImages}"><p>Chưa có hình ảnh nào.</p></c:if>
         </div>
-    </section>
-
-    <section class="section">
-        <h2 class="section-title">Thực Đơn</h2>
-        <%-- Gói danh sách món ăn vào một container --%>
-        <div id="menu-list-container">
-            <c:if test="${not empty menuItems}">
-                <c:forEach items="${menuItems}" var="item">
-                    <div class="menu-list-item">
-                        <div>
-                            <h4>${item.itemName}</h4>
-                            <p>${item.description}</p>
-                        </div>
-                        <div style="font-weight: bold;">
-                            <fmt:formatNumber value="${item.price}" type="currency" currencyCode="VND"/>
-                        </div>
-                    </div>
-                </c:forEach>
-            </c:if>
-            <c:if test="${empty menuItems}"><p>Chưa có món ăn nào.</p></c:if>
-        </div>
-        <div id="menu-pagination" class="pagination"></div>
     </section>
 
     <section class="section" style="border-bottom: none;">
