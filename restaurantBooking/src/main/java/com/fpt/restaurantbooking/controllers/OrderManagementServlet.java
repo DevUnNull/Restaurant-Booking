@@ -2,6 +2,7 @@ package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.dto.OrderManagementDTO;
 import com.fpt.restaurantbooking.repositories.impl.ReservationDAO;
+import com.fpt.restaurantbooking.services.EmailService;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,6 +27,7 @@ public class OrderManagementServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(OrderManagementServlet.class);
     private final ReservationDAO reservationDAO = new ReservationDAO();
     private final Gson gson = new Gson();
+    private final EmailService emailService = new EmailService();
 
     private static final int ITEMS_PER_PAGE = 20;
 
@@ -186,6 +188,27 @@ public class OrderManagementServlet extends HttpServlet {
 
             if (updated) {
                 logger.info("Updated reservation {} to status {}", reservationId, newStatus);
+
+                // Send email notification after successful status update
+                try {
+                    OrderManagementDTO orderDetails = reservationDAO.getReservationDetailsById(reservationId);
+                    if (orderDetails != null && orderDetails.getCustomerEmail() != null) {
+                        boolean emailSent = emailService.sendOrderStatusChangeEmail(orderDetails, newStatus);
+                        if (emailSent) {
+                            logger.info("Email notification sent successfully for reservation {} to {}",
+                                    reservationId, orderDetails.getCustomerEmail());
+                        } else {
+                            logger.warn("Failed to send email notification for reservation {}", reservationId);
+                        }
+                    } else {
+                        logger.warn("No customer email found for reservation {}, skipping email notification",
+                                reservationId);
+                    }
+                } catch (Exception e) {
+                    // Don't fail the status update if email sending fails
+                    logger.error("Error sending email notification for reservation {}", reservationId, e);
+                }
+
                 sendJsonResponse(response, true, "Status updated successfully");
             } else {
                 sendJsonResponse(response, false, "Failed to update status");

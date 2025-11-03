@@ -1,10 +1,15 @@
 package com.fpt.restaurantbooking.services;
 
+import com.fpt.restaurantbooking.dto.OrderManagementDTO;
 import com.fpt.restaurantbooking.models.EmailVerification;
 import com.fpt.restaurantbooking.models.User;
 import com.fpt.restaurantbooking.utils.EmailUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Service for sending email verification related emails
@@ -88,6 +93,39 @@ public class EmailService {
 
         } catch (Exception e) {
             logger.error("Error sending OTP resend email to: {}", user.getEmail(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Send order status change notification email
+     */
+    public boolean sendOrderStatusChangeEmail(OrderManagementDTO order, String newStatus) {
+        try {
+            if (order.getCustomerEmail() == null || order.getCustomerEmail().isEmpty()) {
+                logger.warn("No email found for order {}, cannot send status change notification",
+                        order.getReservationId());
+                return false;
+            }
+
+            String subject = "Thông Báo Thay Đổi Trạng Thái Đơn Hàng - Hệ Thống Đặt Bàn Nhà Hàng";
+            String htmlBody = buildOrderStatusChangeTemplate(order, newStatus);
+
+            boolean sent = EmailUtil.sendHtmlEmail(order.getCustomerEmail(), subject, htmlBody);
+
+            if (sent) {
+                logger.info("Order status change email sent successfully to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            } else {
+                logger.error("Failed to send order status change email to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            }
+
+            return sent;
+
+        } catch (Exception e) {
+            logger.error("Error sending order status change email for order {}",
+                    order.getReservationId(), e);
             return false;
         }
     }
@@ -233,5 +271,114 @@ public class EmailService {
                 "    </div>" +
                 "</body>" +
                 "</html>";
+    }
+
+    /**
+     * Build order status change email template
+     */
+    private String buildOrderStatusChangeTemplate(OrderManagementDTO order, String newStatus) {
+        // Map status to Vietnamese
+        String statusText = mapStatusToVietnamese(newStatus);
+
+        // Format date and time
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String formattedDate = order.getReservationDate() != null
+                ? order.getReservationDate().format(dateFormatter) : "N/A";
+        String formattedTime = order.getReservationTime() != null
+                ? order.getReservationTime().format(timeFormatter) : "N/A";
+
+        // Format amount
+        String formattedAmount = formatAmount(order.getTotalAmount());
+
+        // Get table names
+        String tableNames = order.getTableNames() != null && !order.getTableNames().isEmpty()
+                ? order.getTableNames() : "Chưa xác định";
+
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "    <meta charset='UTF-8'>" +
+                "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "    <title>Thông Báo Trạng Thái Đơn Hàng</title>" +
+                "    <style>" +
+                "        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                "        .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                "        .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }" +
+                "        .status-box { background-color: #fff; border: 2px solid #dc3545; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px; }" +
+                "        .status-text { font-size: 24px; font-weight: bold; color: #dc3545; }" +
+                "        .details { background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0; }" +
+                "        .details p { margin: 10px 0; }" +
+                "        .details strong { color: #333; }" +
+                "        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }" +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class='header'>" +
+                "        <h1>Hệ Thống Đặt Bàn Nhà Hàng</h1>" +
+                "        <h2>Thông Báo Thay Đổi Trạng Thái</h2>" +
+                "    </div>" +
+                "    <div class='content'>" +
+                "        <h3>Xin chào " + (order.getCustomerName() != null ? order.getCustomerName() : "Quý khách") + ",</h3>" +
+                "        <p>Chúng tôi xin thông báo rằng trạng thái đơn đặt bàn của bạn đã được cập nhật.</p>" +
+                "        <div class='status-box'>" +
+                "            <p>Trạng thái mới:</p>" +
+                "            <div class='status-text'>" + statusText + "</div>" +
+                "        </div>" +
+                "        <div class='details'>" +
+                "            <p><strong>Mã đơn hàng:</strong> #" + order.getReservationId() + "</p>" +
+                "            <p><strong>Ngày:</strong> " + formattedDate + "</p>" +
+                "            <p><strong>Giờ:</strong> " + formattedTime + "</p>" +
+                "            <p><strong>Bàn:</strong> " + tableNames + "</p>" +
+                "            <p><strong>Số khách:</strong> " + order.getGuestCount() + " người</p>" +
+                "            <p><strong>Tổng tiền:</strong> " + formattedAmount + "</p>" +
+                "        </div>" +
+                "        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>" +
+                "        <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua số hotline hoặc email hỗ trợ.</p>" +
+                "    </div>" +
+                "    <div class='footer'>" +
+                "        <p>Trân trọng,<br>Đội Ngũ Hệ Thống Đặt Bàn Nhà Hàng</p>" +
+                "        <p><small>Đây là email tự động. Vui lòng không trả lời email này.</small></p>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    /**
+     * Map order status to Vietnamese text
+     */
+    private String mapStatusToVietnamese(String status) {
+        if (status == null) {
+            return "Không xác định";
+        }
+
+        switch (status.toUpperCase()) {
+            case "PENDING":
+                return "Chờ Xác Nhận";
+            case "CONFIRMED":
+                return "Đã Xác Nhận";
+            case "COMPLETED":
+                return "Hoàn Thành";
+            case "CANCELLED":
+                return "Đã Hủy";
+            case "NO_SHOW":
+                return "Không Đến";
+            default:
+                return status;
+        }
+    }
+
+    /**
+     * Format amount to Vietnamese currency format
+     */
+    private String formatAmount(java.math.BigDecimal amount) {
+        if (amount == null) {
+            return "0 VNĐ";
+        }
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setGroupingSeparator(',');
+        DecimalFormat formatter = new DecimalFormat("#,###", symbols);
+        return formatter.format(amount) + " VNĐ";
     }
 }

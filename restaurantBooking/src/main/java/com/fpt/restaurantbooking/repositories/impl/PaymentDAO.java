@@ -154,6 +154,24 @@ public class PaymentDAO {
         return false;
     }
 
+    // Update payment status by reservation ID
+    public boolean updatePaymentStatusByReservation(int reservationId, String status) {
+        String sql = "UPDATE Payments SET payment_status = ?, updated_at = NOW() WHERE reservation_id = ?";
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, status);
+            pstmt.setInt(2, reservationId);
+
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            logger.error("Error updating payment status by reservation ID", e);
+        }
+        return false;
+    }
+
     private Payment mapResultSetToPayment(ResultSet rs) throws SQLException {
         Payment payment = new Payment();
         payment.setPaymentId(rs.getInt("payment_id"));
