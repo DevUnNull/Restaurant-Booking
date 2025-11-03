@@ -339,11 +339,20 @@ public class CheckoutServlet extends HttpServlet {
 
                     logger.info("✅ Checkout completed successfully for reservation {}", reservationId);
 
-                    // ✅ Redirect to details page for edited or new reservation
-                    if (isEditing) {
-                        response.sendRedirect("orderDetails?id=" + reservationId + "&updated=true");
+                    // ✅ Redirect based on payment method
+                    if ("VNPAY".equals(paymentMethod)) {
+                        // Redirect to VNPay payment gateway
+                        String vnpayUrl = request.getContextPath() + "/vnpay-payment?reservationId="
+                                + reservationId + "&amount=" + finalAmount.longValue();
+                        logger.info("Redirecting to VNPay: {}", vnpayUrl);
+                        response.sendRedirect(vnpayUrl);
                     } else {
-                        response.sendRedirect("orderDetails?id=" + reservationId + "&success=true");
+                        // Redirect to details page for edited or new reservation
+                        if (isEditing) {
+                            response.sendRedirect("orderDetails?id=" + reservationId + "&updated=true");
+                        } else {
+                            response.sendRedirect("orderDetails?id=" + reservationId + "&success=true");
+                        }
                     }
                 } else {
                     logger.error("❌ Failed to create payment");

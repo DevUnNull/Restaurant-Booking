@@ -801,6 +801,10 @@
                 <input type="radio" name="paymentMethod" value="E_WALLET">
                 <i class="fas fa-wallet"></i> Ví điện tử (Momo, ZaloPay)
             </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="VNPAY">
+                <i class="fas fa-qrcode"></i> VNPay (Thẻ/Ví điện tử)
+            </label>
 
             <!-- Payment Info -->
             <div id="paymentInfoCash" class="payment-info cash show">
@@ -817,6 +821,15 @@
                     <i class="fas fa-check-circle"></i>
                     <strong>Thanh toán trước:</strong><br>
                     Món ăn sẽ được chuẩn bị sẵn trước khi bạn đến. Đến nhà hàng sẽ có món ăn sẵn sàng ngay!
+                </p>
+            </div>
+            <div id="paymentInfoVNPay" class="payment-info vnpay" style="display: none;">
+                <p>
+                    <i class="fas fa-shield-alt"></i>
+                    <strong>Thanh toán qua VNPay:</strong><br>
+                    Bạn sẽ được chuyển đến trang thanh toán VNPay an toàn.
+                    Hỗ trợ thanh toán bằng thẻ ATM, thẻ tín dụng và ví điện tử.<br>
+                    <strong style="color: #28a745;">✓ Bảo mật cao | ✓ Xử lý nhanh</strong>
                 </p>
             </div>
         </div>
@@ -968,6 +981,7 @@
     const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
     const paymentInfoCash = document.getElementById('paymentInfoCash');
     const paymentInfoPrepaid = document.getElementById('paymentInfoPrepaid');
+    const paymentInfoVNPay = document.getElementById('paymentInfoVNPay');
 
     paymentMethods.forEach(function(radio) {
         radio.addEventListener('change', function() {
@@ -975,10 +989,17 @@
                 // Thanh toán khi nhận (COD)
                 paymentInfoCash.style.display = 'block';
                 paymentInfoPrepaid.style.display = 'none';
+                paymentInfoVNPay.style.display = 'none';
+            } else if (this.value === 'VNPAY') {
+                // Thanh toán VNPay
+                paymentInfoCash.style.display = 'none';
+                paymentInfoPrepaid.style.display = 'none';
+                paymentInfoVNPay.style.display = 'block';
             } else if (this.value === 'CREDIT_CARD' || this.value === 'E_WALLET') {
                 // Thanh toán trước
                 paymentInfoCash.style.display = 'none';
                 paymentInfoPrepaid.style.display = 'block';
+                paymentInfoVNPay.style.display = 'none';
             }
             // Cập nhật tổng tiền khi thay đổi payment method
             updateTotal();
