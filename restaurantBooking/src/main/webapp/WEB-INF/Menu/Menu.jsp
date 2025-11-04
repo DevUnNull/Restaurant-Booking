@@ -255,7 +255,7 @@
 <div class="sidebar">
 
     <ul>
-       
+
         <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
         <li><a href="Menu_manage">Quản lý Menu</a></li>
         <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>

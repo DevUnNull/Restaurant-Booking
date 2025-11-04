@@ -358,6 +358,90 @@ public class ReservationDAO {
         return null;
     }
 
+    // Get reservation details by ID (for email notification)
+    public OrderManagementDTO getReservationDetailsById(int reservationId) {
+        String sql = "SELECT r.reservation_id, r.reservation_date, r.reservation_time, r.guest_count, " +
+                "r.status, r.total_amount, r.special_requests, r.created_at, r.updated_at, " +
+                "u.user_id, u.full_name, u.phone_number, u.email, " +
+                "p.payment_method, p.payment_status, " +
+                "GROUP_CONCAT(DISTINCT t.table_name ORDER BY t.table_name SEPARATOR ', ') as table_names, " +
+                "COUNT(DISTINCT oi.order_item_id) as item_count " +
+                "FROM Reservations r " +
+                "LEFT JOIN Users u ON r.user_id = u.user_id " +
+                "LEFT JOIN Payments p ON r.reservation_id = p.reservation_id " +
+                "LEFT JOIN Reservation_Tables rt ON r.reservation_id = rt.reservation_id " +
+                "LEFT JOIN Tables t ON rt.table_id = t.table_id " +
+                "LEFT JOIN Order_Items oi ON r.reservation_id = oi.reservation_id " +
+                "WHERE r.reservation_id = ? " +
+                "GROUP BY r.reservation_id, r.reservation_date, r.reservation_time, " +
+                "r.guest_count, r.status, r.total_amount, r.special_requests, " +
+                "r.created_at, r.updated_at, u.user_id, u.full_name, u.phone_number, " +
+                "u.email, p.payment_method, p.payment_status";
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, reservationId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    OrderManagementDTO dto = new OrderManagementDTO();
+
+                    // Reservation info
+                    dto.setReservationId(rs.getInt("reservation_id"));
+
+                    // Safe handling for dates
+                    java.sql.Date sqlDate = rs.getDate("reservation_date");
+                    if (sqlDate != null) {
+                        dto.setReservationDate(sqlDate.toLocalDate());
+                    }
+
+                    java.sql.Time sqlTime = rs.getTime("reservation_time");
+                    if (sqlTime != null) {
+                        dto.setReservationTime(sqlTime.toLocalTime());
+                    }
+
+                    dto.setGuestCount(rs.getInt("guest_count"));
+                    dto.setStatus(rs.getString("status"));
+                    dto.setTotalAmount(rs.getBigDecimal("total_amount"));
+                    dto.setSpecialRequests(rs.getString("special_requests"));
+
+                    Timestamp createdAt = rs.getTimestamp("created_at");
+                    if (createdAt != null) {
+                        dto.setCreatedAt(createdAt.toLocalDateTime());
+                    }
+
+                    Timestamp updatedAt = rs.getTimestamp("updated_at");
+                    if (updatedAt != null) {
+                        dto.setUpdatedAt(updatedAt.toLocalDateTime());
+                    }
+
+                    // Customer info
+                    dto.setUserId(rs.getInt("user_id"));
+                    dto.setCustomerName(rs.getString("full_name"));
+                    dto.setCustomerPhone(rs.getString("phone_number"));
+                    dto.setCustomerEmail(rs.getString("email"));
+
+                    // Table info
+                    dto.setTableNames(rs.getString("table_names"));
+
+                    // Order items count
+                    dto.setItemCount(rs.getInt("item_count"));
+
+                    // Payment info
+                    dto.setPaymentMethod(rs.getString("payment_method"));
+                    dto.setPaymentStatus(rs.getString("payment_status"));
+
+                    return dto;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting reservation details by ID: {}", reservationId, e);
+        }
+
+        return null;
+    }
+
     public int getTotalReservationsCount(String statusFilter, String searchQuery) {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT COUNT(DISTINCT r.reservation_id) as total ");
