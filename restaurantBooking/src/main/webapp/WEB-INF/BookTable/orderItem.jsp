@@ -457,7 +457,7 @@
             boolean isComboItem = comboItemIds.contains(item.getItemId());
         %>
         <div class="menu-item <%= isComboItem ? "combo-item" : "" %>">
-            <img src="<%= item.getImageUrl() %>" alt="<%= item.getItemName() %>">
+            <img src="${pageContext.request.contextPath}<%= item.getImageUrl() %>" alt="<%= item.getItemName() %>">
             <div class="item-details">
                 <h3><%= item.getItemName() %></h3>
                 <p class="price"><%= formatter.format(item.getPrice()) %></p>
