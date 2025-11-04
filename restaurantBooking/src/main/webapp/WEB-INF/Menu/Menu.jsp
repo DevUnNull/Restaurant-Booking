@@ -253,9 +253,9 @@
 <%--</ul>--%>
 <!-- Sidebar -->
 <div class="sidebar">
-    <h2>Staff Panel</h2>
+
     <ul>
-        <li><a href="#">Dashboard</a></li>
+       
         <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
         <li><a href="Menu_manage">Quản lý Menu</a></li>
         <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
@@ -315,13 +315,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="addDishImageUrl" class="form-label">Ảnh món ăn (URL)</label>
-                            <div class="mb-2 text-center">
-                                <img id="imagePreview"
-                                     src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}"
-                                     alt="Xem trước ảnh"
-                                     class="img-thumbnail"
-                                     style="max-width:200px; max-height:200px;">
-                            </div>
+
                             <input type="text"
                                    class="form-control"
                                    id="addDishImageUrl"
@@ -464,7 +458,11 @@
                 document.getElementById("menuCodeEdit").value = code;
                 document.getElementById("menuStatusEdit").value = status;
 
-                // ✅ chọn đúng option theo category_id
+
+
+                const imageInput = document.getElementById("menuImageEditUrl");
+                if (imageInput) imageInput.value = image;
+                // document.querySelector('#editForm [name="imageUrl"]').value = image;                // ✅ chọn đúng option theo category_id
                 const categorySelect = document.getElementById("menuCategoryEdit");
                 if (categorySelect) categorySelect.value = categoryId;
 
@@ -653,13 +651,7 @@
 
                     <div class="mb-3">
                         <label for="menuImageEditUrl" class="form-label">Ảnh món ăn (URL)</label>
-                        <div class="mb-2 text-center">
-                            <img id="imagePreview"
-                                 src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}"
-                                 alt="Xem trước ảnh"
-                                 class="img-thumbnail"
-                                 style="max-width:200px; max-height:200px;">
-                        </div>
+
                         <input type="text"
                                class="form-control"
                                id="menuImageEditUrl"

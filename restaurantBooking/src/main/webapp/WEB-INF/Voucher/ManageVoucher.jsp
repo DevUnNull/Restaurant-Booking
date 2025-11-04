@@ -257,9 +257,9 @@
 <%--</ul>--%>
 <!-- Sidebar -->
 <div class="sidebar">
-  <h2>Staff Panel</h2>
+
   <ul>
-    <li><a href="#">Dashboard</a></li>
+
     <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
     <li><a href="Menu_manage">Quản lý Menu</a></li>
     <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
@@ -372,6 +372,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <span class="badge bg-success badge-status">${o.status}</span>
               <small class="text-muted">${o.discount_percentage}%</small>
+
             </div>
             <div class="mt-3 d-flex justify-content-between">
               <button class="btn btn-sm btn-primary btn-edit"
@@ -380,8 +381,8 @@
                       data-desc="${o.description}"
                       data-discount="${o.discount_percentage}"
                       data-start="${o.start_date}"
-                      data-end="${o.end_date}">
-
+                      data-end="${o.end_date}"
+                      data-level="${o.promotion_level_id}">
                 Sửa
               </button>
               <button class="btn btn-sm btn-danger btn-delete"
@@ -442,8 +443,8 @@
             </div>
           </div>
           <div class="mb-3">
-            <label for="addVoucherLevel" class="form-label">Cấp độ Voucher</label>
-            <select class="form-select" id="addVoucherLevel" name="promotion_level_id" >
+            <label for="editVoucherLevel" class="form-label">Cấp độ Voucher</label>
+            <select class="form-select" id="editVoucherLevel" name="promotion_level_id">
               <option value="1">Cấp 1</option>
               <option value="2">Cấp 2</option>
               <option value="3">Cấp 3</option>
@@ -522,6 +523,10 @@
         document.getElementById("voucherStart").value = btn.dataset.start;
         document.getElementById("voucherEnd").value = btn.dataset.end;
 
+        const levelSelect = document.getElementById("editVoucherLevel");
+        if (levelSelect) {
+          levelSelect.value = btn.dataset.level; // chọn đúng option
+        }
         // Mở modal
         editModal.show();
       });
@@ -600,6 +605,51 @@
     const addModal = new bootstrap.Modal(document.getElementById('addVoucherModal'));
     addModal.show();
     <% } %>
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // ====== 🟢 Form thêm voucher ======
+    const addForm = document.querySelector("#addVoucherModal form");
+    const addModalEl = document.getElementById("addVoucherModal");
+    const addModal = new bootstrap.Modal(addModalEl);
+    const addErrorDiv = document.getElementById("addErrorMsg");
+
+    addForm.addEventListener("submit", function(e) {
+      const start = document.getElementById("addVoucherStart").value;
+      const end = document.getElementById("addVoucherEnd").value;
+
+      if (start && end && new Date(end) < new Date(start)) {
+        e.preventDefault(); // ❌ Ngăn gửi form
+        addErrorDiv.classList.remove("d-none");
+        addErrorDiv.textContent = "⚠️ Thời gian kết thúc phải sau hoặc bằng thời gian bắt đầu.";
+        addModal.show(); // 🔁 Giữ popup mở lại
+        return false;
+      } else {
+        addErrorDiv.classList.add("d-none"); // Ẩn lỗi nếu hợp lệ
+      }
+    });
+
+    // ====== 🟠 Form sửa voucher ======
+    const editForm = document.querySelector("#editVoucherModal form");
+    const editModalEl = document.getElementById("editVoucherModal");
+    const editModal = new bootstrap.Modal(editModalEl);
+    const editErrorDiv = document.getElementById("editErrorMsg");
+
+    editForm.addEventListener("submit", function(e) {
+      const start = document.getElementById("voucherStart").value;
+      const end = document.getElementById("voucherEnd").value;
+
+      if (start && end && new Date(end) < new Date(start)) {
+        e.preventDefault(); // ❌ Ngăn gửi form
+        editErrorDiv.classList.remove("d-none");
+        editErrorDiv.textContent = "⚠️ Thời gian kết thúc phải sau hoặc bằng thời gian bắt đầu.";
+        editModal.show(); // 🔁 Giữ popup mở lại
+        return false;
+      } else {
+        editErrorDiv.classList.add("d-none");
+      }
+    });
   });
 </script>
 </body>

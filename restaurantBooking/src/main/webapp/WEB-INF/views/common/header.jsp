@@ -11,6 +11,7 @@
     <nav>
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
+            <li><a href="${pageContext.request.contextPath}/Blog">Blog nhà Hàng</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
             <li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li>
 
@@ -29,7 +30,7 @@
                         <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý voucher</a>
                         <a href="${pageContext.request.contextPath}/Promotion_level"><i class="fas fa-users"></i> Quản lý khách hàng</a>
                         <a href="${pageContext.request.contextPath}/Timedirect"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
-                        <a href="${pageContext.request.contextPath}/Blog"><i class="fas fa-newspaper"></i> Blog nhà Hàng</a>
+
                     </div>
                 </li>
             </c:if>

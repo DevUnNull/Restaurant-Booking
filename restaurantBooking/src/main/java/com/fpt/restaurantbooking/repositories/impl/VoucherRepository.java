@@ -116,7 +116,7 @@ public class VoucherRepository {
         return promotion;
     }
 
-    public void UpdatePromotion(String id, String name, String des, String discount_p, String start_date, String end_Date, String updated_by) throws SQLException {
+    public void UpdatePromotion(String id, String name, String des, String discount_p, String start_date, String end_Date, String updated_by,String promotion_level_id) throws SQLException {
         String sql = "UPDATE promotions \n " +
                 " SET \n " +
                 "    promotion_name = ?,\n " +
@@ -124,7 +124,8 @@ public class VoucherRepository {
                 "    discount_percentage = ?,\n " +
                 "    start_date = ?,\n " +
                 "    end_date = ?\n , " +
-                " updated_by = ? \n  " +
+                " updated_by = ? ,\n  " +
+                " promotion_level_id = ? " +
                 " WHERE promotion_id = ? ";
         try (Connection conn = db.getConnection();
              PreparedStatement stm = conn.prepareStatement(sql);) {
@@ -135,7 +136,8 @@ public class VoucherRepository {
             stm.setString(4, start_date);
             stm.setString(5, end_Date);
             stm.setString(6, updated_by);
-            stm.setString(7, id);
+            stm.setString(7, promotion_level_id);
+            stm.setString(8, id);
             stm.executeUpdate();
         } catch (Exception e) {
             throw new RuntimeException(e);

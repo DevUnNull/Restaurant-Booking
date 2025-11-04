@@ -5,6 +5,7 @@ import com.fpt.restaurantbooking.models.MenuItem;
 import com.fpt.restaurantbooking.models.Promotions;
 import com.fpt.restaurantbooking.repositories.impl.MenuRepository;
 import com.fpt.restaurantbooking.repositories.impl.VoucherRepository;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -41,8 +42,14 @@ public class MenuList extends HttpServlet {
 MenuRepository menuRepository = new MenuRepository();
         try {
             List<MenuItem> listmenuItem = menuRepository.getMenuItemsAlk();
+            if(listmenuItem.isEmpty()|| listmenuItem==null){
+                request.getRequestDispatcher("/WEB-INF/Time_slot/TimeDetail.jsp").forward(request, response);
+                return;
+            }
 request.setAttribute("listmenuItem", listmenuItem);
-            request.getRequestDispatcher("/WEB-INF/Service/ManageService.jsp").forward(request, response);
+
+            RequestDispatcher rd =  request.getRequestDispatcher("/WEB-INF/Service/MenuList.jsp");
+            rd.include(request, response);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

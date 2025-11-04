@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="vi">
@@ -209,9 +210,9 @@
     <div class="main-wrapper">
         <!-- Sidebar -->
         <div class="sidebar">
-            <h2>Staff Panel</h2>
+
             <ul>
-                <li><a href="#">Dashboard</a></li>
+
 
                 <!-- nếu quyền là admin Restaurant thì hiện  -->
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
@@ -241,71 +242,59 @@
                 <div class="modal-content">
                     <span class="close" onclick="closeAddModal()">&times;</span>
                     <h2>Thêm dịch vụ</h2>
-                    <c:if test="${not empty errorMessage}">
-                        <script>
-                            window.onload = function () {
-                                openAddModal(); // ✅ Gọi lại hàm render mã ngẫu nhiên
-                            }
-                        </script>
-                        <p style="color:red;">${errorMessage}</p>
-                    </c:if>
+                    <p id="add-error-message" style="color:red; text-align:center; display:none;"></p>
+
                     <form action="ServiceAdd" method="post">
-                        <label>Tên dịch vụ:</label>
-                        <input type="text" id="add-name" name="serviceName"
-                               value="${param.serviceName != null ? param.serviceName : ''}" >
+                        <div id="step1">
+                            <label>Tên dịch vụ:</label>
+                            <input type="text" id="add-name" name="serviceName"
+                                   value="${param.serviceName != null ? param.serviceName : ''}" >
 
-                        <label>Mã dịch vụ:</label>
-                        <input type="text" id="add-code" name="serviceCode"
-                        >
+                            <label>Mã dịch vụ:</label>
+                            <input type="text" id="add-code" name="serviceCode">
 
-                        <label>Mô tả:</label>
-                        <textarea id="add-description" name="description">${param.description}</textarea>
+                            <label>Mô tả:</label>
+                            <textarea id="add-description" name="description">${param.description}</textarea>
 
-                        <label>Giá:</label>
-                        <input type="number" id="add-price" name="price"
-                               value="${param.price != null ? param.price : ''}">
+                            <label>Giá:</label>
+                            <input type="number" id="add-price" name="price"
+                                   value="${param.price != null ? param.price : ''}">
 
-                        <label>Trạng thái:</label>
-                        <select id="add-status" name="status">
-                            <option value="ACTIVE" ${param.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
-                            <option value="INACTIVE" ${param.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
-                        </select>
+                            <label>Trạng thái:</label>
+                            <select id="add-status" name="status">
+                                <option value="ACTIVE" ${param.status == 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+                                <option value="INACTIVE" ${param.status == 'INACTIVE' ? 'selected' : ''}>INACTIVE</option>
+                            </select>
 
-                        <label>Ngày bắt đầu:</label>
-                        <input type="date" id="add-start" name="startDate" value="${param.startDate}">
+                            <label>Ngày bắt đầu:</label>
+                            <input type="date" id="add-start" name="startDate" value="${param.startDate}">
 
-                        <label>Ngày kết thúc:</label>
-                        <input type="date" id="add-end" name="endDate" value="${param.endDate}">
+                            <label>Ngày kết thúc:</label>
+                            <input type="date" id="add-end" name="endDate" value="${param.endDate}">
 
+                            <button type="button" class="action-btn btn-update" onclick="nextStep()">Tiếp theo</button>
+                        </div>
 
-
-
-                        <!-- Popup chọn món combo (bước 2) -->
-                        <div id="comboStep" style="display:none; margin-top:20px;">
+                        <!-- 🟩 BƯỚC 2: CHỌN MÓN COMBO -->
+                        <div id="comboStep" style="display:none;">
                             <h3 style="text-align:center; color:#b52a1a;">Chọn món cho Combo</h3>
                             <p style="text-align:center; color:#555;">Chọn các món ăn muốn thêm vào combo dịch vụ:</p>
 
-                            <!-- Danh sách món: chia làm 2 cột -->
-                            <div id="menu-list"
-                                 style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:15px; border-radius:8px;">
-                                <div class="menu-grid">
-                                    <c:forEach var="m" items="${listmenuItem}">
-                                        <label><input type="checkbox" name="menuItems" value="${m.itemId}"> ${m.itemName}</label>
-                                    </c:forEach>
-                                </div>
+                            <div id="menu-list" style="margin:15px 0;">
+                                <p style="text-align:center;">Đang tải danh sách món...</p>
                             </div>
 
                             <div style="text-align:center; margin-top:20px;">
-                                <button type="button" class="action-btn btn-update" onclick="prevStep()">Quay lại</button>
-                                <button type="submit" class="action-btn btn-update">Hoàn tất</button>
+                                <button type="button" class="action-btn btn-update" onclick="prevStep()">⬅ Quay lại</button>
+                                <button type="submit" class="action-btn btn-update">Hoàn tất ➕</button>
                             </div>
                         </div>
-                        <button type="submit" class="action-btn btn-update">Thêm dịch vụ</button>
-<%--                        <button type="button" class="action-btn btn-update" onclick="nextStep()">Tiếp theo</button>--%>
                     </form>
                 </div>
             </div>
+
             <!-- Table -->
+
             <table>
                 <thead>
                 <tr>
@@ -324,7 +313,16 @@
                 <tbody>
                 <c:forEach var="o" items="${kakao}">
                     <tr>
-                        <td>${o.serviceName}</td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${fn:length(o.serviceName) > 40}">
+                                    ${fn:substring(o.serviceName, 0, 40)}...
+                                </c:when>
+                                <c:otherwise>
+                                    ${o.serviceName}
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
                         <td>${o.serviceCode}</td>
                         <td>.....</td>
                         <td>${o.price} VND</td>
@@ -444,24 +442,48 @@
         </form>
     </div>
 </div>
+
+
 <!-- Popup Combo món -->
 <div id="comboPopup" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeComboPopup()">&times;</span>
         <h2 style="text-align:center; color:#b52a1a;">Thông tin dịch vụ</h2>
         <h3 id="combo-service-name" style="text-align:center; margin-bottom:15px;"></h3>
-
+        <input type="hidden" id="combo-service-id" value="">
         <div id="combo-items" class="combo-items">
             <!-- Danh sách món sẽ được load tại đây -->
             <p style="text-align:center; color:#777;">Đang tải...</p>
         </div>
     </div>
 </div>
+<div id="addItemPopup" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddItemPopup()">&times;</span>
+        <h2 style="text-align:center; color:#b52a1a;">Thêm món vào Combo</h2>
+
+        <form id="addItemForm" action="AddItemsToCombo" method="post">
+            <input type="hidden" id="comboId" name="serviceId">
+
+            <div id="add-item-list" style="max-height:300px; overflow-y:auto; text-align:center;">
+                <p>Đang tải danh sách món...</p>
+            </div>
+
+            <div style="margin-top:15px; text-align:center;">
+                <button type="submit">✅ Thêm vào combo</button>
+                <button type="button" onclick="closeAddItemPopup()">❌ Hủy</button>
+            </div>
+        </form>
+    </div>
+</div>
 <script>
+
     function openComboPopup(btn) {
         const serviceId = btn.dataset.id;
         const serviceName = btn.dataset.name;
-
+        console.log("✅ serviceId:", serviceId);
+        console.log("✅ serviceName:", serviceName);
+        document.getElementById("combo-service-id").value = serviceId;
         document.getElementById("combo-service-name").innerText = "Dịch vụ: " + serviceName;
         document.getElementById("comboPopup").style.display = "block";
 
@@ -484,6 +506,39 @@
         const popup = document.getElementById("comboPopup");
         if (e.target === popup) closeComboPopup();
     }
+</script>
+<script>
+    // Mở popup 2
+    function openAddItemPopup() {
+        const comboId = document.getElementById("combo-service-id").value;
+
+
+        document.getElementById("comboId").value = comboId;
+        const popup = document.getElementById("addItemPopup");
+        popup.style.display = "block";
+
+        const container = document.getElementById("add-item-list");
+        container.innerHTML = "<p>Đang tải danh sách món...</p>";
+
+        // Gọi servlet đúng với serviceId dạng số
+        fetch("AvailableItemsList?serviceId=" + comboId)
+            .then(res => res.text())
+            .then(html => container.innerHTML = html)
+            .catch(() => container.innerHTML = "<p style='color:red;'>Lỗi tải dữ liệu!</p>");
+    }
+
+    // Đóng popup 2
+    function closeAddItemPopup() {
+        document.getElementById("addItemPopup").style.display = "none";
+    }
+
+    // Đóng popup khi click ra ngoài
+    window.addEventListener('click', function(e) {
+        const popup1 = document.getElementById("comboPopup");
+        const popup2 = document.getElementById("addItemPopup");
+        if (e.target === popup1) closeComboPopup();
+        if (e.target === popup2) closeAddItemPopup();
+    });
 </script>
 <script>
     function openDeleteModal(btn) {
@@ -571,40 +626,146 @@ window.onclick = function (event) {
     }
 </script>
 <script>
+    function showError(msg) {
+        const errorBox = document.getElementById("add-error-message");
+        errorBox.textContent = msg;
+        errorBox.style.display = "block";
+    }
+
+    function clearError() {
+        const errorBox = document.getElementById("add-error-message");
+        errorBox.textContent = "";
+        errorBox.style.display = "none";
+    }
+
     function nextStep() {
-        // Kiểm tra dữ liệu bắt buộc
+        clearError(); // xóa lỗi cũ
+
         const name = document.getElementById("add-name").value.trim();
         const price = document.getElementById("add-price").value.trim();
 
+        // ✅ Kiểm tra rỗng
         if (!name || !price) {
-            alert("Vui lòng nhập đầy đủ tên và giá dịch vụ!");
+            showError("Vui lòng nhập đầy đủ tên và giá dịch vụ!");
             return;
         }
 
-        // Ẩn form nhập, hiện bước chọn món
-        document.querySelector("#addModal form > *:not(#comboStep)").style.display = "none";
+
+
+
+        // Ẩn step 1, hiện step 2
+        document.getElementById("step1").style.display = "none";
         document.getElementById("comboStep").style.display = "block";
 
-        // Tải danh sách món ăn (nếu chưa có)
+        // Load danh sách món ăn nếu chưa có
         const menuList = document.getElementById("menu-list");
         if (!menuList.dataset.loaded) {
-            fetch("MenuList") // servlet JSP trả danh sách món ăn
+            fetch('${pageContext.request.contextPath}/MenuList')
                 .then(res => res.text())
                 .then(html => {
                     menuList.innerHTML = html;
                     menuList.dataset.loaded = "true";
                 })
-                .catch(() => {
-                    menuList.innerHTML = "<p style='color:red;'>Không thể tải danh sách món!</p>";
-                });
+                .catch(() => showError("Không thể tải danh sách món ăn!"));
         }
     }
 
     function prevStep() {
-        // Quay lại bước nhập thông tin
+        clearError();
         document.getElementById("comboStep").style.display = "none";
-        document.querySelectorAll("#addModal form > *:not(#comboStep)").forEach(el => el.style.display = "");
+        document.getElementById("step1").style.display = "block";
     }
 </script>
+<!-- Thông báo thêm thành công -->
+<c:if test="${param.success == '1'}">
+    <div id="toastMessage" class="toast toast-success">
+        ✅ Đã thêm thành công!
+    </div>
+</c:if>
+
+<!-- Thông báo xóa thành công -->
+<c:if test="${param.deleted == '1'}">
+    <div id="toastMessage" class="toast toast-error">
+        ❌ Đã xóa thành công!
+    </div>
+</c:if>
+
+<style>
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        font-weight: bold;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .toast-success {
+        background-color: #4CAF50; /* xanh lá */
+    }
+    .toast-error {
+        background-color: #dc3545; /* đỏ */
+    }
+</style>
+
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+        const toast = document.getElementById("toastMessage");
+        if (toast) {
+            setTimeout(() => toast.classList.add("show"), 100);
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 500);
+            }, 5000);
+        }
+    });
+</script>
+<c:if test="${param.error == '1'}">
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            console.log("⚠️ Phát hiện lỗi error=1 → mở lại popup combo");
+
+            // Lấy serviceId từ param
+            const serviceId = "${param.serviceId}";
+            const btn = document.querySelector(`[data-id='${param.serviceId}']`);
+
+            if (btn && typeof openComboPopup === "function") {
+                openComboPopup(btn);
+
+                // Chờ popup load xong rồi hiển thị thông báo lỗi
+                setTimeout(() => {
+                    const popup = document.getElementById("comboPopup");
+                    const errBox = popup ? popup.querySelector("#errorMessage") : null;
+
+                    if (errBox) {
+                        errBox.textContent = "⚠️ Vui lòng chọn ít nhất một món để xóa!";
+                        errBox.style.display = "block";
+                        errBox.style.opacity = "1";
+
+                        setTimeout(() => {
+                            errBox.style.transition = "opacity 0.5s";
+                            errBox.style.opacity = "0";
+                            setTimeout(() => {
+                                errBox.style.display = "none";
+                                errBox.style.transition = "";
+                            }, 500);
+                        }, 4000);
+                    }
+                }, 800);
+            } else {
+                console.error("Không tìm thấy nút hoặc hàm openComboPopup");
+            }
+        });
+    </script>
+</c:if>
 </body>
 </html>

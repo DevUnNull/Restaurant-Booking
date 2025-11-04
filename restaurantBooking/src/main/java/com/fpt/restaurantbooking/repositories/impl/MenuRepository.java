@@ -32,7 +32,7 @@ public class MenuRepository {
 
     }
     public List<MenuItem> getMenuItemsAlk() throws SQLException {
-        List<MenuItem> menuItemList = new ArrayList<MenuItem>();
+        List<MenuItem> menuItemList = new ArrayList<>();
         String sql= " SELECT \n" +
                 "    mi.item_id,\n" +
                 "    mi.item_name,\n" +

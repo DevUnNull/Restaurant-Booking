@@ -19,8 +19,8 @@ import java.util.List;
 /**
  * @author Quandxnunxi28
  */
-@WebServlet(name = "ServiceItemListController", urlPatterns = {"/ServiceItemList"})
-public class ServiceItemListController extends HttpServlet {
+@WebServlet(name = "DeleteItemsFromComboController", urlPatterns = {"/DeleteItemsFromCombo"})
+public class DeleteItemsFromComboController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -34,17 +34,6 @@ public class ServiceItemListController extends HttpServlet {
 
         response.setContentType("text/html;charset=UTF-8");
 
-        String serviceId = request.getParameter("serviceId");
-        ServiceRepository  ServiceDAO = new ServiceRepository();
-        try {
-            List<MenuItem> items = ServiceDAO.getMenuItemsByService(Integer.parseInt(serviceId));
-            request.setAttribute("items", items);
-            request.setAttribute("serviceId", serviceId);
-            request.getRequestDispatcher("/WEB-INF/Service/ServiceItemList.jsp").forward(request, response);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
 
     }
 
@@ -56,13 +45,26 @@ public class ServiceItemListController extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException      if an I/O error occurs
      */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        @Override
+        protected void doPost(HttpServletRequest request, HttpServletResponse response)
+                throws ServletException, IOException {
 
-
-
-    }
+    String serviceId =  request.getParameter("serviceId");
+            String[] selectedItemIds = request.getParameterValues("selectedItems");
+            ServiceRepository serviceRepository = new ServiceRepository();
+            if (selectedItemIds == null || selectedItemIds.length == 0) {
+                response.sendRedirect("ServiceManage?error=1&serviceId=" + serviceId);
+                return;
+            }
+            if (selectedItemIds != null) {
+                for (String itemIdStr : selectedItemIds) {
+                    int itemId = Integer.parseInt(itemIdStr);
+                    serviceRepository.deleteItemCombo(serviceId, itemId);
+                    request.setAttribute("falseee", "Đã xóa thành công!!!");
+                }
+            }
+            response.sendRedirect("ServiceManage?deleted=1");
+        }
 
     /**
      * Returns a short description of the servlet.

@@ -3,6 +3,7 @@ package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.models.MenuItem;
 import com.fpt.restaurantbooking.models.Promotions;
+import com.fpt.restaurantbooking.models.Service;
 import com.fpt.restaurantbooking.repositories.impl.ServiceRepository;
 import com.fpt.restaurantbooking.repositories.impl.VoucherRepository;
 import jakarta.servlet.ServletException;
@@ -19,8 +20,8 @@ import java.util.List;
 /**
  * @author Quandxnunxi28
  */
-@WebServlet(name = "ServiceItemListController", urlPatterns = {"/ServiceItemList"})
-public class ServiceItemListController extends HttpServlet {
+@WebServlet(name = "AvailableItemsList", urlPatterns = {"/AvailableItemsList"})
+public class AvailableItemsList extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -33,14 +34,13 @@ public class ServiceItemListController extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
-
-        String serviceId = request.getParameter("serviceId");
-        ServiceRepository  ServiceDAO = new ServiceRepository();
+       String id= request.getParameter("serviceId");
+        ServiceRepository  serviceRepository = new ServiceRepository();
         try {
-            List<MenuItem> items = ServiceDAO.getMenuItemsByService(Integer.parseInt(serviceId));
-            request.setAttribute("items", items);
-            request.setAttribute("serviceId", serviceId);
-            request.getRequestDispatcher("/WEB-INF/Service/ServiceItemList.jsp").forward(request, response);
+            List<Integer> listIdItem = serviceRepository.getMenuItemByServiceId(Integer.parseInt(id));
+            List<MenuItem> filteredItems = serviceRepository.getMenuItemsExcluding(listIdItem);
+            request.setAttribute("availableItems", filteredItems);
+            request.getRequestDispatcher("/WEB-INF/Service/AvailableItemsList.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

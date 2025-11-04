@@ -23,7 +23,7 @@ body {
     background: #7b1c1c;
     color: #fff;
     position: fixed;
-    top: 127px; /* dưới header */
+    top: 96px; /* dưới header */
     bottom: 0;
     padding: 20px 12px;
     overflow-y: auto;

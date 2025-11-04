@@ -527,16 +527,7 @@
                 return;
             }
 
-            const invalidOrder =
-                (ms >= me) ||
-                (as >= ae) ||
-                (es >= ee);
 
-            if (invalidOrder) {
-                errorEl.textContent = 'Giờ bắt đầu phải nhỏ hơn giờ kết thúc ở mỗi buổi.';
-                errorEl.style.display = 'block';
-                return;
-            }
 
             document.getElementById('edit-updated-by').value = userId;
             document.getElementById('editForm').submit();
