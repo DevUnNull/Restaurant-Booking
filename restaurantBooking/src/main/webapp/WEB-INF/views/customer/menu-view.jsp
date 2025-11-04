@@ -249,7 +249,7 @@
     <div class="grid">
         <c:forEach var="item" items="${menuList}">
             <div class="card">
-                <img src="${pageContext.request.contextPath}/images/${empty item.imageUrl ? 'no-image.png' : item.imageUrl}"
+                <img src="${pageContext.request.contextPath}${empty item.imageUrl ? 'no-image.png' : item.imageUrl}"
                      alt="${item.itemName}">
                 <div class="card-content">
                     <div class="item-name">${item.itemName}</div>
