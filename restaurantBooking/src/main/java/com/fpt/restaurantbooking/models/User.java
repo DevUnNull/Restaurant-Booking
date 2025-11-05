@@ -67,6 +67,13 @@ public class User extends BaseEntity {
         this.dateOfBirth = dateOfBirth;
     }
 
+    public String  getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public String getPromotion_level_id() {
         return promotion_level_id;
