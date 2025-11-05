@@ -62,7 +62,7 @@
                         <a href="${pageContext.request.contextPath}/EmployeeList">Quản Lý Nhân Sự</a>
                         <a href="${pageContext.request.contextPath}/WorkSchedule">Phân lịch làm việc</a>
                         <a href="#">Lịch làm việc</a>
-                        <a href="#">Đơn xin việc</a>
+                        <a href="CustomerList">Thêm nhân viên</a>
                     </div>
                 </li>
 
