@@ -21,9 +21,9 @@ public class DeleteEmployeeController extends HttpServlet {
             boolean success = userDao.softDeleteUser(userId);
 
             if (success) {
-                request.getSession().setAttribute("message", "Đã xóa nhân viên thành công.");
+                request.getSession().setAttribute("message", "Khóa thành công.");
             } else {
-                request.getSession().setAttribute("error", "Không thể xóa nhân viên này.");
+                request.getSession().setAttribute("error", "Không thể khóa tài khoản của nhân viên này.");
             }
 
         } catch (Exception e) {

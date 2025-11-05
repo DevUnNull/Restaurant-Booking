@@ -1,0 +1,134 @@
+/* === Container tổng === */
+.timetable-container {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 1200px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* === Tiêu đề & form lọc === */
+.timetable-container h3 {
+    text-align: center;
+    color: #b23627;
+    margin-top: 15px;
+    margin-bottom: 25px;
+    font-weight: bold;
+}
+
+.timetable-container form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.timetable-container label {
+    font-weight: 600;
+    color: #333;
+}
+
+.timetable-container select {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.timetable-container select:hover {
+    border-color: #b23627;
+}
+
+.timetable-container button {
+    padding: 8px 20px;
+    background-color: #b23627;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.timetable-container button:hover {
+    background-color: #922c1f;
+}
+
+/* === Bảng lịch làm việc === */
+.timetable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.timetable th {
+    background-color: #b23627;
+    color: white;
+    padding: 10px;
+    border: 1px solid #b23627;
+    font-weight: 600;
+}
+
+.timetable td {
+    border: 1px solid #ddd;
+    height: 100px;
+    vertical-align: top;
+    position: relative;
+    background-color: #fafafa;
+    transition: background-color 0.3s ease;
+}
+
+.timetable td:hover {
+    background-color: #f9e8e7;
+}
+
+/* === Ô ca làm (shift box) === */
+.shift-box {
+    border-radius: 10px;
+    padding: 6px 8px;
+    margin: 4px auto;
+    color: white;
+    width: 95%;
+    font-size: 14px;
+    text-align: center;
+    word-wrap: break-word;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Màu theo trạng thái */
+.CONFIRMED {
+    background-color: #4CAF50;   /* xanh lá */
+}
+
+.TENTATIVE {
+    background-color: #ff9800;   /* cam */
+}
+
+.CANCELLED {
+    background-color: #f44336;   /* đỏ */
+}
+
+/* === Cột đầu tiên (Ca) === */
+.timetable td:first-child {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .timetable th, .timetable td {
+        font-size: 13px;
+        padding: 6px;
+    }
+
+    .shift-box {
+        font-size: 12px;
+        padding: 4px;
+    }
+}

@@ -157,5 +157,80 @@ public class WorkScheduleDAO {
         return null;
     }
 
+    public List<WorkSchedule> getAllSchedules() {
+        List<WorkSchedule> list = new ArrayList<>();
+        String sql = "SELECT ws.schedule_id, ws.work_date, ws.shift, ws.start_time, ws.end_time, " +
+                "ws.work_position, ws.notes, ws.status, ws.user_id, u.full_name " +
+                "FROM work_schedules ws " +
+                "JOIN users u ON ws.user_id = u.user_id";
+        try (Connection con = db.getConnection();
+             PreparedStatement stm = con.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(mapResultSetToWorkSchedule(rs));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<WorkSchedule> getSchedulesByWeek(LocalDate startDate, LocalDate endDate) {
+        List<WorkSchedule> list = new ArrayList<>();
+
+        String sql = "SELECT ws.*, u.full_name " +
+                "FROM work_schedules ws " +
+                "JOIN Users u ON ws.user_id = u.user_id " +
+                "WHERE ws.work_date BETWEEN ? AND ? " +
+                "ORDER BY ws.work_date, ws.start_time";
+
+        try (Connection con = db.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(startDate));
+            ps.setDate(2, Date.valueOf(endDate));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(mapResultSetToWorkSchedule(rs));
+            }
+
+            System.out.println("DEBUG: fetched " + list.size() + " schedules between " + startDate + " and " + endDate);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<WorkSchedule> getSchedulesByDate(LocalDate date) {
+        List<WorkSchedule> list = new ArrayList<>();
+        String sql = """
+            SELECT ws.*, u.full_name 
+            FROM Work_Schedules ws
+            JOIN Users u ON ws.user_id = u.user_id
+            WHERE ws.work_date = ?
+            ORDER BY ws.start_time
+        """;
+
+        try (Connection connection = db.getConnection();
+             PreparedStatement stm = connection.prepareStatement(sql)) {
+
+            stm.setDate(1, Date.valueOf(date));
+            ResultSet rs = stm.executeQuery();
+
+            while (rs.next()) {
+                list.add(mapResultSetToWorkSchedule(rs));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
 }

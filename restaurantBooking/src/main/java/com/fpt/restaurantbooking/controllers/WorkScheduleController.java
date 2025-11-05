@@ -26,8 +26,6 @@ public class WorkScheduleController extends HttpServlet {
         userDao = new UserDao();
     }
 
-    // ===================== MAIN REQUESTS =====================
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -165,7 +163,13 @@ public class WorkScheduleController extends HttpServlet {
             e.printStackTrace();
         }
 
-        response.sendRedirect(request.getContextPath() + "/WorkSchedule");
+        String currentQuery = request.getParameter("currentQuery");
+        if (currentQuery != null && !currentQuery.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/WorkSchedule" + currentQuery);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/WorkSchedule");
+        }
+
     }
 
     /**
