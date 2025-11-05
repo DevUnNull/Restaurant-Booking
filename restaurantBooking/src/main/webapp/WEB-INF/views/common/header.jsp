@@ -35,22 +35,6 @@
                 </li>
             </c:if>
 
-            <%-- HR Management Dropdown (Chỉ Admin - Role 1) --%>
-            <c:if test="${sessionScope.userRole == 1}">
-                <li class="user-dropdown">
-                    <div class="user-button" onclick="toggleDropdown('hrDropdown')">
-                        <span class="user-name">Quản lý nhân sự</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div id="hrDropdown" class="dropdown-content">
-                        <a href="${pageContext.request.contextPath}/EmployeeList">Quản Lý Nhân Sự</a>
-                        <a href="#">Phân lịch làm việc</a>
-                        <a href="#">Lịch làm việc</a>
-                        <a href="#">Đơn xin việc</a>
-                    </div>
-                </li>
-            </c:if>
-
             <%-- Report Dropdown (Admin & Manager - Role 1 & 4) --%>
             <c:if test="${sessionScope.userRole == 1 || sessionScope.userRole == 4}">
                 <li class="user-dropdown">
