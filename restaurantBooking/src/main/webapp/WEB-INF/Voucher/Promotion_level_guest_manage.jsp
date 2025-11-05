@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Quản lý khách hàng thân thiết</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+
     <style>
         :root {
             --wine: #8B0000; /* đỏ rượu vang */
@@ -298,34 +300,66 @@
                 padding: 12px
             }
         }
+        .banner.panel {
+            position: relative;
+            background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80'); /* 👈 thay đường dẫn ảnh của bạn */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #fff;
+            padding: 80px 40px;
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* lớp phủ màu đỏ mờ */
+        .banner.panel::before {
+        .banner.panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(180, 0, 0, 0.45); /* đỏ mờ 45% */
+            z-index: 1;
+        }
+
+        /* nội dung nằm trên overlay */
+        .banner.panel h1,
+        .banner.panel p {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* hiệu ứng chữ */
+        .banner.panel h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .banner.panel p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
 <!-- Header (kept) -->
-<div class="header">
-    <div class="logo">Restaurant_Booking</div>
-    <nav>
-        <ul>
-            <li><a href="#">Trang chủ</a></li>
-            <li><a href="#">Đặt bàn</a></li>
-            <li><a href="#">Menu</a></li>
-            <li><a href="#">Liên hệ</a></li>
-        </ul>
-    </nav>
-</div>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <div class="main-wrapper">
     <!-- Sidebar (kept) -->
     <aside class="sidebar">
-        <h2>Staff Panel</h2>
+
         <ul>
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#">Dịch vụ</a></li>
-            <li><a href="#">Quản lý dịch vụ</a></li>
-            <li><a href="#">Quản lý đánh giá</a></li>
-            <li><a href="#">Quản lý Menu</a></li>
-            <li><a href="#">Voucher</a></li>
-            <li><a href="#">Khách hàng thân thiết</a></li>
+
+            <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
+            <li><a href="Menu_manage">Quản lý Menu</a></li>
+            <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+            <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+            <li><a href="Timedirect">Quản lý khung giờ </a></li>
         </ul>
     </aside>
 
@@ -333,8 +367,9 @@
     <section class="content">
         <div class="banner panel">
             <h1>Danh sách khách hàng thân thiết</h1>
-            <p style="opacity:0.9; margin-top:8px">Quản lý, phân loại và chăm sóc khách hàng VIP — giữ chân khách hàng
-                và tăng doanh thu</p>
+            <p style="opacity:0.9; margin-top:8px">
+                Quản lý, phân loại và chăm sóc khách hàng VIP — giữ chân khách hàng và tăng doanh thu
+            </p>
         </div>
 
         <div class="panel">
@@ -394,7 +429,7 @@
                         <div class="user-meta">Ngày sinh: ${o.dateOfBirth} • Giới tính: ${o.gender}</div>
                         <div class="card-actions">
                             <button class="btn-ghost" onclick="openDetail(this)">Xem</button>
-                            <button class="btn-primary">Chỉnh sửa</button>
+
                         </div>
                         <div class="label-level">Cấp ${o.promotion_level_id}</div>
                     </div>

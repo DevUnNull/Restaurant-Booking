@@ -2,30 +2,34 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Overview Report Dashboard</title>
+    <title>Overview Statistics Report Dashboard</title>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         :root {
-            --main-color: #D32F2F;
-            --light-red: #FFCDD2;
-            --dark-red: #B71C1C;
-            --menu-bg: #8B0000;
-            --menu-hover: #A52A2A;
+            /* Color Variables */
+            --main-color: #D32F2F; /* Red - Primary Button, Top Nav, Headings border */
+            --light-red: #FFCDD2; /* Light Red - HR, Table hover, Chart border */
+            --dark-red: #B71C1C; /* Dark Red - Headings, Strong text */
+            --menu-bg: #8B0000; /* Menu Background - Sidebar */
+            --menu-hover: #A52A2A; /* Menu Hover */
             --text-light: #f8f8f8;
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3;
-            --revenue-color: #4CAF50;
-            --cancellation-color: #E91E63;
-            --rate-color: #FF9800;
+            --booking-color: #2196F3; /* Blue */
+            --revenue-color: #4CAF50; /* Green */
+            --cancellation-color: #E91E63; /* Pink/Red */
+            --rate-color: #FF9800; /* Orange/Warning */
+            --staff-chart-color: #00897B; /* Teal */
+            --staff-border-color: #00897B;
+            --customer-color: #1976D2; /* Customer blue */
         }
 
         body {
@@ -349,11 +353,12 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1001;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-content {
             background-color: #fff;
-            margin: 15% auto;
             padding: 20px;
             border-radius: 8px;
             width: 90%;
@@ -390,6 +395,35 @@
         .modal-form .btn-apply {
             width: 100%;
         }
+
+        /* NEW POPUP STYLE */
+        #missingDateAlert {
+            position: fixed;
+            /* Vị trí: Trên cùng (cách 20px) */
+            top: 20px;
+            left: 50%;
+            /* Căn giữa theo chiều ngang */
+            transform: translateX(-50%);
+
+            padding: 20px 30px;
+            min-width: 300px;
+            max-width: 90%;
+
+            /* Màu sắc bớt chói: Cam đậm/Đất sét */
+            background-color: #fff3e0; /* Deep Orange/Rust */
+            color: red;
+
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            z-index: 1002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
 
         @media (max-width: 768px) {
             .sidebar {
@@ -452,16 +486,16 @@
         <span class="restaurant-name">Restaurant Booking</span>
     </div>
     <div class="user-info">
-        <span>User:
-            <c:choose>
-                <c:when test="${not empty sessionScope.userName}">
-                    ${sessionScope.userName}
-                </c:when>
-                <c:otherwise>
-                    Guest
-                </c:otherwise>
-            </c:choose>
-        </span>
+    <span>User:
+        <c:choose>
+            <c:when test="${not empty sessionScope.currentUser}">
+                ${sessionScope.currentUser.fullName}
+            </c:when>
+            <c:otherwise>
+                Guest
+            </c:otherwise>
+        </c:choose>
+    </span>
     </div>
 </div>
 
@@ -471,8 +505,8 @@
             <li><a href="<%= request.getContextPath() %>/overview-report" ${request.getRequestURI().contains("overview-report") ? "class=\"active\"" : ""}>Overview Report</a></li>
             <li><a href="<%= request.getContextPath() %>/service-report" ${request.getRequestURI().contains("service-report") ? "class=\"active\"" : ""}>Service Report</a></li>
             <li><a href="<%= request.getContextPath() %>/staff-report" ${request.getRequestURI().contains("staff-report") ? "class=\"active\"" : ""}>Staff Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("customer-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancellation-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("user-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancel-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
         </ul>
     </div>
 
@@ -490,8 +524,8 @@
                             <button class="btn-apply" onclick="openModal()"><i class="fas fa-filter"></i> Open Filter Popup</button>
                         </div>
 
+                        <%-- Xuất file chỉ hiện khi không có lỗi/cảnh báo --%>
                         <c:if test="${empty requestScope.errorMessage and empty requestScope.warningMessage}">
-
                             <div class="filter-item" style="min-width: unset;">
                                 <button type="button" id="btnExportExcel" class="btn-apply" style="background-color: #0F9D58;"><i class="fas fa-file-excel"></i> Export to Excel</button>
                             </div>
@@ -501,6 +535,7 @@
                             </div>
                         </c:if>
                     </div>
+
                     <form action="overview-report" method="GET" id="filterForm" style="display: none;">
                         <div class="filter-grid">
                             <div class="filter-item">
@@ -525,92 +560,99 @@
                         </div>
                     </form>
 
-                    <c:if test="${not empty requestScope.warningMessage}">
-                        <div id="alertWarning" style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
-                            ${requestScope.warningMessage}
-                        </div>
-                    </c:if>
-
+                    <%-- HIỂN THỊ CẢNH BÁO LỖI HỆ THỐNG --%>
                     <c:if test="${not empty requestScope.errorMessage}">
                         <div id="alertError" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px;">
                             <i class="fas fa-times-circle"></i>
-                            <strong>System Error:</strong> ${requestScope.errorMessage}
+                            <strong>Lỗi Hệ thống:</strong> ${requestScope.errorMessage}
                         </div>
                     </c:if>
 
-                    <%-- Dữ liệu Summary và Chart luôn được hiển thị --%>
-                    <c:set var="summaryData" value="${requestScope.summaryData}"/>
-                    <div class="summary-cards">
-                        <div class="summary-card booking">
-                            <div class="summary-card-title">Total Bookings</div>
-                            <div class="summary-card-value">
-                                <i class="fas fa-calendar-check summary-card-icon" style="color: var(--booking-color);"></i>
-                                ${summaryData.totalBookings != null ? summaryData.totalBookings : 0}
-                            </div>
+                    <%-- HIỂN THỊ CẢNH BÁO NGHIỆP VỤ (Validation, No Data) --%>
+                    <c:if test="${not empty requestScope.warningMessage}">
+                        <div id="alertWarning" style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
+                            <strong>Cảnh báo Dữ liệu:</strong> ${requestScope.warningMessage}
                         </div>
-                        <div class="summary-card revenue">
-                            <div class="summary-card-title">Total Revenue</div>
-                            <div class="summary-card-value">
-                                <i class="fas fa-dollar-sign summary-card-icon" style="color: var(--revenue-color);"></i>
-                                <c:choose>
-                                    <c:when test="${summaryData.totalRevenue != null}">
-                                        <c:set var="revenue" value="${summaryData.totalRevenue / 1000000}"/>
-                                        <c:choose>
-                                            <c:when test="${revenue >= 1000}">
-                                                <fmt:formatNumber value="${revenue / 1000}" pattern="#0.0"/> B VND
-                                            </c:when>
-                                            <c:otherwise>
-                                                <fmt:formatNumber value="${revenue}" pattern="#0.0"/> M VND
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </c:when>
-                                    <c:otherwise>
-                                        0 M VND
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </div>
-                        <div class="summary-card cancellation">
-                            <div class="summary-card-title">Total Cancellations</div>
-                            <div class="summary-card-value">
-                                <i class="fas fa-ban summary-card-icon" style="color: var(--cancellation-color);"></i>
-                                ${summaryData.totalCancellations != null ? summaryData.totalCancellations : 0}
-                            </div>
-                        </div>
-                        <div class="summary-card rate">
-                            <div class="summary-card-title">Cancellation Rate</div>
-                            <div class="summary-card-value">
-                                <i class="fas fa-percentage summary-card-icon" style="color: var(--rate-color);"></i>
-                                <c:choose>
-                                    <c:when test="${summaryData.cancellationRate != null}">
-                                        <fmt:formatNumber value="${summaryData.cancellationRate}" pattern="#0.00"/>%
-                                    </c:when>
-                                    <c:otherwise>
-                                        0.00%
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </div>
-                    </div>
+                    </c:if>
+                    <%-- KẾT THÚC KHỐI CẢNH BÁO --%>
 
-                    <div class="chart-options">
-                        <h2 style="margin: 0; color: var(--main-color);">Revenue & Booking Trend (<c:out value="${requestScope.chartUnitParam eq 'day' ? 'Daily' : (requestScope.chartUnitParam eq 'week' ? 'Weekly' : 'Monthly')}"/>)</h2>
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <div class="chart-toggle-group">
-                                <label style="font-size: 0.9em; color: #555; margin-right: 5px;">Chart Type:</label>
-                                <button data-type="line"><i class="fas fa-chart-line"></i> Line</button>
-                                <button class="active" data-type="bar"><i class="fas fa-chart-bar"></i> Bar</button>
+
+                    <%-- BẮT ĐẦU KHỐI HIỂN THỊ DỮ LIỆU (CHỈ KHI KHÔNG CÓ LỖI/CẢNH BÁO) --%>
+                    <c:if test="${empty requestScope.errorMessage and empty requestScope.warningMessage}">
+                        <c:set var="summaryData" value="${requestScope.summaryData}"/>
+                        <div class="summary-cards">
+                            <div class="summary-card booking">
+                                <div class="summary-card-title">Total Bookings</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-calendar-check summary-card-icon" style="color: var(--booking-color);"></i>
+                                        ${summaryData.totalBookings != null ? summaryData.totalBookings : 0}
+                                </div>
                             </div>
-                            <div class="checkbox-option">
-                                <input type="checkbox" id="display-cancellations">
-                                <label for="display-cancellations">Show Cancellations</label>
+                            <div class="summary-card revenue">
+                                <div class="summary-card-title">Total Revenue</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-dollar-sign summary-card-icon" style="color: var(--revenue-color);"></i>
+                                    <c:choose>
+                                        <c:when test="${summaryData.totalRevenue != null}">
+                                            <c:set var="revenue" value="${summaryData.totalRevenue / 1000000}"/>
+                                            <c:choose>
+                                                <c:when test="${revenue >= 1000}">
+                                                    <fmt:formatNumber value="${revenue / 1000}" pattern="#0.0"/> B VND
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <fmt:formatNumber value="${revenue}" pattern="#0.0"/> M VND
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            0 M VND
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="summary-card cancellation">
+                                <div class="summary-card-title">Total Cancellations</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-ban summary-card-icon" style="color: var(--cancellation-color);"></i>
+                                        ${summaryData.totalCancellations != null ? summaryData.totalCancellations : 0}
+                                </div>
+                            </div>
+                            <div class="summary-card rate">
+                                <div class="summary-card-title">Cancellation Rate</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-percentage summary-card-icon" style="color: var(--rate-color);"></i>
+                                    <c:choose>
+                                        <c:when test="${summaryData.cancellationRate != null}">
+                                            <fmt:formatNumber value="${summaryData.cancellationRate}" pattern="#0.00"/>%
+                                        </c:when>
+                                        <c:otherwise>
+                                            0.00%
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div id="chartContainer">
-                        <canvas id="timeTrendChart"></canvas>
-                    </div>
+                        <div class="chart-options">
+                            <h2 style="margin: 0; color: var(--main-color);">Revenue & Booking Trend (<c:out value="${requestScope.chartUnitParam eq 'day' ? 'Daily' : (requestScope.chartUnitParam eq 'week' ? 'Weekly' : 'Monthly')}"/>)</h2>
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <div class="chart-toggle-group">
+                                    <label style="font-size: 0.9em; color: #555; margin-right: 5px;">Chart Type:</label>
+                                    <button data-type="line"><i class="fas fa-chart-line"></i> Line</button>
+                                    <button class="active" data-type="bar"><i class="fas fa-chart-bar"></i> Bar</button>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="display-cancellations">
+                                    <label for="display-cancellations">Show Cancellations</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chartContainer">
+                            <canvas id="timeTrendChart"></canvas>
+                        </div>
+                    </c:if>
+                    <%-- KẾT THÚC KHỐI HIỂN THỊ DỮ LIỆU --%>
 
                 </div>
                 <hr/>
@@ -628,15 +670,15 @@
         <form id="modalForm" class="modal-form">
             <div class="filter-item">
                 <label for="modalStartDate">Start Date</label>
-                <input type="date" id="modalStartDate" name="startDate" value="${requestScope.startDateParam}" min="2025-01-01" max="2025-10-31">
+                <input type="date" id="modalStartDate" name="startDate" value="${requestScope.startDateParam}" min="2025-09-01" max="2025-10-31" style="box-sizing: border-box;">
             </div>
             <div class="filter-item">
                 <label for="modalEndDate">End Date</label>
-                <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}" min="2025-01-01" max="2025-10-31">
+                <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}" min="2025-09-01" max="2025-10-31" style="box-sizing: border-box;">
             </div>
             <div class="filter-item">
                 <label for="modalChartUnit">Chart Unit</label>
-                <select id="modalChartUnit" name="chartUnit">
+                <select id="modalChartUnit" name="chartUnit" style="box-sizing: border-box;">
                     <option value="day" ${requestScope.chartUnitParam == 'day' ? 'selected' : ''}>Daily</option>
                     <option value="week" ${requestScope.chartUnitParam == 'week' ? 'selected' : ''}>Weekly</option>
                     <option value="month" ${requestScope.chartUnitParam == 'month' ? 'selected' : ''}>Monthly</option>
@@ -645,6 +687,11 @@
             <button type="button" class="btn-apply" onclick="submitModalForm()">Apply Filter</button>
         </form>
     </div>
+</div>
+
+<div id="missingDateAlert">
+    <i class="fas fa-exclamation-triangle"></i>
+     Vui lòng chọn đầy đủ Ngày Bắt đầu và Ngày Kết thúc!
 </div>
 
 <script>
@@ -658,7 +705,7 @@
     const trendData = [
         <c:forEach var="item" items="${requestScope.timeTrendData}" varStatus="loop">
         {
-            label: "${item.label}",
+            label: "${item.date}", // Sử dụng 'date' từ Controller
             revenue: ${item.totalRevenue},
             bookings: ${item.totalBookings},
             cancellations: ${item.totalCancellations}
@@ -673,7 +720,7 @@
             trendChart.destroy();
         }
 
-        // Vẫn ẩn chart nếu có warning (tức là totalBookings == 0) hoặc lỗi DB
+        // Ẩn chart nếu có warning (tức là totalBookings == 0) hoặc lỗi DB
         if (hasWarning || trendData.length === 0) {
             if (chartContainer) chartContainer.style.display = 'none';
             return;
@@ -817,7 +864,6 @@
         });
 
 
-
         document.getElementById('display-cancellations').addEventListener('change', function() {
             const showCancellations = this.checked;
             const chartType = document.querySelector('.chart-toggle-group .active').getAttribute('data-type');
@@ -837,31 +883,42 @@
         return params;
     }
 
+
     // Attach event listeners to export buttons
     document.addEventListener('DOMContentLoaded', function() {
         const btnExportExcel = document.getElementById('btnExportExcel');
         const btnExportPDF = document.getElementById('btnExportPDF');
+        const hasWarningMessage = "${requestScope.warningMessage}" !== ""; // Lấy giá trị cảnh báo
+
+        // Ngăn Export nếu có cảnh báo
+        const handleExport = (type) => {
+            if (hasWarningMessage) {
+                alert("Lỗi: Không thể xuất báo cáo khi chưa có dữ liệu hoặc bộ lọc bị thiếu. Vui lòng kiểm tra lại cảnh báo.");
+                return;
+            }
+            if (window.confirm("Bạn có chắc chắn muốn xuất file " + type.toUpperCase() + " này không?")) {
+                const params = getFilterParams();
+                window.location.href = "ExportOverviewReportServlet?type=" + type + params;
+            }
+        };
 
         if (btnExportExcel) {
             btnExportExcel.addEventListener('click', function() {
-                const params = getFilterParams();
-                window.location.href = "ExportOverviewReportServlet?type=excel" + params;
-                alert("Downloading Excel file...");
+                handleExport('excel');
             });
         }
 
         if (btnExportPDF) {
             btnExportPDF.addEventListener('click', function() {
-                const params = getFilterParams();
-                window.location.href = "ExportOverviewReportServlet?type=pdf" + params;
-                alert("Downloading PDF file...");
+                handleExport('pdf');
             });
         }
     });
 
     // Modal Functions
     function openModal() {
-        document.getElementById('filterModal').style.display = 'block';
+        document.getElementById('filterModal').style.display = 'flex'; // Dùng 'flex' để căn giữa
+        // Đồng bộ dữ liệu hiện tại
         document.getElementById('modalStartDate').value = "${requestScope.startDateParam}";
         document.getElementById('modalEndDate').value = "${requestScope.endDateParam}";
         document.getElementById('modalChartUnit').value = "${requestScope.chartUnitParam}";
@@ -875,19 +932,60 @@
         const startDate = document.getElementById('modalStartDate').value;
         const endDate = document.getElementById('modalEndDate').value;
         const chartUnit = document.getElementById('modalChartUnit').value;
+        const missingDateAlert = document.getElementById('missingDateAlert'); // Lấy element popup
 
-        // Adjust dates if outside valid range
-        const minDate = new Date('2025-01-01');
+        const minDate = new Date('2025-09-01');
         const maxDate = new Date('2025-10-31');
         let start = new Date(startDate);
         let end = new Date(endDate);
 
-        if (start < minDate) start = minDate;
-        if (end > maxDate) end = maxDate;
+        // ✅ LOGIC CẢNH BÁO POPUP TỰ ĐỘNG MẤT
+        if (!startDate || !endDate) {
+            // 1. Hiển thị Popup
+            missingDateAlert.style.display = 'block';
+            setTimeout(() => {
+                missingDateAlert.style.opacity = '1';
+            }, 10); // Đảm bảo chuyển đổi opacity hoạt động
+
+            // 2. Tự động ẩn Popup sau 5 giây (5000ms)
+            setTimeout(() => {
+                missingDateAlert.style.opacity = '0';
+                // Ẩn hoàn toàn sau khi transition (0.5s) kết thúc
+                setTimeout(() => {
+                    missingDateAlert.style.display = 'none';
+                }, 500);
+            }, 5000); // 5 giây
+
+            return; // Dừng submit
+        }
+        // -----------------------------------------------------------------
+
+
+        // Validation logic Ngày Bắt đầu > Ngày Kết thúc
+        if (start > end) {
+            alert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc.");
+            return; // Dừng submit
+        }
+
+        // Xử lý Min/Max (giữ nguyên logic của bạn)
+        const getFormattedDate = (dateObj) => dateObj.toISOString().split('T')[0];
+
+        let finalStartDate = startDate;
+        let finalEndDate = endDate;
+
+        if (start < minDate) {
+            finalStartDate = getFormattedDate(minDate);
+            alert("Cảnh báo: Ngày Bắt đầu đã được điều chỉnh về ngày tối thiểu: 2025-09-01.");
+        }
+        if (end > maxDate) {
+            finalEndDate = getFormattedDate(maxDate);
+            alert("Cảnh báo: Ngày Kết thúc đã được điều chỉnh về ngày tối đa: 2025-10-31.");
+        }
+
 
         // Update form values
-        document.getElementById('startDate').value = start.toISOString().split('T')[0];
-        document.getElementById('endDate').value = end.toISOString().split('T')[0];
+        document.getElementById('startDate').value = finalStartDate;
+        document.getElementById('endDate').value = finalEndDate;
         document.getElementById('chartUnit').value = chartUnit;
 
         // Submit the hidden form

@@ -4,10 +4,12 @@ import com.fpt.restaurantbooking.models.OrderItem;
 import com.fpt.restaurantbooking.models.Reservation;
 import com.fpt.restaurantbooking.models.MenuItem;
 import com.fpt.restaurantbooking.models.Table;
+import com.fpt.restaurantbooking.models.Payment;
 import com.fpt.restaurantbooking.repositories.impl.OrderItemDAO;
 import com.fpt.restaurantbooking.repositories.impl.ReservationDAO;
 import com.fpt.restaurantbooking.repositories.impl.ReservationTableDAO;
 import com.fpt.restaurantbooking.repositories.impl.MenuItemDAO;
+import com.fpt.restaurantbooking.repositories.impl.PaymentDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -30,6 +32,7 @@ public class OrderDetailsServlet extends HttpServlet {
     private final ReservationTableDAO reservationTableDAO = new ReservationTableDAO();
     private final OrderItemDAO orderItemDAO = new OrderItemDAO();
     private final MenuItemDAO menuItemDAO = new MenuItemDAO();
+    private final PaymentDAO paymentDAO = new PaymentDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -73,6 +76,7 @@ public class OrderDetailsServlet extends HttpServlet {
 
             List<Table> tables = reservationTableDAO.getTablesByReservationIdDetailed(reservationId);
             List<OrderItem> items = orderItemDAO.getOrderItemsByReservationId(reservationId);
+            Payment payment = paymentDAO.getPaymentByReservationId(reservationId);
 
             // Resolve item names for display
             Map<Integer, String> itemNames = new HashMap<>();
@@ -88,6 +92,7 @@ public class OrderDetailsServlet extends HttpServlet {
             request.setAttribute("tables", tables);
             request.setAttribute("orderItems", items);
             request.setAttribute("itemNames", itemNames);
+            request.setAttribute("payment", payment);
             request.setAttribute("reservationId", reservationId);
 
             request.getRequestDispatcher("/WEB-INF/BookTable/orderDetails.jsp").forward(request, response);

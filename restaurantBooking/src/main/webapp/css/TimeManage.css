@@ -23,7 +23,7 @@ body {
     background: #7b1c1c;
     color: #fff;
     position: fixed;
-    top: 68px; /* dưới header */
+    top: 96px; /* dưới header */
     bottom: 0;
     padding: 20px 12px;
     overflow-y: auto;
@@ -37,7 +37,7 @@ body {
 
 .content {
     margin-left: 230px;
-    padding-top: 68px;
+    padding-top: 2px;
     padding-left: 24px;
     padding-right: 24px;
     padding-bottom: 40px;

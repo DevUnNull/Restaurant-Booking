@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,21 +15,22 @@
     <style>
         :root {
             /* Color Variables */
-            --main-color: #D32F2F;
-            --light-red: #FFCDD2;
-            --dark-red: #B71C1C;
-            --menu-bg: #8B0000;
-            --menu-hover: #A52A2A;
+            --main-color: #D32F2F; /* Red - Primary Button, Top Nav, Headings border */
+            --light-red: #FFCDD2; /* Light Red - HR, Table hover, Chart border */
+            --dark-red: #B71C1C; /* Dark Red - Headings, Strong text */
+            --menu-bg: #8B0000; /* Menu Background - Sidebar */
+            --menu-hover: #A52A2A; /* Menu Hover */
             --text-light: #f8f8f8;
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3;
-            --revenue-color: #4CAF50;
-            --cancellation-color: #E91E63;
-            --rate-color: #FF9800;
-            --staff-chart-color: #00897B;
+            --booking-color: #2196F3; /* Blue */
+            --revenue-color: #4CAF50; /* Green */
+            --cancellation-color: #E91E63; /* Pink/Red */
+            --rate-color: #FF9800; /* Orange/Warning */
+            --staff-chart-color: #00897B; /* Teal - Specific Staff color */
             --staff-border-color: #00897B;
+            --customer-color: #1976D2; /* Customer blue */
         }
 
         /* Base & Layout */
@@ -90,13 +92,13 @@
         /* Table Style */
         .staff-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
             margin-top: 20px;
+            border: 1px solid #ddd;
         }
         .staff-table th, .staff-table td {
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border: 1px solid #ddd;
         }
         .staff-table th {
             background-color: #f8f8f8;
@@ -190,6 +192,75 @@
             margin-bottom: 15px;
         }
 
+        /* Pagination Styles (CHUẨN HÓA) */
+        .pagination-container {
+            display: flex;
+            justify-content: flex-end; /* Căn lề phải */
+            margin-top: 25px;
+        }
+        .pagination {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        .pagination li {
+            margin: 0;
+        }
+        .pagination li a, .pagination li span {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #555;
+            background-color: #fff;
+            border-right: 1px solid #ddd;
+            transition: background-color 0.3s;
+        }
+        .pagination li:last-child a, .pagination li:last-child span {
+            border-right: none;
+        }
+        .pagination li a:hover {
+            background-color: #f4f4f4;
+        }
+        .pagination li.active span {
+            background-color: var(--main-color);
+            color: white;
+            font-weight: bold;
+            border-color: var(--main-color);
+        }
+        .pagination li.disabled span, .pagination li.disabled a {
+            color: #ccc;
+            background-color: #fff;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* === NEW POPUP STYLE (From Service Report) === */
+        #missingDateAlert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 30px;
+            min-width: 300px;
+            max-width: 90%;
+            background-color: #E65100; /* Deep Orange/Rust */
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            z-index: 1002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        /* =========================================== */
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -201,7 +272,7 @@
     </style>
 </head>
 <body>
-
+<c:set var="pageSize" value="7" scope="request"/>
 <div class="top-nav">
     <div class="restaurant-group">
         <a href="<%= request.getContextPath() %>/" class="home-button">
@@ -210,16 +281,16 @@
         <span class="restaurant-name">Restaurant Booking</span>
     </div>
     <div class="user-info">
-        <span>User:
-            <c:choose>
-                <c:when test="${not empty sessionScope.userName}">
-                    ${sessionScope.userName}
-                </c:when>
-                <c:otherwise>
-                    Guest
-                </c:otherwise>
-            </c:choose>
-        </span>
+    <span>User:
+        <c:choose>
+            <c:when test="${not empty sessionScope.currentUser}">
+                ${sessionScope.currentUser.fullName}
+            </c:when>
+            <c:otherwise>
+                Guest
+            </c:otherwise>
+        </c:choose>
+    </span>
     </div>
 </div>
 
@@ -229,8 +300,8 @@
             <li><a href="<%= request.getContextPath() %>/overview-report" ${request.getRequestURI().contains("overview-report") ? "class=\"active\"" : ""}>Overview Report</a></li>
             <li><a href="<%= request.getContextPath() %>/service-report" ${request.getRequestURI().contains("service-report") ? "class=\"active\"" : ""}>Service Report</a></li>
             <li><a href="<%= request.getContextPath() %>/staff-report" ${request.getRequestURI().contains("staff-report") ? "class=\"active\"" : ""}>Staff Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("customer-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancellation-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("user-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancel-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
         </ul>
     </div>
 
@@ -296,12 +367,11 @@
                             </div>
                         </c:if>
                         <c:if test="${empty requestScope.employeeTimeTrendJson}">
-                            <p>No activity (Serves or Shifts) was recorded for this employee in the selected period.</p>
+
                         </c:if>
                     </c:when>
 
                     <c:otherwise>
-                        <h2>Staff Performance Summary (Based on Activity Log)</h2>
                         <c:choose>
                             <c:when test="${not empty requestScope.employeeData}">
                                 <table class="staff-table">
@@ -318,7 +388,9 @@
                                     </tr>
                                     </thead>
                                     <tbody>
+
                                     <c:forEach var="employee" items="${requestScope.employeeData}">
+
                                         <tr>
                                             <td>${employee.employeeId}</td>
                                             <td>${employee.employeeName}</td>
@@ -341,13 +413,121 @@
                                                 </a>
                                             </td>
                                         </tr>
+
                                     </c:forEach>
+
                                     </tbody>
                                 </table>
+
+                                <%-- PHẦN PHÂN TRANG (Pagination) - Đã cập nhật pageSize=7 và logic --%>
+                                <c:set var="currentPage" value="${requestScope.currentPage}"/>
+                                <c:set var="totalPages" value="${requestScope.totalPages}"/>
+                                <c:set var="startDateParam" value="${requestScope.startDateParam}"/>
+                                <c:set var="endDateParam" value="${requestScope.endDateParam}"/>
+
+                                <c:if test="${totalPages > 1}">
+                                    <div class="pagination-container">
+                                        <ul class="pagination">
+                                                <%-- Nút Previous --%>
+                                            <c:url var="prevUrl" value="staff-report">
+                                                <c:param name="page" value="${currentPage - 1}"/>
+                                                <c:param name="pageSize" value="7"/> <!-— pageSize = 7 -->
+                                                <c:param name="startDate" value="${startDateParam}"/>
+                                                <c:param name="endDate" value="${endDateParam}"/>
+                                                <c:param name="searchStaffName" value="${requestScope.searchStaffNameParam}"/>
+                                            </c:url>
+                                            <c:choose>
+                                                <c:when test="${currentPage > 1}">
+                                                    <li><a href="${prevUrl}">Prev</a></li>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <li class="disabled"><span>Prev</span></li>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                                <%-- Hiển thị các số trang (tối đa 5 trang) --%>
+                                            <c:set var="startPage" value="${(currentPage - 2) > 1 ? (currentPage - 2) : 1}"/>
+                                            <c:set var="endPage" value="${(currentPage + 2) < totalPages ? (currentPage + 2) : totalPages}"/>
+
+                                                <%-- ĐIỀU CHỈNH KHI GẦN ĐẦU/CUỐI (Đảm bảo luôn hiện 5 nút nếu có thể) --%>
+                                            <c:if test="${endPage - startPage < 4}">
+                                                <c:set var="newStart" value="${endPage - 4}"/>
+                                                <c:if test="${newStart > 1}">
+                                                    <c:set var="startPage" value="${newStart}"/>
+                                                </c:if>
+                                                <c:if test="${startPage < 1}">
+                                                    <c:set var="startPage" value="1"/>
+                                                </c:if>
+                                                <c:set var="endPage" value="${startPage + 4}"/>
+                                                <c:if test="${endPage > totalPages}">
+                                                    <c:set var="endPage" value="${totalPages}"/>
+                                                </c:if>
+                                            </c:if>
+
+                                            <c:if test="${startPage > 1}">
+                                                <c:url var="page1Url" value="staff-report">
+                                                    <c:param name="page" value="1"/>
+                                                    <c:param name="pageSize" value="7"/>
+                                                    <c:param name="startDate" value="${startDateParam}"/>
+                                                    <c:param name="endDate" value="${endDateParam}"/>
+                                                    <c:param name="searchStaffName" value="${requestScope.searchStaffNameParam}"/>
+                                                </c:url>
+                                                <li><a href="${page1Url}">1</a></li>
+                                                <c:if test="${startPage > 2}"><li><span>...</span></li></c:if>
+                                            </c:if>
+
+                                            <c:forEach begin="${startPage}" end="${endPage}" var="i">
+                                                <c:url var="pageUrl" value="staff-report">
+                                                    <c:param name="page" value="${i}"/>
+                                                    <c:param name="pageSize" value="7"/> <!-— pageSize = 7 -->
+                                                    <c:param name="startDate" value="${startDateParam}"/>
+                                                    <c:param name="endDate" value="${endDateParam}"/>
+                                                    <c:param name="searchStaffName" value="${requestScope.searchStaffNameParam}"/>
+                                                </c:url>
+                                                <c:choose>
+                                                    <c:when test="${i == currentPage}">
+                                                        <li class="active"><span>${i}</span></li>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <li><a href="${pageUrl}">${i}</a></li>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:forEach>
+
+                                            <c:if test="${endPage < totalPages}">
+                                                <c:if test="${endPage < totalPages - 1}"><li><span>...</span></li></c:if>
+                                                <c:url var="lastPageUrl" value="staff-report">
+                                                    <c:param name="page" value="${totalPages}"/>
+                                                    <c:param name="pageSize" value="7"/>
+                                                    <c:param name="startDate" value="${startDateParam}"/>
+                                                    <c:param name="endDate" value="${endDateParam}"/>
+                                                    <c:param name="searchStaffName" value="${requestScope.searchStaffNameParam}"/>
+                                                </c:url>
+                                                <li><a href="${lastPageUrl}">${totalPages}</a></li>
+                                            </c:if>
+
+                                                <%-- Nút Next --%>
+                                            <c:url var="nextUrl" value="staff-report">
+                                                <c:param name="page" value="${currentPage + 1}"/>
+                                                <c:param name="pageSize" value="7"/> <!-— pageSize = 7 -->
+                                                <c:param name="startDate" value="${startDateParam}"/>
+                                                <c:param name="endDate" value="${endDateParam}"/>
+                                                <c:param name="searchStaffName" value="${requestScope.searchStaffNameParam}"/>
+                                            </c:url>
+                                            <c:choose>
+                                                <c:when test="${currentPage < totalPages}">
+                                                    <li><a href="${nextUrl}">Next</a></li>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <li class="disabled"><span>Next</span></li>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </ul>
+                                    </div>
+                                </c:if>
+                                <%-- KẾT THÚC PHẦN PHÂN TRANG --%>
+
                             </c:when>
-                            <c:otherwise>
-                                <p>No employee data or assigned bookings found for the selected period.</p>
-                            </c:otherwise>
                         </c:choose>
                     </c:otherwise>
                 </c:choose>
@@ -376,6 +556,7 @@
                 <label for="modalEndDate">To Date</label>
                 <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}">
             </div>
+
             <c:if test="${requestScope.isDetailMode}">
                 <div class="filter-item">
                     <label for="modalChartUnit">Chart Unit</label>
@@ -390,21 +571,25 @@
         </form>
     </div>
 </div>
+
 <div id="searchStaffModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Search Employee (ID)</h3>
+            <h3>Search Employee (Name)</h3>
             <span class="close" onclick="closeSearchModal()">&times;</span>
         </div>
         <form id="searchForm" class="modal-form" method="GET" action="staff-report">
             <input type="hidden" name="startDate" value="${requestScope.startDateParam}">
             <input type="hidden" name="endDate" value="${requestScope.endDateParam}">
+            <input type="hidden" name="pageSize" value="7"> <!-— pageSize = 7 -->
+            <c:if test="${requestScope.isDetailMode}">
+                <input type="hidden" name="employeeId" value="${requestScope.selectedEmployeeId}">
+            </c:if>
 
-            <p>Enter an Employee ID to view their detailed performance chart.</p>
+            <p>Nhập tên nhân viên</p>
 
             <div class="filter-item">
-                <label for="searchStaffId">Enter Employee ID:</label>
-                <input type="number" id="searchStaffId" name="searchStaffId" placeholder="Example: 24" value="${requestScope.searchStaffIdParam}" required>
+                <input type="text" id="searchStaffName" name="searchStaffName" placeholder="Example: Anh Hoa" value="${requestScope.searchStaffNameParam}" required>
             </div>
 
             <button type="submit" class="btn-apply"><i class="fas fa-search"></i> Search & View Details</button>
@@ -414,12 +599,42 @@
         <p>Note: Active employees are listed in the Overview table.</p>
     </div>
 </div>
+
+<div id="missingDateAlert">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span id="missingDateAlertText"></span>
+</div>
+
 <script>
     const isDetailMode = "${requestScope.isDetailMode}" === "true";
     const chartUnit = "${requestScope.chartUnitParam}" || "day";
     const chartContainer = document.getElementById('chartContainer');
-    const START_OF_BUSINESS_DATE = "2025-01-01";
+    const START_OF_BUSINESS_DATE = "2025-09-01";
     let trendChart;
+
+    // --- KHAI BÁO CÁC BIẾN POPUP CẢNH BÁO ---
+    const missingDateAlert = document.getElementById('missingDateAlert');
+    const missingDateAlertText = document.getElementById('missingDateAlertText');
+
+    function showAlert(message) {
+        missingDateAlertText.textContent = message;
+
+        // 1. Hiển thị Popup
+        missingDateAlert.style.display = 'block';
+        setTimeout(() => {
+            missingDateAlert.style.opacity = '1';
+        }, 10);
+
+        // 2. Tự động ẩn Popup sau 5 giây (5000ms)
+        setTimeout(() => {
+            missingDateAlert.style.opacity = '0';
+            // Ẩn hoàn toàn sau khi transition (0.3s) kết thúc
+            setTimeout(() => {
+                missingDateAlert.style.display = 'none';
+                missingDateAlertText.textContent = ''; // Xóa nội dung
+            }, 300); // 300ms = 0.3 giây
+        }, 5000); // 5 giây
+    }
 
     // --- FUNCTION TO REFORMAT X-AXIS LABELS ---
     function formatChartLabel(label, unit) {
@@ -540,7 +755,7 @@
                     title: {
                         display: true,
                         text: 'Total Working Hours',
-                        color: 'var(--revenue-color)',
+                        color: 'rgba(255, 99, 132, 1)', /* Tăng cường màu sắc */
                         font: { size: 14, weight: 'bold' }
                     },
                     ticks: {
@@ -594,10 +809,20 @@
     // --- FUNCTIONS FOR DATE FILTER MODAL ---
     function openFilterModal() {
         const modalStartDateInput = document.getElementById('modalStartDate');
+        const modalEndDateInput = document.getElementById('modalEndDate');
+
+        // 1. Thiết lập min date cho StartDate
         modalStartDateInput.min = START_OF_BUSINESS_DATE;
         if (modalStartDateInput.value && modalStartDateInput.value < START_OF_BUSINESS_DATE) {
             modalStartDateInput.value = START_OF_BUSINESS_DATE;
         }
+
+        // 2. Thiết lập min date cho EndDate (Đảm bảo EndDate không sớm hơn ngày bắt đầu kinh doanh)
+        modalEndDateInput.min = START_OF_BUSINESS_DATE;
+        if (modalEndDateInput.value && modalEndDateInput.value < START_OF_BUSINESS_DATE) {
+            modalEndDateInput.value = START_OF_BUSINESS_DATE;
+        }
+
         document.getElementById('filterModal').style.display = 'block';
     }
 
@@ -605,10 +830,35 @@
         document.getElementById('filterModal').style.display = 'none';
     }
 
+
     function submitFilterForm() {
-        const startDate = document.getElementById('modalStartDate').value;
-        const endDate = document.getElementById('modalEndDate').value;
-        let url = 'staff-report?startDate=' + startDate + '&endDate=' + endDate;
+        let startDate = document.getElementById('modalStartDate').value;
+        let endDate = document.getElementById('modalEndDate').value;
+        const pageSize = 7; // Cố định
+
+        // 1. Bắt buộc chọn Ngày Bắt đầu
+        if (!startDate) {
+            closeFilterModal();
+            showAlert("Vui lòng chọn Ngày Bắt đầu (From Date) cho báo cáo.");
+            return;
+        }
+
+        // 2. Bắt buộc chọn Ngày Kết thúc
+        if (!endDate) {
+            closeFilterModal();
+            showAlert("Vui lòng chọn Ngày Kết thúc (To Date) cho báo cáo.");
+            return;
+        }
+
+        // 3. Kiểm tra logic ngày (Ngày Bắt đầu không được lớn hơn Ngày Kết thúc)
+        if (new Date(startDate) > new Date(endDate)) {
+            closeFilterModal();
+            showAlert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
+            return;
+        }
+
+        // Luôn chuyển về trang 1 và set pageSize = 7 khi thay đổi bộ lọc ngày
+        let url = 'staff-report?startDate=' + startDate + '&endDate=' + endDate + '&page=1&pageSize=' + pageSize;
 
         if (isDetailMode) {
             const chartUnit = document.getElementById('modalChartUnit').value;
@@ -620,17 +870,18 @@
         closeFilterModal();
     }
 
+
     // --- FUNCTIONS FOR EMPLOYEE SEARCH MODAL ---
     function openSearchModal() {
-        const searchInput = document.getElementById('searchStaffId');
-        if (isDetailMode) {
-            const employeeId = "${requestScope.selectedEmployeeId}";
-            if (employeeId && employeeId !== '0') {
-                searchInput.value = employeeId;
-            }
+        const searchInput = document.getElementById('searchStaffName');
+
+        const searchNameParam = "${requestScope.searchStaffNameParam}";
+        if (searchNameParam) {
+            searchInput.value = searchNameParam;
         } else {
             searchInput.value = '';
         }
+
         document.getElementById('searchStaffModal').style.display = 'block';
     }
 

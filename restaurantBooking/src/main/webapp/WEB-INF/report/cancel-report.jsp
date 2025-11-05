@@ -12,15 +12,23 @@
 
     <style>
         :root {
-            --main-color: #D32F2F;
-            --light-red: #FFCDD2;
-            --dark-red: #B71C1C;
-            --menu-bg: #8B0000;
-            --menu-hover: #A52A2A;
+            /* Color Variables */
+            --main-color: #D32F2F; /* Red - Primary Button, Top Nav, Headings border */
+            --light-red: #FFCDD2; /* Light Red - HR, Table hover, Chart border */
+            --dark-red: #B71C1C; /* Dark Red - Headings, Strong text */
+            --menu-bg: #8B0000; /* Menu Background - Sidebar */
+            --menu-hover: #A52A2A; /* Menu Hover */
             --text-light: #f8f8f8;
+            --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --cancellation-color: #E91E63;
+            --booking-color: #2196F3; /* Blue */
+            --revenue-color: #4CAF50; /* Green */
+            --cancellation-color: #E91E63; /* Pink/Red - Cancellation highlight */
+            --rate-color: #FF9800; /* Orange/Warning */
+            --staff-chart-color: #00897B; /* Teal */
+            --staff-border-color: #00897B;
+            --customer-color: #1976D2; /* Customer blue */
         }
 
         body {
@@ -210,16 +218,17 @@
             margin: 20px 0;
         }
 
+        /* ----- CANCELLATION TABLE STYLES ----- */
         .cancellation-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
             margin-top: 20px;
+            border: 1px solid #ddd;
         }
 
         .cancellation-table th, .cancellation-table td {
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border: 1px solid #ddd;
         }
 
         .cancellation-table th {
@@ -232,6 +241,7 @@
         .cancellation-table tr:hover {
             background-color: #fce4ec;
         }
+        /* ----------------------------------------------- */
 
         .reason-cell {
             max-width: 300px;
@@ -250,7 +260,7 @@
         }
 
         .status-no-show {
-            background-color: #E91E63;
+            background-color: var(--cancellation-color);
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
@@ -344,10 +354,61 @@
             visibility: visible;
             opacity: 1;
         }
+
+        /* PHẦN PHÂN TRANG (PAGINATION) - CHUẨN HÓA */
+        .pagination-container {
+            display: flex;
+            justify-content: flex-end; /* Căn lề phải */
+            margin-top: 25px;
+        }
+        .pagination {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        .pagination li {
+            margin: 0;
+        }
+        .pagination li a, .pagination li span {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #555;
+            background-color: #fff;
+            border-right: 1px solid #ddd;
+            transition: background-color 0.3s;
+        }
+        .pagination li:last-child a, .pagination li:last-child span {
+            border-right: none;
+        }
+        .pagination li a:hover {
+            background-color: #f4f4f4;
+        }
+        .pagination li.active span {
+            background-color: var(--main-color);
+            color: white;
+            font-weight: bold;
+            border-color: var(--main-color);
+        }
+        .pagination li.disabled span, .pagination li.disabled a {
+            color: #ccc;
+            background-color: #fff;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .modal-form .btn-apply {
+            margin-top: 20px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
-
+<c:set var="pageSize" value="5" scope="request"/>
 <div class="top-nav">
     <div class="restaurant-group">
         <a href="<%= request.getContextPath() %>/" class="home-button">
@@ -356,16 +417,16 @@
         <span class="restaurant-name">Restaurant Booking</span>
     </div>
     <div class="user-info">
-        <span>User:
-            <c:choose>
-                <c:when test="${not empty sessionScope.userName}">
-                    ${sessionScope.userName}
-                </c:when>
-                <c:otherwise>
-                    Guest
-                </c:otherwise>
-            </c:choose>
-        </span>
+    <span>User:
+        <c:choose>
+            <c:when test="${not empty sessionScope.currentUser}">
+                ${sessionScope.currentUser.fullName}
+            </c:when>
+            <c:otherwise>
+                Guest
+            </c:otherwise>
+        </c:choose>
+    </span>
     </div>
 </div>
 
@@ -375,14 +436,14 @@
             <li><a href="<%= request.getContextPath() %>/overview-report" ${request.getRequestURI().contains("overview-report") ? "class=\"active\"" : ""}>Overview Report</a></li>
             <li><a href="<%= request.getContextPath() %>/service-report" ${request.getRequestURI().contains("service-report") ? "class=\"active\"" : ""}>Service Report</a></li>
             <li><a href="<%= request.getContextPath() %>/staff-report" ${request.getRequestURI().contains("staff-report") ? "class=\"active\"" : ""}>Staff Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("customer-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancellation-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("user-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancel-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
         </ul>
     </div>
 
     <div class="main-content-body">
         <div class="content-container">
-            <h1>Detailed Cancellation & No-Show Report</h1>
+            <h1>Detailed Cancellation & No-Show Report (Page ${requestScope.currentPage} of ${requestScope.totalPages})</h1>
 
             <div class="filter-section">
                 <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Report Filters</h3>
@@ -407,7 +468,6 @@
                 </div>
             </c:if>
 
-            <h2>List of Cancelled/No-Show Transactions (${requestScope.startDateParam} to ${requestScope.endDateParam})</h2>
 
             <c:choose>
                 <c:when test="${not empty requestScope.cancellationData}">
@@ -459,6 +519,95 @@
                         </c:forEach>
                         </tbody>
                     </table>
+
+                    <%-- PHẦN HIỂN THỊ PHÂN TRANG --%>
+                    <c:set var="currentPage" value="${requestScope.currentPage}"/>
+                    <c:set var="totalPages" value="${requestScope.totalPages}"/>
+                    <c:set var="totalRecords" value="${requestScope.totalRecords}"/>
+                    <c:set var="startDate" value="${requestScope.startDateParam}"/>
+                    <c:set var="endDate" value="${requestScope.endDateParam}"/>
+
+                    <c:if test="${totalRecords > 0 and totalPages > 1}">
+                        <div class="pagination-container">
+                            <ul class="pagination">
+                                    <%-- Nút Previous --%>
+                                <c:url var="prevUrl" value="cancel-report">
+                                    <c:param name="page" value="${currentPage - 1}"/>
+                                    <c:param name="pageSize" value="5"/>
+                                    <c:param name="startDate" value="${startDate}"/>
+                                    <c:param name="endDate" value="${endDate}"/>
+                                </c:url>
+                                <c:choose>
+                                    <c:when test="${currentPage > 1}">
+                                        <li><a href="${prevUrl}"><i class="fas fa-chevron-left"></i> Prev</a></li>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <li class="disabled"><span><i class="fas fa-chevron-left"></i> Prev</span></li>
+                                    </c:otherwise>
+                                </c:choose>
+
+                                    <%-- Hiển thị các số trang (tối đa 5 trang) --%>
+                                <c:set var="startPage" value="${(currentPage - 2) > 1 ? (currentPage - 2) : 1}"/>
+                                <c:set var="endPage" value="${(currentPage + 2) < totalPages ? (currentPage + 2) : totalPages}"/>
+
+                                <c:if test="${startPage > 1}">
+                                    <c:url var="page1Url" value="cancel-report">
+                                        <c:param name="page" value="1"/>
+                                        <c:param name="pageSize" value="5"/>
+                                        <c:param name="startDate" value="${startDate}"/>
+                                        <c:param name="endDate" value="${endDate}"/>
+                                    </c:url>
+                                    <li><a href="${page1Url}">1</a></li>
+                                    <c:if test="${startPage > 2}"><li><span>...</span></li></c:if>
+                                </c:if>
+
+                                <c:forEach begin="${startPage}" end="${endPage}" var="i">
+                                    <c:url var="pageUrl" value="cancel-report">
+                                        <c:param name="page" value="${i}"/>
+                                        <c:param name="pageSize" value="5"/>
+                                        <c:param name="startDate" value="${startDate}"/>
+                                        <c:param name="endDate" value="${endDate}"/>
+                                    </c:url>
+                                    <c:choose>
+                                        <c:when test="${i == currentPage}">
+                                            <li class="active"><span><c:out value="${i}"/></span></li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li><a href="${pageUrl}"><c:out value="${i}"/></a></li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+
+                                <c:if test="${endPage < totalPages}">
+                                    <c:if test="${endPage < totalPages - 1}"><li><span>...</span></li></c:if>
+                                    <c:url var="lastPageUrl" value="cancel-report">
+                                        <c:param name="page" value="${totalPages}"/>
+                                        <c:param name="pageSize" value="5"/>
+                                        <c:param name="startDate" value="${startDate}"/>
+                                        <c:param name="endDate" value="${endDate}"/>
+                                    </c:url>
+                                    <li><a href="${lastPageUrl}"><c:out value="${totalPages}"/></a></li>
+                                </c:if>
+
+                                    <%-- Nút Next --%>
+                                <c:url var="nextUrl" value="cancel-report">
+                                    <c:param name="page" value="${currentPage + 1}"/>
+                                    <c:param name="pageSize" value="5"/>
+                                    <c:param name="startDate" value="${startDate}"/>
+                                    <c:param name="endDate" value="${endDate}"/>
+                                </c:url>
+                                <c:choose>
+                                    <c:when test="${currentPage < totalPages}">
+                                        <li><a href="${nextUrl}">Next <i class="fas fa-chevron-right"></i></a></li>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <li class="disabled"><span>Next <i class="fas fa-chevron-right"></i></span></li>
+                                    </c:otherwise>
+                                </c:choose>
+                            </ul>
+                        </div>
+                    </c:if>
+
                 </c:when>
                 <c:otherwise>
                     <p>No bookings were cancelled or marked as no-show during the selected time period.</p>
@@ -485,6 +634,7 @@
                 <label for="modalEndDate">To Date</label>
                 <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}">
             </div>
+
             <button type="button" class="btn-apply" onclick="submitFilterForm()"><i class="fas fa-check"></i> Apply
                 Filters
             </button>
@@ -494,6 +644,9 @@
 <script>
     const START_OF_BUSINESS_DATE = "2025-01-01";
     const CURRENT_DATE = new Date().toISOString().split('T')[0];
+
+    // Cần set cứng pageSize = 5 trong JS submit
+    const TARGET_PAGE_SIZE = 5;
 
     function openFilterModal() {
         const modalStartDateInput = document.getElementById('modalStartDate');
@@ -523,11 +676,29 @@
         const startDate = document.getElementById('modalStartDate').value;
         const endDate = document.getElementById('modalEndDate').value;
 
-        if (startDate > CURRENT_DATE || endDate > CURRENT_DATE) {
-            alert("Please do not select a future date for the report filter. The date will be automatically adjusted to the current date.");
+        // --- Bổ sung xác thực phía Client ---
+        if (!startDate) {
+            alert("Lỗi: Vui lòng chọn Ngày Bắt đầu (From Date) cho báo cáo.");
+            return; // Ngăn không cho form gửi đi
+        }
+        if (!endDate) {
+            alert("Lỗi: Vui lòng chọn Ngày Kết thúc (To Date) cho báo cáo.");
+            return; // Ngăn không cho form gửi đi
         }
 
-        let url = 'cancel-report?startDate=' + startDate + '&endDate=' + endDate;
+        if (new Date(startDate) > new Date(endDate)) {
+            alert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
+            return;
+        }
+
+        if (startDate > CURRENT_DATE || endDate > CURRENT_DATE) {
+            alert("Lỗi: Vui lòng không chọn Ngày Bắt đầu hoặc Ngày Kết thúc là ngày trong tương lai.");
+            // Giữ logic tiếp theo, nhưng thông báo đã cảnh báo người dùng.
+        }
+        // --- Kết thúc xác thực ---
+
+        // Luôn reset về trang 1 khi thay đổi bộ lọc ngày, và set cứng pageSize = 5
+        let url = 'cancel-report?startDate=' + startDate + '&endDate=' + endDate + '&page=1' + '&pageSize=' + TARGET_PAGE_SIZE;
 
         window.location.href = url;
         closeFilterModal();

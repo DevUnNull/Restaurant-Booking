@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Blog - Tica's Tacos</title>
     <link rel="stylesheet" href="css/BlogList.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         /* Tổng thể */
         body {
@@ -189,19 +190,7 @@
 </head>
 <body>
 <!-- HEADER -->
-<header class="topbar">
-    <div class="container">
-        <h1 class="logo">Tica's Tacos</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Trang chủ</a></li>
-                <li><a href="#">Đặt bàn</a></li>
-                <li><a href="#">Menu</a></li>
-                <li><a href="#">Liên hệ</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <!-- HERO (CÓ ẢNH NỀN) -->
 <section class="hero" style="background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80');">

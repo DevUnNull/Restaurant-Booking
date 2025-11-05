@@ -9,7 +9,7 @@
 
     <!-- Bootstrap (optional) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         /* ---------- layout giống voucher page ---------- */
         body {
@@ -202,27 +202,18 @@
 <body>
 
 <!-- Header -->
-<div class="top-header d-flex align-items-center">
-    <div class="brand">Restaurant_Booking</div>
-    <div class="ml-auto d-none d-md-block">
-        <!-- right side top links (example) -->
-        <a style="color:#fff;margin-right:18px;text-decoration:none;">Trang chủ</a>
-        <a style="color:#fff;margin-right:18px;text-decoration:none;">Đặt bàn</a>
-        <a style="color:#fff;margin-right:18px;text-decoration:none;">Menu</a>
-        <a style="color:#fff;text-decoration:none;">Voucher</a>
-    </div>
-</div>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
+
 
 <!-- Sidebar -->
 <div class="sidebar">
     <h4 style="text-align:center;margin-top:0;">Staff Panel</h4>
     <div class="nav-item">Dashboard</div>
-    <div class="nav-item">Dịch vụ</div>
-    <div class="nav-item">Quản lý dịch vụ</div>
-    <div class="nav-item">Quản lý đánh giá bình luận</div>
-    <div class="nav-item">Quản lý Menu</div>
-    <div class="nav-item">Quản lý Voucher khuyến mãi</div>
-    <div class="nav-item">Quản lý khách hàng thân thiết</div>
+    <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
+    <li><a href="Menu_manage">Quản lý Menu</a></li>
+    <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+    <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+    <li><a href="Timedirect">Quản lý khung giờ </a></li>
 </div>
 
 <!-- Content -->

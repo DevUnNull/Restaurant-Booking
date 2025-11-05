@@ -27,7 +27,10 @@ import java.util.Locale;
 public class EmployeeReportController extends HttpServlet {
 
     private final EmployeeReportRepository reportRepository = new EmployeeReportRepository();
-    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 1, 1);
+    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 9, 1);
+
+    // Khai báo hằng số phân trang
+    private final int PAGE_SIZE = 5;
 
     private LocalDate safeParseDate(String dateStr, LocalDate defaultValue) {
         if (dateStr == null || dateStr.isEmpty()) {
@@ -45,7 +48,7 @@ public class EmployeeReportController extends HttpServlet {
             LocalDate startDate,
             LocalDate endDate,
             String unit) {
-
+        // ... (Code không đổi)
         Map<String, Map<String, Object>> dataMap = new HashMap<>();
         for (Map<String, Object> item : rawData) {
             dataMap.put((String) item.get("label"), item);
@@ -110,15 +113,56 @@ public class EmployeeReportController extends HttpServlet {
         String endDateParam = request.getParameter("endDate");
         String employeeIdParam = request.getParameter("employeeId");
         String chartUnitParam = request.getParameter("chartUnit");
-        String searchStaffIdParam = request.getParameter("searchStaffId");
+        String searchStaffNameParam = request.getParameter("searchStaffName");
 
-        String currentWarningMessage = null;
-        String currentErrorMessage = null;
+        // --- LOGIC MỚI: Bỏ tự chọn ngày mặc định ---
+        // Nếu không có tham số ngày nào, không gán giá trị và không tính toán
+        if (startDateParam == null || startDateParam.isEmpty() || endDateParam == null || endDateParam.isEmpty()) {
+
+            // Nếu có tham số tìm kiếm tên nhưng không có ngày, vẫn cho phép tìm kiếm
+            if (searchStaffNameParam == null || searchStaffNameParam.isEmpty()) {
+                request.setAttribute("startDateParam", "");
+                request.setAttribute("endDateParam", "");
+                // Gán cảnh báo yêu cầu nhập ngày, chỉ khi không có tìm kiếm tên
+                session.setAttribute("sessionWarningMessage",
+                        "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.");
+
+                request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
+                return; // Dừng xử lý nếu thiếu ngày và không tìm kiếm tên
+            }
+        }
 
         LocalDate currentDate = LocalDate.now();
 
-        LocalDate endDate = safeParseDate(endDateParam, currentDate);
-        LocalDate startDate = safeParseDate(startDateParam, START_OF_BUSINESS);
+        LocalDate endDate = null;
+        LocalDate startDate = null;
+
+        // Chỉ parse ngày nếu tham số có giá trị
+        if (startDateParam != null && !startDateParam.isEmpty()) {
+            startDate = safeParseDate(startDateParam, null);
+        }
+        if (endDateParam != null && !endDateParam.isEmpty()) {
+            endDate = safeParseDate(endDateParam, null);
+        }
+
+        // Gán lại các param String đã có để truyền lại cho JSP
+        request.setAttribute("startDateParam", startDateParam);
+        request.setAttribute("endDateParam", endDateParam);
+
+        // Nếu ngày bị null sau khi parse (do định dạng sai), dừng và báo lỗi (hoặc sẽ bị xử lý ở logic tiếp theo)
+        if (startDate == null || endDate == null) {
+            // Trường hợp này chỉ xảy ra khi ngày được nhập nhưng định dạng sai (trường hợp hiếm)
+            // Giữ lại logic cảnh báo để hiển thị message
+            request.setAttribute("startDateParam", startDateParam);
+            request.setAttribute("endDateParam", endDateParam);
+            request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
+            return;
+        }
+
+        // --- Bắt đầu Logic Xử lý Ngày (chỉ chạy khi cả startDate và endDate đã được định nghĩa) ---
+        String currentWarningMessage = null;
+        String currentErrorMessage = null;
+
 
         if (startDate.isBefore(START_OF_BUSINESS)) {
             currentWarningMessage = ": The start date (" + startDate.toString() + ") has been adjusted to the opening date (" + START_OF_BUSINESS.toString() + ").";
@@ -162,8 +206,26 @@ public class EmployeeReportController extends HttpServlet {
             session.removeAttribute("sessionWarningMessage");
         }
 
+        // Cập nhật lại param string sau khi có thể bị hoán đổi/điều chỉnh
         startDateParam = startDate.toString();
         endDateParam = endDate.toString();
+        request.setAttribute("startDateParam", startDateParam);
+        request.setAttribute("endDateParam", endDateParam);
+
+
+        // Xử lý tham số phân trang
+        int currentPage = 1;
+        int totalRecords = 0;
+        int totalPages = 0;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            try {
+                currentPage = Math.max(1, Integer.parseInt(pageParam));
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+        int offset = (currentPage - 1) * PAGE_SIZE;
 
         if (chartUnitParam == null || chartUnitParam.isEmpty()) {
             chartUnitParam = "month";
@@ -176,12 +238,41 @@ public class EmployeeReportController extends HttpServlet {
         String employeeTimeTrendJson = null;
 
         try {
-            if (searchStaffIdParam != null && !searchStaffIdParam.isEmpty()) {
-                employeeIdParam = searchStaffIdParam;
+            if (searchStaffNameParam != null && !searchStaffNameParam.isEmpty()) {
+                Integer foundEmployeeId = reportRepository.findEmployeeIdByName(searchStaffNameParam);
+
+                if (foundEmployeeId != null) {
+                    employeeIdParam = String.valueOf(foundEmployeeId);
+                } else {
+                    currentErrorMessage = ": Employee with name containing '" + searchStaffNameParam + "' not found or is not a staff member (role_id != 2). Displaying Overview.";
+                    employeeIdParam = null;
+                }
             }
 
             if (employeeIdParam == null || employeeIdParam.isEmpty()) {
-                employeeData = reportRepository.getEmployeeOverviewData(startDateParam, endDateParam, currentDate.toString());
+                // Chế độ Tổng quan (có phân trang)
+
+                // 1. Lấy tổng số bản ghi và tính tổng số trang
+                totalRecords = reportRepository.getTotalActiveEmployees();
+                totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
+
+                // Điều chỉnh trang hiện tại và offset
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                    offset = (currentPage - 1) * PAGE_SIZE;
+                } else if (totalPages == 0) {
+                    currentPage = 1;
+                    offset = 0;
+                }
+
+                // 2. Lấy dữ liệu phân trang
+                employeeData = reportRepository.getEmployeeOverviewData(
+                        startDateParam,
+                        endDateParam,
+                        currentDate.toString(),
+                        offset,
+                        PAGE_SIZE
+                );
 
                 if (employeeData != null) {
                     for (Map<String, Object> item : employeeData) {
@@ -197,6 +288,7 @@ public class EmployeeReportController extends HttpServlet {
                 }
 
             } else {
+                // Chế độ Chi tiết (không phân trang)
                 int employeeId = Integer.parseInt(employeeIdParam);
 
                 selectedEmployeeDetail = reportRepository.getEmployeeDetailById(employeeId);
@@ -251,13 +343,18 @@ public class EmployeeReportController extends HttpServlet {
             session.removeAttribute("sessionErrorMessage");
         }
 
-        request.setAttribute("startDateParam", startDateParam);
-        request.setAttribute("endDateParam", endDateParam);
+
         request.setAttribute("chartUnitParam", chartUnitParam);
         request.setAttribute("employeeData", employeeData);
         request.setAttribute("employeeTimeTrend", employeeTimeTrend);
         request.setAttribute("employeeTimeTrendJson", employeeTimeTrendJson);
-        request.setAttribute("searchStaffIdParam", searchStaffIdParam);
+        request.setAttribute("searchStaffNameParam", searchStaffNameParam);
+
+        // Thuộc tính phân trang
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalRecords", totalRecords);
+        request.setAttribute("pageSize", PAGE_SIZE);
 
         request.setAttribute("isDetailMode", employeeIdParam != null && !employeeIdParam.isEmpty());
 

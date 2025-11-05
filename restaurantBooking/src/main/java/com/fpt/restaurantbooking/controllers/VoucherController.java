@@ -175,7 +175,7 @@ public class VoucherController extends HttpServlet {
         try {
 
 
-            vrepo.UpdatePromotion(id, nameVoucher, description, discount_percentage, start_date, end_date, updated_by);
+            vrepo.UpdatePromotion(id, nameVoucher, description, discount_percentage, start_date, end_date, updated_by, promotion_level_id);
             request.setAttribute("pro", pro);
             processRequest(request, response);
 

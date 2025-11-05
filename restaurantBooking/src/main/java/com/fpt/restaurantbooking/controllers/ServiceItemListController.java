@@ -39,6 +39,7 @@ public class ServiceItemListController extends HttpServlet {
         try {
             List<MenuItem> items = ServiceDAO.getMenuItemsByService(Integer.parseInt(serviceId));
             request.setAttribute("items", items);
+            request.setAttribute("serviceId", serviceId);
             request.getRequestDispatcher("/WEB-INF/Service/ServiceItemList.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new RuntimeException(e);

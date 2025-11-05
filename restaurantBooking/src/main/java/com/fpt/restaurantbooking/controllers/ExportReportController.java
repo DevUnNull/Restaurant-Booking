@@ -1,6 +1,6 @@
 package com.fpt.restaurantbooking.controllers;
 
-import com.fpt.restaurantbooking.repositories.ReportRepository;
+import com.fpt.restaurantbooking.repositories.ServiceReportRepository;
 import com.fpt.restaurantbooking.utils.ExcelGeneratorUtil;
 import com.fpt.restaurantbooking.utils.PdfGeneratorUtil;
 import jakarta.servlet.ServletException;
@@ -17,19 +17,32 @@ import java.sql.SQLException;
 public class ExportReportController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final ReportRepository reportRepository = new ReportRepository();
-
+    private final ServiceReportRepository serviceReportRepository = new ServiceReportRepository();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String type = request.getParameter("type");
-
-        final int REPORT_LIMIT = 10000;
         List<Map<String, Object>> dataToExport;
 
+        // =========================================================
+        //  LẤY CÁC THAM SỐ LỌC TỪ REQUEST
+        // =========================================================
+        String serviceType = request.getParameter("serviceType");
+        String status = request.getParameter("status");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+
+        // Dọn dẹp tham số nếu là chuỗi rỗng
+        if (serviceType != null && serviceType.trim().isEmpty()) serviceType = null;
+        if (status != null && status.trim().isEmpty()) status = null;
+        if (startDate != null && startDate.trim().isEmpty()) startDate = null;
+        if (endDate != null && endDate.trim().isEmpty()) endDate = null;
+        // =========================================================
+
         try {
-            dataToExport = reportRepository.getTopSellingItems(REPORT_LIMIT);
+            //  GỌI REPOSITORY VỚI CÁC THAM SỐ LỌC THỰC TẾ
+            dataToExport = serviceReportRepository.getTopSellingItems(serviceType, status, startDate, endDate, 20);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -48,7 +61,9 @@ public class ExportReportController extends HttpServlet {
                 response.setHeader("Content-Disposition", "attachment; filename=\"TopSellingReport.xlsx\"");
 
                 ExcelGeneratorUtil generator = new ExcelGeneratorUtil();
-                generator.generate(dataToExport, response.getOutputStream());
+                // TRUYỀN CÁC THAM SỐ LỌC VÀO HÀM GENERATE
+                generator.generate(dataToExport, response.getOutputStream(),
+                        serviceType, status, startDate, endDate);
 
             } else if ("pdf".equalsIgnoreCase(type)) {
 
@@ -56,7 +71,9 @@ public class ExportReportController extends HttpServlet {
                 response.setHeader("Content-Disposition", "attachment; filename=\"TopSellingReport.pdf\"");
 
                 PdfGeneratorUtil generator = new PdfGeneratorUtil();
-                generator.generate(dataToExport, response.getOutputStream());
+                //  TRUYỀN CÁC THAM SỐ LỌC VÀO HÀM GENERATE
+                generator.generate(dataToExport, response.getOutputStream(),
+                        serviceType, status, startDate, endDate);
 
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid or missing report type. Must be 'excel' or 'pdf'.");
@@ -64,13 +81,7 @@ public class ExportReportController extends HttpServlet {
 
         } catch (IOException e) {
             e.printStackTrace();
-
             String errorMessage = "Export failed: " + e.getMessage();
-
-            if (e.getMessage() != null && e.getMessage().contains("Lỗi Font")) {
-            }
-
-            // Gửi lỗi cho người dùng trong mọi trường hợp IOException
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMessage);
 
         } catch (Exception e) {

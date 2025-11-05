@@ -15,9 +15,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- *
  * @author Quandxnunxi28
  */
 public class ServiceRepository {
@@ -55,17 +55,16 @@ public class ServiceRepository {
                 " LEFT JOIN Users uc ON s.created_by = uc.user_id\n" +
                 " LEFT JOIN Users uu ON s.updated_by = uu.user_id";
 
-        try(Connection conn = db.getConnection();
-            PreparedStatement stm = conn.prepareStatement(query);
-            ResultSet rs = stm.executeQuery();) {
-
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query);
+             ResultSet rs = stm.executeQuery();) {
 
 
             while (rs.next()) {
                 list.add(new Service(rs.getInt("service_id"), rs.getString("service_name"), rs.getString("service_code"), rs.getString("description"), rs.getString("price"),
                         rs.getString("promotion_info"), rs.getString("start_date"), rs.getString("end_date"), rs.getString("status"), rs.getString("created_by_name"), // đổi sang name
 
-                        rs.getString("updated_by_name") )); // đổi sang name));
+                        rs.getString("updated_by_name"))); // đổi sang name));
 
             }
         } catch (Exception e) {
@@ -128,18 +127,139 @@ public class ServiceRepository {
 
     }
 
+    public int getIdService(String serviceCode) throws SQLException {
+        String query = "SELECT service_id FROM Services WHERE service_code = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query)) {
+
+            stm.setString(1, serviceCode);
+
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("service_id"); // chỉ lấy id thôi
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return -1; // hoặc 0 nếu muốn mặc định là không tìm thấy
+    }
+
+    public void insertComboItems(int serviceId, List<Integer> menuItemIds) throws SQLException {
+        String query = "INSERT INTO service_menu_items (service_id, item_id) VALUES (?, ?)";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            int i = 0;
+            while (i < menuItemIds.size()) {
+                ps.setInt(1, serviceId);
+                ps.setInt(2, menuItemIds.get(i));
+                ps.addBatch();
+                i++;
+            }
+
+            ps.executeBatch();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Integer> getMenuItemByServiceId(int service_id) throws SQLException {
+        List<Integer> list = new ArrayList<>();
+
+
+        String query = " SELECT * FROM service_menu_items where service_id = ? ";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query);) {
+            stm.setInt(1, service_id);
+            try (ResultSet rs = stm.executeQuery();) {
+
+                while (rs.next()) {
+                    list.add(
+                            rs.getInt("item_id"
+                            ));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public void addItemToCombo(String serviceId, int itemId) {
+        String query = " INSERT INTO service_menu_items (service_id, item_id) VALUES (?, ?) ";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query);) {
+            stm.setString(1, serviceId);
+            stm.setInt(2, itemId);
+            stm.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+    public void deleteItemCombo(String serviceId, int itemId) {
+        String query = " DELETE FROM service_menu_items \n" +
+                "WHERE service_id = ? AND item_id = ?; ";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query);) {
+            stm.setString(1, serviceId);
+            stm.setInt(2, itemId);
+            stm.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<MenuItem> getMenuItemsExcluding(List<Integer> excludedIds) throws SQLException {
+        String sql = "SELECT * FROM menu_items";
+
+        if (!excludedIds.isEmpty()) {
+            String placeholders = excludedIds.stream()
+                    .map(x -> "?")
+                    .collect(Collectors.joining(","));
+            sql += " WHERE item_id NOT IN (" + placeholders + ")";
+        }
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);) {
+
+            for (int i = 0; i < excludedIds.size(); i++) {
+                stm.setInt(i + 1, excludedIds.get(i));
+            }
+
+            ResultSet rs = stm.executeQuery();
+            List<MenuItem> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(new MenuItem(
+                        rs.getInt("item_id"),
+                        rs.getString("item_name")
+
+                ));
+            }
+            return result;
+        }
+    }
+
     public List<Service> getServicesByPageShowList(int offset, int limit) throws SQLException {
         List<Service> list = new ArrayList<>();
 
 
         String query = "SELECT * FROM Services ORDER BY service_id DESC limit ?,  ?";
 
-        try(Connection conn = db.getConnection();
-            PreparedStatement stm = conn.prepareStatement(query);) {
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(query);) {
 
             stm.setInt(1, offset);
             stm.setInt(2, limit);
-            try( ResultSet rs = stm.executeQuery();){
+            try (ResultSet rs = stm.executeQuery();) {
 
                 while (rs.next()) {
                     list.add(new Service(
@@ -177,12 +297,12 @@ public class ServiceRepository {
                 " LIMIT ?, ? ";
 
 
-        try(Connection conn = db.getConnection();
-            PreparedStatement stm = conn.prepareStatement(sql);
-        ){
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+        ) {
             stm.setInt(1, offset);
             stm.setInt(2, limit);
-            try(ResultSet rs = stm.executeQuery();){
+            try (ResultSet rs = stm.executeQuery();) {
 
                 while (rs.next()) {
                     list.add(new Service(
@@ -204,24 +324,19 @@ public class ServiceRepository {
         }
 
 
-
-
-
         return list;
     }
 
     public int getTotalServiceCount() throws SQLException {
         String sql = "SELECT COUNT(*) FROM services ";
 
-        try(Connection conn = db.getConnection();
-            PreparedStatement stm = conn.prepareStatement(sql);
-            ResultSet rs = stm.executeQuery();){
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql);
+             ResultSet rs = stm.executeQuery();) {
             if (rs.next()) {
                 return rs.getInt(1);
             }
         }
-
-
 
 
         return 0;
@@ -296,8 +411,6 @@ public class ServiceRepository {
     }
 
 
-
-
     public List<MenuItem> getMenuItemsByService(int id) throws SQLException {
         List<MenuItem> list = new ArrayList<>();
         String sql = " SELECT\n" +
@@ -328,5 +441,7 @@ public class ServiceRepository {
 
         return list;
     }
+
+
 
 }

@@ -11,25 +11,26 @@
     <nav>
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
+            <li><a href="${pageContext.request.contextPath}/Blog">Blog nhà Hàng</a></li>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
             <li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li>
-
+            <li><a href="${pageContext.request.contextPath}/Blog"> Blog nhà Hàng</a></li>
             <%-- Booking Management Dropdown (Role 2) --%>
             <c:if test="${sessionScope.userRole == 2}">
                 <li class="user-dropdown">
                     <div class="user-button" onclick="toggleDropdown('bookingDropdown')">
-                        <span class="user-name">Booking Management</span>
+                        <span class="user-name">Quản lý nhà hàng</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div id="bookingDropdown" class="dropdown-content">
-                        <a href="${pageContext.request.contextPath}/ServiceList"><i class="fas fa-concierge-bell"></i>
-                            Service Management</a>
-                        <a href="${pageContext.request.contextPath}/Menu_manage"><i class="fas fa-utensils"></i> Menu
-                            Management</a>
-                        <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý Voucher</a>
+                        <a href="${pageContext.request.contextPath}/ServiceManage"><i class="fas fa-concierge-bell"></i>
+                            Quản lý dịch vụ</a>
+                        <a href="${pageContext.request.contextPath}/OrderManagement"><i class="fas fa-receipt"></i> Quản lý đơn hàng</a>
+                        <a href="${pageContext.request.contextPath}/Menu_manage"><i class="fas fa-utensils"></i> Quản lý menu</a>
+                        <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý voucher</a>
                         <a href="${pageContext.request.contextPath}/Promotion_level"><i class="fas fa-users"></i> Quản lý khách hàng</a>
                         <a href="${pageContext.request.contextPath}/Timedirect"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
-                        <a href="${pageContext.request.contextPath}/Blog"><i class="fas fa-newspaper"></i> Blog Nhà Hàng</a>
+
                     </div>
                 </li>
             </c:if>
@@ -64,17 +65,18 @@
                         <a href="CustomerList">Thêm nhân viên</a>
                     </div>
                 </li>
+
                 <li class="user-dropdown">
                     <div class="user-button" onclick="toggleDropdown('reportDropdown')">
-                        <span class="user-name">Report</span>
+                        <span class="user-name">Báo cáo</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div id="reportDropdown" class="dropdown-content">
-                        <a href="${pageContext.request.contextPath}/overview-report">Overview Report</a>
-                        <a href="${pageContext.request.contextPath}/service-report">Service Reports</a>
-                        <a href="${pageContext.request.contextPath}/staff-report">Staff Report</a>
-                        <a href="${pageContext.request.contextPath}/user-report">User Report</a>
-                        <a href="${pageContext.request.contextPath}/cancel-report">Cancel Request</a>
+                        <a href="${pageContext.request.contextPath}/overview-report">Báo cáo tổng quan</a>
+                        <a href="${pageContext.request.contextPath}/service-report">Báo cáo theo dịch vụ</a>
+                        <a href="${pageContext.request.contextPath}/staff-report">Báo cáo nhân viên</a>
+                        <a href="${pageContext.request.contextPath}/user-report">Báo cáo người dùng</a>
+                        <a href="${pageContext.request.contextPath}/cancel-report">Báo cáo lịch hủy</a>
                     </div>
                 </li>
             </c:if>
@@ -85,8 +87,6 @@
 
 
             <li><a href="${pageContext.request.contextPath}/about">Giới Thiệu</a></li>
-            <li><a href="${pageContext.request.contextPath}/contact">Liên Hệ</a></li>
-            <li><a href="${pageContext.request.contextPath}/cart">Cart (<span id="cart-count">0</span>)</a></li>
 
 
             <c:choose>
@@ -98,7 +98,7 @@
                         </div>
                         <div id="userDropdown" class="dropdown-content">
                             <a href="${pageContext.request.contextPath}/profile"><i class="fas fa-user"></i> Hồ Sơ</a>
-                            <a href="${pageContext.request.contextPath}/my-reservations"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
+                            <a href="${pageContext.request.contextPath}/orderHistory"><i class="fas fa-calendar-alt"></i> Đặt Bàn Của Tôi</a>
                             <a href="${pageContext.request.contextPath}/change-password"><i class="fas fa-key"></i> Đổi Mật Khẩu</a>
                             <div class="dropdown-divider"></div>
                             <a href="${pageContext.request.contextPath}/logout" class="logout-link"><i

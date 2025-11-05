@@ -253,15 +253,14 @@
 <%--</ul>--%>
 <!-- Sidebar -->
 <div class="sidebar">
-    <h2>Staff Panel</h2>
+
     <ul>
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="ServiceList">Dịch vụ</a></li>
+
         <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-        <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
-        <li><a href="#">Quản lý Menu</a></li>
-        <li><a href="Voucher" class="active">Quản lý Voucher khuyến mãi</a></li>
-        <li><a href="#">Quản lý khách hàng thân thiết</a></li>
+        <li><a href="Menu_manage">Quản lý Menu</a></li>
+        <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+        <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+        <li><a href="Timedirect">Quản lý khung giờ </a></li>
     </ul>
 </div>
 
@@ -315,11 +314,14 @@
                             <input type="number" class="form-control" id="addMenuPrice" name="price" min="0" value="${param.price != null ? param.price : ''}">
                         </div>
                         <div class="mb-3">
-                            <label for="addDishImage" class="form-label">Ảnh món ăn</label>
-                            <div class="mb-2 text-center">
-                                <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
-                            </div>
-                            <input type="file" class="form-control" id="addDishImage" name="imageFile" accept="image/*" onchange="previewImage(event)">
+                            <label for="addDishImageUrl" class="form-label">Ảnh món ăn (URL)</label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   id="addDishImageUrl"
+                                   name="imageUrl"
+                                   placeholder="Dán link ảnh HTTPS vào đây (vd: https://i.ibb.co/xxxx.jpg)"
+                                   oninput="previewImageFromUrl(this.value)">
                         </div>
                         <div class="mb-3">
                             <label for="addMenuStatus" class="form-label">Trạng thái</label>
@@ -353,7 +355,7 @@
             <!-- xây sẵn đường dẫn ảnh an toàn (bao gồm context path) -->
             <c:choose>
                 <c:when test="${not empty o.imageUrl}">
-                    <c:set var="imgPath" value="${pageContext.request.contextPath}/images/${o.imageUrl}" />
+                    <c:set var="imgPath" value="${o.imageUrl}" />
                 </c:when>
                 <c:otherwise>
                     <c:set var="imgPath" value="${pageContext.request.contextPath}/images/no-image.png" />
@@ -393,9 +395,10 @@
                                     data-desc="${o.description}"
                                     data-price="${o.price}"
                                     data-code="${o.itemCode}"
-                                    data-image="/images/${o.imageUrl}"
+                                    data-image="${o.imageUrl}"
                                     data-status="${o.status}"
-                                    data-category="${o.category_name}">
+                                    data-category="${o.category_id}"
+                                    data-category-name="${o.category_name}">
                                 Sửa
                             </button>
                             <button class="btn btn-sm btn-danger btn-delete"
@@ -412,6 +415,20 @@
 
 
 </div>
+
+<script>
+    function previewImageFromUrl(url) {
+        const img = document.getElementById("imagePreview");
+        if (url && url.startsWith("http")) {
+            img.src = url;
+        } else {
+            img.src = "/images/no-image.png"; // ảnh mặc định khi không hợp lệ
+        }
+    }
+</script>
+
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const editButtons = document.querySelectorAll(".btn-edit");
@@ -430,20 +447,35 @@
                 const code = btn.dataset.code || '';
                 const image = btn.dataset.image || '';
                 const status = btn.dataset.status || 'AVAILABLE';
-                const category = btn.dataset.category || '';
+                const categoryId = btn.dataset.category || '';
+                const categoryName = btn.dataset.categoryName || ''; // ✅ lấy tên thể loại
 
+                // --- Gán giá trị vào modal ---
                 document.getElementById("menuIdEdit").value = id;
                 document.getElementById("menuNameEdit").value = name;
                 document.getElementById("menuDescriptionEdit").value = desc;
                 document.getElementById("priceEdit").value = price;
                 document.getElementById("menuCodeEdit").value = code;
-
                 document.getElementById("menuStatusEdit").value = status;
-                document.getElementById("menuCategoryEdit").value = category;
 
+
+
+                const imageInput = document.getElementById("menuImageEditUrl");
+                if (imageInput) imageInput.value = image;
+                // document.querySelector('#editForm [name="imageUrl"]').value = image;                // ✅ chọn đúng option theo category_id
+                const categorySelect = document.getElementById("menuCategoryEdit");
+                if (categorySelect) categorySelect.value = categoryId;
+
+                // ✅ hiển thị tên thể loại hiện tại
+                const currentCategory = document.getElementById("currentCategoryName");
+                if (currentCategory) {
+                    currentCategory.textContent = `Thể loại hiện tại: ${categoryName}`;
+                }
+
+                // ✅ xử lý ảnh xem trước
                 const preview = document.getElementById("imagePreviewEdit");
                 if (preview && image) {
-                    preview.src = `${ctx}/images/${image}`;
+                    preview.src = image.startsWith("http") ? image : `${ctx}/images/${image}`;
                 }
 
                 editModal.show();
@@ -618,12 +650,15 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="addDishImage" class="form-label">Ảnh món ăn</label>
-                        <div class="mb-2 text-center">
-                            <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
-                        </div>
-                        <input type="file" class="form-control" id="menuImageEdit" name="imageFile" accept="image/*" onchange="previewImage(event)">
-                        <small class="text-muted">Nếu không chọn file mới, ảnh cũ sẽ được giữ.</small>
+                        <label for="menuImageEditUrl" class="form-label">Ảnh món ăn (URL)</label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="menuImageEditUrl"
+                               name="imageUrl"
+                               placeholder="Dán link ảnh HTTPS vào đây (vd: https://i.ibb.co/xxxx.jpg)"
+                               oninput="previewImageFromUrlEdit(this.value)">
+                        <small class="text-muted">Nếu không nhập link mới, ảnh cũ sẽ được giữ lại.</small>
                     </div>
 
                     <div class="mb-3">
@@ -637,6 +672,7 @@
 
                     <div class="mb-3">
                         <label for="addMenuCategory" class="form-label">Thể loại</label>
+                        <div id="currentCategoryName" class="mb-2 text-muted fst-italic"></div>
                         <select class="form-select" id="menuCategoryEdit" name="categoryId">
                             <c:forEach var="o" items="${listMenuCategory}">
                                 <option value="${o.id_menuCategory}">${o.categoryName}</option>
@@ -654,6 +690,16 @@
         </div>
     </div>
 </div>
+<script>
+    function previewImageFromUrlEdit(url) {
+        const img = document.getElementById("imagePreview");
+        if (url && url.startsWith("http")) {
+            img.src = url;
+        } else {
+            img.src = "/images/no-image.png"; // ảnh mặc định
+        }
+    }
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const modals = document.querySelectorAll('.modal');

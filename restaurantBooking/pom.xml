@@ -248,7 +248,7 @@
                 <version>11.0.15</version>
                 <configuration>
                     <httpConnector>
-                        <port>8081</port>
+                        <port>8080</port>
                     </httpConnector>
                     <webApp>
                         <contextPath>/restaurantbooking</contextPath>

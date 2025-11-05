@@ -748,8 +748,17 @@
     <div class="total-summary">
         <p>Tổng tiền món ăn: <strong id="subtotal"><%= formatter.format(totalAmount) %></strong></p>
         <p id="discount-line" style="display: none;">Giảm giá: <strong class="applied-discount" id="discount-amount">0 VNĐ</strong></p>
+        <p id="deposit-line" style="display: none;">
+            <i class="fas fa-info-circle" style="color: #ffc107;"></i>
+            Phí đặt cọc (<span id="deposit-table-count">0</span> bàn × 20.000 VNĐ/bàn):
+            <strong id="deposit-amount" style="color: #ffc107;">0 VNĐ</strong>
+            <br><small style="color: rgba(255, 255, 255, 0.8); font-size: 0.85em;">
+            (Tiền cọc sẽ được hoàn lại khi đến quán và thanh toán đầy đủ)
+        </small>
+        </p>
         <p class="final-total">Tổng tiền cần thanh toán: <strong id="final-total"><%= formatter.format(totalAmount) %></strong></p>
         <input type="hidden" id="subtotalValue" value="<%= totalAmount.doubleValue() %>">
+        <input type="hidden" id="depositAmount" name="depositAmount" value="0">
     </div>
 
     <!-- Payment Form -->
@@ -792,13 +801,19 @@
                 <input type="radio" name="paymentMethod" value="E_WALLET">
                 <i class="fas fa-wallet"></i> Ví điện tử (Momo, ZaloPay)
             </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="VNPAY">
+                <i class="fas fa-qrcode"></i> VNPay (Thẻ/Ví điện tử)
+            </label>
 
             <!-- Payment Info -->
             <div id="paymentInfoCash" class="payment-info cash show">
                 <p>
                     <i class="fas fa-info-circle"></i>
                     <strong>Thanh toán khi nhận:</strong><br>
-                    Món ăn sẽ được nấu khi bạn đến nhà hàng. Vui lòng đến đúng giờ đã đặt.
+                    Món ăn sẽ được nấu khi bạn đến nhà hàng. Vui lòng đến đúng giờ đã đặt.<br>
+                    <strong style="color: #ffc107;">⚠️ Lưu ý:</strong> Yêu cầu đặt cọc <strong id="deposit-amount-info">0 VNĐ</strong>
+                    (20.000 VNĐ/bàn). Tiền cọc sẽ được hoàn lại khi đến quán và thanh toán đầy đủ.
                 </p>
             </div>
             <div id="paymentInfoPrepaid" class="payment-info prepaid" style="display: none;">
@@ -806,6 +821,15 @@
                     <i class="fas fa-check-circle"></i>
                     <strong>Thanh toán trước:</strong><br>
                     Món ăn sẽ được chuẩn bị sẵn trước khi bạn đến. Đến nhà hàng sẽ có món ăn sẵn sàng ngay!
+                </p>
+            </div>
+            <div id="paymentInfoVNPay" class="payment-info vnpay" style="display: none;">
+                <p>
+                    <i class="fas fa-shield-alt"></i>
+                    <strong>Thanh toán qua VNPay:</strong><br>
+                    Bạn sẽ được chuyển đến trang thanh toán VNPay an toàn.
+                    Hỗ trợ thanh toán bằng thẻ ATM, thẻ tín dụng và ví điện tử.<br>
+                    <strong style="color: #28a745;">✓ Bảo mật cao | ✓ Xử lý nhanh</strong>
                 </p>
             </div>
         </div>
@@ -851,16 +875,31 @@
         }).format(amount);
     }
 
+    // Tính số bàn và deposit
+    function calculateDeposit() {
+        const selectedTables = <%= selectedTables != null ? selectedTables.size() : 0 %>;
+        const depositPerTable = 20000; // 20,000 VNĐ per table
+        const deposit = selectedTables * depositPerTable;
+        return { tableCount: selectedTables, deposit: deposit };
+    }
+
     // Cập nhật tổng tiền
     function updateTotal() {
         const discountAmount = (originalTotal * appliedDiscount / 100);
-        const finalTotal = originalTotal - discountAmount;
+        const subtotalAfterDiscount = originalTotal - discountAmount;
+
+        // Tính deposit nếu payment method là CASH
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'CASH';
+        const depositInfo = calculateDeposit();
+        const deposit = (paymentMethod === 'CASH' && depositInfo.tableCount > 0) ? depositInfo.deposit : 0;
+        const finalTotal = subtotalAfterDiscount + deposit;
 
         // Cập nhật UI
         document.getElementById('discount-amount').textContent = formatMoney(discountAmount);
         document.getElementById('final-total').textContent = formatMoney(finalTotal);
         document.getElementById('discountAmount').value = discountAmount;
         document.getElementById('discountCodeValue').value = discountCodeUsed;
+        document.getElementById('depositAmount').value = deposit;
 
         // Hiển thị/ẩn dòng giảm giá
         const discountLine = document.getElementById('discount-line');
@@ -868,6 +907,23 @@
             discountLine.style.display = 'flex';
         } else {
             discountLine.style.display = 'none';
+        }
+
+        // Hiển thị/ẩn dòng phí đặt cọc
+        const depositLine = document.getElementById('deposit-line');
+        const depositAmountEl = document.getElementById('deposit-amount');
+        const depositAmountInfoEl = document.getElementById('deposit-amount-info');
+        const depositTableCountEl = document.getElementById('deposit-table-count');
+
+        if (paymentMethod === 'CASH' && deposit > 0) {
+            depositLine.style.display = 'block';
+            depositAmountEl.textContent = formatMoney(deposit);
+            depositAmountInfoEl.textContent = formatMoney(deposit);
+            depositTableCountEl.textContent = depositInfo.tableCount;
+        } else {
+            depositLine.style.display = 'none';
+            depositAmountEl.textContent = '0 VNĐ';
+            depositAmountInfoEl.textContent = '0 VNĐ';
         }
     }
 
@@ -925,6 +981,7 @@
     const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
     const paymentInfoCash = document.getElementById('paymentInfoCash');
     const paymentInfoPrepaid = document.getElementById('paymentInfoPrepaid');
+    const paymentInfoVNPay = document.getElementById('paymentInfoVNPay');
 
     paymentMethods.forEach(function(radio) {
         radio.addEventListener('change', function() {
@@ -932,12 +989,26 @@
                 // Thanh toán khi nhận (COD)
                 paymentInfoCash.style.display = 'block';
                 paymentInfoPrepaid.style.display = 'none';
+                paymentInfoVNPay.style.display = 'none';
+            } else if (this.value === 'VNPAY') {
+                // Thanh toán VNPay
+                paymentInfoCash.style.display = 'none';
+                paymentInfoPrepaid.style.display = 'none';
+                paymentInfoVNPay.style.display = 'block';
             } else if (this.value === 'CREDIT_CARD' || this.value === 'E_WALLET') {
                 // Thanh toán trước
                 paymentInfoCash.style.display = 'none';
                 paymentInfoPrepaid.style.display = 'block';
+                paymentInfoVNPay.style.display = 'none';
             }
+            // Cập nhật tổng tiền khi thay đổi payment method
+            updateTotal();
         });
+    });
+
+    // Khởi tạo tổng tiền khi trang load
+    window.addEventListener('DOMContentLoaded', function() {
+        updateTotal();
     });
 
     // ===== CÁC HÀM QUẢN LÝ GIỎ HÀNG =====
@@ -1111,7 +1182,7 @@
                 }
             });
         }
-    })();s
+    })();
 
     // Ngăn submit khi chưa có bàn (phòng hờ nếu người dùng bỏ qua link)
     (function() {
