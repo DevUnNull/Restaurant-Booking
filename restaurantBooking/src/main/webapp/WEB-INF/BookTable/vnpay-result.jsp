@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Kết quả thanh toán VNPay</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
