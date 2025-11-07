@@ -1,8 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="jakarta.servlet.http.HttpSession" %>
 <!DOCTYPE html>
-<html>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+<html lang="vi">
 <head>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <meta charset="UTF-8">
     <title>Tìm Bàn</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -185,6 +186,74 @@
             border-radius: 5px;
             transition: all 0.3s ease;
         }
+        
+        /* Slot Selection Styles */
+        .slot-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .slot-button {
+            padding: 12px 20px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1em;
+        }
+        .slot-button:hover:not(.slot-blocked):not(.slot-selected) {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+        .slot-button.slot-selected {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.2);
+            font-weight: bold;
+        }
+        .slot-button.slot-special {
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.15);
+        }
+        .slot-button.slot-blocked {
+            border-color: #555;
+            background: rgba(0, 0, 0, 0.3);
+            color: #888;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .slot-time {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+        .slot-button.slot-blocked .slot-time {
+            color: #666;
+        }
+        
+        /* Date Input Warning */
+        .date-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .date-warning-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #f39c12;
+            font-size: 1.2em;
+            pointer-events: none;
+            display: none;
+        }
+        .date-warning-icon.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -212,31 +281,37 @@
             <!-- Ngày -->
             <div class="form-group">
                 <label for="date">Ngày:</label>
-                <div class="input-with-icon">
+                <div class="input-with-icon date-input-wrapper">
                     <i class="fas fa-calendar-alt"></i>
                     <input type="date" id="date" name="date" required>
+                    <i class="fas fa-exclamation-triangle date-warning-icon" id="dateWarning" title="Ngày này có slot đặc biệt hoặc bị chặn"></i>
                 </div>
             </div>
 
-            <!-- Giờ -->
-            <div class="form-group">
-                <label for="time">Giờ:</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-clock"></i>
-                    <select id="time" name="time" required>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="11:30">11:30 AM</option>
-                        <option value="12:00">12:00 PM</option>
-                        <option value="12:30">12:30 PM</option>
-                        <option value="17:00">5:00 PM</option>
-                        <option value="17:30">5:30 PM</option>
-                        <option value="18:00" selected>6:00 PM</option>
-                        <option value="18:30">6:30 PM</option>
-                        <option value="19:00">7:00 PM</option>
-                        <option value="19:30">7:30 PM</option>
-                        <option value="20:00">8:00 PM</option>
-                    </select>
+            <!-- Slot Selection -->
+            <div class="form-group full-width">
+                <label>Chọn Slot:</label>
+                <div class="slot-selection" id="slotSelection">
+                    <button type="button" class="slot-button" data-slot="MORNING" id="slotMorning">
+                        <span>
+                            <i class="fas fa-sun"></i> Slot Sáng
+                            <span class="slot-time" id="morningTime">--:-- - --:--</span>
+                        </span>
+                    </button>
+                    <button type="button" class="slot-button" data-slot="AFTERNOON" id="slotAfternoon">
+                        <span>
+                            <i class="fas fa-cloud-sun"></i> Slot Chiều
+                            <span class="slot-time" id="afternoonTime">--:-- - --:--</span>
+                        </span>
+                    </button>
+                    <button type="button" class="slot-button" data-slot="EVENING" id="slotEvening">
+                        <span>
+                            <i class="fas fa-moon"></i> Slot Tối
+                            <span class="slot-time" id="eveningTime">--:-- - --:--</span>
+                        </span>
+                    </button>
                 </div>
+                <input type="hidden" id="slot" name="slot" required>
             </div>
 
             <!-- Số khách -->
@@ -302,7 +377,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="search-btn">Tìm Bàn Trống</button>
+            <button type="submit" class="search-btn" id="submitBtn">Tìm Bàn Trống</button>
         </form>
     </div>
 </div>
@@ -327,44 +402,389 @@
         }
     }
 
-    // Load saved theme on page load
+    // === LOCAL STORAGE MANAGEMENT ===
+    const STORAGE_KEY = 'findTableFormData';
+    
+    function saveFormData() {
+        try {
+            const dateEl = document.getElementById('date');
+            const slotEl = document.getElementById('slot');
+            const guestsEl = document.getElementById('guests');
+            const floorEl = document.getElementById('floor');
+            const serviceEl = document.getElementById('serviceId');
+            const specialEl = document.getElementById('specialRequest');
+            
+            if (dateEl && slotEl && guestsEl && floorEl && serviceEl && specialEl) {
+                const formData = {
+                    date: dateEl.value || '',
+                    slot: slotEl.value || '',
+                    guests: guestsEl.value || '2',
+                    floor: floorEl.value || '1',
+                    serviceId: serviceEl.value || 'none',
+                    specialRequest: specialEl.value || ''
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+            }
+        } catch (e) {
+            console.error('Error saving form data:', e);
+        }
+    }
+    
+    function loadFormData() {
+        try {
+            const dateEl = document.getElementById('date');
+            const guestsEl = document.getElementById('guests');
+            const floorEl = document.getElementById('floor');
+            const serviceEl = document.getElementById('serviceId');
+            const specialEl = document.getElementById('specialRequest');
+            
+            let formData = null;
+            
+            // Ưu tiên load từ session (nếu có) - từ servlet đã lưu khi submit
+            <%
+            HttpSession sessionObj = request.getSession();
+            String sessionDate = (String) sessionObj.getAttribute("requiredDate");
+            String sessionSlot = (String) sessionObj.getAttribute("requiredSlot");
+            Object sessionGuestsObj = sessionObj.getAttribute("guestCount");
+            Object sessionFloorObj = sessionObj.getAttribute("floor");
+            Object sessionServiceIdObj = sessionObj.getAttribute("selectedServiceId");
+            String sessionSpecialRequest = (String) sessionObj.getAttribute("specialRequest");
+            
+            String sessionGuests = sessionGuestsObj != null ? sessionGuestsObj.toString() : null;
+            String sessionFloor = sessionFloorObj != null ? sessionFloorObj.toString() : null;
+            String sessionServiceId = sessionServiceIdObj != null ? sessionServiceIdObj.toString() : null;
+            %>
+            
+            <% 
+            if (sessionDate != null || sessionGuests != null) { 
+                // Escape special characters for JavaScript
+                String escapedSpecialRequest = "";
+                if (sessionSpecialRequest != null) {
+                    escapedSpecialRequest = sessionSpecialRequest
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
+                        .replace("\"", "\\\"")
+                        .replace("\n", "\\n")
+                        .replace("\r", "\\r");
+                }
+            %>
+            // Có dữ liệu từ session, ưu tiên dùng
+            var sessionData = {
+                date: '<%= sessionDate != null ? sessionDate : "" %>',
+                slot: '<%= sessionSlot != null ? sessionSlot : "" %>',
+                guests: '<%= sessionGuests != null ? sessionGuests : "2" %>',
+                floor: '<%= sessionFloor != null ? sessionFloor : "1" %>',
+                serviceId: '<%= sessionServiceId != null ? sessionServiceId : "none" %>',
+                specialRequest: '<%= escapedSpecialRequest %>'
+            };
+            formData = sessionData;
+            <% 
+            } else { 
+            %>
+            // Không có session, load từ localStorage
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                formData = JSON.parse(saved);
+            }
+            <% } %>
+            
+            // Áp dụng dữ liệu vào form
+            if (formData) {
+                if (formData.date && dateEl) dateEl.value = formData.date;
+                if (formData.guests && guestsEl) guestsEl.value = formData.guests;
+                if (formData.floor && floorEl) floorEl.value = formData.floor;
+                if (formData.serviceId && serviceEl) {
+                    serviceEl.value = formData.serviceId;
+                }
+                if (formData.specialRequest && specialEl) {
+                    specialEl.value = formData.specialRequest;
+                }
+                
+                // Load slot sau khi load date
+                if (formData.date) {
+                    loadSlotsForDate(formData.date, formData.slot);
+                }
+            }
+        } catch (e) {
+            console.error('Error loading form data:', e);
+        }
+    }
+    
+    // === SLOT MANAGEMENT ===
+    let currentSlotData = null;
+    let selectedSlot = null;
+    
+    function formatTime(timeStr) {
+        if (!timeStr) return '--:--';
+        // Format từ "08:00:00" thành "08:00"
+        return timeStr.substring(0, 5);
+    }
+    
+    function loadSlotsForDate(date, preSelectSlot) {
+        if (!date) return;
+        if (preSelectSlot === undefined) preSelectSlot = null;
+        
+        fetch('findTable?date=' + encodeURIComponent(date))
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentSlotData = data;
+                
+                // Update morning slot
+                const morningBtn = document.getElementById('slotMorning');
+                const morningTime = document.getElementById('morningTime');
+                if (morningBtn && morningTime) {
+                    if (data.morning && !data.morning.blocked) {
+                        morningTime.textContent = formatTime(data.morning.startTime) + ' - ' + formatTime(data.morning.endTime);
+                        morningBtn.classList.remove('slot-blocked');
+                        if (data.categoryId === 2) {
+                            morningBtn.classList.add('slot-special');
+                        } else {
+                            morningBtn.classList.remove('slot-special');
+                        }
+                    } else {
+                        morningTime.textContent = 'Không khả dụng';
+                        morningBtn.classList.add('slot-blocked');
+                        morningBtn.classList.remove('slot-special');
+                    }
+                }
+                
+                // Update afternoon slot
+                const afternoonBtn = document.getElementById('slotAfternoon');
+                const afternoonTime = document.getElementById('afternoonTime');
+                if (afternoonBtn && afternoonTime) {
+                    if (data.afternoon && !data.afternoon.blocked) {
+                        afternoonTime.textContent = formatTime(data.afternoon.startTime) + ' - ' + formatTime(data.afternoon.endTime);
+                        afternoonBtn.classList.remove('slot-blocked');
+                        if (data.categoryId === 2) {
+                            afternoonBtn.classList.add('slot-special');
+                        } else {
+                            afternoonBtn.classList.remove('slot-special');
+                        }
+                    } else {
+                        afternoonTime.textContent = 'Không khả dụng';
+                        afternoonBtn.classList.add('slot-blocked');
+                        afternoonBtn.classList.remove('slot-special');
+                    }
+                }
+                
+                // Update evening slot
+                const eveningBtn = document.getElementById('slotEvening');
+                const eveningTime = document.getElementById('eveningTime');
+                if (eveningBtn && eveningTime) {
+                    if (data.evening && !data.evening.blocked) {
+                        eveningTime.textContent = formatTime(data.evening.startTime) + ' - ' + formatTime(data.evening.endTime);
+                        eveningBtn.classList.remove('slot-blocked');
+                        if (data.categoryId === 2) {
+                            eveningBtn.classList.add('slot-special');
+                        } else {
+                            eveningBtn.classList.remove('slot-special');
+                        }
+                    } else {
+                        eveningTime.textContent = 'Không khả dụng';
+                        eveningBtn.classList.add('slot-blocked');
+                        eveningBtn.classList.remove('slot-special');
+                    }
+                }
+                
+                // Show/hide warning icon
+                const warningIcon = document.getElementById('dateWarning');
+                if (warningIcon) {
+                    if (data.hasWarning) {
+                        warningIcon.classList.add('show');
+                    } else {
+                        warningIcon.classList.remove('show');
+                    }
+                }
+                
+                // Pre-select slot if provided
+                if (preSelectSlot) {
+                    selectSlot(preSelectSlot);
+                } else if (!selectedSlot || !document.getElementById('slot').value) {
+                    // Auto-select first available slot
+                    if (data.morning && !data.morning.blocked) {
+                        selectSlot('MORNING');
+                    } else if (data.afternoon && !data.afternoon.blocked) {
+                        selectSlot('AFTERNOON');
+                    } else if (data.evening && !data.evening.blocked) {
+                        selectSlot('EVENING');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading slots:', error);
+                // Fallback: show default slots if API fails
+                const morningBtn = document.getElementById('slotMorning');
+                const afternoonBtn = document.getElementById('slotAfternoon');
+                const eveningBtn = document.getElementById('slotEvening');
+                if (morningBtn) {
+                    document.getElementById('morningTime').textContent = '08:00 - 11:30';
+                    morningBtn.classList.remove('slot-blocked');
+                }
+                if (afternoonBtn) {
+                    document.getElementById('afternoonTime').textContent = '12:00 - 17:00';
+                    afternoonBtn.classList.remove('slot-blocked');
+                }
+                if (eveningBtn) {
+                    document.getElementById('eveningTime').textContent = '18:00 - 21:00';
+                    eveningBtn.classList.remove('slot-blocked');
+                }
+                // Auto-select first slot
+                if (!selectedSlot && morningBtn && !morningBtn.classList.contains('slot-blocked')) {
+                    selectSlot('MORNING');
+                }
+            });
+    }
+    
+    function selectSlot(slotType) {
+        // Check if slot is blocked
+        if (currentSlotData) {
+            const slotData = currentSlotData[slotType.toLowerCase()];
+            if (slotData && slotData.blocked) {
+                return; // Cannot select blocked slot
+            }
+        }
+        
+        // Remove previous selection
+        document.querySelectorAll('.slot-button').forEach(btn => {
+            btn.classList.remove('slot-selected');
+        });
+        
+        // Add selection to clicked button
+        const slotId = 'slot' + slotType.charAt(0) + slotType.slice(1).toLowerCase();
+        const btn = document.getElementById(slotId);
+        if (btn && !btn.classList.contains('slot-blocked')) {
+            btn.classList.add('slot-selected');
+            const slotInput = document.getElementById('slot');
+            if (slotInput) {
+                slotInput.value = slotType;
+            }
+            selectedSlot = slotType;
+            saveFormData();
+        }
+    }
+    
+    // Load saved data on page load - Gộp tất cả vào một DOMContentLoaded
     window.addEventListener('DOMContentLoaded', function() {
-        const savedTheme = localStorage.getItem('theme');
-        const body = document.body;
-        const themeIcon = document.getElementById('themeIcon');
-        const themeText = document.getElementById('themeText');
+        try {
+            // === THEME MANAGEMENT ===
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
 
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-            themeIcon.className = 'fas fa-sun';
-            themeText.textContent = 'Chế độ sáng';
-        }
-    });
+            if (savedTheme === 'light' && body && themeIcon && themeText) {
+                body.classList.add('light-mode');
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Chế độ sáng';
+            }
+            
+            // === ORIGINAL SCRIPTS ===
+            const minusBtn = document.getElementById('minus-btn');
+            const plusBtn = document.getElementById('plus-btn');
+            const guestsInput = document.getElementById('guests');
+            const dateInput = document.getElementById('date');
 
-    // === ORIGINAL SCRIPTS ===
-    const minusBtn = document.getElementById('minus-btn');
-    const plusBtn = document.getElementById('plus-btn');
-    const guestsInput = document.getElementById('guests');
-    const dateInput = document.getElementById('date');
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            if (dateInput) {
+                if (!dateInput.value) {
+                    dateInput.value = today;
+                }
+                dateInput.min = today;
+            }
 
-    // Set default date to today
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.value = today;
-    dateInput.min = today;
+            // Load slots when date changes
+            if (dateInput) {
+                dateInput.addEventListener('change', function() {
+                    loadSlotsForDate(this.value);
+                    saveFormData();
+                });
+            }
 
-    minusBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        let currentValue = parseInt(guestsInput.value);
-        if (currentValue > 1) {
-            guestsInput.value = currentValue - 1;
-        }
-    });
+            // Slot button clicks
+            document.querySelectorAll('.slot-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!this.classList.contains('slot-blocked')) {
+                        const slotType = this.getAttribute('data-slot');
+                        selectSlot(slotType);
+                    }
+                });
+            });
 
-    plusBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        let currentValue = parseInt(guestsInput.value);
-        if (currentValue < 20) {
-            guestsInput.value = currentValue + 1;
+            if (minusBtn && guestsInput) {
+                minusBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    let currentValue = parseInt(guestsInput.value);
+                    if (currentValue > 1) {
+                        guestsInput.value = currentValue - 1;
+                        saveFormData();
+                    }
+                });
+            }
+
+            if (plusBtn && guestsInput) {
+                plusBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    let currentValue = parseInt(guestsInput.value);
+                    if (currentValue < 20) {
+                        guestsInput.value = currentValue + 1;
+                        saveFormData();
+                    }
+                });
+            }
+            
+            // === FORM VALIDATION ===
+            const form = document.querySelector('form.search-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const slotInput = document.getElementById('slot');
+                    if (!slotInput || !slotInput.value) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('Vui lòng chọn một slot thời gian!');
+                        return false;
+                    }
+                    // Lưu lại dữ liệu vào localStorage trước khi submit để giữ lại khi quay lại
+                    saveFormData();
+                    return true;
+                });
+            }
+            
+            // Save form data on other field changes
+            const floorSelect = document.getElementById('floor');
+            const serviceSelect = document.getElementById('serviceId');
+            const specialRequestTextarea = document.getElementById('specialRequest');
+            
+            if (floorSelect) {
+                floorSelect.addEventListener('change', saveFormData);
+            }
+            if (serviceSelect) {
+                serviceSelect.addEventListener('change', saveFormData);
+            }
+            if (specialRequestTextarea) {
+                specialRequestTextarea.addEventListener('input', saveFormData);
+            }
+            
+            // Load saved form data
+            loadFormData();
+            
+            // Get final date value and load slots
+            const dateValue = document.getElementById('date') ? document.getElementById('date').value : null;
+            const finalDateValue = dateValue || today;
+            
+            if (!dateValue && dateInput) {
+                dateInput.value = finalDateValue;
+            }
+            
+            // Always load slots for the current date value
+            loadSlotsForDate(finalDateValue);
+        } catch (error) {
+            console.error('Error initializing page:', error);
         }
     });
 </script>

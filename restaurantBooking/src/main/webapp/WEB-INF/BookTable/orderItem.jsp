@@ -470,7 +470,7 @@
             <div class="item-controls">
                 <label>
                     Số lượng:
-                    <input type="number" name="qty_<%= item.getItemId() %>" value="0" min="0">
+                    <input type="number" name="qty_<%= item.getItemId() %>" value="1" min="1">
                 </label>
 
                 <button type="button" class="btn-add-cart"
@@ -549,8 +549,8 @@
 
         console.log('📊 Quantity:', quantity, '| Note:', note);
 
-        if (isNaN(quantity) || quantity <= 0) {
-            alert('⚠️ Vui lòng nhập số lượng > 0');
+        if (isNaN(quantity) || quantity < 1) {
+            alert('⚠️ Vui lòng nhập số lượng >= 1');
             return;
         }
 
@@ -574,7 +574,7 @@
             .then(data => {
                 if (data.success) {
                     alert('✅ Thêm ' + itemName + ' thành công!');
-                    qtyInput.value = 0;
+                    qtyInput.value = 1; // Reset về giá trị mặc định là 1
                     if (noteInput) noteInput.value = '';
                     updateTotalPrice();
                 } else {
