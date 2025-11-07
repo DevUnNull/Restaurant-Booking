@@ -729,7 +729,7 @@
                                     <c:choose>
                                         <c:when test="${order.paymentMethod == 'CASH'}">
                                                     <span class="payment-badge payment-cash">
-                                                        <i class="fas fa-money-bill-wave"></i> COD
+                                                        <i class="fas fa-money-bill-wave"></i> Đến nơi trả tiền
                                                     </span>
                                         </c:when>
                                         <c:when test="${order.paymentMethod == 'CREDIT_CARD'}">
@@ -768,6 +768,13 @@
                                             <span class="payment-status-badge">-</span>
                                         </c:otherwise>
                                     </c:choose>
+
+                                    <!-- Note for CASH payment with deposit -->
+                                    <c:if test="${order.paymentMethod == 'CASH' and order.paymentStatus == 'COMPLETED'}">
+                                        <div style="font-size: 0.85em; color: #ffc107; font-style: italic; margin-top: 4px;">
+                                            <i class="fas fa-info-circle"></i> Đã trả tiền cọc - Đến nơi trả tiền
+                                        </div>
+                                    </c:if>
 
                                     <!-- Confirm Payment Button (CASH + PENDING only) -->
                                     <c:if test="${order.paymentMethod == 'CASH' and order.paymentStatus == 'PENDING'}">

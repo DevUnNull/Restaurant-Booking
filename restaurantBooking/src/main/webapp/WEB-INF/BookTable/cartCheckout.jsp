@@ -791,15 +791,7 @@
             <p><i class="fas fa-credit-card"></i> Chọn hình thức thanh toán:</p>
             <label>
                 <input type="radio" name="paymentMethod" value="CASH" checked>
-                <i class="fas fa-money-bill-wave"></i> Thanh toán khi nhận (COD)
-            </label>
-            <label>
-                <input type="radio" name="paymentMethod" value="CREDIT_CARD">
-                <i class="fas fa-credit-card"></i> Thẻ tín dụng
-            </label>
-            <label>
-                <input type="radio" name="paymentMethod" value="E_WALLET">
-                <i class="fas fa-wallet"></i> Ví điện tử (Momo, ZaloPay)
+                <i class="fas fa-money-bill-wave"></i> Trả tiền khi đến nơi
             </label>
             <label>
                 <input type="radio" name="paymentMethod" value="VNPAY">
@@ -810,17 +802,11 @@
             <div id="paymentInfoCash" class="payment-info cash show">
                 <p>
                     <i class="fas fa-info-circle"></i>
-                    <strong>Thanh toán khi nhận:</strong><br>
+                    <strong>Trả tiền khi đến nơi:</strong><br>
                     Món ăn sẽ được nấu khi bạn đến nhà hàng. Vui lòng đến đúng giờ đã đặt.<br>
-                    <strong style="color: #ffc107;">⚠️ Lưu ý:</strong> Yêu cầu đặt cọc <strong id="deposit-amount-info">0 VNĐ</strong>
+                    <strong style="color: #ffc107;">⚠️ Lưu ý:</strong> Vẫn phải trả tiền cọc bàn để lên đơn. 
+                    Yêu cầu đặt cọc <strong id="deposit-amount-info">0 VNĐ</strong>
                     (20.000 VNĐ/bàn). Tiền cọc sẽ được hoàn lại khi đến quán và thanh toán đầy đủ.
-                </p>
-            </div>
-            <div id="paymentInfoPrepaid" class="payment-info prepaid" style="display: none;">
-                <p>
-                    <i class="fas fa-check-circle"></i>
-                    <strong>Thanh toán trước:</strong><br>
-                    Món ăn sẽ được chuẩn bị sẵn trước khi bạn đến. Đến nhà hàng sẽ có món ăn sẵn sàng ngay!
                 </p>
             </div>
             <div id="paymentInfoVNPay" class="payment-info vnpay" style="display: none;">
@@ -980,26 +966,18 @@
     // ===== XỬ LÝ THAY ĐỔI PAYMENT METHOD =====
     const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
     const paymentInfoCash = document.getElementById('paymentInfoCash');
-    const paymentInfoPrepaid = document.getElementById('paymentInfoPrepaid');
     const paymentInfoVNPay = document.getElementById('paymentInfoVNPay');
 
     paymentMethods.forEach(function(radio) {
         radio.addEventListener('change', function() {
             if (this.value === 'CASH') {
-                // Thanh toán khi nhận (COD)
+                // Trả tiền khi đến nơi
                 paymentInfoCash.style.display = 'block';
-                paymentInfoPrepaid.style.display = 'none';
                 paymentInfoVNPay.style.display = 'none';
             } else if (this.value === 'VNPAY') {
                 // Thanh toán VNPay
                 paymentInfoCash.style.display = 'none';
-                paymentInfoPrepaid.style.display = 'none';
                 paymentInfoVNPay.style.display = 'block';
-            } else if (this.value === 'CREDIT_CARD' || this.value === 'E_WALLET') {
-                // Thanh toán trước
-                paymentInfoCash.style.display = 'none';
-                paymentInfoPrepaid.style.display = 'block';
-                paymentInfoVNPay.style.display = 'none';
             }
             // Cập nhật tổng tiền khi thay đổi payment method
             updateTotal();

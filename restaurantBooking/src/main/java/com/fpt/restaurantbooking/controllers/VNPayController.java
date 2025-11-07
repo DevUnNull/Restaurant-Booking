@@ -81,11 +81,17 @@ public class VNPayController extends HttpServlet {
 
             int reservationId = Integer.parseInt(reservationIdStr);
             long amount = Long.parseLong(amountStr);
+            String isDeposit = request.getParameter("isDeposit");
 
-            logger.info("Creating VNPay payment for reservation {} with amount {}", reservationId, amount);
+            logger.info("Creating VNPay payment for reservation {} with amount {} (isDeposit: {})", reservationId, amount, isDeposit);
 
             // Create payment URL
-            String orderDescription = "Thanh toán đơn đặt bàn #" + reservationId;
+            String orderDescription;
+            if ("true".equals(isDeposit)) {
+                orderDescription = "Thanh toán tiền cọc đơn đặt bàn #" + reservationId;
+            } else {
+                orderDescription = "Thanh toán đơn đặt bàn #" + reservationId;
+            }
             String paymentUrl = vnPayService.createPaymentUrl(reservationId, amount, orderDescription, "restaurant_booking");
 
             if (paymentUrl != null && !paymentUrl.isEmpty()) {

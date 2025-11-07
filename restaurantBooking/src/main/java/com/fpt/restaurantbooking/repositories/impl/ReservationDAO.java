@@ -137,6 +137,49 @@ public class ReservationDAO {
         return tableIds;
     }
 
+    // Get booked table IDs for a specific date and time slot
+    // slot can be "MORNING", "AFTERNOON", or "EVENING"
+    public List<Integer> getBookedTableIdsForSlot(LocalDate date, String slot) {
+        String sql = "SELECT DISTINCT rt.table_id " +
+                "FROM Reservation_Tables rt " +
+                "INNER JOIN Reservations r ON rt.reservation_id = r.reservation_id " +
+                "WHERE r.reservation_date = ? " +
+                "AND r.status IN ('CONFIRMED', 'COMPLETED') " +
+                "AND (";
+
+        // Determine time range based on slot
+        String timeCondition = "";
+        if ("MORNING".equalsIgnoreCase(slot)) {
+            timeCondition = "TIME(r.reservation_time) >= TIME('08:00:00') AND TIME(r.reservation_time) < TIME('12:00:00')";
+        } else if ("AFTERNOON".equalsIgnoreCase(slot)) {
+            timeCondition = "TIME(r.reservation_time) >= TIME('12:00:00') AND TIME(r.reservation_time) < TIME('18:00:00')";
+        } else if ("EVENING".equalsIgnoreCase(slot)) {
+            timeCondition = "TIME(r.reservation_time) >= TIME('18:00:00') AND TIME(r.reservation_time) <= TIME('23:59:59')";
+        } else {
+            // If slot is not recognized, return empty list
+            return new ArrayList<>();
+        }
+
+        sql += timeCondition + ")";
+
+        List<Integer> tableIds = new ArrayList<>();
+
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDate(1, Date.valueOf(date));
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    tableIds.add(rs.getInt("table_id"));
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error getting booked tables for slot: " + slot + " on date: " + date, e);
+        }
+        return tableIds;
+    }
+
     // Update reservation status
     public boolean updateReservationStatus(int reservationId, String status) {
         String sql = "UPDATE Reservations SET status = ?, updated_at = NOW() WHERE reservation_id = ?";
@@ -198,7 +241,7 @@ public class ReservationDAO {
 
     // Cancel reservation
     public boolean cancelReservation(int reservationId, String reason) {
-        String sql = "UPDATE Reservations SET status = 'CANCELLED', cancellation_reason = ?, updated_at = NOW() WHERE reservation_id = ? AND status = 'PENDING'";
+        String sql = "UPDATE Reservations SET status = 'CANCELLED', cancellation_reason = ?, updated_at = NOW() WHERE reservation_id = ? AND status IN ('PENDING', 'CONFIRMED')";
 
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

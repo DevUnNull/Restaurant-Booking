@@ -355,18 +355,299 @@
     <% } else { %>
 
     <!-- CHÍNH SÁCH HỦY -->
+    <%
+        String paymentMethod = (payment != null) ? payment.getPaymentMethod() : "";
+        boolean isCashPayment = "CASH".equals(paymentMethod);
+        boolean isVnPayPayment = "VNPAY".equals(paymentMethod);
+        
+        // Tính thời gian từ bây giờ đến giờ đặt bàn
+        long hoursBeforeReservation = 0;
+        if (reservation != null && reservation.getReservationDate() != null && reservation.getReservationTime() != null) {
+            LocalDateTime reservationDateTime = reservation.getReservationDate().atTime(reservation.getReservationTime());
+            LocalDateTime now = LocalDateTime.now();
+            hoursBeforeReservation = ChronoUnit.HOURS.between(now, reservationDateTime);
+        }
+    %>
+    
     <div class="policy-section">
         <h3><i class="fas fa-info-circle"></i> Chính sách hủy đặt bàn</h3>
-        <ul>
-            <li>Miễn phí hủy nếu hủy trước 24 giờ so với giờ đặt bàn</li>
-            <li>Hủy trong vòng 12-24 giờ: Phí hủy 50,000 VNĐ</li>
-            <li>Hủy trong vòng 12 giờ: Phí hủy 100,000 VNĐ</li>
-            <li><strong style="color: #e74c3c;">⚠️ QUAN TRỌNG - Về tiền đặt cọc:</strong></li>
-            <li style="padding-left: 40px;">Nếu bạn chọn thanh toán tại quán (COD), yêu cầu đặt cọc 20.000 VNĐ/bàn</li>
-            <li style="padding-left: 40px;">Tiền cọc sẽ được hoàn lại khi bạn đến quán và thanh toán đầy đủ</li>
-            <li style="padding-left: 40px;"><strong style="color: #ffc107;">Nếu hủy sau thời gian đặt bàn, tiền đặt cọc sẽ không được hoàn lại</strong></li>
-            <li>Vui lòng cung cấp lý do hủy để chúng tôi cải thiện dịch vụ</li>
-        </ul>
+        
+        <!-- Case 1: Thanh toán khi đến nơi (có tiền đặt cọc) -->
+        <% if (isCashPayment) { %>
+        <div style="margin-bottom: 25px; padding: 15px; background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: 5px;">
+            <h4 style="color: #ffc107; margin-bottom: 15px; font-size: 1.1em;">
+                <i class="fas fa-money-bill-wave"></i> Trường hợp 1: Thanh toán khi đến nơi (có tiền đặt cọc)
+            </h4>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: rgba(255, 193, 7, 0.2);">
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(255, 193, 7, 0.3);">Tình huống</th>
+                        <th style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3);">Hành động</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(255, 193, 7, 0.3);">Giải thích</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách hủy trước hạn cho phép<br>
+                            <small style="color: rgba(255,255,255,0.7);">(ví dụ: ≥ 2 giờ trước giờ đặt bàn)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Hoàn lại tiền đặt cọc
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Vì khách báo sớm, nhà hàng chưa chuẩn bị món hoặc giữ bàn
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách hủy trễ hạn<br>
+                            <small style="color: rgba(255,255,255,0.7);">(ví dụ: < 2 giờ trước khi đến)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #e74c3c; font-weight: 600;">
+                            ❌ Không hoàn tiền đặt cọc
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Tiền cọc bị giữ vì nhà hàng đã chuẩn bị, mất cơ hội phục vụ người khác
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách không đến (no-show)
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #e74c3c; font-weight: 600;">
+                            ❌ Không hoàn tiền đặt cọc
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Giống hủy trễ, mất slot bàn
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách đến và thanh toán toàn bộ
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Không cần hoàn, tiền cọc được trừ vào hóa đơn
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Lúc này tiền cọc = một phần trong tổng thanh toán
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; padding: 10px; background: rgba(255, 193, 7, 0.15); border-radius: 5px; font-size: 0.95em;">
+                <strong>Tóm tắt:</strong> Chỉ hoàn tiền cọc nếu khách hủy trước thời hạn quy định (ví dụ ≥ 2h trước giờ đến).
+            </p>
+        </div>
+        <% } %>
+        
+        <!-- Case 2: Thanh toán toàn bộ online -->
+        <% if (isVnPayPayment) { %>
+        <div style="margin-bottom: 25px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; border-radius: 5px;">
+            <h4 style="color: #667eea; margin-bottom: 15px; font-size: 1.1em;">
+                <i class="fas fa-credit-card"></i> Trường hợp 2: Thanh toán toàn bộ online (full payment)
+            </h4>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: rgba(102, 126, 234, 0.2);">
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(102, 126, 234, 0.3);">Tình huống</th>
+                        <th style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3);">Hành động</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(102, 126, 234, 0.3);">Giải thích</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách hủy trước hạn cho phép<br>
+                            <small style="color: rgba(255,255,255,0.7);">(≥ 2 giờ)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Hoàn 100% tiền
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Vì chưa phục vụ gì cả
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách hủy trễ<br>
+                            <small style="color: rgba(255,255,255,0.7);">(< 2 giờ)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #ffc107; font-weight: 600;">
+                            ⚠️ Hoàn 50% tiền (hoặc tùy quy định)
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Nhà hàng có thể đã chuẩn bị món hoặc setup bàn
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách không đến (no-show)
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #e74c3c; font-weight: 600;">
+                            ❌ Không hoàn tiền
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Nhà hàng bị thiệt hại trực tiếp
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách đến và dùng dịch vụ
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Không hoàn tiền (hoàn tất đơn)
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Giao dịch thành công
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; padding: 10px; background: rgba(102, 126, 234, 0.15); border-radius: 5px; font-size: 0.95em;">
+                <strong>Tóm tắt:</strong> Với thanh toán trước, bạn có thể quy định hoàn 100% / 50% / 0% tùy theo thời gian hủy trước giờ đặt.
+            </p>
+        </div>
+        <% } %>
+        
+        <!-- Hiển thị cả 2 nếu chưa xác định payment method -->
+        <% if (!isCashPayment && !isVnPayPayment) { %>
+        <div style="margin-bottom: 25px; padding: 15px; background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: 5px;">
+            <h4 style="color: #ffc107; margin-bottom: 15px; font-size: 1.1em;">
+                <i class="fas fa-money-bill-wave"></i> Trường hợp 1: Thanh toán khi đến nơi (có tiền đặt cọc)
+            </h4>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: rgba(255, 193, 7, 0.2);">
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(255, 193, 7, 0.3);">Tình huống</th>
+                        <th style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3);">Hành động</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(255, 193, 7, 0.3);">Giải thích</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách hủy trước hạn cho phép<br>
+                            <small style="color: rgba(255,255,255,0.7);">(ví dụ: ≥ 2 giờ trước giờ đặt bàn)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Hoàn lại tiền đặt cọc
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Vì khách báo sớm, nhà hàng chưa chuẩn bị món hoặc giữ bàn
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách hủy trễ hạn<br>
+                            <small style="color: rgba(255,255,255,0.7);">(ví dụ: < 2 giờ trước khi đến)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #e74c3c; font-weight: 600;">
+                            ❌ Không hoàn tiền đặt cọc
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Tiền cọc bị giữ vì nhà hàng đã chuẩn bị, mất cơ hội phục vụ người khác
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách không đến (no-show)
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #e74c3c; font-weight: 600;">
+                            ❌ Không hoàn tiền đặt cọc
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Giống hủy trễ, mất slot bàn
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Khách đến và thanh toán toàn bộ
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(255, 193, 7, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Không cần hoàn, tiền cọc được trừ vào hóa đơn
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(255, 193, 7, 0.3);">
+                            Lúc này tiền cọc = một phần trong tổng thanh toán
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; padding: 10px; background: rgba(255, 193, 7, 0.15); border-radius: 5px; font-size: 0.95em;">
+                <strong>Tóm tắt:</strong> Chỉ hoàn tiền cọc nếu khách hủy trước thời hạn quy định (ví dụ ≥ 2h trước giờ đến).
+            </p>
+        </div>
+        
+        <div style="margin-bottom: 25px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; border-radius: 5px;">
+            <h4 style="color: #667eea; margin-bottom: 15px; font-size: 1.1em;">
+                <i class="fas fa-credit-card"></i> Trường hợp 2: Thanh toán toàn bộ online (full payment)
+            </h4>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="background: rgba(102, 126, 234, 0.2);">
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(102, 126, 234, 0.3);">Tình huống</th>
+                        <th style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3);">Hành động</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid rgba(102, 126, 234, 0.3);">Giải thích</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách hủy trước hạn cho phép<br>
+                            <small style="color: rgba(255,255,255,0.7);">(≥ 2 giờ)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Hoàn 100% tiền
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Vì chưa phục vụ gì cả
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách hủy trễ<br>
+                            <small style="color: rgba(255,255,255,0.7);">(< 2 giờ)</small>
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #ffc107; font-weight: 600;">
+                            ⚠️ Hoàn 50% tiền (hoặc tùy quy định)
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Nhà hàng có thể đã chuẩn bị món hoặc setup bàn
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách không đến (no-show)
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #e74c3c; font-weight: 600;">
+                            ❌ Không hoàn tiền
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Nhà hàng bị thiệt hại trực tiếp
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Khách đến và dùng dịch vụ
+                        </td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); color: #28a745; font-weight: 600;">
+                            ✅ Không hoàn tiền (hoàn tất đơn)
+                        </td>
+                        <td style="padding: 10px; border: 1px solid rgba(102, 126, 234, 0.3);">
+                            Giao dịch thành công
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; padding: 10px; background: rgba(102, 126, 234, 0.15); border-radius: 5px; font-size: 0.95em;">
+                <strong>Tóm tắt:</strong> Với thanh toán trước, bạn có thể quy định hoàn 100% / 50% / 0% tùy theo thời gian hủy trước giờ đặt.
+            </p>
+        </div>
+        <% } %>
+        
+        <p style="margin-top: 20px; padding: 12px; background: rgba(231, 76, 60, 0.15); border-left: 4px solid #e74c3c; border-radius: 5px; font-size: 0.95em;">
+            <i class="fas fa-info-circle"></i> <strong>Lưu ý:</strong> Vui lòng cung cấp lý do hủy để chúng tôi cải thiện dịch vụ.
+        </p>
     </div>
 
     <!-- Thông tin đơn đặt bàn -->
