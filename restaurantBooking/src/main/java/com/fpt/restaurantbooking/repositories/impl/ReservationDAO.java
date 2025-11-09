@@ -263,12 +263,14 @@ public class ReservationDAO {
         sql.append("SELECT r.reservation_id, r.reservation_date, r.reservation_time, r.guest_count, ");
         sql.append("r.status, r.total_amount, r.special_requests, r.created_at, r.updated_at, ");
         sql.append("u.user_id, u.full_name, u.phone_number, u.email, ");
-        sql.append("p.payment_method, p.payment_status, ");
+        sql.append("(SELECT p1.payment_method FROM Payments p1 WHERE p1.reservation_id = r.reservation_id ");
+        sql.append(" ORDER BY CASE WHEN p1.payment_status = 'COMPLETED' THEN 0 ELSE 1 END, p1.payment_id DESC LIMIT 1) as payment_method, ");
+        sql.append("(SELECT p1.payment_status FROM Payments p1 WHERE p1.reservation_id = r.reservation_id ");
+        sql.append(" ORDER BY CASE WHEN p1.payment_status = 'COMPLETED' THEN 0 ELSE 1 END, p1.payment_id DESC LIMIT 1) as payment_status, ");
         sql.append("GROUP_CONCAT(DISTINCT t.table_name ORDER BY t.table_name SEPARATOR ', ') as table_names, ");
         sql.append("COUNT(DISTINCT oi.order_item_id) as item_count ");
         sql.append("FROM Reservations r ");
         sql.append("LEFT JOIN Users u ON r.user_id = u.user_id ");
-        sql.append("LEFT JOIN Payments p ON r.reservation_id = p.reservation_id ");
         sql.append("LEFT JOIN Reservation_Tables rt ON r.reservation_id = rt.reservation_id ");
         sql.append("LEFT JOIN Tables t ON rt.table_id = t.table_id ");
         sql.append("LEFT JOIN Order_Items oi ON r.reservation_id = oi.reservation_id ");
@@ -299,8 +301,7 @@ public class ReservationDAO {
         // MySQL ONLY_FULL_GROUP_BY requires all non-aggregated columns in GROUP BY
         sql.append("GROUP BY r.reservation_id, r.reservation_date, r.reservation_time, ");
         sql.append("r.guest_count, r.status, r.total_amount, r.special_requests, ");
-        sql.append("r.created_at, r.updated_at, u.user_id, u.full_name, u.phone_number, ");
-        sql.append("u.email, p.payment_method, p.payment_status ");
+        sql.append("r.created_at, r.updated_at, u.user_id, u.full_name, u.phone_number, u.email ");
         sql.append("ORDER BY r.created_at DESC ");
         sql.append("LIMIT ? OFFSET ?");
         params.add(limit);
