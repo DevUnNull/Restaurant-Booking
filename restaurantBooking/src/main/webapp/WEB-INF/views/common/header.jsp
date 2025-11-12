@@ -5,13 +5,13 @@
 <header style="background: #ad0505">
     <div class="logo">
         <a href="${pageContext.request.contextPath}/">
-            <h1>Đặt Bàn Nhà Hàng</h1>
+            <h1>Fine Dining</h1>
         </a>
     </div>
     <nav>
         <ul>
             <li><a href="${pageContext.request.contextPath}/">Trang Chủ</a></li>
-            <li><a href="${pageContext.request.contextPath}/Blog">Blog nhà Hàng</a></li>
+<%--            <li><a href="${pageContext.request.contextPath}/Blog">Blog nhà Hàng</a></li>--%>
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
             <li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li>
             <li><a href="${pageContext.request.contextPath}/Blog"> Blog nhà Hàng</a></li>
