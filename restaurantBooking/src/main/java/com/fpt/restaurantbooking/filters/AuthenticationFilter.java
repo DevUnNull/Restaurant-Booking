@@ -25,7 +25,7 @@ public class AuthenticationFilter implements Filter {
 
     private UserService userService;
 
-    // KHAI BÁO VAI TRÒ VÀ REPORT_URLS ĐÚNG VỊ TRÍ (Ophelia)
+    // KHAI BÁO VAI TRÒ VÀ REPORT_URLS ĐÚNG VỊ TRÍ
     private static final int ADMIN_ROLE_ID = 1;
     private static final int MANAGER_ROLE_ID = 4;
 
@@ -66,7 +66,7 @@ public class AuthenticationFilter implements Filter {
             "/api/staff/"
     );
 
-    // URLs that require manager or admin role (Ophelia)
+    // URLs that require manager or admin role
     private static final List<String> REPORT_URLS = Arrays.asList(
             "/overview-report",
             "/service-report",

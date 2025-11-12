@@ -12,7 +12,7 @@
             <div class="footer-section contact">
                 <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #ffd700;">Restaurant Booking</h3>
                 <p style="margin-bottom: 10px; line-height: 1.6;">Experience authentic flavors and exceptional service at our restaurant.</p>
-                <p style="margin: 8px 0;"><span style="margin-right: 8px;">Location:</span> 123 Restaurant Street, Food City</p>
+                <p style="margin: 8px 0;"><span style="margin-right: 8px;">Location:</span> 54 Liễu Giai, Ba Đình, Hà Nội</p>
                 <p style="margin: 8px 0;"><span style="margin-right: 8px;">Phone:</span> +1 (555) 123-4567</p>
                 <p style="margin: 8px 0;"><span style="margin-right: 8px;">Email:</span> info@restaurantbooking.com</p>
             </div>
@@ -29,7 +29,7 @@
 
             <div class="footer-section location">
                 <h3 style="font-size: 1.3rem; margin-bottom: 15px; color: #ffd700;">Location</h3>
-                <p style="margin-bottom: 15px;">123 Restaurant Street, Food City</p>
+                <p style="margin-bottom: 15px;">54 Liễu Giai, Ba Đình, Hà Nội</p>
                 <div class="map-container" style="
                     height: 180px;
                     border-radius: 10px;

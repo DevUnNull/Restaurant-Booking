@@ -57,33 +57,33 @@
     <!-- Menu Section -->
     <section id="menu">
         <div class="menu-content container">
-            <h2>Món Ăn Nổi Bật</h2>
+            <h2>Thực đơn của chúng tôi</h2>
             <p class="menu-intro">Khám phá những món ăn đặc sắc được lựa chọn đặc biệt bởi các đầu bếp của chúng tôi.</p>
 
-            <div class="menu-grid">
-                <c:if test="${not empty featuredDishes}">
-                    <c:forEach items="${featuredDishes}" var="dish">
-                        <div class="dish-card">
-                            <div class="dish-image-container">
-                                <img src="${pageContext.request.contextPath}/images/dishes/${dish.imageUrl}" alt="${dish.itemName}">
-                            </div>
-                            <div class="dish-details">
-                                <h3 class="dish-name">${dish.itemName}</h3>
-                                <p class="dish-description">${dish.description}</p>
-                            </div>
-                            <div class="dish-footer">
-                                <span class="dish-price"><fmt:formatNumber value="${dish.price}" type="currency" currencyCode="VND"/></span>
-                                <button class="dish-order-btn" onclick="addToCart(${dish.itemId})">
-                                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-                                </button>
-                            </div>
-                        </div>
-                    </c:forEach>
-                </c:if>
-                <c:if test="${empty featuredDishes}">
-                    <p>Chưa có món ăn nổi bật nào để hiển thị.</p>
-                </c:if>
-            </div>
+<%--            <div class="menu-grid">--%>
+<%--                <c:if test="${not empty featuredDishes}">--%>
+<%--                    <c:forEach items="${featuredDishes}" var="dish">--%>
+<%--                        <div class="dish-card">--%>
+<%--                            <div class="dish-image-container">--%>
+<%--                                <img src="${pageContext.request.contextPath}/images/dishes/${dish.imageUrl}" alt="${dish.itemName}">--%>
+<%--                            </div>--%>
+<%--                            <div class="dish-details">--%>
+<%--                                <h3 class="dish-name">${dish.itemName}</h3>--%>
+<%--                                <p class="dish-description">${dish.description}</p>--%>
+<%--                            </div>--%>
+<%--                            <div class="dish-footer">--%>
+<%--                                <span class="dish-price"><fmt:formatNumber value="${dish.price}" type="currency" currencyCode="VND"/></span>--%>
+<%--                                <button class="dish-order-btn" onclick="addToCart(${dish.itemId})">--%>
+<%--                                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ--%>
+<%--                                </button>--%>
+<%--                            </div>--%>
+<%--                        </div>--%>
+<%--                    </c:forEach>--%>
+<%--                </c:if>--%>
+<%--                <c:if test="${empty featuredDishes}">--%>
+<%--                    <p>Chưa có món ăn nổi bật nào để hiển thị.</p>--%>
+<%--                </c:if>--%>
+<%--            </div>--%>
 
             <div class="view-full-menu">
                 <a href="${pageContext.request.contextPath}/menu" class="menu-button">Xem Toàn Bộ Thực Đơn</a>
@@ -104,10 +104,10 @@
                     </div>
                     <div class="testimonial-author">
                         <div class="author-avatar">
-                            <img src="${pageContext.request.contextPath}/assets/images/avatar1.jpg" alt="Nguyễn Văn A" />
+                            <img src="${pageContext.request.contextPath}/images/img_3.png" alt="Nguyễn Văn A" />
                         </div>
                         <div class="author-info">
-                            <h4>Nguyễn Văn A</h4>
+                            <h4>Nguyễn Văn Anh</h4>
                             <span>Khách hàng thân thiết</span>
                         </div>
                     </div>
@@ -118,10 +118,10 @@
                     </div>
                     <div class="testimonial-author">
                         <div class="author-avatar">
-                            <img src="${pageContext.request.contextPath}/assets/images/avatar2.jpg" alt="Trần Thị B" />
+                            <img src="${pageContext.request.contextPath}/images/img_4.png" alt="Trần Thị B" />
                         </div>
                         <div class="author-info">
-                            <h4>Trần Thị B</h4>
+                            <h4>Trần Thị Hòa</h4>
                             <span>Khách hàng mới</span>
                         </div>
                     </div>
