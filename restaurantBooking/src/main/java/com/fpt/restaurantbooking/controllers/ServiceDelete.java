@@ -78,6 +78,7 @@ public class ServiceDelete extends HttpServlet {
         
             try {
                 if(Serviceid !=null && !Serviceid.isEmpty()){
+                    dao.deleteServiceFromService_menu_items(Serviceid);
                 dao.deleteService(Serviceid);
                 
                  response.sendRedirect("ServiceManage");

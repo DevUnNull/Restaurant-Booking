@@ -6,11 +6,16 @@ import com.fpt.restaurantbooking.models.Promotions;
 import com.fpt.restaurantbooking.repositories.impl.MenuRepository;
 import com.fpt.restaurantbooking.repositories.impl.VoucherRepository;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +23,7 @@ import java.util.List;
 
 
 @WebServlet(name="AddMenu", urlPatterns={"/AddMenu"})
+@MultipartConfig
 public class AddMenu  extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -72,7 +78,21 @@ public class AddMenu  extends HttpServlet {
         String itemName = request.getParameter("itemName");
         String code_dish= request.getParameter("code_dish");
         String description = request.getParameter("description");
-        String img_url= request.getParameter("imageUrl");
+        Part filePart = request.getPart("imageFile"); // Lấy file
+        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+// ✅ Nơi lưu file (trong thư mục images/appetizers)
+        String uploadPath = getServletContext().getRealPath("/images/appetizers/");
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+// ✅ Ghi file vào server
+        if (fileName != null && !fileName.isEmpty()) {
+            filePart.write(uploadPath + File.separator + fileName);
+        }
+
+// ✅ Đường dẫn ảnh để lưu DB
+        String img_url = "images/appetizers/" + fileName;
         String price= request.getParameter("price");
         String categoryId = request.getParameter("categoryId");
         String status = request.getParameter("status");
@@ -81,6 +101,11 @@ public class AddMenu  extends HttpServlet {
 
         if(itemName.isEmpty()){
             er="name must not be empty";
+            request.setAttribute("errorMessageee", er);
+            processRequest(request, response);
+            return;
+        }if(itemName.trim().length() > 40) {
+            er="name must not greater than 40 characters";
             request.setAttribute("errorMessageee", er);
             processRequest(request, response);
             return;

@@ -47,6 +47,7 @@ public class BlogRepository {
                 "    p.content,\n" +
                 "    p.thumbnail,\n" +
                 "    p.category_id,\n" +
+                "   p.description, \n" +
                 "    c.name AS category_name,\n " +
                 "    p.created_at,\n " +
                 "    p.created_by\n " +
@@ -62,12 +63,47 @@ try(ResultSet rs = stm.executeQuery()) {
 
 
     while (rs.next()) {
-        list.add(new Blog(rs.getInt("id"), rs.getString("title"), rs.getString("thumbnail"), rs.getString("content"), rs.getString("created_by"), rs.getString("created_at"), rs.getString("category_name"), rs.getInt("category_id")));
+        list.add(new Blog(rs.getInt("id"), rs.getString("title"), rs.getString("thumbnail"), rs.getString("content"), rs.getString("created_by"), rs.getString("created_at"), rs.getString("category_name"), rs.getInt("category_id"), rs.getString("description")));
     }
 }
         } catch (Exception e) {
         }
         return list;
+
+    }
+    public Blog getDetailBlog_byCategory(String id){
+        Blog blog =null;
+        String query =
+                "SELECT \n" +
+                        "                          p.title, \n" +
+                        "                          p.slug, \n" +
+                        "                          p.content, \n" +
+                        "                          p.thumbnail, \n" +
+                        "                          p.category_id, \n" +
+                        "                          p.description, \n" +
+                        " c.name AS category_name, \n" +
+                        "                          p.created_at, \n" +
+                        "                          p.created_by, \n" +
+                        "                          u.full_name AS author_name \n" +
+                        "                        FROM posts p \n" +
+                        "                        JOIN blogcategories c ON p.category_id = c.id \n" +
+                        "                        JOIN users u ON p.created_by = u.user_id \n" +
+                        "                        WHERE p.id = ? ";
+        try(Connection conn = db.getConnection();
+            PreparedStatement stm = conn.prepareStatement(query);
+
+        ) {
+            stm.setString(1, id);
+            try(ResultSet rs = stm.executeQuery()) {
+
+
+                if (rs.next()) {
+                    blog =   new Blog(rs.getString("title"), rs.getString("thumbnail"), rs.getString("content"), rs.getString("created_by"), rs.getString("created_at"), rs.getString("category_name"), rs.getInt("category_id"), rs.getString("description"), rs.getString("author_name"));
+                }
+            }
+        } catch (Exception e) {
+        }
+        return blog;
 
     }
 }
