@@ -34,8 +34,6 @@
                         <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý voucher</a>
                         <a href="${pageContext.request.contextPath}/Promotion_level"><i class="fas fa-users"></i> Quản lý khách hàng</a>
                         <a href="${pageContext.request.contextPath}/Timedirect"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
-
-
                     </div>
                 </li>
             </c:if>

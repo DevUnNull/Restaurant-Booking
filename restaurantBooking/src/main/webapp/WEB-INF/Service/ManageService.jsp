@@ -212,15 +212,12 @@
         <div class="sidebar">
 
             <ul>
-
-
                 <!-- nếu quyền là admin Restaurant thì hiện  -->
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
                 <li><a href="Menu_manage">Quản lý Menu</a></li>
                 <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
                 <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
-                <li><a href="Timedirect">Quản lý khung giờ </a></li>
-
+                <li><a href="Timedirect">Quản lý khung giờ</a></li>
             </ul>
         </div>
 
@@ -371,7 +368,7 @@
                         <c:forEach var="i" begin="1" end="${totalPages}">
                             <c:choose>
                                 <c:when test="${i == currentPage}">
-                                    <span style="margin: 0 5px; font-weight: bold; color: #b23627;">${i}</span>
+                                    <span style="margin: 0 5px; font-weight: bold; color: white;">${i}</span>
                                 </c:when>
                                 <c:otherwise>
                                     <a href="ServiceManage?page=${i}"
@@ -471,7 +468,7 @@
 
             <div style="margin-top:15px; text-align:center;">
                 <button type="submit">✅ Thêm vào combo</button>
-                <button type="button" onclick="closeAddItemPopup()">❌ Hủy</button>
+                <button type="button" onclick="closeAddItemPopup()"> Hủy</button>
             </div>
         </form>
     </div>
