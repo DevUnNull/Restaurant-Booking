@@ -404,33 +404,6 @@
             color: #721c24;
         }
 
-        /* Confirm Payment Button */
-        .btn-confirm-payment {
-            padding: 6px 12px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.85em;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.3s;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .btn-confirm-payment:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-        }
-
-        .btn-confirm-payment:active {
-            transform: translateY(0);
-        }
-
         /* Actions Buttons */
         .actions {
             display: flex;
@@ -725,57 +698,59 @@
                             </td>
                             <td>
                                 <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
-                                    <!-- Payment Method Badge -->
-                                    <c:choose>
-                                        <c:when test="${order.paymentMethod == 'CASH'}">
-                                                    <span class="payment-badge payment-cash">
-                                                        <i class="fas fa-money-bill-wave"></i> COD
-                                                    </span>
-                                        </c:when>
-                                        <c:when test="${order.paymentMethod == 'CREDIT_CARD'}">
-                                                    <span class="payment-badge payment-card">
-                                                        <i class="fas fa-credit-card"></i> Thẻ
-                                                    </span>
-                                        </c:when>
-                                        <c:when test="${order.paymentMethod == 'E_WALLET'}">
-                                                    <span class="payment-badge payment-wallet">
-                                                        <i class="fas fa-wallet"></i> Ví
-                                                    </span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="payment-badge">-</span>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <!-- Payment Method Badge - Always show if payment method exists -->
+                                    <c:if test="${not empty order.paymentMethod}">
+                                        <c:choose>
+                                            <c:when test="${order.paymentMethod == 'CASH'}">
+                                                        <span class="payment-badge payment-cash">
+                                                            <i class="fas fa-money-bill-wave"></i> Đến nơi trả tiền
+                                                        </span>
+                                            </c:when>
+                                            <c:when test="${order.paymentMethod == 'CREDIT_CARD'}">
+                                                        <span class="payment-badge payment-card">
+                                                            <i class="fas fa-credit-card"></i> Thẻ
+                                                        </span>
+                                            </c:when>
+                                            <c:when test="${order.paymentMethod == 'E_WALLET'}">
+                                                        <span class="payment-badge payment-wallet">
+                                                            <i class="fas fa-wallet"></i> Ví
+                                                        </span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="payment-badge">${order.paymentMethod}</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:if>
 
                                     <!-- Payment Status Badge -->
-                                    <c:choose>
-                                        <c:when test="${order.paymentStatus == 'PENDING'}">
-                                                    <span class="payment-status-badge payment-pending">
-                                                        <i class="fas fa-clock"></i> Chờ
-                                                    </span>
-                                        </c:when>
-                                        <c:when test="${order.paymentStatus == 'COMPLETED'}">
-                                                    <span class="payment-status-badge payment-completed">
-                                                        <i class="fas fa-check-circle"></i> Đã TT
-                                                    </span>
-                                        </c:when>
-                                        <c:when test="${order.paymentStatus == 'FAILED'}">
-                                                    <span class="payment-status-badge payment-failed">
-                                                        <i class="fas fa-times-circle"></i> Thất bại
-                                                    </span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="payment-status-badge">-</span>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <c:if test="${not empty order.paymentStatus}">
+                                        <c:choose>
+                                            <c:when test="${order.paymentStatus == 'PENDING'}">
+                                                        <span class="payment-status-badge payment-pending">
+                                                            <i class="fas fa-clock"></i> Chờ
+                                                        </span>
+                                            </c:when>
+                                            <c:when test="${order.paymentStatus == 'COMPLETED'}">
+                                                        <span class="payment-status-badge payment-completed">
+                                                            <i class="fas fa-check-circle"></i> Đã TT
+                                                        </span>
+                                            </c:when>
+                                            <c:when test="${order.paymentStatus == 'FAILED'}">
+                                                        <span class="payment-status-badge payment-failed">
+                                                            <i class="fas fa-times-circle"></i> Thất bại
+                                                        </span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="payment-status-badge">${order.paymentStatus}</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:if>
 
-                                    <!-- Confirm Payment Button (CASH + PENDING only) -->
-                                    <c:if test="${order.paymentMethod == 'CASH' and order.paymentStatus == 'PENDING'}">
-                                        <button onclick="confirmPayment(${order.reservationId});"
-                                                class="btn-confirm-payment"
-                                                title="Xác nhận đã nhận tiền">
-                                            <i class="fas fa-check"></i> Nhận tiền
-                                        </button>
+                                    <!-- Note for CASH payment with deposit -->
+                                    <c:if test="${order.paymentMethod == 'CASH' and order.paymentStatus == 'COMPLETED'}">
+                                        <div style="font-size: 0.85em; color: #ffc107; font-style: italic; margin-top: 4px;">
+                                            <i class="fas fa-info-circle"></i> Đã trả tiền cọc - Đến nơi trả tiền
+                                        </div>
                                     </c:if>
                                 </div>
                             </td>
@@ -855,64 +830,6 @@
     // Reset filter
     function resetFilter() {
         window.location.href = '${pageContext.request.contextPath}/OrderManagement';
-    }
-
-    // Confirm payment received (AJAX)
-    function confirmPayment(reservationId) {
-        if (!confirm('Xác nhận đã nhận tiền mặt từ khách?')) {
-            return;
-        }
-
-        // Disable button to prevent double click
-        const button = event.target.closest('.btn-confirm-payment');
-        if (button) {
-            button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-        }
-
-        const url = '${pageContext.request.contextPath}/confirmPayment';
-        console.log('🔍 Calling API:', url);
-        console.log('📝 Reservation ID:', reservationId);
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'reservationId=' + reservationId
-        })
-            .then(response => {
-                console.log('📡 Response Status:', response.status);
-                console.log('📡 Response OK:', response.ok);
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('✅ Response Data:', data);
-                if (data.success) {
-                    alert('✅ Đã xác nhận thanh toán thành công!');
-                    // Reload page to update UI
-                    location.reload();
-                } else {
-                    alert('❌ Lỗi: ' + (data.message || 'Không thể xác nhận thanh toán. Vui lòng thử lại.'));
-                    // Re-enable button
-                    if (button) {
-                        button.disabled = false;
-                        button.innerHTML = '<i class="fas fa-check"></i> Nhận tiền';
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('❌ Có lỗi xảy ra khi gửi yêu cầu. Vui lòng kiểm tra kết nối và thử lại.');
-                // Re-enable button
-                if (button) {
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-check"></i> Nhận tiền';
-                }
-            });
     }
 
     // Update order status

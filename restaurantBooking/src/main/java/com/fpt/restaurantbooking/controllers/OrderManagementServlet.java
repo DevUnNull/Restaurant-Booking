@@ -2,7 +2,13 @@ package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.dto.OrderManagementDTO;
 import com.fpt.restaurantbooking.repositories.impl.ReservationDAO;
+import com.fpt.restaurantbooking.repositories.impl.PaymentDAO;
+import com.fpt.restaurantbooking.repositories.impl.ReservationTableDAO;
+import com.fpt.restaurantbooking.models.Reservation;
+import com.fpt.restaurantbooking.models.Payment;
 import com.fpt.restaurantbooking.services.EmailService;
+import com.fpt.restaurantbooking.services.RefundService;
+import java.time.LocalDateTime;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,8 +32,11 @@ import java.util.Map;
 public class OrderManagementServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(OrderManagementServlet.class);
     private final ReservationDAO reservationDAO = new ReservationDAO();
+    private final PaymentDAO paymentDAO = new PaymentDAO();
+    private final ReservationTableDAO reservationTableDAO = new ReservationTableDAO();
     private final Gson gson = new Gson();
     private final EmailService emailService = new EmailService();
+    private final RefundService refundService = new RefundService();
 
     private static final int ITEMS_PER_PAGE = 20;
 
@@ -189,16 +198,80 @@ public class OrderManagementServlet extends HttpServlet {
             if (updated) {
                 logger.info("Updated reservation {} to status {}", reservationId, newStatus);
 
-                // Send email notification after successful status update
+                // Get order details for email and refund calculation
+                OrderManagementDTO orderDetails = reservationDAO.getReservationDetailsById(reservationId);
+                Reservation reservation = reservationDAO.getReservationById(reservationId);
+                Payment payment = paymentDAO.getPaymentByReservationId(reservationId);
+
+                // Xử lý refund và gửi email theo quy định
                 try {
-                    OrderManagementDTO orderDetails = reservationDAO.getReservationDetailsById(reservationId);
                     if (orderDetails != null && orderDetails.getCustomerEmail() != null) {
-                        boolean emailSent = emailService.sendOrderStatusChangeEmail(orderDetails, newStatus);
-                        if (emailSent) {
-                            logger.info("Email notification sent successfully for reservation {} to {}",
-                                    reservationId, orderDetails.getCustomerEmail());
-                        } else {
-                            logger.warn("Failed to send email notification for reservation {}", reservationId);
+                        // Case 1: Đơn bị hủy (CANCELLED) hoặc no-show (NO_SHOW)
+                        if ("CANCELLED".equals(newStatus) || "NO_SHOW".equals(newStatus)) {
+                            if (payment != null && reservation != null) {
+                                LocalDateTime cancellationTime = LocalDateTime.now();
+                                boolean isNoShow = "NO_SHOW".equals(newStatus);
+                                
+                                RefundService.RefundResult refundResult = refundService.calculateRefund(
+                                        reservation, payment, cancellationTime, isNoShow);
+                                
+                                logger.info("💳 Refund calculation for {} reservation {}: Amount={}, Eligible={}, Reason={}",
+                                        newStatus, reservationId, refundResult.getRefundAmount(), 
+                                        refundResult.isEligible(), refundResult.getReason());
+                                
+                                // Gửi email refund nếu có
+                                if (refundResult.isEligible() && refundResult.getRefundAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                                    boolean isDepositRefund = "CASH".equals(payment.getPaymentMethod());
+                                    boolean emailSent = emailService.sendRefundNotificationEmail(
+                                            orderDetails,
+                                            refundResult.getRefundAmount(),
+                                            refundResult.getReason(),
+                                            isDepositRefund
+                                    );
+                                    if (emailSent) {
+                                        logger.info("✅ Refund notification email sent for {} reservation {}", newStatus, reservationId);
+                                    }
+                                } else {
+                                    // Vẫn gửi email thông báo thay đổi trạng thái
+                                    emailService.sendOrderStatusChangeEmail(orderDetails, newStatus);
+                                }
+                            } else {
+                                // Gửi email thông báo thay đổi trạng thái thông thường
+                                emailService.sendOrderStatusChangeEmail(orderDetails, newStatus);
+                            }
+                        }
+                        // Case 2: Đơn hoàn thành (COMPLETED) - refund tiền cọc cho CASH
+                        else if ("COMPLETED".equals(newStatus) && payment != null && "CASH".equals(payment.getPaymentMethod())) {
+                            RefundService.RefundResult depositRefund = refundService.calculateDepositRefundForCompletedOrder(payment, reservation);
+                            
+                            if (depositRefund.isEligible() && depositRefund.getRefundAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                                logger.info("💳 Deposit refund for completed order {}: Amount={}", 
+                                        reservationId, depositRefund.getRefundAmount());
+                                
+                                // Gửi email thông báo hoàn tiền cọc
+                                boolean emailSent = emailService.sendRefundNotificationEmail(
+                                        orderDetails,
+                                        depositRefund.getRefundAmount(),
+                                        depositRefund.getReason(),
+                                        true // isDepositRefund = true
+                                );
+                                if (emailSent) {
+                                    logger.info("✅ Deposit refund notification email sent for completed reservation {}", reservationId);
+                                }
+                            }
+                            
+                            // Vẫn gửi email thông báo thay đổi trạng thái
+                            emailService.sendOrderStatusChangeEmail(orderDetails, newStatus);
+                        }
+                        // Case 3: Các trạng thái khác - chỉ gửi email thông báo thay đổi trạng thái
+                        else {
+                            boolean emailSent = emailService.sendOrderStatusChangeEmail(orderDetails, newStatus);
+                            if (emailSent) {
+                                logger.info("Email notification sent successfully for reservation {} to {}",
+                                        reservationId, orderDetails.getCustomerEmail());
+                            } else {
+                                logger.warn("Failed to send email notification for reservation {}", reservationId);
+                            }
                         }
                     } else {
                         logger.warn("No customer email found for reservation {}, skipping email notification",

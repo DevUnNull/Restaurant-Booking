@@ -18,8 +18,16 @@
 </head>
 <body>
 <div class="main">
+<%--    <div class="header">--%>
+<%--        <div class="logo">Quản Lý Nhân Sự</div>--%>
+<%--    </div>--%>
     <div class="header">
         <div class="logo">Quản Lý Nhân Sự</div>
+        <nav>
+            <ul>
+                <li><a href="#">Trang chủ</a></li>
+            </ul>
+        </nav>
     </div>
 
     <div class="main-wrapper">
@@ -28,8 +36,8 @@
             <ul>
                 <li><a href="EmployeeList">Danh sách nhân viên</a></li>
                 <li><a href="WorkSchedule">Phân lịch làm việc</a></li>
-                <li><a href="#">Lịch làm việc</a></li>
-                <li><a href="${pageContext.request.contextPath}/JobRequest?action=list">Đơn xin việc</a></li>
+                <li><a href="WorkTimetable">Lịch làm việc</a></li>
+                <li><a href="CustomerList">Thêm nhân viên</a></li>
             </ul>
         </div>
 
@@ -107,12 +115,15 @@
                                            '${ws.notes}',
                                        ${currentPage}
                                            ); return false;"
-                                   class="linkWS1">Chi tiết</a>
-                                <a href="#"
-                                   onclick="deleteSchedule(${ws.scheduleId}, ${currentPage}); return false;"
-                                   class="linkWS2">
-                                    Xóa
-                                </a>
+                                   class="linkWS1">Sửa</a>
+                                <form action="WorkSchedule" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa lịch làm việc này không?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="scheduleId" value="${ws.scheduleId}">
+                                    <button type="submit" class="linkWS2" style="background:none; border:none; color:#007bff; cursor:pointer;">
+                                        Xóa
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     </c:forEach>
@@ -200,16 +211,16 @@
     function resetForm() {
         const form = document.getElementById("scheduleForm");
         form.reset();
-        // ⭐ Sửa: Truy cập input bằng 'name'
+        // Sửa: Truy cập input bằng 'name'
         form.elements['action'].value = "add";
         form.elements['scheduleId'].value = "";
     }
 
-    // === 🛠 Hàm mở popup sửa lịch làm việc ===
+    // === Hàm mở popup sửa lịch làm việc ===
     function editSchedule(id, userId, workDate, shift, startTime, endTime, position, notes, page) {
         const form = document.getElementById("scheduleForm");
 
-        // ⭐ Sửa: Truy cập các trường bằng 'name'
+        // Sửa: Truy cập các trường bằng 'name'
         form.elements['action'].value = "edit";
         form.elements['scheduleId'].value = id;
         form.elements['userId'].value = userId;
@@ -295,6 +306,7 @@
         }
     });
 </script>
+
 
 
 </body>

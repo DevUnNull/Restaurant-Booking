@@ -381,4 +381,125 @@ public class EmailService {
         DecimalFormat formatter = new DecimalFormat("#,###", symbols);
         return formatter.format(amount) + " VNĐ";
     }
+
+    /**
+     * Send refund notification email to customer
+     */
+    public boolean sendRefundNotificationEmail(OrderManagementDTO order, 
+                                               java.math.BigDecimal refundAmount, 
+                                               String refundReason, 
+                                               boolean isDepositRefund) {
+        try {
+            if (order.getCustomerEmail() == null || order.getCustomerEmail().isEmpty()) {
+                logger.warn("No email found for order {}, cannot send refund notification",
+                        order.getReservationId());
+                return false;
+            }
+
+            String subject = isDepositRefund 
+                    ? "Thông Báo Hoàn Tiền Cọc - Hệ Thống Đặt Bàn Nhà Hàng"
+                    : "Thông Báo Hoàn Tiền - Hệ Thống Đặt Bàn Nhà Hàng";
+            String htmlBody = buildRefundNotificationTemplate(order, refundAmount, refundReason, isDepositRefund);
+
+            boolean sent = EmailUtil.sendHtmlEmail(order.getCustomerEmail(), subject, htmlBody);
+
+            if (sent) {
+                logger.info("Refund notification email sent successfully to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            } else {
+                logger.error("Failed to send refund notification email to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            }
+
+            return sent;
+
+        } catch (Exception e) {
+            logger.error("Error sending refund notification email for order {}",
+                    order.getReservationId(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Build refund notification email template
+     */
+    private String buildRefundNotificationTemplate(OrderManagementDTO order, 
+                                                   java.math.BigDecimal refundAmount,
+                                                   String refundReason,
+                                                   boolean isDepositRefund) {
+        // Format date and time
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String formattedDate = order.getReservationDate() != null
+                ? order.getReservationDate().format(dateFormatter) : "N/A";
+        String formattedTime = order.getReservationTime() != null
+                ? order.getReservationTime().format(timeFormatter) : "N/A";
+
+        // Format amounts
+        String formattedRefundAmount = formatAmount(refundAmount);
+        String formattedTotalAmount = formatAmount(order.getTotalAmount());
+
+        // Get table names
+        String tableNames = order.getTableNames() != null && !order.getTableNames().isEmpty()
+                ? order.getTableNames() : "Chưa xác định";
+
+        String title = isDepositRefund ? "Hoàn Tiền Cọc" : "Hoàn Tiền";
+        String headerColor = isDepositRefund ? "#ffc107" : "#28a745";
+
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "    <meta charset='UTF-8'>" +
+                "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "    <title>Thông Báo Hoàn Tiền</title>" +
+                "    <style>" +
+                "        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                "        .header { background-color: " + headerColor + "; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                "        .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }" +
+                "        .refund-box { background-color: #fff; border: 2px solid " + headerColor + "; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px; }" +
+                "        .refund-amount { font-size: 28px; font-weight: bold; color: " + headerColor + "; margin: 10px 0; }" +
+                "        .details { background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0; }" +
+                "        .details p { margin: 10px 0; }" +
+                "        .details strong { color: #333; }" +
+                "        .reason-box { background-color: #e8f5e9; border-left: 4px solid " + headerColor + "; padding: 15px; margin: 20px 0; border-radius: 5px; }" +
+                "        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }" +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class='header'>" +
+                "        <h1>Hệ Thống Đặt Bàn Nhà Hàng</h1>" +
+                "        <h2>" + title + "</h2>" +
+                "    </div>" +
+                "    <div class='content'>" +
+                "        <h3>Xin chào " + (order.getCustomerName() != null ? order.getCustomerName() : "Quý khách") + ",</h3>" +
+                "        <p>Chúng tôi xin thông báo về việc hoàn tiền cho đơn đặt bàn của bạn.</p>" +
+                "        <div class='refund-box'>" +
+                "            <p>Số tiền được hoàn:</p>" +
+                "            <div class='refund-amount'>" + formattedRefundAmount + "</div>" +
+                "        </div>" +
+                "        <div class='details'>" +
+                "            <p><strong>Mã đơn hàng:</strong> #" + order.getReservationId() + "</p>" +
+                "            <p><strong>Ngày đặt:</strong> " + formattedDate + "</p>" +
+                "            <p><strong>Giờ đặt:</strong> " + formattedTime + "</p>" +
+                "            <p><strong>Bàn:</strong> " + tableNames + "</p>" +
+                "            <p><strong>Tổng tiền đơn hàng:</strong> " + formattedTotalAmount + "</p>" +
+                "        </div>" +
+                "        <div class='reason-box'>" +
+                "            <p><strong>Lý do hoàn tiền:</strong></p>" +
+                "            <p>" + (refundReason != null ? refundReason : "Theo quy định của nhà hàng") + "</p>" +
+                "        </div>" +
+                (isDepositRefund ? 
+                "        <p><strong>Lưu ý:</strong> Tiền cọc đã được hoàn lại vào tài khoản của bạn. " +
+                "Vui lòng kiểm tra số dư tài khoản trong vòng 3-5 ngày làm việc.</p>" :
+                "        <p><strong>Lưu ý:</strong> Số tiền hoàn sẽ được chuyển vào tài khoản của bạn. " +
+                "Vui lòng kiểm tra số dư tài khoản trong vòng 3-5 ngày làm việc.</p>") +
+                "        <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua số hotline hoặc email hỗ trợ.</p>" +
+                "    </div>" +
+                "    <div class='footer'>" +
+                "        <p>Trân trọng,<br>Đội Ngũ Hệ Thống Đặt Bàn Nhà Hàng</p>" +
+                "        <p><small>Đây là email tự động. Vui lòng không trả lời email này.</small></p>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+    }
 }

@@ -10,19 +10,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="174435c8-542b-4177-87b7-e2426fcf2677" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/VNPayController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/services/VNPayService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/utils/VNPayConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/resources/vnpay.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/vnpay-result.jsp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CheckoutServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/CheckoutServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/OrderManagementServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/controllers/OrderManagementServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/PaymentDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/PaymentDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/ReservationDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/ReservationDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/services/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/services/EmailService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/cartCheckout.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/cartCheckout.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/orderManagement.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/orderManagement.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -247,7 +237,14 @@
       <workItem from="1761861086273" duration="4415000" />
       <workItem from="1761872716879" duration="2237000" />
       <workItem from="1761914050309" duration="1018000" />
-      <workItem from="1762149258162" duration="7144000" />
+      <workItem from="1762149258162" duration="7546000" />
+      <workItem from="1762304043387" duration="2846000" />
+      <workItem from="1762349780916" duration="1324000" />
+      <workItem from="1762400392253" duration="595000" />
+      <workItem from="1762476105440" duration="2399000" />
+      <workItem from="1762485840804" duration="1918000" />
+      <workItem from="1762506971988" duration="5781000" />
+      <workItem from="1762589639891" duration="1928000" />
     </task>
     <servers />
   </component>

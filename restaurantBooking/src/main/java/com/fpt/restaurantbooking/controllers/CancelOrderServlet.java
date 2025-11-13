@@ -6,6 +6,9 @@ import com.fpt.restaurantbooking.repositories.impl.ReservationDAO;
 import com.fpt.restaurantbooking.repositories.impl.ReservationTableDAO;
 import com.fpt.restaurantbooking.repositories.impl.TableDAO;
 import com.fpt.restaurantbooking.repositories.impl.PaymentDAO;
+import com.fpt.restaurantbooking.services.RefundService;
+import com.fpt.restaurantbooking.services.EmailService;
+import com.fpt.restaurantbooking.dto.OrderManagementDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -27,6 +30,8 @@ public class CancelOrderServlet extends HttpServlet {
     private final ReservationTableDAO reservationTableDAO = new ReservationTableDAO();
     private final TableDAO tableDAO = new TableDAO();
     private final PaymentDAO paymentDAO = new PaymentDAO();
+    private final RefundService refundService = new RefundService();
+    private final EmailService emailService = new EmailService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -111,30 +116,17 @@ public class CancelOrderServlet extends HttpServlet {
                 return;
             }
 
-            // Kiểm tra nếu hủy sau thời gian đặt bàn và có tiền cọc
+            // Tính toán refund dựa trên quy định mới
             Payment payment = paymentDAO.getPaymentByReservationId(reservationId);
-            boolean isCancellingAfterReservationTime = false;
-            if (reservation.getReservationDate() != null && reservation.getReservationTime() != null) {
-                LocalDateTime reservationDateTime = reservation.getReservationDate().atTime(reservation.getReservationTime());
-                LocalDateTime now = LocalDateTime.now();
-                isCancellingAfterReservationTime = now.isAfter(reservationDateTime);
-            }
-
-            // Nếu hủy sau thời gian đặt bàn và có tiền cọc, cập nhật notes trong payment
-            if (isCancellingAfterReservationTime && payment != null &&
-                    "CASH".equals(payment.getPaymentMethod())) {
-                List<Integer> tableIds = reservationTableDAO.getTablesByReservationId(reservationId);
-                int tableCount = tableIds != null ? tableIds.size() : 0;
-                long depositAmount = tableCount * 20000L;
-
-                if (depositAmount > 0 && payment.getPaymentId() != null) {
-                    String notes = payment.getNotes();
-                    if (notes == null) notes = "";
-                    notes += String.format("\n[CANCELLED] Deposit %d VNĐ forfeited due to cancellation after reservation time.", depositAmount);
-                    paymentDAO.updatePaymentNotes(payment.getPaymentId(), notes);
-                    logger.warn("⚠️ Reservation {} cancelled after reservation time. Deposit {} VNĐ will be forfeited.",
-                            reservationId, depositAmount);
-                }
+            LocalDateTime cancellationTime = LocalDateTime.now();
+            boolean isNoShow = false; // Hủy bởi khách, không phải no-show
+            
+            // Tính toán refund
+            RefundService.RefundResult refundResult = null;
+            if (payment != null) {
+                refundResult = refundService.calculateRefund(reservation, payment, cancellationTime, isNoShow);
+                logger.info("💳 Refund calculation for reservation {}: Amount={}, Eligible={}, Reason={}",
+                        reservationId, refundResult.getRefundAmount(), refundResult.isEligible(), refundResult.getReason());
             }
 
             // Cancel reservation
@@ -145,6 +137,29 @@ public class CancelOrderServlet extends HttpServlet {
                 List<Integer> tableIds = reservationTableDAO.getTablesByReservationId(reservationId);
                 for (Integer tableId : tableIds) {
                     tableDAO.updateTableStatus(tableId, "AVAILABLE");
+                }
+
+                // Gửi email thông báo refund nếu có
+                if (refundResult != null && refundResult.isEligible() && refundResult.getRefundAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                    try {
+                        OrderManagementDTO orderDetails = reservationDAO.getReservationDetailsById(reservationId);
+                        if (orderDetails != null && orderDetails.getCustomerEmail() != null) {
+                            boolean isDepositRefund = "CASH".equals(payment.getPaymentMethod());
+                            boolean emailSent = emailService.sendRefundNotificationEmail(
+                                    orderDetails, 
+                                    refundResult.getRefundAmount(), 
+                                    refundResult.getReason(),
+                                    isDepositRefund
+                            );
+                            if (emailSent) {
+                                logger.info("✅ Refund notification email sent for reservation {}", reservationId);
+                            } else {
+                                logger.warn("⚠️ Failed to send refund notification email for reservation {}", reservationId);
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error sending refund notification email for reservation {}", reservationId, e);
+                    }
                 }
 
                 logger.info("✅ Cancelled reservation {} by user {}", reservationId, userId);

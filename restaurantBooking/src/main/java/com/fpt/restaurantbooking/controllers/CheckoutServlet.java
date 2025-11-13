@@ -341,13 +341,19 @@ public class CheckoutServlet extends HttpServlet {
 
                     // ✅ Redirect based on payment method
                     if ("VNPAY".equals(paymentMethod)) {
-                        // Redirect to VNPay payment gateway
+                        // Redirect to VNPay payment gateway - thanh toán toàn bộ
                         String vnpayUrl = request.getContextPath() + "/vnpay-payment?reservationId="
                                 + reservationId + "&amount=" + finalAmount.longValue();
-                        logger.info("Redirecting to VNPay: {}", vnpayUrl);
+                        logger.info("Redirecting to VNPay (full payment): {}", vnpayUrl);
+                        response.sendRedirect(vnpayUrl);
+                    } else if ("CASH".equals(paymentMethod) && depositAmount.compareTo(BigDecimal.ZERO) > 0) {
+                        // Redirect to VNPay payment gateway - chỉ thanh toán tiền cọc
+                        String vnpayUrl = request.getContextPath() + "/vnpay-payment?reservationId="
+                                + reservationId + "&amount=" + depositAmount.longValue() + "&isDeposit=true";
+                        logger.info("Redirecting to VNPay (deposit only): {} VNĐ for reservation {}", depositAmount, reservationId);
                         response.sendRedirect(vnpayUrl);
                     } else {
-                        // Redirect to details page for edited or new reservation
+                        // Không có tiền cọc, redirect trực tiếp đến details page
                         if (isEditing) {
                             response.sendRedirect("orderDetails?id=" + reservationId + "&updated=true");
                         } else {

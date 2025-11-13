@@ -246,8 +246,7 @@
     });
 </script>
 <!-- FOOTER -->
-<footer class="footer">
-    <p>© 2025 Tica's Tacos. All rights reserved.</p>
-</footer>
+<!-- Footer -->
+<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 </body>
 </html>

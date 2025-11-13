@@ -199,7 +199,7 @@ public class UserDao {
     }
 
     public boolean softDeleteUser(int userId) {
-        String sql = "UPDATE users SET status = 'DELETE', updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+        String sql = "UPDATE users SET status = 'Inactive', updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
 
         try (Connection con = db.getConnection();
              PreparedStatement stm = con.prepareStatement(sql)) {
@@ -223,5 +223,121 @@ public class UserDao {
             stm.executeUpdate();
         }
     }
+
+    public List<User> getUsersByRole(int roleId) {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE role_id = ?";
+
+        try {
+            Connection conn = db.getConnection();
+            stm = conn.prepareStatement(sql);
+            stm.setInt(1, roleId);
+            rs = stm.executeQuery();
+            List<User> users = new ArrayList<>();
+            while (rs.next()) {
+                list.add(mapResultSetToStaff(rs));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    // Lấy danh sách người dùng theo vai trò + tìm kiếm + phân trang
+    public List<User> getUsersByRoleWithPagination(int roleId, String keyword, int offset, int limit) {
+        List<User> list = new ArrayList<>();
+        String sql = """
+        SELECT * FROM users
+        WHERE role_id = ? AND (full_name LIKE ? OR email LIKE ? OR phone_number LIKE ?)
+        ORDER BY user_id ASC
+        LIMIT ? OFFSET ?
+    """;
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + keyword + "%";
+            stm.setInt(1, roleId);
+            stm.setString(2, searchPattern);
+            stm.setString(3, searchPattern);
+            stm.setString(4, searchPattern);
+            stm.setInt(5, limit);
+            stm.setInt(6, offset);
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToStaff(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Đếm tổng số bản ghi cho phân trang
+    public int countUsersByRole(int roleId, String keyword) {
+        String sql = """
+        SELECT COUNT(*) FROM users
+        WHERE role_id = ? AND (full_name LIKE ? OR email LIKE ? OR phone_number LIKE ?)
+    """;
+        try (Connection conn = db.getConnection();
+             PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + keyword + "%";
+            stm.setInt(1, roleId);
+            stm.setString(2, searchPattern);
+            stm.setString(3, searchPattern);
+            stm.setString(4, searchPattern);
+
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public User getUserById(int userId) {
+        String sql = "SELECT * FROM users WHERE user_id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                User user = new User(
+                        rs.getInt("user_id"),
+                        rs.getInt("role_id"),
+                        rs.getString("full_name"),
+                        rs.getString("gender"),
+                        rs.getString("email"),
+                        rs.getString("phone_number"),
+                        rs.getString("status")
+                );
+
+                user.setAvatar(rs.getString("avatar"));
+                Date dob = rs.getDate("date_of_birth");
+                if (dob != null) user.setDateOfBirth(dob.toLocalDate());
+
+                Timestamp createdAt = rs.getTimestamp("created_at");
+                if (createdAt != null) user.setCreatedAt(createdAt.toLocalDateTime());
+
+                Timestamp updatedAt = rs.getTimestamp("updated_at");
+                if (updatedAt != null) user.setUpdatedAt(updatedAt.toLocalDateTime());
+
+                return user;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 }

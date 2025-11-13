@@ -40,8 +40,16 @@
 %>
 
 <div class="main">
+<%--    <div class="header">--%>
+<%--        <div class="logo">Quản Lý Nhân Sự</div>--%>
+<%--    </div>--%>
     <div class="header">
         <div class="logo">Quản Lý Nhân Sự</div>
+        <nav>
+            <ul>
+                <li><a href="#">Trang chủ</a></li>
+            </ul>
+        </nav>
     </div>
     <div class="main-wrapper">
         <!-- Sidebar -->
@@ -49,8 +57,8 @@
             <ul>
                 <li><a href="EmployeeList">Danh sách nhân viên</a></li>
                 <li><a href="WorkSchedule">Phân lịch làm việc</a></li>
-                <li><a href="#">Lịch làm việc</a></li>
-                <li><a href="${pageContext.request.contextPath}/JobRequest?action=list">Đơn xin việc</a></li>
+                <li><a href="WorkTimetable">Lịch làm việc</a></li>
+                <li><a href="CustomerList">Thêm nhân viên</a></li>
             </ul>
         </div>
 
@@ -99,10 +107,10 @@
                     <tr>
                         <td>${u.userId}</td>
                         <td>${u.fullName}</td>
-                        <td>${u.gender}</td>
+                        <td>${u.gender == 'Male' ? 'Nam' : 'Nữ'}</td>
                         <td>${u.email}</td>
                         <td>${u.phoneNumber}</td>
-                        <td>${u.status}</td>
+                        <td>${u.status == 'Active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}</td>
                         <td>${u.createdAt}</td>
                         <td>${u.updatedAt}</td>
                         <td>
@@ -110,9 +118,8 @@
                                onclick="openEditModal('${u.userId}', '${u.fullName}', '${u.gender}', '${u.email}', '${u.phoneNumber}', '${u.status}')">
                                 Sửa
                             </a>
-
-                            <a href="#" class="link2" onclick="confirmDelete(${u.userId})">Xóa</a>
-                            <a href="#" class="link3">Chi Tiết</a>
+                            <a href="#" class="link2" onclick="confirmDelete(${u.userId})">Khóa</a>
+                            <a href="#" class="link3" onclick="showDetail(${u.userId})">Chi Tiết</a>
                         </td>
                     </tr>
                 </c:forEach>
@@ -154,6 +161,15 @@
                             <button type="button" class="cancel-btn" onclick="closeModal()">Hủy</button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Popup hiển thị chi tiết -->
+            <div id="detailModal" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeDetailModal()">&times;</span>
+                    <h2>Chi tiết nhân viên</h2>
+                    <div id="detailContent" class="detail-info"></div>
                 </div>
             </div>
 
@@ -228,7 +244,7 @@
 <%--xóa Staff--%>
 <script>
     function confirmDelete(userId) {
-        if (confirm("Bạn có chắc chắn muốn xóa nhân viên này không?")) {
+        if (confirm("Bạn có chắc chắn muốn khóa tài khoản của nhân viên này không?")) {
             window.location.href = "${pageContext.request.contextPath}/DeleteEmployee?userId=" + userId;
         }
     }
@@ -277,6 +293,25 @@
         }
     });
 </script>
+
+<script>
+    function showDetail(id) {
+        // Gửi yêu cầu tới servlet để lấy HTML chi tiết
+        fetch('view-employee-detail?id=' + id)
+            .then(response => response.text())
+            .then(html => {
+                // Đổ nội dung vào phần popup
+                document.getElementById("detailContent").innerHTML = html;
+                document.getElementById("detailModal").style.display = "flex";
+            })
+            .catch(err => console.error('Error loading detail:', err));
+    }
+
+    function closeDetailModal() {
+        document.getElementById("detailModal").style.display = "none";
+    }
+</script>
+
 
 </body>
 
