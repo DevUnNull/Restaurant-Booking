@@ -15,6 +15,10 @@
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
             <li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li>
             <li><a href="${pageContext.request.contextPath}/Blog"> Blog nhà Hàng</a></li>
+            <c:if test="${sessionScope.userRole ==3}">
+                <li>   <a href="${pageContext.request.contextPath}/TimeTable"></i> Quản lý khung giờ</a></li>
+            </c:if>
+
             <%-- Booking Management Dropdown (Role 2) --%>
             <c:if test="${sessionScope.userRole == 2}">
                 <li class="user-dropdown">
@@ -30,6 +34,7 @@
                         <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý voucher</a>
                         <a href="${pageContext.request.contextPath}/Promotion_level"><i class="fas fa-users"></i> Quản lý khách hàng</a>
                         <a href="${pageContext.request.contextPath}/Timedirect"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
+
 
                     </div>
                 </li>

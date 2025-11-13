@@ -211,13 +211,11 @@
     <li><a href="Menu_manage">Quản lý Menu</a></li>
     <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
     <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
-    <li><a href="Timedirect">Quản lý khung giờ </a></li>/ul>
-
+    <li><a href="Timedirect">Quản lý khung giờ </a></li>
+  </ul>
 </div>
-
 <!-- Content -->
 <div class="content">
-
   <!-- Banner -->
   <div class="banner">
     <div class="title">Quản lý khung thời gian</div>

@@ -228,7 +228,21 @@ public class VoucherRepository {
     }
     public List<User> getUsersByPagee(int start, int total) {
         List<User> userList = new ArrayList<>();
-        String sql = "SELECT * FROM Users where role_id = 3  LIMIT ?, ?";
+        String sql = "SELECT\n" +
+                "    u.*,\n" +
+                "    pl.description AS current_rank, -- Cấp bậc hiện tại\n" +
+                "    COALESCE(SUM(r.total_amount), 0) AS total_spent, -- Tổng tiền đã chi (chỉ tính đơn COMPLETED)\n" +
+                "    CASE\n" +
+                "        WHEN COALESCE(SUM(r.total_amount), 0) >= 15000000 THEN 3 -- ID của Cấp Vàng\n" +
+                "        WHEN COALESCE(SUM(r.total_amount), 0) >= 5000000 THEN 2  -- ID của Cấp Bạc\n" +
+                "        ELSE 1                                                   -- ID của Cấp Đồng\n" +
+                "        END AS calculated_level_id\n" +
+                "FROM Users u\n" +
+                "         LEFT JOIN Reservations r ON u.user_id = r.user_id AND r.status = 'COMPLETED'\n" +
+                "         LEFT JOIN Promotion_Level pl ON u.promotion_level_id = pl.category_id\n" +
+                "WHERE u.role_id = 3 -- Chỉ tính cho khách hàng (Customer)\n" +
+                "GROUP BY u.user_id, u.full_name, u.email, pl.description\n" +
+                "ORDER BY total_spent DESC LIMIT ?, ?";
         try(Connection conn = db.getConnection();
             PreparedStatement stm = conn.prepareStatement(sql);
             ) {
@@ -242,7 +256,7 @@ public class VoucherRepository {
                             rs.getString("full_name"),
                             rs.getString("email"),
                             rs.getString("phone_number"),
-                            rs.getString("promotion_level_id"),rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender")));
+                            rs.getString("calculated_level_id"),rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender")));
 
                 }
             }
