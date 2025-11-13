@@ -29,7 +29,6 @@ public class UpdateEmployee extends HttpServlet{
             String phoneNumber = request.getParameter("phoneNumber");
             String status = request.getParameter("status");
 
-            // Tạo đối tượng user để cập nhật
             User user = new User();
             user.setUserId(userId);
             user.setFullName(fullName);
@@ -47,7 +46,6 @@ public class UpdateEmployee extends HttpServlet{
                 request.getSession().setAttribute("error", "Không thể cập nhật nhân viên!");
             }
 
-            // Quay lại trang danh sách
             response.sendRedirect(request.getContextPath() + "/EmployeeList");
 
         } catch (Exception e) {

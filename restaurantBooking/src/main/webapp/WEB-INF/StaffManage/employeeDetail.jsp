@@ -13,11 +13,11 @@
     <img src="${userDetail.avatar != null ? userDetail.avatar : '/default-avaimagestar.png'}" alt="Avatar" />
     <p><strong>ID:</strong> ${userDetail.userId}</p>
     <p><strong>Họ và tên:</strong> ${userDetail.fullName}</p>
-    <p><strong>Giới tính:</strong> ${userDetail.gender}</p>
+    <p><strong>Giới tính:</strong> ${userDetail.gender == 'Male' ? 'Nam' : 'Nữ'}</p>
     <p><strong>Ngày sinh:</strong> ${userDetail.dateOfBirth}</p>
     <p><strong>Email:</strong> ${userDetail.email}</p>
     <p><strong>Số điện thoại:</strong> ${userDetail.phoneNumber}</p>
-    <p><strong>Trạng thái:</strong> ${userDetail.status}</p>
-    <p><strong>Ngày tạo:</strong> ${userDetail.createdAt}</p>
-    <p><strong>Ngày cập nhật:</strong> ${userDetail.updatedAt}</p>
+    <p><strong>Trạng thái:</strong> ${userDetail.status == 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động'}</p>
+    <p><strong>Ngày tạo:</strong> ${userDetail.createdAtString}</p>
+    <p><strong>Ngày cập nhật:</strong> ${userDetail.updatedAtString}</p>
 </c:if>

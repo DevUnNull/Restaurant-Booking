@@ -23,6 +23,24 @@
     box-shadow: 0 0 5px #b23627;
 }
 
+.input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column; /* input + span lỗi xếp theo cột */
+    width: 250px;
+}
+
+.search-error {
+    position: absolute;
+    top: 100%;           /* đặt ngay dưới container */
+    left: 50%;           /* căn giữa theo chiều ngang */
+    transform: translateX(-50%);
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
 /* Nút Search */
 .search-button {
     background-color: #b23627;
@@ -140,6 +158,41 @@ a:hover {
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 14px;
+}
+
+/* Employee.css */
+#scheduleDetailPopup h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+#scheduleDetailPopup p {
+    font-size: 18px;
+    margin: 12px 0;
+    line-height: 1.5;
+    color: #555;
+}
+
+#scheduleDetailPopup strong {
+    color: #222;
+}
+
+#scheduleDetailPopup button {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+#scheduleDetailPopup button:hover {
+    background-color: #c0392b;
 }
 
 /* Nút Lưu & Hủy */
@@ -319,6 +372,10 @@ a:hover {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.error-msg {
+    margin-top: 3px;
 }
 
 

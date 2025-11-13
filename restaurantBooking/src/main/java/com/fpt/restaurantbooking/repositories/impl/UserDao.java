@@ -5,6 +5,7 @@ import com.fpt.restaurantbooking.models.WorkSchedule;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,7 +179,10 @@ public class UserDao {
     }
 
     public boolean updateUser(User user) {
-        String sql = "UPDATE users SET full_name = ?, gender = ?, email = ?, phone_number = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+
+        user.setUpdatedAt(LocalDateTime.now());
+
+        String sql = "UPDATE users SET full_name = ?, gender = ?, email = ?, phone_number = ?, status = ?, updated_at = ? WHERE user_id = ?";
 
         try (Connection con = db.getConnection();
              PreparedStatement stm = con.prepareStatement(sql)) {
@@ -188,7 +192,8 @@ public class UserDao {
             stm.setString(3, user.getEmail());
             stm.setString(4, user.getPhoneNumber());
             stm.setString(5, user.getStatus());
-            stm.setInt(6, user.getUserId());
+            stm.setObject(6, user.getUpdatedAt()); // set LocalDateTime trực tiếp
+            stm.setInt(7, user.getUserId());
 
             int rows = stm.executeUpdate();
             return rows > 0;
