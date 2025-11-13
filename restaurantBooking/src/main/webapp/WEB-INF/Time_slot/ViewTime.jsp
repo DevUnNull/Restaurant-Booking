@@ -208,7 +208,6 @@
     <!-- Banner -->
     <div class="banner">
         <div class="title">Khung Thời Gian Nhà Hàng</div>
-
     </div>
 
     <!-- Controls: legend + month selector -->

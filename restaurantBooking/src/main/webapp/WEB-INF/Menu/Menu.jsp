@@ -584,8 +584,6 @@
                         <h5 id="detailName" class="fw-bold text-danger mb-2"></h5>
                         <p><strong>Mã món:</strong> <span id="detailCode"></span></p>
                         <p><strong>Thời gian tạo:</strong> <span id="detailCreated"></span></p>
-                        <p><strong>Mô tả:</strong></p>
-                        <p id="detailDesc" class="text-muted fst-italic"></p>
                         <p><strong>Giá:</strong> <span id="detailPrice" class="text-success fw-bold"></span></p>
                         <p><strong>Trạng thái:</strong> <span id="detailStatus" class="badge bg-success"></span></p>
                     </div>
