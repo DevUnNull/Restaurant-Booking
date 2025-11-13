@@ -74,6 +74,8 @@
             background: linear-gradient(180deg, var(--wine), #6a0000);
             color: #fff;
             border-radius: 8px;
+            margin-left: -29px;
+            margin-right: -3px;
             padding: 18px;
             height: calc(100vh - 84px);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);

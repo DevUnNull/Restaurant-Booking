@@ -53,6 +53,38 @@
     margin-top: 20px;
     width: 297px;
   }
+  .sidebar {
+    width: 220px;
+    background-color: #7a1c1c; /* màu nền đỏ đậm */
+    padding: 20px 10px;
+    border-top: 3px solid #c0392b; /* viền trên nhẹ màu đỏ sáng hơn */
+    min-height: 100vh;
+  }
+
+  .sidebar ul {
+    list-style: none;
+    margin: 6px;
+    padding: 5px;
+  }
+
+  .sidebar ul li {
+    margin-bottom: 20px; /* khoảng cách giữa các dòng */
+  }
+
+  .sidebar ul li a {
+    text-decoration: none;
+    color: #ffffff; /* chữ trắng */
+    font-size: 16px;
+    font-weight: 500;
+    display: block;
+    transition: color 0.3s ease, padding-left 0.3s ease;
+  }
+
+  .sidebar ul li a:hover {
+    color: #ffcc99; /* khi hover chuyển sang màu cam nhạt */
+    padding-left: 10px; /* dịch nhẹ sang phải khi hover */
+  }
+
 </style>
 </head>
 <body>
@@ -62,15 +94,15 @@
 
 <!-- Sidebar -->
 <div class="sidebar">
-  <h4 style="text-align:center;margin-top:0;">Staff Panel</h4>
-  <div class="nav-item">Dashboard</div>
+  <ul>
 
-
-  <div class="nav-item">Quản lý dịch vụ</div>
-  <div class="nav-item">Quản lý đánh giá bình luận</div>
-  <div class="nav-item">Quản lý Menu</div>
-  <div class="nav-item">Quản lý Voucher khuyến mãi</div>
-  <div class="nav-item">Quản lý khách hàng thân thiết</div>
+    <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
+    <li><a href="Menu_manage">Quản lý Menu</a></li>
+    <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+    <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+    <li><a href="Timedirect">Quản lý khung giờ </a></li>
+  </ul>
+<%--  <div class="nav-item">Quản lý khách hàng thân thiết</div>--%>
 </div>
 
 <!-- Content -->

@@ -267,7 +267,7 @@
                             </select>
 
                             <label>Ngày bắt đầu:</label>
-                            <input type="date" id="add-start" name="startDate" value="${param.startDate}">
+                            <input type="date" id="add-start" name="startDate" value="<%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()) %>">
 
                             <label>Ngày kết thúc:</label>
                             <input type="date" id="add-end" name="endDate" value="${param.endDate}">
@@ -643,10 +643,16 @@ window.onclick = function (event) {
 
         const name = document.getElementById("add-name").value.trim();
         const price = document.getElementById("add-price").value.trim();
-
+        const endDate =  document.getElementById("add-end").value.trim();
         // ✅ Kiểm tra rỗng
-        if (!name || !price) {
-            showError("Vui lòng nhập đầy đủ tên và giá dịch vụ!");
+        if (!name) {
+            showError("Vui lòng nhập tên dịch vụ!");
+            return;
+        }else if(!price){
+            showError("Vui lòng nhập giá dịch vụ!");
+            return;
+        }else if(!endDate){
+            showError("Vui lòng nhập ngày kết thúc dịch vụ!");
             return;
         }
 

@@ -653,7 +653,6 @@
                         <input type="file" class="form-control" id="menuImageEditUrl" name="imageFile" accept="image/*" onchange="previewImageEdit(event)">
                         <input type="hidden" name="oldImageUrl" id="oldImageUrl">
                         <img id="imagePreviewEdit" src="/images/no-image.png" alt="Xem trước ảnh" style="max-height:150px; margin-top:10px;">
-                        <small class="text-muted">Nếu không chọn ảnh mới, ảnh cũ sẽ được giữ lại.</small>
                     </div>
 
                     <div class="mb-3">
