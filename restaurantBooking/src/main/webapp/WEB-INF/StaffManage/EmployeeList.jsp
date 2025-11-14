@@ -149,6 +149,16 @@
                         <label>Số điện thoại:</label>
                         <input type="text" name="phoneNumber" id="editPhone">
 
+                        <label>Giới tính:</label>
+                        <select name="gender" id="editGender" required>
+                            <option value="Male">Nam</option>
+                            <option value="Female">Nữ</option>
+                            <option value="Other">Khác</option>
+                        </select>
+
+                        <label>Ngày sinh:</label>
+                        <input type="date" name="dateOfBirth" id="editDateOfBirth" required>
+
                         <label>Trạng thái:</label>
                         <select name="status" id="editStatus">
                             <option value="ACTIVE">Hoạt động</option>
@@ -203,7 +213,7 @@
     </div>
 </div>
 
-<!-- popup-->
+<!-- JS điều khiển popup -->
 <script>
     function openEditModal(id, fullName, gender, email, phone, status) {
         document.getElementById("editUserId").value = id;
@@ -211,10 +221,14 @@
         document.getElementById("editGender").value = gender;
         document.getElementById("editEmail").value = email;
         document.getElementById("editPhone").value = phone;
+        document.getElementById("editGender").value = gender;
+        document.getElementById("editDateOfBirth").value = dateOfBirth;
         document.getElementById("editStatus").value = status;
+
         document.getElementById("editModal").style.display = "flex";
     }
 
+    // Đóng popup
     function closeModal() {
         document.getElementById("editModal").style.display = "none";
     }

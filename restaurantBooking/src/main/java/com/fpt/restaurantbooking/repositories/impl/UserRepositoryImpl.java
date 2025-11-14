@@ -5,6 +5,7 @@ import com.fpt.restaurantbooking.repositories.UserRepository;
 import com.fpt.restaurantbooking.utils.DatabaseUtil;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -329,6 +330,7 @@ public class UserRepositoryImpl implements UserRepository {
         user.setUserId(rs.getInt("user_id"));
         user.setRoleId(rs.getInt("role_id"));
         user.setFullName(rs.getString("full_name"));
+        user.setGender(rs.getString("gender"));
         user.setEmail(rs.getString("email"));
         user.setPhoneNumber(rs.getString("phone_number"));
         user.setPassword(rs.getString("password"));
@@ -427,4 +429,25 @@ public class UserRepositoryImpl implements UserRepository {
         }
         return null;
     }
+
+    public List<User> findEmployeesByPage(int offset, int limit) {
+        String sql = "SELECT * FROM users LIMIT ?, ?";
+        List<User> users = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, offset);
+            stmt.setInt(2, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding employees by page", e);
+        }
+
+        return users;
+    }
+
 }
