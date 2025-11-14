@@ -289,7 +289,7 @@
     <div class="modal fade" id="addMenuModal" tabindex="-1" aria-labelledby="addVoucherLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="AddMenu" method="post" >
+                <form action="AddMenu" method="post" enctype="multipart/form-data">
                     <div class="modal-header">
                         <h5 class="modal-title" id="addVoucherLabel">Thêm Món Mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
@@ -313,16 +313,15 @@
                             <label for="addMenuPrice" class="form-label">Giá</label>
                             <input type="number" class="form-control" id="addMenuPrice" name="price" min="0" value="${param.price != null ? param.price : ''}">
                         </div>
-                        <div class="mb-3">
-                            <label for="addDishImageUrl" class="form-label">Ảnh món ăn (URL)</label>
 
-                            <input type="text"
-                                   class="form-control"
-                                   id="addDishImageUrl"
-                                   name="imageUrl"
-                                   placeholder="Dán link ảnh HTTPS vào đây (vd: https://i.ibb.co/xxxx.jpg)"
-                                   oninput="previewImageFromUrl(this.value)">
+
+                        <div class="mb-3">
+                            <label for="addDishImageUrl" class="form-label">Ảnh món ăn</label>
+                            <input type="file" class="form-control" id="addDishImageUrl" name="imageFile" accept="image/*" onchange="previewImage(event)">
+                            <img id="imagePreview" src="/images/no-image.png" alt="Xem trước ảnh" style="max-height:150px; margin-top:10px;">
                         </div>
+
+
                         <div class="mb-3">
                             <label for="addMenuStatus" class="form-label">Trạng thái</label>
                             <select class="form-select" id="addMenuStatus" name="status">
@@ -395,7 +394,7 @@
                                     data-desc="${o.description}"
                                     data-price="${o.price}"
                                     data-code="${o.itemCode}"
-                                    data-image="${o.imageUrl}"
+
                                     data-status="${o.status}"
                                     data-category="${o.category_id}"
                                     data-category-name="${o.category_name}">
@@ -585,8 +584,6 @@
                         <h5 id="detailName" class="fw-bold text-danger mb-2"></h5>
                         <p><strong>Mã món:</strong> <span id="detailCode"></span></p>
                         <p><strong>Thời gian tạo:</strong> <span id="detailCreated"></span></p>
-                        <p><strong>Mô tả:</strong></p>
-                        <p id="detailDesc" class="text-muted fst-italic"></p>
                         <p><strong>Giá:</strong> <span id="detailPrice" class="text-success fw-bold"></span></p>
                         <p><strong>Trạng thái:</strong> <span id="detailStatus" class="badge bg-success"></span></p>
                     </div>
@@ -605,7 +602,7 @@
         <div class="modal-content">
 
             <!-- CHÚ Ý: enctype để upload file -->
-            <form action="Menu_manage" method="post" >
+            <form action="Menu_manage" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editVoucherLabel">Sửa món ăn</h5>
                     <c:if test="${not empty errorMessage}">
@@ -650,15 +647,10 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="menuImageEditUrl" class="form-label">Ảnh món ăn (URL)</label>
-
-                        <input type="text"
-                               class="form-control"
-                               id="menuImageEditUrl"
-                               name="imageUrl"
-                               placeholder="Dán link ảnh HTTPS vào đây (vd: https://i.ibb.co/xxxx.jpg)"
-                               oninput="previewImageFromUrlEdit(this.value)">
-                        <small class="text-muted">Nếu không nhập link mới, ảnh cũ sẽ được giữ lại.</small>
+                        <label for="menuImageEditUrl" class="form-label">Ảnh món ăn</label>
+                        <input type="file" class="form-control" id="menuImageEditUrl" name="imageFile" accept="image/*" onchange="previewImageEdit(event)">
+                        <input type="hidden" name="oldImageUrl" id="oldImageUrl">
+                        <img id="imagePreviewEdit" src="/images/no-image.png" alt="Xem trước ảnh" style="max-height:150px; margin-top:10px;">
                     </div>
 
                     <div class="mb-3">
@@ -830,5 +822,17 @@
     });
 </script>
 <% } %>
+<script>
+    function previewImage(event) {
+        const output = document.getElementById('imagePreview');
+        output.src = URL.createObjectURL(event.target.files[0]);
+    }
+
+    function previewImageEdit(event) {
+        const output = document.getElementById('imagePreviewEdit');
+        output.src = URL.createObjectURL(event.target.files[0]);
+    }
+</script>
+
 </body>
 </html>

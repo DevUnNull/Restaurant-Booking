@@ -103,6 +103,18 @@ public class ServiceRepository {
         }
 
     }
+    public void deleteServiceFromService_menu_items(String service_id) throws SQLException {
+        String sql = " Delete From service_menu_items  WHERE service_id = ? ";
+        try (Connection con = db.getConnection(); PreparedStatement stm = con.prepareStatement(sql)) {
+
+            stm.setString(1, service_id);
+
+            stm.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        }
+
+    }
 
     public void addService(String serviceName, String serviceCode, String description, String price, String status, String startDate, String endDate, int id) throws SQLException {
         String sql = " INSERT INTO Services (service_name,service_code, description, price, status, start_date, end_date, created_by, updated_by ) \n"

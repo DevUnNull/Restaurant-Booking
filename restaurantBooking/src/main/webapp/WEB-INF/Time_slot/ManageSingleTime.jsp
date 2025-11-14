@@ -135,9 +135,7 @@
     <div class="main-wrapper">
         <!-- Sidebar -->
         <div class="sidebar">
-            <h2>Staff Panel</h2>
             <ul>
-                <li><a href="#">Dashboard</a></li>
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
                 <li><a href="Menu_manage">Quản lý Menu</a></li>
                 <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>

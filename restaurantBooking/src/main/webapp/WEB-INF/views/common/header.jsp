@@ -15,6 +15,10 @@
             <li><a href="${pageContext.request.contextPath}/menu">Thực Đơn</a></li>
             <li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li>
             <li><a href="${pageContext.request.contextPath}/Blog"> Blog nhà Hàng</a></li>
+            <c:if test="${sessionScope.userRole ==3}">
+                <li>   <a href="${pageContext.request.contextPath}/TimeTable">Xem khung giờ</a></li>
+            </c:if>
+
             <%-- Booking Management Dropdown (Role 2) --%>
             <c:if test="${sessionScope.userRole == 2}">
                 <li class="user-dropdown">
@@ -30,7 +34,6 @@
                         <a href="${pageContext.request.contextPath}/Voucher"><i class="fas fa-tags"></i> Quản lý voucher</a>
                         <a href="${pageContext.request.contextPath}/Promotion_level"><i class="fas fa-users"></i> Quản lý khách hàng</a>
                         <a href="${pageContext.request.contextPath}/Timedirect"><i class="fas fa-clock"></i> Quản lý khung giờ</a>
-
                     </div>
                 </li>
             </c:if>
@@ -45,8 +48,8 @@
                     <div id="hrDropdown" class="dropdown-content">
                         <a href="${pageContext.request.contextPath}/EmployeeList">Quản Lý Nhân Sự</a>
                         <a href="${pageContext.request.contextPath}/WorkSchedule">Phân lịch làm việc</a>
-                        <a href="#">Lịch làm việc</a>
-                        <a href="CustomerList">Thêm nhân viên</a>
+                        <a href="${pageContext.request.contextPath}/WorkTimetable">Lịch làm việc</a>
+                        <a href="${pageContext.request.contextPath}/CustomerList">Thêm nhân viên</a>
                     </div>
                 </li>
 

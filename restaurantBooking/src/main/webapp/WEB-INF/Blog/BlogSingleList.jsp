@@ -219,15 +219,12 @@
 
     <!-- Bài đăng 1 -->
     <c:forEach var="o" items="${postList}">
-        <div class="blog-post">
+        <div class="blog-post" data-id="${o.idBlogSingle}">
             <div class="blog-img" style="background-image: url('${o.imgUrl}');"></div>
             <div class="blog-content">
                 <span class="blog-meta">${o.createdDate} | ${o.createdBy}</span>
                 <h3>${o.titleBlogSingle}</h3>
-                <p>
-                    ${o.contentBlogSingle}
-                </p>
-
+                <p>${o.contentBlogSingle}</p>
             </div>
         </div>
     </c:forEach>
@@ -237,7 +234,17 @@
 
 
 </main>
-
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const posts = document.querySelectorAll(".blog-post");
+        posts.forEach(post => {
+            post.addEventListener("click", () => {
+                const id = post.dataset.id;
+                window.location.href = "DetailBlogSingle?id=" + id;
+            });
+        });
+    });
+</script>
 <!-- FOOTER -->
 <!-- Footer -->
 <jsp:include page="/WEB-INF/views/common/footer.jsp" />

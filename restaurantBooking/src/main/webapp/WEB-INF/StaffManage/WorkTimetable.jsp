@@ -24,7 +24,7 @@
         <div class="logo">Quản Lý Nhân Sự</div>
         <nav>
             <ul>
-                <li><a href="#">Trang chủ</a></li>
+                <li><a href="home">Trang chủ</a></li>
             </ul>
         </nav>
     </div>
@@ -42,7 +42,7 @@
         <div class="content">
             <h2>Danh sách nhân viên</h2>
             <div class="timetable-container">
-                <!-- 🧭 Form chọn năm và tuần -->
+                <!-- Form chọn năm và tuần -->
                 <form action="WorkTimetable" method="get" style="margin-bottom: 15px;">
                     <label for="year">YEAR</label>
                     <select id="year" name="year">
@@ -63,12 +63,26 @@
                     <button type="submit">View</button>
                 </form>
 
-                <h3>Tuần ${monday} → ${sunday}</h3>
+                <div class="status-note">
+                    <strong>Chú thích:</strong>
+                    <div class="legend-item">
+                        <div class="legend-box confirmed"> </div>
+                        <span>Đã xác nhận (CONFIRMED)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box tentative"> </div>
+                        <span>Tạm thời (TENTATIVE)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box cancelled"> </div>
+                        <span>Đã hủy (CANCELLED)</span>
+                    </div>
+                </div>
 
                 <table class="timetable">
                     <thead>
                     <tr>
-                        <th>Slot</th>
+                        <th>CA</th>
                         <th>Thứ 2</th>
                         <th>Thứ 3</th>
                         <th>Thứ 4</th>
@@ -79,20 +93,24 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach var="slot" begin="1" end="1">
+                    <c:set var="shifts" value="${['Sáng', 'Tối']}" />
+
+                    <c:forEach var="shiftName" items="${shifts}">
                         <tr>
-                            <td>Ca ${slot}</td>
+                            <td><strong>${shiftName}</strong></td>
                             <c:forEach var="dateStr" items="${weekDates}">
                                 <td>
-                                        <%-- Lấy danh sách WorkSchedule cho ngày dateStr --%>
                                     <c:set var="list" value="${scheduleMap[dateStr]}" />
                                     <c:if test="${not empty list}">
                                         <c:forEach var="ws" items="${list}">
-                                            <div class="shift-box ${ws.status}">
-                                                <strong>${ws.user.fullName}</strong><br/>
-                                                <small>${ws.shift} (${ws.startTime} - ${ws.endTime})</small><br/>
-                                                <em>${ws.workPosition}</em>
-                                            </div>
+                                            <c:if test="${ws.shift eq shiftName}">
+                                                <div class="shift-box ${ws.status}"
+                                                    onclick="showDetailPopup('${ws.user.fullName}', '${ws.shift}', '${ws.startTime}', '${ws.endTime}', '${ws.workPosition}', '${ws.status}', '${ws.notes}')">
+                                                    <strong>${ws.user.fullName}</strong><br/>
+                                                    <small>(${ws.startTime} - ${ws.endTime})</small><br/>
+                                                    <em>${ws.workPosition}</em>
+                                                </div>
+                                            </c:if>
                                         </c:forEach>
                                     </c:if>
                                 </td>
@@ -105,5 +123,36 @@
         </div>
     </div>
 </div>
+
+<!-- Popup chi tiết lịch -->
+<div id="scheduleDetailPopup" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3>Chi tiết lịch làm việc</h3>
+        <p><strong>Nhân viên:</strong> <span id="popupFullName"></span></p>
+        <p><strong>Ca:</strong> <span id="popupShift"></span></p>
+        <p><strong>Thời gian:</strong> <span id="popupTime"></span></p>
+        <p><strong>Vị trí:</strong> <span id="popupPosition"></span></p>
+        <p><strong>Trạng thái:</strong> <span id="popupStatus"></span></p>
+        <p><strong>Ghi chú:</strong> <span id="popupNotes"></span></p>
+        <button onclick="closeDetailPopup()">Đóng</button>
+    </div>
+</div>
+
+<script>
+    function showDetailPopup(fullName, shift, startTime, endTime, position, status, notes) {
+        document.getElementById("popupFullName").textContent = fullName;
+        document.getElementById("popupShift").textContent = shift;
+        document.getElementById("popupTime").textContent = startTime + " - " + endTime;
+        document.getElementById("popupPosition").textContent = position || "(Không có)";
+        document.getElementById("popupStatus").textContent = status;
+        document.getElementById("popupNotes").textContent = notes || "(Không có)";
+        document.getElementById("scheduleDetailPopup").style.display = "flex";
+    }
+
+    function closeDetailPopup() {
+        document.getElementById("scheduleDetailPopup").style.display = "none";
+    }
+</script>
+
 </body>
 </html>

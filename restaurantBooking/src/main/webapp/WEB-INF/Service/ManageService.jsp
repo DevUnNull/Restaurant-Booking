@@ -212,15 +212,12 @@
         <div class="sidebar">
 
             <ul>
-
-
                 <!-- nếu quyền là admin Restaurant thì hiện  -->
                 <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
                 <li><a href="Menu_manage">Quản lý Menu</a></li>
                 <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
                 <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
-                <li><a href="Timedirect">Quản lý khung giờ </a></li>
-
+                <li><a href="Timedirect">Quản lý khung giờ</a></li>
             </ul>
         </div>
 
@@ -267,7 +264,7 @@
                             </select>
 
                             <label>Ngày bắt đầu:</label>
-                            <input type="date" id="add-start" name="startDate" value="${param.startDate}">
+                            <input type="date" id="add-start" name="startDate" value="<%= new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()) %>">
 
                             <label>Ngày kết thúc:</label>
                             <input type="date" id="add-end" name="endDate" value="${param.endDate}">
@@ -371,7 +368,7 @@
                         <c:forEach var="i" begin="1" end="${totalPages}">
                             <c:choose>
                                 <c:when test="${i == currentPage}">
-                                    <span style="margin: 0 5px; font-weight: bold; color: #b23627;">${i}</span>
+                                    <span style="margin: 0 5px; font-weight: bold; color: white;">${i}</span>
                                 </c:when>
                                 <c:otherwise>
                                     <a href="ServiceManage?page=${i}"
@@ -471,7 +468,7 @@
 
             <div style="margin-top:15px; text-align:center;">
                 <button type="submit">✅ Thêm vào combo</button>
-                <button type="button" onclick="closeAddItemPopup()">❌ Hủy</button>
+                <button type="button" onclick="closeAddItemPopup()"> Hủy</button>
             </div>
         </form>
     </div>
@@ -643,10 +640,16 @@ window.onclick = function (event) {
 
         const name = document.getElementById("add-name").value.trim();
         const price = document.getElementById("add-price").value.trim();
-
+        const endDate =  document.getElementById("add-end").value.trim();
         // ✅ Kiểm tra rỗng
-        if (!name || !price) {
-            showError("Vui lòng nhập đầy đủ tên và giá dịch vụ!");
+        if (!name) {
+            showError("Vui lòng nhập tên dịch vụ!");
+            return;
+        }else if(!price){
+            showError("Vui lòng nhập giá dịch vụ!");
+            return;
+        }else if(!endDate){
+            showError("Vui lòng nhập ngày kết thúc dịch vụ!");
             return;
         }
 

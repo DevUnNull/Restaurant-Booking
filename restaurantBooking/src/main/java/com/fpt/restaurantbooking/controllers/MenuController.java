@@ -25,6 +25,7 @@ import java.util.List;
  * @author Quandxnunxi28
  */
 @WebServlet(name="Menu", urlPatterns={"/Menu_manage"})
+@MultipartConfig
 public class MenuController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -133,7 +134,21 @@ public class MenuController extends HttpServlet {
         String menuName = request.getParameter("menuName");
         String description = request.getParameter("description");
         String price= request.getParameter("price");
-        String imageFile =  request.getParameter("imageUrl");
+        Part filePart = request.getPart("imageFile");
+        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+        String uploadPath = getServletContext().getRealPath("/images/appetizers/");
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+        String imageFile;
+        if (fileName != null && !fileName.isEmpty()) {
+            filePart.write(uploadPath + File.separator + fileName);
+            imageFile = "images/appetizers/" + fileName;
+        } else {
+            // Nếu không chọn ảnh mới, dùng lại ảnh cũ
+            imageFile = request.getParameter("oldImageUrl");
+        }
         String updated_by= request.getParameter("updated_by");
         String status= request.getParameter("status");
         String categoryId = request.getParameter("categoryId");
@@ -151,6 +166,11 @@ public class MenuController extends HttpServlet {
             er = "Name must not be empty";
             request.setAttribute("errorMessage", er);
             request.setAttribute("pro", pro);
+            processRequest(request, response);
+            return;
+        }if(menuName.trim().length() > 40) {
+            er="name must not greater than 40 characters";
+            request.setAttribute("errorMessageee", er);
             processRequest(request, response);
             return;
         }else if(description.isEmpty()){

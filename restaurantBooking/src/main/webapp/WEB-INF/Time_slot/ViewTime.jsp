@@ -48,13 +48,7 @@
         }
         .sidebar .nav-item:hover { background: rgba(255,255,255,0.06); cursor: pointer; }
 
-        .content {
-            margin-left: 230px;
-            padding-top: 68px;
-            padding-left: 24px;
-            padding-right: 24px;
-            padding-bottom: 40px;
-        }
+
 
         /* banner (khoanh đỏ) */
         .banner {
@@ -194,7 +188,7 @@
 
         @media (max-width: 900px) {
             .sidebar { display:none; }
-            .content { margin-left: 0; padding-left: 12px; padding-right: 12px; }
+
         }
     </style>
 
@@ -206,15 +200,7 @@
 
 
 <!-- Sidebar -->
-<div class="sidebar">
-    <h4 style="text-align:center;margin-top:0;">Staff Panel</h4>
-    <div class="nav-item">Dashboard</div>
-    <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-    <li><a href="Menu_manage">Quản lý Menu</a></li>
-    <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
-    <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
-    <li><a href="Timedirect">Quản lý khung giờ </a></li>
-</div>
+
 
 <!-- Content -->
 <div class="content">
@@ -222,7 +208,6 @@
     <!-- Banner -->
     <div class="banner">
         <div class="title">Khung Thời Gian Nhà Hàng</div>
-
     </div>
 
     <!-- Controls: legend + month selector -->
@@ -319,7 +304,7 @@
 
                 if (cellIndex >= startIndex && day <= lastDay) {
                     const link = document.createElement("a");
-                    link.href = "Time?day=" + day + "&month=" + month + "&year=" + year;
+                    link.href = "Time_Table?day=" + day + "&month=" + month + "&year=" + year;
                     link.style.textDecoration = "none";
                     link.style.color = "inherit"; // giữ nguyên màu
 

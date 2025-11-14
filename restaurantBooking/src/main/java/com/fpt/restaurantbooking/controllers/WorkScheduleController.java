@@ -39,9 +39,11 @@ public class WorkScheduleController extends HttpServlet {
 
         if ("add".equalsIgnoreCase(action)) {
             handleAddSchedule(request, response);
-        } else if ("delete".equalsIgnoreCase(action)) {
+        } else if ("cancel".equalsIgnoreCase(action)) {
             handleDeleteSchedule(request, response);
-        }else if ("edit".equalsIgnoreCase(action)) {
+        } else if ("confirm".equalsIgnoreCase(action)) {
+            handleConfirmSchedule(request, response);
+        } else if ("edit".equalsIgnoreCase(action)) {
             handleEditSchedule(request, response);
         } else {
             showWorkScheduleList(request, response);
@@ -59,7 +61,7 @@ public class WorkScheduleController extends HttpServlet {
             List<WorkSchedule> schedules = workScheduleDao.getAllWorkSchedules();
 
             // Ẩn CANCELLED
-            schedules.removeIf(ws -> "CANCELLED".equalsIgnoreCase(ws.getStatus()));
+//            schedules.removeIf(ws -> "CANCELLED".equalsIgnoreCase(ws.getStatus()));
 
             // Lấy danh sách nhân viên
             List<User> staffList = userDao.findAllStaff();
@@ -88,6 +90,12 @@ public class WorkScheduleController extends HttpServlet {
                 schedules.sort(Comparator.comparingInt(WorkSchedule::getScheduleId));
             } else if ("desc".equalsIgnoreCase(sortOrder)) {
                 schedules.sort(Comparator.comparingInt(WorkSchedule::getScheduleId).reversed());
+            }
+
+            // === Lọc theo ca làm ===
+            String shiftParam = request.getParameter("shift");
+            if (shiftParam != null && !shiftParam.isEmpty()) {
+                schedules.removeIf(ws -> ws.getShift() == null || !ws.getShift().equalsIgnoreCase(shiftParam));
             }
 
             // Phân trang
@@ -122,8 +130,6 @@ public class WorkScheduleController extends HttpServlet {
         }
     }
 
-
-
     /**
      * Xử lý thêm lịch làm việc mới
      */
@@ -144,33 +150,72 @@ public class WorkScheduleController extends HttpServlet {
             WorkSchedule ws = new WorkSchedule(null, user, workDate, shift, startTime, endTime, workPosition, notes, "TENTATIVE");
 
             workScheduleDao.addWorkSchedule(ws);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("successMessage", "Thêm lịch làm việc thành công!");
         } catch (Exception e) {
             e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "Thêm lịch thất bại. Vui lòng thử lại.");
         }
 
         response.sendRedirect(request.getContextPath() + "/WorkSchedule");
     }
 
     /**
-     * Xử lý xóa lịch làm việc (đổi trạng thái sang CANCELLED)
+     * Xử lý Hủy lịch làm việc (đổi trạng thái sang CANCELLED)
      */
     private void handleDeleteSchedule(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         try {
             int scheduleId = Integer.parseInt(request.getParameter("scheduleId"));
-            workScheduleDao.updateStatus(scheduleId, "CANCELLED");
+            WorkSchedule existing = workScheduleDao.getWorkScheduleById(scheduleId);
+
+            if (existing == null) {
+                request.getSession().setAttribute("errorMessage", "Lịch làm việc không tồn tại.");
+            } else if ("CANCELLED".equalsIgnoreCase(existing.getStatus())) {
+                request.getSession().setAttribute("errorMessage", "Lịch này đã bị hủy trước đó.");
+            } else if ("CONFIRMED".equalsIgnoreCase(existing.getStatus())) {
+                request.getSession().setAttribute("errorMessage", "Lịch này đã được xác nhận, không thể hủy.");
+            } else {
+                workScheduleDao.updateStatus(scheduleId, "CANCELLED");
+                request.getSession().setAttribute("successMessage", "Hủy thành công!");
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "Lỗi khi hủy lịch làm việc.");
         }
 
-        String currentQuery = request.getParameter("currentQuery");
-        if (currentQuery != null && !currentQuery.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/WorkSchedule" + currentQuery);
-        } else {
-            response.sendRedirect(request.getContextPath() + "/WorkSchedule");
-        }
-
+        response.sendRedirect(request.getContextPath() + "/WorkSchedule");
     }
+
+
+    /**
+     * Xử lý Xác nhận lịch làm việc (đổi trạng thái sang CONFIRMED)
+     */
+    private void handleConfirmSchedule(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            int scheduleId = Integer.parseInt(request.getParameter("scheduleId"));
+            WorkSchedule existing = workScheduleDao.getWorkScheduleById(scheduleId);
+
+            if (existing == null) {
+                request.getSession().setAttribute("errorMessage", "Lịch làm việc không tồn tại.");
+            } else if ("CONFIRMED".equalsIgnoreCase(existing.getStatus())) {
+                request.getSession().setAttribute("errorMessage", "Lịch này đã được xác nhận trước đó.");
+            } else if ("CANCELLED".equalsIgnoreCase(existing.getStatus())) {
+                request.getSession().setAttribute("errorMessage", "Lịch này đã bị hủy, không thể xác nhận.");
+            } else {
+                workScheduleDao.updateStatus(scheduleId, "CONFIRMED");
+                request.getSession().setAttribute("successMessage", "Xác nhận thành công!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "Lỗi khi xác nhận lịch làm việc.");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/WorkSchedule");
+    }
+
 
     /**
      * Xử lý sửa lịch làm việc
@@ -196,8 +241,12 @@ public class WorkScheduleController extends HttpServlet {
             WorkSchedule ws = new WorkSchedule(scheduleId, user, workDate, shift, startTime, endTime, workPosition, notes, currentStatus);
 
             workScheduleDao.updateWorkSchedule(ws);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("successMessage", "Cập nhật thành công!");
         } catch (Exception e) {
             e.printStackTrace();
+            request.getSession().setAttribute("errorMessage", "Cập nhật không thành công!");
         }
 
         response.sendRedirect(request.getContextPath() + "/WorkSchedule");

@@ -13,11 +13,10 @@
       <title>Đơn xin việc</title>
       <link href="css/ServiceManage.css" rel="stylesheet" type="text/css" />
       <link href="css/Employee.css" rel="stylesheet" type="text/css" />
-      <link href="css/WorkShedule.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
 
-<%--  thông báo khi thêm--%>
+<%--  thông báo --%>
   <c:if test="${not empty message}">
       <div id="toast">
           <span>${message}</span>
@@ -53,14 +52,11 @@
 
 
   <div class="main">
-<%--      <div class="header">--%>
-<%--          <div class="logo">Quản Lý Nhân Sự</div>--%>
-<%--      </div>--%>
       <div class="header">
           <div class="logo">Quản Lý Nhân Sự</div>
           <nav>
               <ul>
-                  <li><a href="#">Trang chủ</a></li>
+                  <li><a href="home">Trang chủ</a></li>
               </ul>
           </nav>
       </div>
@@ -117,8 +113,8 @@
                               <td>${c.email}</td>
                               <td>${c.phoneNumber}</td>
                               <td>
-                                  <a href="AddEmployee?id=${c.userId}" class="linkWS1">Thêm</a>
-                                  <a href="#" class="linkWS3">Chi tiết</a>
+                                  <a href="AddEmployee?id=${c.userId}" class="link1">Thêm</a>
+                                  <a href="#" class="link3" onclick="showDetail(${c.userId})">Chi tiết</a>
                               </td>
                           </tr>
                       </c:forEach>
@@ -132,10 +128,38 @@
                           </a>
                       </c:forEach>
                   </div>
+
+                  <!-- Popup hiển thị chi tiết -->
+                  <div id="detailModal" class="modal" style="display:none;">
+                      <div class="modal-content">
+                          <span class="close" onclick="closeDetailModal()">&times;</span>
+                          <h2>Chi tiết khách hàng</h2>
+                          <div id="detailContent" class="detail-info"></div>
+                      </div>
+                  </div>
               </c:if>
           </div>
       </div>
   </div>
+
+<script>
+    function showDetail(id) {
+        // Gửi yêu cầu tới servlet để lấy HTML chi tiết
+        fetch('view-employee-detail?id=' + id)
+            .then(response => response.text())
+            .then(html => {
+                // Đổ nội dung vào phần popup
+                document.getElementById("detailContent").innerHTML = html;
+                document.getElementById("detailModal").style.display = "flex";
+            })
+            .catch(err => console.error('Error loading detail:', err));
+    }
+
+    function closeDetailModal() {
+        document.getElementById("detailModal").style.display = "none";
+    }
+</script>
+
   </body>
   <style>
       #toast {

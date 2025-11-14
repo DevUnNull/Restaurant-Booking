@@ -17,6 +17,8 @@ public class Blog {
     private String contentBlogSingle;
     private String thumbnailBlogSingle;
     private String createdAtBlogSingle;
+    private String descriptionBlogSingle;
+    private String authorNameBlogSingle;
 
     public Blog(int id, String nameCategoryBlog, String imgUrl, String description, String createdDate) {
         this.id = id;
@@ -25,7 +27,7 @@ public class Blog {
         this.description = description;
         this.createdDate = createdDate;
     }
-    public Blog(int idBlogSingle, String titleBlogSingle, String imgUrl, String contentBlogSingle, String createdBy, String createdDate, String nameCategoryBlog, int id ) {
+    public Blog(int idBlogSingle, String titleBlogSingle, String imgUrl, String contentBlogSingle, String createdBy, String createdDate, String nameCategoryBlog, int id ,String descriptionBlogSingle ) {
         this.idBlogSingle = idBlogSingle;
         this.titleBlogSingle = titleBlogSingle;
         this.imgUrl = imgUrl;
@@ -34,6 +36,33 @@ public class Blog {
         this.createdBy = createdBy;
         this.nameCategoryBlog = nameCategoryBlog;
         this.id = id;
+        this.descriptionBlogSingle = descriptionBlogSingle;
+    }
+    public Blog( String titleBlogSingle, String imgUrl, String contentBlogSingle, String createdBy, String createdDate, String nameCategoryBlog, int id ,String descriptionBlogSingle, String  authorNameBlogSingle ) {
+
+        this.titleBlogSingle = titleBlogSingle;
+        this.imgUrl = imgUrl;
+        this.contentBlogSingle = contentBlogSingle;
+        this.createdDate = createdDate;
+        this.createdBy = createdBy;
+        this.nameCategoryBlog = nameCategoryBlog;
+        this.id = id;
+        this.descriptionBlogSingle = descriptionBlogSingle;
+        this.authorNameBlogSingle = authorNameBlogSingle;
+    }
+    public String getDescriptionBlogSingle() {
+        return descriptionBlogSingle;
+    }
+
+    public void setDescriptionBlogSingle(String descriptionBlogSingle) {
+        this.descriptionBlogSingle = descriptionBlogSingle;
+    }
+    public String getAuthorNameBlogSingle() {
+        return authorNameBlogSingle;
+    }
+
+    public void seAuthorNameBlogSingle(String authorNameBlogSingle) {
+        this.authorNameBlogSingle = authorNameBlogSingle;
     }
 
     public String getCreatedBy() {

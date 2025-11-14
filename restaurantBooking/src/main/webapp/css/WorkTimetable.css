@@ -120,6 +120,46 @@
     font-weight: 600;
 }
 
+/* Container ghi chú trạng thái */
+.status-note {
+    margin: 10px 0 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Mỗi dòng legend */
+.status-note .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 6px;
+}
+
+/* Ô màu legend */
+.status-note .legend-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+}
+
+/* Màu theo trạng thái */
+.status-note .legend-box.confirmed {
+    background-color: #4CAF50;   /* xanh lá */
+}
+
+.status-note .legend-box.tentative {
+    background-color: #ff9800;   /* cam */
+}
+
+.status-note .legend-box.cancelled {
+    background-color: #f44336;   /* đỏ */
+}
+
+.shift-box.CONFIRMED { background-color: #4CAF50; }
+.shift-box.TENTATIVE { background-color: #ff9800; }
+.shift-box.CANCELLED { background-color: #f44336; }
+
+
 /* Responsive */
 @media (max-width: 900px) {
     .timetable th, .timetable td {

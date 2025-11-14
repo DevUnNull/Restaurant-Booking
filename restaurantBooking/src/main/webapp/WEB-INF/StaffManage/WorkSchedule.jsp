@@ -17,15 +17,34 @@
     <link href="css/WorkShedule.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+<%
+    String message = (String) session.getAttribute("successMessage");
+    String error = (String) session.getAttribute("errorMessage");
+    if (message != null) {
+%>
+<div class="alert alert-success">
+    <span class="close-btn" onclick="closeAlert(this)">×</span>
+    <%= message %>
+</div>
+<%
+    session.removeAttribute("successMessage");
+} else if (error != null) {
+%>
+<div class="alert alert-danger">
+    <span class="close-btn" onclick="closeAlert(this)">×</span>
+    <%= error %>
+</div>
+<%
+        session.removeAttribute("errorMessage");
+    }
+%>
+
 <div class="main">
-<%--    <div class="header">--%>
-<%--        <div class="logo">Quản Lý Nhân Sự</div>--%>
-<%--    </div>--%>
     <div class="header">
         <div class="logo">Quản Lý Nhân Sự</div>
         <nav>
             <ul>
-                <li><a href="#">Trang chủ</a></li>
+                <li><a href="home">Trang chủ</a></li>
             </ul>
         </nav>
     </div>
@@ -44,9 +63,6 @@
         <!-- Content -->
         <div class="content">
             <h2>Phân lịch làm việc</h2>
-            <c:if test="${empty schedules}">
-                <div class="no-data">Không có dữ liệu lịch làm việc.</div>
-            </c:if>
 
             <!-- Nút mở popup -->
             <button id="openModalBtn">+ Thêm lịch làm việc</button>
@@ -66,6 +82,13 @@
                     <c:forEach var="u" items="${staffList}">
                         <option value="${u.userId}" ${param.userId == u.userId ? 'selected' : ''}>${u.fullName}</option>
                     </c:forEach>
+                </select>
+
+                <label>Ca làm:</label>
+                <select name="shift">
+                    <option value="">-- Tất cả --</option>
+                    <option value="Sáng" ${param.shift == 'Sáng' ? 'selected' : ''}>Sáng</option>
+                    <option value="Tối" ${param.shift == 'Tối' ? 'selected' : ''}>Tối</option>
                 </select>
 
                 <label>Từ ngày:</label>
@@ -118,10 +141,18 @@
                                    class="linkWS1">Sửa</a>
                                 <form action="WorkSchedule" method="post" style="display:inline;"
                                       onsubmit="return confirm('Bạn có chắc muốn xóa lịch làm việc này không?');">
-                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="action" value="cancel">
                                     <input type="hidden" name="scheduleId" value="${ws.scheduleId}">
-                                    <button type="submit" class="linkWS2" style="background:none; border:none; color:#007bff; cursor:pointer;">
-                                        Xóa
+                                    <button type="submit" class="linkWS2">
+                                        Hủy
+                                    </button>
+                                </form>
+                                <form action="WorkSchedule" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Bạn có muốn xác nhận lịch làm việc này không?');">
+                                    <input type="hidden" name="action" value="confirm">
+                                    <input type="hidden" name="scheduleId" value="${ws.scheduleId}">
+                                    <button type="submit" class="linkWS3">
+                                        Xác nhận
                                     </button>
                                 </form>
                             </td>
@@ -131,29 +162,84 @@
                 </table>
             </c:if>
 
-            <%--phân trang--%>
+            <!-- Tạo query giữ filter -->
+            <c:set var="queryString" value="" />
+            <c:if test="${not empty param.userId}">
+                <c:set var="queryString" value="${queryString}&userId=${param.userId}" />
+            </c:if>
+            <c:if test="${not empty param.startDate}">
+                <c:set var="queryString" value="${queryString}&startDate=${param.startDate}" />
+            </c:if>
+            <c:if test="${not empty param.endDate}">
+                <c:set var="queryString" value="${queryString}&endDate=${param.endDate}" />
+            </c:if>
+            <c:if test="${not empty param.sortOrder}">
+                <c:set var="queryString" value="${queryString}&sortOrder=${param.sortOrder}" />
+            </c:if>
+
+            <!-- PHÂN TRANG -->
             <div class="pagination">
                 <c:if test="${totalPages > 1}">
-                    <c:forEach var="i" begin="1" end="${totalPages}">
-                        <a href="WorkSchedule?page=${i}"
-                           class="${i == currentPage ? 'active' : ''}">
-                                ${i}
-                        </a>
+                    <c:if test="${currentPage > 1}">
+                        <a href="WorkSchedule?page=1${queryString}">&laquo;</a>
+                        <a href="WorkSchedule?page=${currentPage - 1}${queryString}">&lt;</a>
+                    </c:if>
+
+                    <c:if test="${currentPage > 4}">
+                        <a href="WorkSchedule?page=1${queryString}">1</a>
+                        <span>...</span>
+                    </c:if>
+
+                    <c:set var="start" value="${currentPage - 2}" />
+                    <c:set var="end" value="${currentPage + 2}" />
+
+                    <c:if test="${start < 1}">
+                        <c:set var="end" value="${end + (1 - start)}" />
+                        <c:set var="start" value="1" />
+                    </c:if>
+
+                    <c:if test="${end > totalPages}">
+                        <c:set var="start" value="${start - (end - totalPages)}" />
+                        <c:set var="end" value="${totalPages}" />
+                    </c:if>
+
+                    <c:forEach var="i" begin="${start}" end="${end}">
+                        <c:if test="${i >= 1 && i <= totalPages}">
+                            <a href="WorkSchedule?page=${i}${queryString}"
+                               class="${i == currentPage ? 'active' : ''}">
+                                    ${i}
+                            </a>
+                        </c:if>
                     </c:forEach>
+
+                    <c:if test="${currentPage < totalPages - 3}">
+                        <span>...</span>
+                        <a href="WorkSchedule?page=${totalPages}${queryString}">${totalPages}</a>
+                    </c:if>
+
+                    <c:if test="${currentPage < totalPages}">
+                        <a href="WorkSchedule?page=${currentPage + 1}${queryString}">&gt;</a>
+                        <a href="WorkSchedule?page=${totalPages}${queryString}">&raquo;</a>
+                    </c:if>
                 </c:if>
             </div>
+
+            <c:if test="${empty schedules}">
+                <div style="color: red; text-align: center;">Không có dữ liệu lịch làm việc.</div>
+            </c:if>
 
             <%-- Popup thêm/sửa lịch làm việc --%>
             <div id="addModal" class="modal">
 
                 <div class="modal-content">
-                    <span id="closeModal" class="close">&times;</span> <form id="scheduleForm" action="WorkSchedule" method="post">
+                    <span id="closeModal" class="close">&times;</span>
+                    <form id="scheduleForm" action="${pageContext.request.contextPath}/WorkSchedule" method="post">
                     <input type="hidden" name="action" value="add"/>
                     <input type="hidden" name="scheduleId" value=""/>
 
                     <div class="form-fields">
                         <label>Nhân viên:</label>
-                        <select name="userId" required>
+                        <select name="userId">
                             <option value="">-- Chọn nhân viên --</option>
                             <c:forEach var="u" items="${staffList}">
                                 <option value="${u.userId}">${u.fullName}</option>
@@ -161,29 +247,32 @@
                         </select><br/>
 
                         <label>Ngày làm:</label>
-                        <input type="date" name="workDate" required><br/>
+                        <input type="date" name="workDate"><br/>
 
                         <label>Ca làm:</label>
-                        <input type="text" name="shift" placeholder="Sáng/Chiều/Tối" required><br/>
+                        <select name="shift">
+                            <option value="">-- Chọn ca làm --</option>
+                            <option value="Sáng">Sáng</option>
+                            <option value="Tối">Tối</option>
+                        </select><br/>
 
                         <label>Giờ bắt đầu:</label>
-                        <input type="time" name="startTime" required><br/>
+                        <input type="time" name="startTime"><br/>
 
                         <label>Giờ kết thúc:</label>
-                        <input type="time" name="endTime" required><br/>
+                        <input type="time" name="endTime"><br/>
 
                         <label>Vị trí:</label>
-                        <input type="text" name="workPosition" required><br/>
+                        <input type="text" name="workPosition"><br/>
 
                         <label>Ghi chú:</label>
                         <textarea name="notes"></textarea><br/>
                     </div>
 
                     <button type="submit" id="submitBtn">Thêm lịch</button>
-                </form>
+                    </form>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -252,6 +341,30 @@
         // Xóa trang đã lưu sau khi tải xong để tránh chuyển hướng lặp lại
         // sessionStorage.removeItem("currentPage");
     });
+
+    // Tự động điền giờ khi chọn ca làm
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("scheduleForm");
+        const shiftSelect = form.querySelector("select[name='shift']");
+        const startTimeInput = form.querySelector("input[name='startTime']");
+        const endTimeInput = form.querySelector("input[name='endTime']");
+
+        shiftSelect.addEventListener("change", function () {
+            const shift = this.value;
+            if (shift === "Sáng") {
+                startTimeInput.value = "09:00";
+                endTimeInput.value = "17:00";
+            } else if (shift === "Tối") {
+                startTimeInput.value = "15:00";
+                endTimeInput.value = "23:00";
+            } else {
+                startTimeInput.value = "";
+                endTimeInput.value = "";
+            }
+        });
+    });
+
+
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -307,7 +420,170 @@
     });
 </script>
 
+<%--Validate--%>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("scheduleForm");
+        const modal = document.getElementById("addModal");
+        const closeModal = document.getElementById("closeModal");
+        const openModalBtn = document.getElementById("openModalBtn");
+        const submitBtn = document.getElementById("submitBtn");
 
+        // === Xóa thông báo lỗi ===
+        function clearErrors() {
+            form.querySelectorAll(".error-message").forEach(e => e.remove());
+        }
+
+        // === Hiển thị lỗi ngay dưới input/select ===
+        function showError(input, message) {
+            const error = document.createElement("div");
+            error.className = "error-message";
+            error.style.color = "red";
+            error.style.fontSize = "13px";
+            error.style.marginTop = "3px";
+            error.textContent = message;
+            input.insertAdjacentElement("afterend", error);
+        }
+
+        // === Hiển thị lỗi dưới nút submit ===
+        function showSubmitError(message) {
+            const error = document.createElement("div");
+            error.className = "error-message";
+            error.style.color = "red";
+            error.style.fontSize = "14px";
+            error.style.marginTop = "8px";
+            error.textContent = message;
+            submitBtn.insertAdjacentElement("afterend", error);
+        }
+
+        // === Reset form khi mở popup thêm mới ===
+        openModalBtn.onclick = function () {
+            form.reset();
+            form.elements["action"].value = "add";
+            form.elements["scheduleId"].value = "";
+            clearErrors();
+            submitBtn.textContent = "Thêm lịch";
+            modal.style.display = "block";
+        };
+
+        // === Đóng popup ===
+        closeModal.onclick = function () {
+            modal.style.display = "none";
+            clearErrors();
+        };
+
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+                clearErrors();
+            }
+        };
+
+        // === Validate khi submit ===
+        form.addEventListener("submit", function (event) {
+            clearErrors();
+            let isValid = true;
+
+            const userId = form.elements["userId"];
+            const workDate = form.elements["workDate"];
+            const shift = form.elements["shift"];
+            const position = form.elements["workPosition"];
+            const start = form.elements["startTime"];
+            const end = form.elements["endTime"];
+
+            if (!userId.value.trim()) {
+                showError(userId, "Vui lòng chọn nhân viên.");
+                isValid = false;
+            }
+
+            if (!workDate.value.trim()) {
+                showError(workDate, "Vui lòng chọn ngày làm việc.");
+                isValid = false;
+            }
+
+            if (!shift.value.trim()) {
+                showError(shift, "Vui lòng chọn ca làm.");
+                isValid = false;
+            }
+
+            if (!position.value.trim()) {
+                showError(position, "Vui lòng nhập vị trí làm việc.");
+                isValid = false;
+            }
+
+            // === Kiểm tra trùng lịch ===
+            if (isValid && typeof existingSchedules !== "undefined") {
+                const currentScheduleId = form.elements["scheduleId"].value; // id của lịch đang edit
+                const exists = existingSchedules.some(s =>
+                    s.userId === userId.value &&
+                    s.workDate === workDate.value &&
+                    s.shift === shift.value &&
+                    s.scheduleId !== currentScheduleId // bỏ qua lịch đang edit
+                );
+
+                if (exists) {
+                    showSubmitError("Lịch làm việc này đã tồn tại.");
+                    isValid = false;
+                }
+            }
+
+            // === Kiểm tra giờ hợp lệ ===
+            if (start.value && end.value && start.value >= end.value) {
+                showError(end, "Giờ kết thúc phải lớn hơn giờ bắt đầu.");
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+<script>
+    const existingSchedules = [
+        <c:forEach var="ws" items="${schedules}" varStatus="loop">
+        {
+            scheduleId: '${ws.scheduleId}',
+            userId: '${ws.user.userId}',
+            workDate: '${ws.workDate}',
+            shift: '${ws.shift}'
+        }${!loop.last ? ',' : ''}
+        </c:forEach>
+    ];
+</script>
+<script>
+    // Truyền danh sách lịch làm việc từ server sang JS
+    const existingSchedules = [
+        <c:forEach var="ws" items="${schedules}" varStatus="loop">
+        {
+            userId: '${ws.user.userId}',
+            workDate: '${ws.workDate}',
+            shift: '${ws.shift}'
+        }${!loop.last ? ',' : ''}
+        </c:forEach>
+    ];
+</script>
+
+<!-- in thông báo thêm lịch thành công-->
+<script>
+    // Hàm đóng khi bấm nút X
+    function closeAlert(element) {
+        const alertBox = element.parentElement;
+        alertBox.classList.add('hide');
+        setTimeout(() => alertBox.remove(), 500);
+    }
+
+    // Tự động ẩn sau 4 giây
+    window.addEventListener('DOMContentLoaded', () => {
+        const alertBox = document.querySelector('.alert');
+        if (alertBox) {
+            setTimeout(() => {
+                alertBox.classList.add('hide');
+                setTimeout(() => alertBox.remove(), 500);
+            }, 4000);
+        }
+    });
+</script>
 
 </body>
 </html>

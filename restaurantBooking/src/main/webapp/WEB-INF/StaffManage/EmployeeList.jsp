@@ -8,6 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <html>
 <head>
@@ -40,14 +41,11 @@
 %>
 
 <div class="main">
-<%--    <div class="header">--%>
-<%--        <div class="logo">Quản Lý Nhân Sự</div>--%>
-<%--    </div>--%>
     <div class="header">
         <div class="logo">Quản Lý Nhân Sự</div>
         <nav>
             <ul>
-                <li><a href="#">Trang chủ</a></li>
+                <li><a href="home">Trang chủ</a></li>
             </ul>
         </nav>
     </div>
@@ -66,9 +64,9 @@
             <h2>Danh sách nhân viên</h2>
             <div class="search-container">
                 <form action="${pageContext.request.contextPath}/EmployeeList" method="get">
-                    <input type="text" name="search"
-                           placeholder="Tìm theo tên hoặc mã nhân viên"
-                           value="${search != null ? search : ''}" class="search-input">
+                        <input type="text" name="search"
+                               placeholder="Tìm theo tên hoặc mã nhân viên"
+                               value="${search != null ? search : ''}" class="search-input">
 
                     <select name="gender">
                         <option value="all" ${gender == 'all' ? 'selected' : ''}>Giới tính</option>
@@ -87,6 +85,7 @@
 
                     <button type="submit" class="search-button">Tìm kiếm</button>
                 </form>
+                <span class="search-error"></span>
             </div>
             <table>
                 <thead>
@@ -110,15 +109,15 @@
                         <td>${u.gender == 'Male' ? 'Nam' : 'Nữ'}</td>
                         <td>${u.email}</td>
                         <td>${u.phoneNumber}</td>
-                        <td>${u.status == 'Active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}</td>
-                        <td>${u.createdAt}</td>
-                        <td>${u.updatedAt}</td>
+                        <td>${u.status == 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động'}</td>
+                        <td>${u.createdAtString}</td>
+                        <td>${u.updatedAtString}</td>
                         <td>
                             <a href="#" class="link1"
                                onclick="openEditModal('${u.userId}', '${u.fullName}', '${u.gender}', '${u.email}', '${u.phoneNumber}', '${u.status}')">
                                 Sửa
                             </a>
-                            <a href="#" class="link2" onclick="confirmDelete(${u.userId})">Khóa</a>
+                            <a href="#" class="link2" onclick="confirmDelete(${u.userId}, '${u.status}')">Khóa</a>
                             <a href="#" class="link3" onclick="showDetail(${u.userId})">Chi Tiết</a>
                         </td>
                     </tr>
@@ -136,7 +135,7 @@
                         <input type="hidden" name="userId" id="editUserId">
 
                         <label>Họ và tên:</label>
-                        <input type="text" name="fullName" id="editFullName" required>
+                        <input type="text" name="fullName" id="editFullName">
 
                         <label>Giới tính</label>
                         <select name="gender" id="editGender">
@@ -145,15 +144,15 @@
                         </select>
 
                         <label>Email:</label>
-                        <input type="email" name="email" id="editEmail" required>
+                        <input type="email" name="email" id="editEmail">
 
                         <label>Số điện thoại:</label>
-                        <input type="text" name="phoneNumber" id="editPhone" required>
+                        <input type="text" name="phoneNumber" id="editPhone">
 
                         <label>Trạng thái:</label>
                         <select name="status" id="editStatus">
-                            <option value="ACTIVE">Active</option>
-                            <option value="INACTIVE">Inactive</option>
+                            <option value="ACTIVE">Hoạt động</option>
+                            <option value="INACTIVE">Ngừng hoạt động</option>
                         </select>
 
                         <div style="text-align:center; margin-top:20px;">
@@ -241,9 +240,14 @@
         }
     });
 </script>
-<%--xóa Staff--%>
+<%--Khóa Staff--%>
 <script>
-    function confirmDelete(userId) {
+    function confirmDelete(userId, status) {
+        if (status === 'INACTIVE') {
+            alert("Tài khoản này đã bị khóa.");
+            return;
+        }
+
         if (confirm("Bạn có chắc chắn muốn khóa tài khoản của nhân viên này không?")) {
             window.location.href = "${pageContext.request.contextPath}/DeleteEmployee?userId=" + userId;
         }
@@ -312,6 +316,86 @@
     }
 </script>
 
+<%--validate--%>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const editForm = document.getElementById("editForm");
+
+        // Tạo các span chứa lỗi cho từng input
+        const fields = ["editFullName", "editEmail", "editPhone"];
+        fields.forEach(id => {
+            const input = document.getElementById(id);
+            let errorSpan = document.createElement("span");
+            errorSpan.className = "error-msg";
+            errorSpan.style.color = "red";
+            errorSpan.style.fontSize = "12px";
+            errorSpan.style.display = "block";
+            input.parentNode.insertBefore(errorSpan, input.nextSibling);
+        });
+
+        editForm.addEventListener("submit", function (e) {
+            let isValid = true;
+
+            // Xóa lỗi cũ
+            document.querySelectorAll(".error-msg").forEach(span => span.textContent = "");
+
+            // Validate tên
+            const fullName = document.getElementById("editFullName").value.trim();
+            if (fullName === "") {
+                document.getElementById("editFullName").nextElementSibling.textContent = "Tên nhân viên không được để trống.";
+                isValid = false;
+            }
+
+            // Validate email
+            const email = document.getElementById("editEmail").value.trim();
+            if (email === "") {
+                document.getElementById("editEmail").nextElementSibling.textContent = "Email không được để trống.";
+                isValid = false;
+            } else {
+                // Regex đơn giản kiểm tra email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    document.getElementById("editEmail").nextElementSibling.textContent = "Email không hợp lệ.";
+                    isValid = false;
+                }
+            }
+
+            // Validate số điện thoại
+            const phone = document.getElementById("editPhone").value.trim();
+            if (phone === "") {
+                document.getElementById("editPhone").nextElementSibling.textContent = "Số điện thoại không được để trống.";
+                isValid = false;
+            } else if (!/^\d{10}$/.test(phone)) {
+                document.getElementById("editPhone").nextElementSibling.textContent = "Số điện thoại phải đúng 10 chữ số.";
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault(); // Ngăn submit form nếu có lỗi
+            }
+        });
+
+        // Tìm kiếm
+        const searchForm = document.querySelector(".search-container form");
+        const searchInput = searchForm.querySelector("input[name='search']");
+
+        // Tạo span hiển thị lỗi
+        let errorSpan = document.createElement("span");
+        errorSpan.className = "search-error";
+        searchForm.appendChild(errorSpan);
+
+        searchForm.addEventListener("submit", function (e) {
+            // Xóa lỗi cũ
+            errorSpan.textContent = "";
+
+            if (searchInput.value.trim() === "") {
+                e.preventDefault(); // ngăn form submit
+                errorSpan.textContent = "Vui lòng nhập tên hoặc mã nhân viên để tìm kiếm.";
+                searchInput.focus();
+            }
+        });
+    });
+</script>
 
 </body>
 
