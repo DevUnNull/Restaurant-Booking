@@ -1,34 +1,38 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="funt" uri="http://java.sun.com/jsp/jstl/functions" %>
+<jsp:useBean id="today" class="java.util.Date" scope="page" />
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cancelled Bookings Report</title>
+    <title>Báo Cáo Đặt Bàn Đã Hủy</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         :root {
-            /* Color Variables */
-            --main-color: #D32F2F; /* Red - Primary Button, Top Nav, Headings border */
-            --light-red: #FFCDD2; /* Light Red - HR, Table hover, Chart border */
-            --dark-red: #B71C1C; /* Dark Red - Headings, Strong text */
-            --menu-bg: #8B0000; /* Menu Background - Sidebar */
-            --menu-hover: #A52A2A; /* Menu Hover */
+            /* Biến Màu Sắc */
+            --main-color: #D32F2F; /* Đỏ - Nút Chính, Thanh Điều Hướng Trên Cùng, Viền Tiêu đề */
+            --light-red: #FFCDD2; /* Đỏ Nhạt - HR, Hover Bảng, Viền Biểu đồ */
+            --dark-red: #B71C1C; /* Đỏ Đậm - Tiêu đề, Văn bản Mạnh */
+            --menu-bg: #8B0000; /* Nền Menu - Thanh Bên */
+            --menu-hover: #A52A2A; /* Hover Menu */
             --text-light: #f8f8f8;
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3; /* Blue */
-            --revenue-color: #4CAF50; /* Green */
-            --cancellation-color: #E91E63; /* Pink/Red - Cancellation highlight */
-            --rate-color: #FF9800; /* Orange/Warning */
-            --staff-chart-color: #00897B; /* Teal */
+            --booking-color: #2196F3; /* Xanh Dương */
+            --revenue-color: #4CAF50; /* Xanh Lá */
+            --cancellation-color: #E91E63; /* Hồng/Đỏ - Đánh dấu Hủy */
+            --rate-color: #FF9800; /* Cam/Cảnh báo */
+            --staff-chart-color: #00897B; /* Xanh Lục Bảo */
             --staff-border-color: #00897B;
-            --customer-color: #1976D2; /* Customer blue */
+            --customer-color: #1976D2; /* Xanh Dương Khách hàng */
         }
 
         body {
@@ -69,12 +73,12 @@
             flex-shrink: 0;
         }
 
-        .top-nav .restaurant-name {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: white;
-            white-space: nowrap;
-        }
+        /*.top-nav .restaurant-name {*/
+        /* font-size: 1.2em;*/
+        /* font-weight: bold;*/
+        /* color: white;*/
+        /* white-space: nowrap;*/
+        /*}*/
 
         .home-button {
             background-color: var(--main-color);
@@ -152,7 +156,7 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
             width: 100%;
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
             box-sizing: border-box;
         }
@@ -218,7 +222,7 @@
             margin: 20px 0;
         }
 
-        /* ----- CANCELLATION TABLE STYLES ----- */
+        /* ----- PHONG CÁCH BẢNG HỦY ĐẶT BÀN ----- */
         .cancellation-table {
             width: 100%;
             border-collapse: collapse;
@@ -408,22 +412,23 @@
     </style>
 </head>
 <body>
+<%-- SỬA: Đặt pageSize = 5 --%>
 <c:set var="pageSize" value="5" scope="request"/>
 <div class="top-nav">
     <div class="restaurant-group">
         <a href="<%= request.getContextPath() %>/" class="home-button">
-            <i class="fas fa-home"></i> Home
+            <i class="fas fa-home"></i> Trang Chủ
         </a>
-        <span class="restaurant-name">Restaurant Booking</span>
+        <%--        <span class="restaurant-name">Đặt Bàn Nhà Hàng</span>--%>
     </div>
     <div class="user-info">
-    <span>User:
+    <span>Người dùng:
         <c:choose>
             <c:when test="${not empty sessionScope.currentUser}">
                 ${sessionScope.currentUser.fullName}
             </c:when>
             <c:otherwise>
-                Guest
+                Khách
             </c:otherwise>
         </c:choose>
     </span>
@@ -433,22 +438,22 @@
 <div class="wrapper">
     <div class="sidebar">
         <ul>
-            <li><a href="<%= request.getContextPath() %>/overview-report" ${request.getRequestURI().contains("overview-report") ? "class=\"active\"" : ""}>Overview Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/service-report" ${request.getRequestURI().contains("service-report") ? "class=\"active\"" : ""}>Service Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/staff-report" ${request.getRequestURI().contains("staff-report") ? "class=\"active\"" : ""}>Staff Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("user-report") ? "class=\"active\"" : ""}>Customer Report</a></li>
-            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancel-report") ? "class=\"active\"" : ""}>Cancellation Report</a></li>
+            <li><a href="<%= request.getContextPath() %>/overview-report" ${request.getRequestURI().contains("overview-report") ? "class=\"active\"" : ""}>Báo Cáo Tổng Quan</a></li>
+            <li><a href="<%= request.getContextPath() %>/service-report" ${request.getRequestURI().contains("service-report") ? "class=\"active\"" : ""}>Báo Cáo Dịch Vụ</a></li>
+            <li><a href="<%= request.getContextPath() %>/staff-report" ${request.getRequestURI().contains("staff-report") ? "class=\"active\"" : ""}>Báo Cáo Nhân Viên</a></li>
+            <li><a href="<%= request.getContextPath() %>/user-report" ${request.getRequestURI().contains("user-report") ? "class=\"active\"" : ""}>Báo Cáo Khách Hàng</a></li>
+            <li><a href="<%= request.getContextPath() %>/cancel-report" ${request.getRequestURI().contains("cancel-report") ? "class=\"active\"" : ""}>Báo Cáo Hủy Đặt Bàn</a></li>
         </ul>
     </div>
 
     <div class="main-content-body">
         <div class="content-container">
-            <h1>Detailed Cancellation & No-Show Report (Page ${requestScope.currentPage} of ${requestScope.totalPages})</h1>
+            <h1>Báo Cáo Chi Tiết Hủy Đặt Bàn & Không Đến </h1>
 
             <div class="filter-section">
-                <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Report Filters</h3>
-                <button type="button" class="btn-apply" onclick="openFilterModal()"><i class="fas fa-calendar"></i> Filter
-                    by Date
+                <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Bộ Lọc Báo Cáo</h3>
+                <button type="button" class="btn-apply" onclick="openFilterModal()"><i class="fas fa-calendar"></i> Lọc
+                    theo Ngày
                 </button>
             </div>
 
@@ -456,7 +461,7 @@
                 <div id="alertWarning"
                      style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Warning:</strong> ${requestScope.warningMessage}
+                    <strong>Cảnh báo:</strong> ${requestScope.warningMessage}
                 </div>
             </c:if>
 
@@ -464,24 +469,24 @@
                 <div id="alertError"
                      style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px;">
                     <i class="fas fa-times-circle"></i>
-                    <strong>System Error:</strong> ${requestScope.errorMessage}
+                    <strong>Lỗi Hệ thống:</strong> ${requestScope.errorMessage}
                 </div>
             </c:if>
 
-
             <c:choose>
+                <%-- KHI CÓ DỮ LIỆU ĐỂ HIỂN THỊ (Sau khi submit ngày) --%>
                 <c:when test="${not empty requestScope.cancellationData}">
                     <table class="cancellation-table">
                         <thead>
                         <tr>
-                            <th>Booking ID</th>
-                            <th>Customer Name</th>
-                            <th>Customer Email</th>
-                            <th>Booking Date/Time</th>
-                            <th class="text-center">Guests</th>
-                            <th class="text-center">Status</th>
-                            <th>Cancellation Reason</th>
-                            <th class="text-center">Lead Time (Days)</th>
+                            <th>ID Đặt Bàn</th>
+                            <th>Tên Khách Hàng</th>
+                            <th>Email Khách Hàng</th>
+                            <th>Ngày/Giờ Đặt Bàn</th>
+                            <th class="text-center">Số Khách</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th>Lý do Hủy</th>
+                            <th class="text-center">Thời gian Báo trước (Ngày)</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -490,15 +495,18 @@
                                 <td><c:out value="${item.reservationId}"/></td>
                                 <td><c:out value="${item.customerName}"/></td>
                                 <td><c:out value="${item.customerEmail}"/></td>
-                                <td><c:out value="${item.reservationDate}"/> at <c:out value="${item.reservationTime}"/></td>
+                                <td>
+                                    <fmt:parseDate value="${item.reservationDate}" pattern="yyyy-MM-dd" var="resDateObj" type="date"/>
+                                    <fmt:formatDate value="${resDateObj}" pattern="dd/MM/yyyy"/> lúc <c:out value="${item.reservationTime}"/>
+                                </td>
                                 <td class="text-center"><c:out value="${item.numberOfGuests}"/></td>
                                 <td class="text-center">
                                     <c:choose>
                                         <c:when test="${item.reservationStatus == 'CANCELLED'}">
-                                            <span class="status-cancelled">Cancelled</span>
+                                            <span class="status-cancelled">Đã Hủy</span>
                                         </c:when>
                                         <c:when test="${item.reservationStatus == 'NO_SHOW'}">
-                                            <span class="status-no-show">No Show</span>
+                                            <span class="status-no-show">Không Đến</span>
                                         </c:when>
                                         <c:otherwise>
                                             <c:out value="${item.reservationStatus}"/>
@@ -507,14 +515,23 @@
                                 </td>
                                 <td class="reason-cell">
                                     <div class="tooltip">
-                                        <c:set var="reasonText" value="${item.cancellationReason != null ? item.cancellationReason : 'Not provided'}"/>
+                                        <c:set var="reasonText" value="${item.cancellationReason != null ? item.cancellationReason : 'Không cung cấp'}"/>
                                         <c:out value="${reasonText.length() > 50 ? reasonText.substring(0, 50).concat('...') : reasonText}"/>
                                         <c:if test="${item.cancellationReason != null}">
                                             <span class="tooltiptext"><c:out value="${item.cancellationReason}"/></span>
                                         </c:if>
                                     </div>
                                 </td>
-                                <td class="text-center"><c:out value="${item.leadTimeDays}"/></td>
+                                <td class="text-center">
+                                    <c:choose>
+                                        <c:when test="${item.leadTimeDays >= 0}">
+                                            <c:out value="${item.leadTimeDays}"/> ngày
+                                        </c:when>
+                                        <c:otherwise>
+                                            N/A
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
                             </tr>
                         </c:forEach>
                         </tbody>
@@ -533,16 +550,16 @@
                                     <%-- Nút Previous --%>
                                 <c:url var="prevUrl" value="cancel-report">
                                     <c:param name="page" value="${currentPage - 1}"/>
-                                    <c:param name="pageSize" value="5"/>
+                                    <c:param name="pageSize" value="${pageSize}"/>
                                     <c:param name="startDate" value="${startDate}"/>
                                     <c:param name="endDate" value="${endDate}"/>
                                 </c:url>
                                 <c:choose>
                                     <c:when test="${currentPage > 1}">
-                                        <li><a href="${prevUrl}"><i class="fas fa-chevron-left"></i> Prev</a></li>
+                                        <li><a href="${prevUrl}"><i class="fas fa-chevron-left"></i> Trước</a></li>
                                     </c:when>
                                     <c:otherwise>
-                                        <li class="disabled"><span><i class="fas fa-chevron-left"></i> Prev</span></li>
+                                        <li class="disabled"><span><i class="fas fa-chevron-left"></i> Trước</span></li>
                                     </c:otherwise>
                                 </c:choose>
 
@@ -553,7 +570,7 @@
                                 <c:if test="${startPage > 1}">
                                     <c:url var="page1Url" value="cancel-report">
                                         <c:param name="page" value="1"/>
-                                        <c:param name="pageSize" value="5"/>
+                                        <c:param name="pageSize" value="${pageSize}"/>
                                         <c:param name="startDate" value="${startDate}"/>
                                         <c:param name="endDate" value="${endDate}"/>
                                     </c:url>
@@ -564,7 +581,7 @@
                                 <c:forEach begin="${startPage}" end="${endPage}" var="i">
                                     <c:url var="pageUrl" value="cancel-report">
                                         <c:param name="page" value="${i}"/>
-                                        <c:param name="pageSize" value="5"/>
+                                        <c:param name="pageSize" value="${pageSize}"/>
                                         <c:param name="startDate" value="${startDate}"/>
                                         <c:param name="endDate" value="${endDate}"/>
                                     </c:url>
@@ -582,7 +599,7 @@
                                     <c:if test="${endPage < totalPages - 1}"><li><span>...</span></li></c:if>
                                     <c:url var="lastPageUrl" value="cancel-report">
                                         <c:param name="page" value="${totalPages}"/>
-                                        <c:param name="pageSize" value="5"/>
+                                        <c:param name="pageSize" value="${pageSize}"/>
                                         <c:param name="startDate" value="${startDate}"/>
                                         <c:param name="endDate" value="${endDate}"/>
                                     </c:url>
@@ -592,16 +609,16 @@
                                     <%-- Nút Next --%>
                                 <c:url var="nextUrl" value="cancel-report">
                                     <c:param name="page" value="${currentPage + 1}"/>
-                                    <c:param name="pageSize" value="5"/>
+                                    <c:param name="pageSize" value="${pageSize}"/>
                                     <c:param name="startDate" value="${startDate}"/>
                                     <c:param name="endDate" value="${endDate}"/>
                                 </c:url>
                                 <c:choose>
                                     <c:when test="${currentPage < totalPages}">
-                                        <li><a href="${nextUrl}">Next <i class="fas fa-chevron-right"></i></a></li>
+                                        <li><a href="${nextUrl}">Tiếp <i class="fas fa-chevron-right"></i></a></li>
                                     </c:when>
                                     <c:otherwise>
-                                        <li class="disabled"><span>Next <i class="fas fa-chevron-right"></i></span></li>
+                                        <li class="disabled"><span>Tiếp <i class="fas fa-chevron-right"></i></span></li>
                                     </c:otherwise>
                                 </c:choose>
                             </ul>
@@ -609,8 +626,17 @@
                     </c:if>
 
                 </c:when>
+                <%-- KHI CHƯA CÓ DỮ LIỆU HOẶC CHƯA CHỌN NGÀY --%>
                 <c:otherwise>
-                    <p>No bookings were cancelled or marked as no-show during the selected time period.</p>
+                    <c:if test="${empty requestScope.startDateParam}">
+                        <div style="background-color: #ffcccc; color: #cc0000; padding: 20px; border-radius: 5px; text-align: center; margin-top: 20px;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>Vui lòng chọn Ngày Bắt đầu và Ngày Kết thúc</strong> để xem dữ liệu hủy đặt bàn.
+                        </div>
+                    </c:if>
+                    <c:if test="${not empty requestScope.startDateParam and empty requestScope.cancellationData}">
+                        <p>Không có đặt bàn nào bị hủy hoặc đánh dấu là không đến trong khoảng thời gian đã chọn.</p>
+                    </c:if>
                 </c:otherwise>
             </c:choose>
 
@@ -622,21 +648,21 @@
 <div id="filterModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Report Filters (Date)</h3>
+            <h3>Bộ Lọc Báo Cáo (Ngày)</h3>
             <span class="close" onclick="closeFilterModal()">&times;</span>
         </div>
         <form id="modalForm" class="modal-form">
             <div class="filter-item">
-                <label for="modalStartDate">From Date</label>
+                <label for="modalStartDate">Từ Ngày</label>
                 <input type="date" id="modalStartDate" name="startDate" value="${requestScope.startDateParam}">
             </div>
             <div class="filter-item">
-                <label for="modalEndDate">To Date</label>
+                <label for="modalEndDate">Đến Ngày</label>
                 <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}">
             </div>
 
-            <button type="button" class="btn-apply" onclick="submitFilterForm()"><i class="fas fa-check"></i> Apply
-                Filters
+            <button type="button" class="btn-apply" onclick="submitFilterForm()"><i class="fas fa-check"></i> Áp Dụng
+                Bộ Lọc
             </button>
         </form>
     </div>
@@ -645,8 +671,8 @@
     const START_OF_BUSINESS_DATE = "2025-01-01";
     const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
-    // Cần set cứng pageSize = 5 trong JS submit
-    const TARGET_PAGE_SIZE = 5;
+    // SỬA: Lấy giá trị pageSize từ JSTL (đã set là 5)
+    const TARGET_PAGE_SIZE = "${pageSize}";
 
     function openFilterModal() {
         const modalStartDateInput = document.getElementById('modalStartDate');
@@ -661,7 +687,9 @@
             modalStartDateInput.value = START_OF_BUSINESS_DATE;
         }
 
-        if (modalEndDateInput.value === '' || modalEndDateInput.value > CURRENT_DATE) {
+        // SỬA: Sửa lại logic: nếu chưa có ngày cuối (lần đầu tải trang)
+        // thì không set, nếu có mà lớn hơn ngày hiện tại thì set về hôm nay
+        if (modalEndDateInput.value > CURRENT_DATE) {
             modalEndDateInput.value = CURRENT_DATE;
         }
 
@@ -678,11 +706,11 @@
 
         // --- Bổ sung xác thực phía Client ---
         if (!startDate) {
-            alert("Lỗi: Vui lòng chọn Ngày Bắt đầu (From Date) cho báo cáo.");
+            alert("Lỗi: Vui lòng chọn Ngày Bắt đầu (Từ Ngày) cho báo cáo.");
             return; // Ngăn không cho form gửi đi
         }
         if (!endDate) {
-            alert("Lỗi: Vui lòng chọn Ngày Kết thúc (To Date) cho báo cáo.");
+            alert("Lỗi: Vui lòng chọn Ngày Kết thúc (Đến Ngày) cho báo cáo.");
             return; // Ngăn không cho form gửi đi
         }
 
@@ -697,7 +725,7 @@
         }
         // --- Kết thúc xác thực ---
 
-        // Luôn reset về trang 1 khi thay đổi bộ lọc ngày, và set cứng pageSize = 5
+        // SỬA: Sử dụng biến TARGET_PAGE_SIZE
         let url = 'cancel-report?startDate=' + startDate + '&endDate=' + endDate + '&page=1' + '&pageSize=' + TARGET_PAGE_SIZE;
 
         window.location.href = url;

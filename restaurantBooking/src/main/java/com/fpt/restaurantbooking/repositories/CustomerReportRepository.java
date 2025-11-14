@@ -21,6 +21,7 @@ public class CustomerReportRepository {
 
 
     public int getTotalActiveCustomerCount() throws SQLException {
+        // (Hàm này giữ nguyên code cũ)
         String query = "SELECT COUNT(user_id) FROM Users WHERE role_id = 3;";
         try (Connection con = db.getConnection();
              PreparedStatement stm = con.prepareStatement(query)) {
@@ -38,6 +39,7 @@ public class CustomerReportRepository {
 
 
     public long getGrandTotalSpending(String startDate, String endDate) throws SQLException {
+        // (Hàm này giữ nguyên code cũ)
         String query = """
             SELECT IFNULL(SUM(R.total_amount), 0) AS grand_total
             FROM Reservations R
@@ -67,13 +69,15 @@ public class CustomerReportRepository {
 
 
     public int getNewCustomerCount(String startDate, String endDate) throws SQLException {
+        // (Logic này đã được sửa để chỉ lấy từ Users)
         int count = 0;
+
         String query = """
             SELECT COUNT(user_id)
             FROM Users
             WHERE role_id = 3
-            AND DATE(created_at) >= ?
-            AND DATE(created_at) <= ?;
+            AND DATE(CONVERT_TZ(created_at, '+00:00', '+07:00')) >= ?
+            AND DATE(CONVERT_TZ(created_at, '+00:00', '+07:00')) <= ?;
         """;
 
         try (Connection con = db.getConnection();
@@ -91,11 +95,12 @@ public class CustomerReportRepository {
             e.printStackTrace();
             throw e;
         }
-        return count;
+        return 0;
     }
 
 
     public List<Map<String, Object>> getCustomerOverviewData(String startDate, String endDate, int limit, int offset) throws SQLException {
+        // (Hàm này giữ nguyên code cũ)
         List<Map<String, Object>> customerList = new ArrayList<>();
         String query = """
             SELECT
@@ -130,8 +135,8 @@ public class CustomerReportRepository {
 
             stm.setString(1, startDate);
             stm.setString(2, endDate);
-            stm.setInt(3, limit);     // Tham số mới
-            stm.setInt(4, offset);    // Tham số mới
+            stm.setInt(3, limit);
+            stm.setInt(4, offset);
 
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
@@ -156,4 +161,78 @@ public class CustomerReportRepository {
         }
         return customerList;
     }
+
+    // (Các hàm chi tiết khác giữ nguyên)
+    public Map<String, Object> getCustomerDetails(int userId) throws SQLException {
+        Map<String, Object> customerDetail = new HashMap<>();
+        String query = """
+            SELECT full_name, email, phone_number, status, gender, date_of_birth 
+            FROM Users WHERE user_id = ? AND role_id = 3
+        """;
+        try (Connection con = db.getConnection();
+             PreparedStatement stm = con.prepareStatement(query)) {
+            stm.setInt(1, userId);
+            try (ResultSet rs = stm.executeQuery()) {
+                if (rs.next()) {
+                    customerDetail.put("fullName", rs.getString("full_name"));
+                    customerDetail.put("email", rs.getString("email"));
+                    customerDetail.put("phoneNumber", rs.getString("phone_number"));
+                    customerDetail.put("status", rs.getString("status"));
+                    customerDetail.put("gender", rs.getString("gender"));
+                    customerDetail.put("dob", rs.getDate("date_of_birth"));
+                    return customerDetail;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return null;
+    }
+
+    public List<Map<String, Object>> getReservationsForCustomer(int userId, String startDate, String endDate) throws SQLException {
+        List<Map<String, Object>> reservationList = new ArrayList<>();
+        String query = """
+            SELECT
+                reservation_id,
+                reservation_date,
+                reservation_time,
+                status,
+                total_amount
+            FROM
+                Reservations
+            WHERE
+                user_id = ?
+                AND reservation_date >= ?
+                AND reservation_date <= ?
+            ORDER BY
+                reservation_date DESC, reservation_time DESC;
+        """;
+
+        try (Connection con = db.getConnection();
+             PreparedStatement stm = con.prepareStatement(query)) {
+
+            stm.setInt(1, userId);
+            stm.setString(2, startDate);
+            stm.setString(3, endDate);
+
+            try (ResultSet rs = stm.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("reservation_id", rs.getInt("reservation_id"));
+                    row.put("reservation_date", rs.getDate("reservation_date"));
+                    row.put("reservation_time", rs.getTime("reservation_time"));
+                    row.put("status", rs.getString("status"));
+                    row.put("total_amount", rs.getBigDecimal("total_amount"));
+                    reservationList.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return reservationList;
+    }
+
+    // XÓA: Hàm getOrderItemsForReservation đã được loại bỏ khỏi file này.
 }

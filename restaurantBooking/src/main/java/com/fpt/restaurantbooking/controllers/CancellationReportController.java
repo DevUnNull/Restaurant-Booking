@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collections; // MỚI: Để tạo danh sách rỗng khi không có ngày
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +18,8 @@ import java.util.Map;
 public class CancellationReportController extends HttpServlet {
 
     private final CancellationReportRepository reportRepository = new CancellationReportRepository();
-    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 1, 1);
-    private static final int DEFAULT_PAGE_SIZE = 10; // Số lượng bản ghi mặc định trên mỗi trang
+    //    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 1, 1);
+    private static final int DEFAULT_PAGE_SIZE = 7;
 
     private LocalDate safeParseDate(String dateStr, LocalDate defaultValue) {
         if (dateStr == null || dateStr.isEmpty()) {
@@ -57,7 +58,6 @@ public class CancellationReportController extends HttpServlet {
         int currentPage = safeParseInt(request.getParameter("page"), 1);
         int pageSize = safeParseInt(request.getParameter("pageSize"), DEFAULT_PAGE_SIZE);
 
-        // Đảm bảo trang và kích thước trang hợp lệ
         if (currentPage < 1) currentPage = 1;
         if (pageSize < 1) pageSize = DEFAULT_PAGE_SIZE;
 
@@ -69,22 +69,38 @@ public class CancellationReportController extends HttpServlet {
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
         String warningMessage = null;
+        String errorMessage = null;
+        List<Map<String, Object>> cancellationData = null;
 
+        // ********** MỚI: KIỂM TRA BẮT BUỘC NGÀY **********
+        if (startDateParam == null || startDateParam.isEmpty() || endDateParam == null || endDateParam.isEmpty()) {
+            // Thiết lập các giá trị cần thiết cho JSP hiển thị trống (không có data)
+            request.setAttribute("cancellationData", Collections.emptyList());
+            request.setAttribute("totalRecords", 0);
+            request.setAttribute("totalPages", 0);
+            request.setAttribute("currentPage", 1);
+
+            // Chuyển tiếp ngay lập tức để JSP yêu cầu chọn ngày
+            request.getRequestDispatcher("/WEB-INF/report/cancel-report.jsp").forward(request, response);
+            return;
+        }
+        // **************************************************
+
+
+        // --- CHỈ CHẠY TIẾP NẾU CÓ ĐỦ NGÀY HỢP LỆ ---
         LocalDate currentDate = LocalDate.now();
+        // Giả định một ngày bắt đầu kinh doanh an toàn nếu cần validation chi tiết hơn
+        LocalDate START_OF_BUSINESS = LocalDate.of(2025, 1, 1);
+
         LocalDate endDate = safeParseDate(endDateParam, currentDate);
         LocalDate startDate = safeParseDate(startDateParam, START_OF_BUSINESS);
+
 
         // ... (Logic Validation Ngày giữ nguyên)
         if (endDate.isAfter(currentDate)) {
             String futureWarning = "Warning: The end date (" + endDate.toString() + ") cannot exceed the current date. The system has adjusted the end date to **" + currentDate.toString() + "**.";
             if (warningMessage != null) warningMessage += "<br/>" + futureWarning; else warningMessage = futureWarning;
             endDate = currentDate;
-        }
-
-        if (startDate.isBefore(START_OF_BUSINESS)) {
-            String pastWarning = "Warning: The start date (" + startDate.toString() + ") was adjusted to the business start date (" + START_OF_BUSINESS.toString() + ").";
-            if (warningMessage != null) warningMessage += "<br/>" + pastWarning; else warningMessage = pastWarning;
-            startDate = START_OF_BUSINESS;
         }
 
         if (startDate.isAfter(endDate)) {
@@ -104,8 +120,6 @@ public class CancellationReportController extends HttpServlet {
         startDateParam = startDate.toString();
         endDateParam = endDate.toString();
 
-        String errorMessage = null;
-        List<Map<String, Object>> cancellationData = null;
 
         try {
             // 3. Lấy Tổng số bản ghi (Cần thiết cho phân trang)

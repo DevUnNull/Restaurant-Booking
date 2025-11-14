@@ -1,7 +1,7 @@
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.repositories.EmployeeReportRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+// [ĐÃ XÓA] import com.fasterxml.jackson.databind.ObjectMapper; -> Không dùng nữa
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,45 +10,30 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.math.BigDecimal;
-import java.time.temporal.WeekFields;
 import java.util.Locale;
+import java.util.Map;
 
 @WebServlet(name="EmployeeReportController", urlPatterns={"/staff-report"})
 public class EmployeeReportController extends HttpServlet {
 
     private final EmployeeReportRepository reportRepository = new EmployeeReportRepository();
-    private static final LocalDate START_OF_BUSINESS = LocalDate.of(2025, 9, 1);
 
-    // Khai báo hằng số phân trang
-    private final int PAGE_SIZE = 5;
-
-    private LocalDate safeParseDate(String dateStr, LocalDate defaultValue) {
-        if (dateStr == null || dateStr.isEmpty()) {
-            return defaultValue;
-        }
-        try {
-            return LocalDate.parse(dateStr);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+    private LocalDate safeParseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        try { return LocalDate.parse(dateStr); } catch (Exception e) { return null; }
     }
 
-    private List<Map<String, Object>> zeroFillTimeTrend(
-            List<Map<String, Object>> rawData,
-            LocalDate startDate,
-            LocalDate endDate,
-            String unit) {
-        // ... (Code không đổi)
+    // Hàm lấp đầy ngày trống (Zero-fill)
+    private List<Map<String, Object>> zeroFillTimeTrend(List<Map<String, Object>> rawData, LocalDate startDate, LocalDate endDate, String unit) {
         Map<String, Map<String, Object>> dataMap = new HashMap<>();
         for (Map<String, Object> item : rawData) {
             dataMap.put((String) item.get("label"), item);
@@ -57,313 +42,160 @@ public class EmployeeReportController extends HttpServlet {
         List<Map<String, Object>> filledData = new ArrayList<>();
         LocalDate current = startDate;
         WeekFields weekFields = WeekFields.of(Locale.getDefault());
-        if ("week".equals(unit)) {
-            weekFields = WeekFields.of(DayOfWeek.MONDAY, 4);
-        }
+        if ("week".equals(unit)) weekFields = WeekFields.of(DayOfWeek.MONDAY, 4);
 
-        while (!current.isAfter(endDate)) {
+        int maxIterations = (int) ChronoUnit.DAYS.between(startDate, endDate) + 730;
+        int count = 0;
+
+        while (!current.isAfter(endDate) && count < maxIterations) {
             String label;
+            LocalDate labelDate = current;
 
             if ("month".equals(unit)) {
                 label = current.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+                labelDate = current.withDayOfMonth(1);
             } else if ("week".equals(unit)) {
-                int weekOfYear = current.get(weekFields.weekOfWeekBasedYear());
+                int week = current.get(weekFields.weekOfWeekBasedYear());
                 int year = current.get(weekFields.weekBasedYear());
-                label = String.format("%d-W%02d", year, weekOfYear);
+                label = String.format("%d-W%02d", year, week);
+                labelDate = current.with(weekFields.dayOfWeek(), 1);
             } else {
                 label = current.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             }
 
-            Map<String, Object> existingData = dataMap.get(label);
-
-            if (existingData != null) {
-                filledData.add(existingData);
+            if (dataMap.containsKey(label)) {
+                filledData.add(dataMap.get(label));
             } else {
                 Map<String, Object> zeroRow = new HashMap<>();
                 zeroRow.put("label", label);
                 zeroRow.put("totalServes", 0);
-                zeroRow.put("totalWorkingHours", 0.0f); // Sử dụng 0.0f (Float) cho biểu đồ
+                zeroRow.put("totalWorkingHours", 0.0f);
                 filledData.add(zeroRow);
+                // Để tránh lặp vô tận nếu logic unit sai, ta put vào map để check
+                dataMap.put(label, zeroRow);
             }
 
-            if ("month".equals(unit)) {
-                current = current.plusMonths(1).withDayOfMonth(1);
-            } else if ("week".equals(unit)) {
-                current = current.with(weekFields.dayOfWeek(), 1).plusWeeks(1);
-            } else {
-                current = current.plusDays(1);
-            }
-
-            if ("month".equals(unit) && current.isAfter(endDate.plusMonths(1).withDayOfMonth(1))) break;
-            if ("week".equals(unit) && current.isAfter(endDate.plusWeeks(1))) break;
-            if (ChronoUnit.DAYS.between(startDate, current) > ChronoUnit.DAYS.between(startDate, endDate) + 365) break;
+            // Tăng thời gian
+            if ("month".equals(unit)) current = labelDate.plusMonths(1);
+            else if ("week".equals(unit)) current = labelDate.plusWeeks(1);
+            else current = current.plusDays(1);
+            count++;
         }
-
         return filledData;
     }
-
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession(true);
-        response.setContentType("text/html;charset=UTF-8");
 
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
         String employeeIdParam = request.getParameter("employeeId");
-        String chartUnitParam = request.getParameter("chartUnit");
         String searchStaffNameParam = request.getParameter("searchStaffName");
 
-        // --- LOGIC MỚI: Bỏ tự chọn ngày mặc định ---
-        // Nếu không có tham số ngày nào, không gán giá trị và không tính toán
-        if (startDateParam == null || startDateParam.isEmpty() || endDateParam == null || endDateParam.isEmpty()) {
+        // Mặc định chartUnit
+        String chartUnitParam = request.getParameter("chartUnit");
+        if (chartUnitParam == null || chartUnitParam.isEmpty()) chartUnitParam = "day";
+        request.setAttribute("chartUnitParam", chartUnitParam);
 
-            // Nếu có tham số tìm kiếm tên nhưng không có ngày, vẫn cho phép tìm kiếm
-            if (searchStaffNameParam == null || searchStaffNameParam.isEmpty()) {
-                request.setAttribute("startDateParam", "");
-                request.setAttribute("endDateParam", "");
-                // Gán cảnh báo yêu cầu nhập ngày, chỉ khi không có tìm kiếm tên
-                session.setAttribute("sessionWarningMessage",
-                        "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.");
+        LocalDate startDate = safeParseDate(startDateParam);
+        LocalDate endDate = safeParseDate(endDateParam);
 
-                request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
-                return; // Dừng xử lý nếu thiếu ngày và không tìm kiếm tên
-            }
-        }
-
-        LocalDate currentDate = LocalDate.now();
-
-        LocalDate endDate = null;
-        LocalDate startDate = null;
-
-        // Chỉ parse ngày nếu tham số có giá trị
-        if (startDateParam != null && !startDateParam.isEmpty()) {
-            startDate = safeParseDate(startDateParam, null);
-        }
-        if (endDateParam != null && !endDateParam.isEmpty()) {
-            endDate = safeParseDate(endDateParam, null);
-        }
-
-        // Gán lại các param String đã có để truyền lại cho JSP
-        request.setAttribute("startDateParam", startDateParam);
-        request.setAttribute("endDateParam", endDateParam);
-
-        // Nếu ngày bị null sau khi parse (do định dạng sai), dừng và báo lỗi (hoặc sẽ bị xử lý ở logic tiếp theo)
+        // Nếu chưa có ngày -> Trả về trang rỗng ngay
         if (startDate == null || endDate == null) {
-            // Trường hợp này chỉ xảy ra khi ngày được nhập nhưng định dạng sai (trường hợp hiếm)
-            // Giữ lại logic cảnh báo để hiển thị message
-            request.setAttribute("startDateParam", startDateParam);
-            request.setAttribute("endDateParam", endDateParam);
+            request.setAttribute("isDetailMode", false);
             request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
             return;
         }
 
-        // --- Bắt đầu Logic Xử lý Ngày (chỉ chạy khi cả startDate và endDate đã được định nghĩa) ---
-        String currentWarningMessage = null;
-        String currentErrorMessage = null;
-
-
-        if (startDate.isBefore(START_OF_BUSINESS)) {
-            currentWarningMessage = ": The start date (" + startDate.toString() + ") has been adjusted to the opening date (" + START_OF_BUSINESS.toString() + ").";
-            startDate = START_OF_BUSINESS;
-        }
-
         if (startDate.isAfter(endDate)) {
-            LocalDate originalStartDate = startDate;
-            LocalDate originalEndDate = endDate;
-
-            LocalDate tempDate = startDate;
-            startDate = endDate;
-            endDate = tempDate;
-
-            String swapMessage = ": The start date (" + originalStartDate.toString() + ") is after the end date (" + originalEndDate.toString() + "). The system has automatically **swapped** the two dates (From " + startDate.toString() + " to " + endDate.toString() + ") to display valid data.";
-
-            if (currentWarningMessage != null) {
-                currentWarningMessage += "<br/>" + swapMessage;
-            } else {
-                currentWarningMessage = swapMessage;
-            }
+            LocalDate temp = startDate; startDate = endDate; endDate = temp;
+            session.setAttribute("sessionWarningMessage", "Ngày bắt đầu lớn hơn ngày kết thúc. Đã tự động đảo lại.");
         }
 
-        if (endDate.isAfter(currentDate)) {
-            String futureWarning = String.format(
-                    ": The end date you selected (%s) is in the future. " +
-                            "The metrics are calculated based on Log data up to today (%s).",
-                    endDate.toString(), currentDate.toString()
-            );
+        request.setAttribute("startDateParam", startDate.toString());
+        request.setAttribute("endDateParam", endDate.toString());
 
-            if (currentWarningMessage != null) {
-                currentWarningMessage += "<br/>" + futureWarning;
-            } else {
-                currentWarningMessage = futureWarning;
-            }
-        }
-
-        if (currentWarningMessage != null) {
-            session.setAttribute("sessionWarningMessage", currentWarningMessage);
-        } else {
-            session.removeAttribute("sessionWarningMessage");
-        }
-
-        // Cập nhật lại param string sau khi có thể bị hoán đổi/điều chỉnh
-        startDateParam = startDate.toString();
-        endDateParam = endDate.toString();
-        request.setAttribute("startDateParam", startDateParam);
-        request.setAttribute("endDateParam", endDateParam);
-
-
-        // Xử lý tham số phân trang
+        int pageSize = 7;
         int currentPage = 1;
-        int totalRecords = 0;
-        int totalPages = 0;
-        String pageParam = request.getParameter("page");
-        if (pageParam != null && !pageParam.isEmpty()) {
-            try {
-                currentPage = Math.max(1, Integer.parseInt(pageParam));
-            } catch (NumberFormatException e) {
-                currentPage = 1;
-            }
-        }
-        int offset = (currentPage - 1) * PAGE_SIZE;
-
-        if (chartUnitParam == null || chartUnitParam.isEmpty()) {
-            chartUnitParam = "month";
-        }
-
-        List<Map<String, Object>> employeeData = null;
-        List<Map<String, Object>> employeeTimeTrend = null;
-        Map<String, Object> selectedEmployeeDetail = null;
-
-        String employeeTimeTrendJson = null;
+        try { currentPage = Integer.parseInt(request.getParameter("page")); } catch (NumberFormatException e) {}
+        int offset = (currentPage - 1) * pageSize;
 
         try {
-            if (searchStaffNameParam != null && !searchStaffNameParam.isEmpty()) {
-                Integer foundEmployeeId = reportRepository.findEmployeeIdByName(searchStaffNameParam);
-
-                if (foundEmployeeId != null) {
-                    employeeIdParam = String.valueOf(foundEmployeeId);
+            // Xử lý tìm kiếm tên
+            if (searchStaffNameParam != null && !searchStaffNameParam.trim().isEmpty()) {
+                Integer foundId = reportRepository.findEmployeeIdByName(searchStaffNameParam);
+                if (foundId != null) {
+                    employeeIdParam = String.valueOf(foundId);
                 } else {
-                    currentErrorMessage = ": Employee with name containing '" + searchStaffNameParam + "' not found or is not a staff member (role_id != 2). Displaying Overview.";
+                    session.setAttribute("sessionErrorMessage", "Không tìm thấy nhân viên: " + searchStaffNameParam);
                     employeeIdParam = null;
                 }
             }
 
-            if (employeeIdParam == null || employeeIdParam.isEmpty()) {
-                // Chế độ Tổng quan (có phân trang)
+            // --- 1. CHẾ ĐỘ CHI TIẾT ---
+            if (employeeIdParam != null && !employeeIdParam.isEmpty()) {
+                int empId = Integer.parseInt(employeeIdParam);
+                Map<String, Object> detail = reportRepository.getEmployeeDetailById(empId);
 
-                // 1. Lấy tổng số bản ghi và tính tổng số trang
-                totalRecords = reportRepository.getTotalActiveEmployees();
-                totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
+                if (detail != null) {
+                    String nextDay = endDate.plusDays(1).toString();
+                    List<Map<String, Object>> trendData = reportRepository.getEmployeeTimeTrend(
+                            empId, startDate.toString(), nextDay, chartUnitParam);
 
-                // Điều chỉnh trang hiện tại và offset
-                if (currentPage > totalPages && totalPages > 0) {
-                    currentPage = totalPages;
-                    offset = (currentPage - 1) * PAGE_SIZE;
-                } else if (totalPages == 0) {
-                    currentPage = 1;
-                    offset = 0;
-                }
-
-                // 2. Lấy dữ liệu phân trang
-                employeeData = reportRepository.getEmployeeOverviewData(
-                        startDateParam,
-                        endDateParam,
-                        currentDate.toString(),
-                        offset,
-                        PAGE_SIZE
-                );
-
-                if (employeeData != null) {
-                    for (Map<String, Object> item : employeeData) {
-
-                        BigDecimal servePerShiftRate = (BigDecimal) item.getOrDefault("servePerShiftRate", BigDecimal.ZERO);
-                        item.put("servePerShiftRate", servePerShiftRate.floatValue());
-                        item.put("totalServes", (Integer) item.getOrDefault("totalServes", 0));
-                        item.put("totalShiftDays", (Integer) item.getOrDefault("totalShiftDays", 0));
-
-                        BigDecimal totalWorkingHours = (BigDecimal) item.getOrDefault("totalWorkingHours", BigDecimal.ZERO);
-                        item.put("totalWorkingHours", totalWorkingHours);
-                    }
-                }
-
-            } else {
-                // Chế độ Chi tiết (không phân trang)
-                int employeeId = Integer.parseInt(employeeIdParam);
-
-                selectedEmployeeDetail = reportRepository.getEmployeeDetailById(employeeId);
-
-                if (selectedEmployeeDetail != null) {
-
-                    LocalDate parsedEnd = LocalDate.parse(endDateParam);
-
-                    String nextDayParam = parsedEnd.plusDays(1).toString();
-
-                    employeeTimeTrend = reportRepository.getEmployeeTimeTrend(employeeId, startDateParam, nextDayParam, chartUnitParam);
-
-                    if (employeeTimeTrend != null) {
-
-                        LocalDate parsedStart = LocalDate.parse(startDateParam);
-
-                        for(Map<String, Object> item : employeeTimeTrend) {
-                            Double hours = (Double) item.getOrDefault("totalWorkingHours", 0.0);
-                            item.put("totalWorkingHours", hours.floatValue());
+                    if (trendData != null) {
+                        // Ép kiểu float để tránh lỗi JS
+                        for(Map<String, Object> item : trendData) {
+                            Object val = item.get("totalWorkingHours");
+                            if (val instanceof Double) item.put("totalWorkingHours", ((Double) val).floatValue());
                         }
+                        // Lấp đầy dữ liệu
+                        trendData = zeroFillTimeTrend(trendData, startDate, endDate, chartUnitParam);
 
-                        employeeTimeTrend = zeroFillTimeTrend(employeeTimeTrend, parsedStart, parsedEnd, chartUnitParam);
-
-                        if (!employeeTimeTrend.isEmpty()) {
-                            ObjectMapper mapper = new ObjectMapper();
-                            employeeTimeTrendJson = mapper.writeValueAsString(employeeTimeTrend);
-                        }
+                        // [THAY ĐỔI Ở ĐÂY: Gửi thẳng List sang JSP, không convert JSON nữa]
+                        request.setAttribute("employeeTimeTrend", trendData);
                     }
-
-                    request.setAttribute("selectedEmployeeDetail", selectedEmployeeDetail);
+                    request.setAttribute("selectedEmployeeDetail", detail);
+                    request.setAttribute("selectedEmployeeId", empId);
+                    request.setAttribute("isDetailMode", true);
                 } else {
-                    currentErrorMessage = ": Employee with ID " + employeeId + " not found or is not a staff member (role_id != 2).";
+                    request.setAttribute("isDetailMode", false);
+                }
+            }
+            // --- 2. CHẾ ĐỘ TỔNG QUAN ---
+            else {
+                int totalRecords = reportRepository.getTotalFilteredEmployees(startDate.toString(), endDate.toString());
+                int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+                List<Map<String, Object>> list = reportRepository.getEmployeeOverviewData(
+                        startDate.toString(), endDate.toString(), null, offset, pageSize);
+
+                // Null check
+                if(list != null) {
+                    for(Map<String, Object> i : list) {
+                        if(i.get("totalServes") == null) i.put("totalServes", 0);
+                        if(i.get("totalShiftDays") == null) i.put("totalShiftDays", 0);
+                    }
                 }
 
-                request.setAttribute("selectedEmployeeId", employeeId);
+                request.setAttribute("employeeData", list);
+                request.setAttribute("currentPage", currentPage);
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("isDetailMode", false);
             }
 
-        } catch (NumberFormatException e) {
-            currentErrorMessage = ": Invalid employee ID format.";
-            e.printStackTrace();
-        } catch (SQLException e) {
-            currentErrorMessage = "Error querying the database: " + e.getMessage();
-            e.printStackTrace();
         } catch (Exception e) {
-            currentErrorMessage = "An unknown error occurred: " + e.getMessage();
             e.printStackTrace();
+            session.setAttribute("sessionErrorMessage", "Lỗi hệ thống: " + e.getMessage());
         }
 
-        if (currentErrorMessage != null) {
-            session.setAttribute("sessionErrorMessage", currentErrorMessage);
-        } else {
-            session.removeAttribute("sessionErrorMessage");
-        }
-
-
-        request.setAttribute("chartUnitParam", chartUnitParam);
-        request.setAttribute("employeeData", employeeData);
-        request.setAttribute("employeeTimeTrend", employeeTimeTrend);
-        request.setAttribute("employeeTimeTrendJson", employeeTimeTrendJson);
         request.setAttribute("searchStaffNameParam", searchStaffNameParam);
-
-        // Thuộc tính phân trang
-        request.setAttribute("currentPage", currentPage);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("totalRecords", totalRecords);
-        request.setAttribute("pageSize", PAGE_SIZE);
-
-        request.setAttribute("isDetailMode", employeeIdParam != null && !employeeIdParam.isEmpty());
-
         request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        processRequest(req, resp);
     }
 }
