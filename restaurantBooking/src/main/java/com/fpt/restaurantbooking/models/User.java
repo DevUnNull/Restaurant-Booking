@@ -1,6 +1,7 @@
 package com.fpt.restaurantbooking.models;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * User entity representing customers and staff
@@ -151,7 +152,13 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
+    public String getCreatedAtString() {
+        return getCreatedAt() != null ? getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "";
+    }
 
+    public String getUpdatedAtString() {
+        return getUpdatedAt() != null ? getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "";
+    }
 
     public boolean getIsActive() {
         return isActive();
