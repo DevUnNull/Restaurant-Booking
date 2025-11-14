@@ -68,10 +68,6 @@
   <!-- Banner -->
   <div class="banner">
     <div class="title">Quản lý khung thời gian</div>
-    <div class="actions">
-      <button class="btn">Khai Vị</button>
-      <button class="btn">+ Thêm mục mới</button>
-    </div>
   </div>
 
   <!-- NEW BODY: list các slot dưới dạng card -->

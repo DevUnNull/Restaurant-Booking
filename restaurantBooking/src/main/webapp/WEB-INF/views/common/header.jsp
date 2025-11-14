@@ -16,7 +16,7 @@
             <li><a href="${pageContext.request.contextPath}/findTable">Đặt Bàn</a></li>
             <li><a href="${pageContext.request.contextPath}/Blog"> Blog nhà Hàng</a></li>
             <c:if test="${sessionScope.userRole ==3}">
-                <li>   <a href="${pageContext.request.contextPath}/TimeTable"></i> Quản lý khung giờ</a></li>
+                <li>   <a href="${pageContext.request.contextPath}/TimeTable">Xem khung giờ</a></li>
             </c:if>
 
             <%-- Booking Management Dropdown (Role 2) --%>

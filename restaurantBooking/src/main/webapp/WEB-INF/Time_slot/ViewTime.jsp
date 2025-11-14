@@ -304,7 +304,7 @@
 
                 if (cellIndex >= startIndex && day <= lastDay) {
                     const link = document.createElement("a");
-                    link.href = "Time?day=" + day + "&month=" + month + "&year=" + year;
+                    link.href = "Time_Table?day=" + day + "&month=" + month + "&year=" + year;
                     link.style.textDecoration = "none";
                     link.style.color = "inherit"; // giữ nguyên màu
 
