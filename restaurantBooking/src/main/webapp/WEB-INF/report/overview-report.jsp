@@ -1,37 +1,35 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<jsp:useBean id="today" class="java.util.Date" scope="page" />
-
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Đặt Bàn Đã Hủy</title>
+    <title>Báo Cáo Thống Kê Tổng Quan</title>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         :root {
-            /* Biến Màu Sắc */
-            --main-color: #D32F2F; /* Đỏ - Nút Chính, Thanh Điều Hướng Trên Cùng, Viền Tiêu đề */
-            --light-red: #FFCDD2; /* Đỏ Nhạt - HR, Hover Bảng, Viền Biểu đồ */
-            --dark-red: #B71C1C; /* Đỏ Đậm - Tiêu đề, Văn bản Mạnh */
-            --menu-bg: #8B0000; /* Nền Menu - Thanh Bên */
-            --menu-hover: #A52A2A; /* Hover Menu */
+            --main-color: #D32F2F;
+            --light-red: #FFCDD2;
+            --dark-red: #B71C1C;
+            --menu-bg: #8B0000;
+            --menu-hover: #A52A2A;
             --text-light: #f8f8f8;
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3; /* Xanh Dương */
-            --revenue-color: #4CAF50; /* Xanh Lá */
-            --cancellation-color: #E91E63; /* Hồng/Đỏ - Đánh dấu Hủy */
-            --rate-color: #FF9800; /* Cam/Cảnh báo */
-            --staff-chart-color: #00897B; /* Xanh Lục Bảo */
+            --booking-color: #2196F3;
+            --revenue-color: #4CAF50;
+            --cancellation-color: #E91E63;
+            --rate-color: #FF9800;
+            --staff-chart-color: #00897B;
             --staff-border-color: #00897B;
-            --customer-color: #1976D2; /* Xanh Dương Khách hàng */
+            --customer-color: #1976D2;
         }
 
         body {
@@ -61,24 +59,16 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             z-index: 1000;
         }
-
         .top-nav .restaurant-group {
             display: flex;
             align-items: center;
             gap: 15px;
             flex-shrink: 0;
         }
-
-        /*.top-nav .restaurant-name {*/
-        /* font-size: 1.2em;*/
-        /* font-weight: bold;*/
-        /* color: white;*/
-        /* white-space: nowrap;*/
-        /*}*/
-
+        /*missingDateAlert*/
         .home-button {
             background-color: var(--main-color);
             color: white;
@@ -90,15 +80,13 @@
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-
         .home-button:hover {
             background-color: var(--dark-red);
             color: white;
             border-color: var(--dark-red);
         }
-
         .top-nav .user-info {
             display: flex;
             align-items: center;
@@ -116,16 +104,15 @@
             background-color: var(--menu-bg);
             color: var(--text-light);
             padding-top: 10px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             z-index: 999;
+            transition: transform 0.3s ease;
         }
-
         .sidebar ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-
         .sidebar li a {
             display: block;
             padding: 15px 20px;
@@ -134,7 +121,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             transition: background-color 0.3s;
         }
-
         .sidebar li a:hover, .sidebar li a.active {
             background-color: var(--menu-hover);
             color: white;
@@ -155,9 +141,14 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
             width: 100%;
-            max-width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
             box-sizing: border-box;
+        }
+
+        .fixed-width-wrapper {
+            width: 100%;
+            overflow: hidden;
         }
 
         .filter-section {
@@ -166,23 +157,27 @@
             border: 1px solid #eee;
             border-radius: 6px;
             margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
+        .filter-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
         .filter-item {
             display: flex;
             flex-direction: column;
             min-width: 120px;
         }
-
         .filter-item label {
             font-size: 0.9em;
             color: #555;
             margin-bottom: 5px;
             font-weight: bold;
         }
-
-        .filter-item input[type="date"] {
+        .filter-item input[type="date"], .filter-item select {
             padding: 8px 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -199,21 +194,144 @@
             cursor: pointer;
             font-weight: bold;
             transition: background-color 0.3s;
+            white-space: nowrap;
         }
-
         .btn-apply:hover {
             background-color: var(--dark-red);
+        }
+
+        .chart-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chart-toggle-group button {
+            padding: 5px 10px;
+            border: 1px solid var(--main-color);
+            background-color: white;
+            color: var(--main-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chart-toggle-group button:first-of-type {
+            border-radius: 4px 0 0 4px;
+        }
+        .chart-toggle-group button:last-of-type {
+            border-radius: 0 4px 4px 0;
+        }
+        .chart-toggle-group button.active {
+            background-color: var(--main-color);
+            color: white;
+        }
+
+        .chart-toggle-group a.btn-toggle-unit {
+            padding: 5px 10px;
+            border: 1px solid var(--main-color);
+            background-color: white;
+            color: var(--main-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+        .chart-toggle-group a.btn-toggle-unit:first-of-type {
+            border-radius: 4px 0 0 4px;
+        }
+        .chart-toggle-group a.btn-toggle-unit:last-of-type {
+            border-radius: 0 4px 4px 0;
+        }
+        .chart-toggle-group a.btn-toggle-unit.active {
+            background-color: var(--main-color);
+            color: white;
+        }
+
+        .checkbox-option label {
+            font-size: 0.9em;
+            color: #555;
+            margin-left: 5px;
+        }
+
+        .summary-cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: flex-start;
+        }
+
+        .summary-card {
+            flex: 1;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s;
+            min-width: 150px;
+            max-width: 300px;
+            overflow: hidden;
+        }
+
+        .summary-card-value {
+            font-size: 1.8em;
+            color: var(--dark-red);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow-x: auto;
+            max-width: 100%;
+            padding-right: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .summary-card-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+            color: var(--main-color);
+        }
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+        .summary-card-title {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .cancellation {
+            background-color: #fce4ec;
+            border-left: 5px solid var(--cancellation-color);
+        }
+        .revenue {
+            background-color: #e8f5e9;
+            border-left: 5px solid var(--revenue-color);
+        }
+        .booking {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--booking-color);
+        }
+        .rate {
+            background-color: #fff3e0;
+            border-left: 5px solid var(--rate-color);
         }
 
         h1, h2, h3 {
             color: var(--dark-red);
         }
-
         h1 {
             border-bottom: 2px solid var(--main-color);
             padding-bottom: 10px;
         }
-
         hr {
             border: none;
             height: 1px;
@@ -221,85 +339,43 @@
             margin: 20px 0;
         }
 
-        /* ----- PHONG CÁCH BẢNG HỦY ĐẶT BÀN ----- */
-        .cancellation-table {
+        #chartContainer {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            border: 1px solid #ddd;
+            max-width: 100%;
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid var(--light-red);
+            border-radius: 8px;
+            background-color: #fffafa;
+            display: flex;
+            justify-content: center;
+            min-height: 400px;
+            overflow-x: auto;
         }
-
-        .cancellation-table th, .cancellation-table td {
-            padding: 12px;
-            border: 1px solid #ddd;
-        }
-
-        .cancellation-table th {
-            background-color: #f8f8f8;
-            color: var(--cancellation-color);
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .cancellation-table tr:hover {
-            background-color: #fce4ec;
-        }
-        /* ----------------------------------------------- */
-
-        .reason-cell {
-            max-width: 300px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: help;
-        }
-
-        .status-cancelled {
-            background-color: #FFC107;
-            color: #333;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .status-no-show {
-            background-color: var(--cancellation-color);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
+        #timeTrendChart {
+            width: 100%;
+            height: 100%;
         }
 
         .modal {
             display: none;
             position: fixed;
-            z-index: 1001;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding-top: 60px;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
+            background-color: #fff;
             padding: 20px;
-            border: 1px solid #888;
+            border-radius: 8px;
             width: 90%;
             max-width: 400px;
-            border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
@@ -307,109 +383,32 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
             margin-bottom: 15px;
         }
 
+        .modal-header h3 {
+            margin: 0;
+            color: var(--dark-red);
+        }
+
         .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 1.5em;
             cursor: pointer;
+            color: #555;
         }
 
         .close:hover {
-            color: #000;
+            color: var(--main-color);
         }
 
-        .filter-grid {
-            display: flex;
-            gap: 15px;
-            align-items: flex-end;
-        }
-
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 300px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -150px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            white-space: normal;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* PHẦN PHÂN TRANG (PAGINATION) - CHUẨN HÓA */
-        .pagination-container {
-            display: flex;
-            justify-content: flex-end; /* Căn lề phải */
-            margin-top: 25px;
-        }
-        .pagination {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid #ddd;
-        }
-        .pagination li {
-            margin: 0;
-        }
-        .pagination li a, .pagination li span {
-            display: block;
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #555;
-            background-color: #fff;
-            border-right: 1px solid #ddd;
-            transition: background-color 0.3s;
-        }
-        .pagination li:last-child a, .pagination li:last-child span {
-            border-right: none;
-        }
-        .pagination li a:hover {
-            background-color: #f4f4f4;
-        }
-        .pagination li.active span {
-            background-color: var(--main-color);
-            color: white;
-            font-weight: bold;
-            border-color: var(--main-color);
-        }
-        .pagination li.disabled span, .pagination li.disabled a {
-            color: #ccc;
-            background-color: #fff;
-            pointer-events: none;
-            opacity: 0.6;
+        .modal-form .filter-item {
+            margin-bottom: 15px;
         }
 
         .modal-form .btn-apply {
-            margin-top: 20px;
             width: 100%;
         }
 
-        /* MỚI: CSS cho POPUP CẢNH BÁO/LỖI */
         #missingDateAlert {
             position: fixed;
             top: 20px;
@@ -421,7 +420,7 @@
             max-width: 90%;
 
             background-color: #fff3e0;
-            color: #B71C1C; /* Đổi màu chữ sang Đỏ Đậm */
+            color: #D32F2F;
 
             border-radius: 8px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
@@ -432,19 +431,81 @@
             font-weight: bold;
             text-align: center;
             font-size: 1.1em;
-            border: 1px solid var(--dark-red); /* Đổi màu viền */
+            border: 1px solid #FF9800;
+        }
+
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content-body {
+                margin-left: 0;
+            }
+            .top-nav .restaurant-group {
+                width: auto;
+            }
+            .summary-cards {
+                flex-wrap: wrap;
+            }
+            .summary-card {
+                flex: 0 0 calc(50% - 7.5px);
+                padding: 15px;
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                transition: transform 0.3s;
+                min-width: 0;
+                overflow: hidden;
+            }
+            .filter-grid {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-grid > .filter-item {
+                width: 100%;
+            }
+            .filter-item input[type="date"], .filter-item select {
+                width: 100%;
+            }
+
+            .chart-options {
+                justify-content: flex-start;
+            }
+            .chart-options > div {
+                flex-basis: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .chart-toggle-group {
+                margin-bottom: 5px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .sidebar {
+                transform: translateX(0);
+            }
+            .summary-cards {
+                flex-wrap: nowrap;
+            }
         }
     </style>
 </head>
 <body>
-<%-- SỬA: Đặt pageSize = 5 --%>
-<c:set var="pageSize" value="5" scope="request"/>
+
 <div class="top-nav">
     <div class="restaurant-group">
         <a href="<%= request.getContextPath() %>/" class="home-button">
             <i class="fas fa-home"></i> Trang Chủ
         </a>
-        <%--        <span class="restaurant-name">Đặt Bàn Nhà Hàng</span>--%>
     </div>
     <div class="user-info">
     <span>Người dùng:
@@ -473,193 +534,174 @@
 
     <div class="main-content-body">
         <div class="content-container">
-            <h1>Báo Cáo Chi Tiết Hủy Đặt Bàn & Không Đến </h1>
+            <h1>Báo Cáo Thống Kê Tổng Quan</h1>
 
-            <div class="filter-section">
-                <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Bộ Lọc Báo Cáo</h3>
-                <button type="button" class="btn-apply" onclick="openFilterModal()"><i class="fas fa-calendar"></i> Lọc
-                    theo Ngày
-                </button>
+            <div class="fixed-width-wrapper">
+                <div class="filter-section">
+                    <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Bộ Lọc Báo Cáo</h3>
+
+                    <div class="filter-grid" style="margin-bottom: 20px;">
+
+                        <div class="filter-item" style="min-width: unset;">
+                            <button class="btn-apply" onclick="openModal()"><i class="fas fa-filter"></i> Lọc Theo Ngày</button>
+                        </div>
+
+                        <c:set var="isSevereError" value="${fn:startsWith(requestScope.warningMessage, 'Lỗi:') || fn:startsWith(requestScope.warningMessage, 'Hãy chọn Ngày Bắt đầu')}"/>
+
+                        <c:if test="${empty requestScope.errorMessage and !isSevereError}">
+                            <div class="filter-item" style="min-width: unset;">
+                                <button type="button" id="btnExportExcel" class="btn-apply" style="background-color: #0F9D58;"><i class="fas fa-file-excel"></i> Xuất Excel</button>
+                            </div>
+
+                            <div class="filter-item" style="min-width: unset;">
+                                <button type="button" id="btnExportPDF" class="btn-apply" style="background-color: #DB4437;"><i class="fas fa-file-pdf"></i> Xuất PDF</button>
+                            </div>
+                        </c:if>
+                    </div>
+
+                    <form action="overview-report" method="GET" id="filterForm" style="display: none;">
+                        <div class="filter-grid">
+                            <div class="filter-item">
+                                <label for="startDate">Ngày Bắt Đầu</label>
+                                <input type="date" id="startDate" name="startDate" value="${requestScope.startDateParam}" max="${requestScope.currentDate}">
+                            </div>
+                            <div class="filter-item">
+                                <label for="endDate">Ngày Kết Thúc</label>
+                                <input type="date" id="endDate" name="endDate" value="${requestScope.endDateParam}" max="${requestScope.currentDate}">
+                            </div>
+
+                            <div class="filter-item" style="display:none;">
+                                <label for="chartUnit">Đơn Vị Biểu Đồ (Ẩn)</label>
+                                <select id="chartUnit" name="chartUnit">
+                                    <option value="day" ${requestScope.chartUnitParam == 'day' ? 'selected' : ''}>Theo Ngày</option>
+                                    <option value="week" ${requestScope.chartUnitParam == 'week' ? 'selected' : ''}>Theo Tuần</option>
+                                    <option value="month" ${requestScope.chartUnitParam == 'month' ? 'selected' : ''}>Theo Tháng</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-item" style="padding-top: 5px; display:none;">
+                                <button type="submit" class="btn-apply"><i class="fas fa-check"></i> Áp Dụng Bộ Lọc (Ẩn)</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <c:if test="${not empty requestScope.errorMessage}">
+                        <div id="alertError" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px;">
+                            <i class="fas fa-times-circle"></i>
+                            <strong>Lỗi Hệ thống:</strong> ${requestScope.errorMessage}
+                        </div>
+                    </c:if>
+
+                    <c:if test="${not empty requestScope.warningMessage}">
+                        <div id="alertWarning" style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
+                                ${requestScope.warningMessage}
+                        </div>
+                    </c:if>
+
+                    <c:if test="${empty requestScope.errorMessage and !isSevereError}">
+                        <c:set var="summaryData" value="${requestScope.summaryData}"/>
+                        <div class="summary-cards">
+                            <div class="summary-card booking">
+                                <div class="summary-card-title">Tổng Số Lượt Đặt Bàn</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-calendar-check summary-card-icon" style="color: var(--booking-color);"></i>
+                                        ${summaryData.totalBookings != null ? summaryData.totalBookings : 0}
+                                </div>
+                            </div>
+                            <div class="summary-card revenue">
+                                <div class="summary-card-title">Tổng Doanh Thu</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-dollar-sign summary-card-icon" style="color: var(--revenue-color);"></i>
+                                    <c:choose>
+                                        <c:when test="${summaryData.totalRevenue != null}">
+                                            <c:set var="revenue" value="${summaryData.totalRevenue / 1000000}"/>
+                                            <c:choose>
+                                                <c:when test="${revenue >= 1000}">
+                                                    <fmt:formatNumber value="${revenue / 1000}" pattern="#0.0"/> T VND
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <fmt:formatNumber value="${revenue}" pattern="#0.g"/> Tr VND
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            0 Tr VND
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div class="summary-card cancellation">
+                                <div class="summary-card-title">Tổng Số Lượt Hủy</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-ban summary-card-icon" style="color: var(--cancellation-color);"></i>
+                                        ${summaryData.totalCancellations != null ? summaryData.totalCancellations : 0}
+                                </div>
+                            </div>
+                            <div class="summary-card rate">
+                                <div class="summary-card-title">Tỷ Lệ Hủy</div>
+                                <div class="summary-card-value">
+                                    <i class="fas fa-percentage summary-card-icon" style="color: var(--rate-color);"></i>
+                                    <c:choose>
+                                        <c:when test="${summaryData.cancellationRate != null}">
+                                            <fmt:formatNumber value="${summaryData.cancellationRate}" pattern="#0.00"/>%
+                                        </c:when>
+                                        <c:otherwise>
+                                            0.00%
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-options">
+                            <h2 style="margin: 0; color: var(--main-color); flex-basis: 100%;">Xu Hướng Doanh Thu & Đặt Bàn</h2>
+
+                            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+
+                                <div class="chart-toggle-group">
+                                    <label style="font-size: 0.9em; color: #555; margin-right: 5px;">Xem theo:</label>
+
+                                    <c:url var="urlDay" value="overview-report">
+                                        <c:param name="startDate" value="${requestScope.startDateParam}" />
+                                        <c:param name="endDate" value="${requestScope.endDateParam}" />
+                                        <c:param name="chartUnit" value="day" />
+                                    </c:url>
+                                    <c:url var="urlWeek" value="overview-report">
+                                        <c:param name="startDate" value="${requestScope.startDateParam}" />
+                                        <c:param name="endDate" value="${requestScope.endDateParam}" />
+                                        <c:param name="chartUnit" value="week" />
+                                    </c:url>
+                                    <c:url var="urlMonth" value="overview-report">
+                                        <c:param name="startDate" value="${requestScope.startDateParam}" />
+                                        <c:param name="endDate" value="${requestScope.endDateParam}" />
+                                        <c:param name="chartUnit" value="month" />
+                                    </c:url>
+
+                                    <a href="${urlDay}" class="btn-toggle-unit ${requestScope.chartUnitParam == 'day' ? 'active' : ''}">Ngày</a>
+                                    <a href="${urlWeek}" class="btn-toggle-unit ${requestScope.chartUnitParam == 'week' ? 'active' : ''}">Tuần</a>
+                                    <a href="${urlMonth}" class="btn-toggle-unit ${requestScope.chartUnitParam == 'month' ? 'active' : ''}">Tháng</a>
+                                </div>
+
+                                <div class="chart-toggle-group">
+                                    <label style="font-size: 0.9em; color: #555; margin-right: 5px;">Loại Biểu Đồ:</label>
+                                    <button data-type="line"><i class="fas fa-chart-line"></i> Đường</button>
+                                    <button class="active" data-type="bar"><i class="fas fa-chart-bar"></i> Cột</button>
+                                </div>
+
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="display-cancellations">
+                                    <label for="display-cancellations">Hiển thị Hủy Đặt Bàn</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="chartContainer">
+                            <canvas id="timeTrendChart"></canvas>
+                        </div>
+                    </c:if>
+
+                </div>
+                <hr/>
             </div>
-
-            <%-- KHỐI CẢNH BÁO/LỖI ĐÃ ĐƯỢC ẨN VÀ CHUYỂN SANG JS --%>
-            <c:if test="${not empty requestScope.errorMessage}">
-                <div id="alertErrorHidden" style="display:none;">${requestScope.errorMessage}</div>
-            </c:if>
-
-            <c:if test="${not empty requestScope.warningMessage}">
-                <div id="alertWarningHidden" style="display:none;">${requestScope.warningMessage}</div>
-            </c:if>
-
-
-            <c:choose>
-                <%-- KHI CÓ DỮ LIỆU ĐỂ HIỂN THỊ (Sau khi submit ngày) --%>
-                <c:when test="${not empty requestScope.cancellationData}">
-                    <table class="cancellation-table">
-                        <thead>
-                        <tr>
-                            <th>ID Đặt Bàn</th>
-                            <th>Tên Khách Hàng</th>
-                            <th>Email Khách Hàng</th>
-                            <th>Ngày/Giờ Đặt Bàn</th>
-                            <th class="text-center">Số Khách</th>
-                            <th class="text-center">Trạng Thái</th>
-                            <th>Lý do Hủy</th>
-                            <th class="text-center">Thời gian Báo trước (Ngày)</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="item" items="${requestScope.cancellationData}">
-                            <tr>
-                                <td><c:out value="${item.reservationId}"/></td>
-                                <td><c:out value="${item.customerName}"/></td>
-                                <td><c:out value="${item.customerEmail}"/></td>
-                                <td>
-                                    <fmt:parseDate value="${item.reservationDate}" pattern="yyyy-MM-dd" var="resDateObj" type="date"/>
-                                    <fmt:formatDate value="${resDateObj}" pattern="dd/MM/yyyy"/> lúc <c:out value="${item.reservationTime}"/>
-                                </td>
-                                <td class="text-center"><c:out value="${item.numberOfGuests}"/></td>
-                                <td class="text-center">
-                                    <c:choose>
-                                        <c:when test="${item.reservationStatus == 'CANCELLED'}">
-                                            <span class="status-cancelled">Đã Hủy</span>
-                                        </c:when>
-                                        <c:when test="${item.reservationStatus == 'NO_SHOW'}">
-                                            <span class="status-no-show">Không Đến</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <c:out value="${item.reservationStatus}"/>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td class="reason-cell">
-                                    <div class="tooltip">
-                                        <c:set var="reasonText" value="${item.cancellationReason != null ? item.cancellationReason : 'Không cung cấp'}"/>
-                                        <c:out value="${reasonText.length() > 50 ? reasonText.substring(0, 50).concat('...') : reasonText}"/>
-                                        <c:if test="${item.cancellationReason != null}">
-                                            <span class="tooltiptext"><c:out value="${item.cancellationReason}"/></span>
-                                        </c:if>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <c:choose>
-                                        <c:when test="${item.leadTimeDays >= 0}">
-                                            <c:out value="${item.leadTimeDays}"/> ngày
-                                        </c:when>
-                                        <c:otherwise>
-                                            N/A
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
-
-                    <%-- PHẦN HIỂN THỊ PHÂN TRANG --%>
-                    <c:set var="currentPage" value="${requestScope.currentPage}"/>
-                    <c:set var="totalPages" value="${requestScope.totalPages}"/>
-                    <c:set var="totalRecords" value="${requestScope.totalRecords}"/>
-                    <c:set var="startDate" value="${requestScope.startDateParam}"/>
-                    <c:set var="endDate" value="${requestScope.endDateParam}"/>
-
-                    <c:if test="${totalRecords > 0 and totalPages > 1}">
-                        <div class="pagination-container">
-                            <ul class="pagination">
-                                    <%-- Nút Previous --%>
-                                <c:url var="prevUrl" value="cancel-report">
-                                    <c:param name="page" value="${currentPage - 1}"/>
-                                    <c:param name="pageSize" value="${pageSize}"/>
-                                    <c:param name="startDate" value="${startDate}"/>
-                                    <c:param name="endDate" value="${endDate}"/>
-                                </c:url>
-                                <c:choose>
-                                    <c:when test="${currentPage > 1}">
-                                        <li><a href="${prevUrl}"><i class="fas fa-chevron-left"></i> Trước</a></li>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <li class="disabled"><span><i class="fas fa-chevron-left"></i> Trước</span></li>
-                                    </c:otherwise>
-                                </c:choose>
-
-                                    <%-- Hiển thị các số trang (tối đa 5 trang) --%>
-                                <c:set var="startPage" value="${(currentPage - 2) > 1 ? (currentPage - 2) : 1}"/>
-                                <c:set var="endPage" value="${(currentPage + 2) < totalPages ? (currentPage + 2) : totalPages}"/>
-
-                                <c:if test="${startPage > 1}">
-                                    <c:url var="page1Url" value="cancel-report">
-                                        <c:param name="page" value="1"/>
-                                        <c:param name="pageSize" value="${pageSize}"/>
-                                        <c:param name="startDate" value="${startDate}"/>
-                                        <c:param name="endDate" value="${endDate}"/>
-                                    </c:url>
-                                    <li><a href="${page1Url}">1</a></li>
-                                    <c:if test="${startPage > 2}"><li><span>...</span></li></c:if>
-                                </c:if>
-
-                                <c:forEach begin="${startPage}" end="${endPage}" var="i">
-                                    <c:url var="pageUrl" value="cancel-report">
-                                        <c:param name="page" value="${i}"/>
-                                        <c:param name="pageSize" value="${pageSize}"/>
-                                        <c:param name="startDate" value="${startDate}"/>
-                                        <c:param name="endDate" value="${endDate}"/>
-                                    </c:url>
-                                    <c:choose>
-                                        <c:when test="${i == currentPage}">
-                                            <li class="active"><span><c:out value="${i}"/></span></li>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <li><a href="${pageUrl}"><c:out value="${i}"/></a></li>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </c:forEach>
-
-                                <c:if test="${endPage < totalPages}">
-                                    <c:if test="${endPage < totalPages - 1}"><li><span>...</span></li></c:if>
-                                    <c:url var="lastPageUrl" value="cancel-report">
-                                        <c:param name="page" value="${totalPages}"/>
-                                        <c:param name="pageSize" value="${pageSize}"/>
-                                        <c:param name="startDate" value="${startDate}"/>
-                                        <c:param name="endDate" value="${endDate}"/>
-                                    </c:url>
-                                    <li><a href="${lastPageUrl}"><c:out value="${totalPages}"/></a></li>
-                                </c:if>
-
-                                    <%-- Nút Next --%>
-                                <c:url var="nextUrl" value="cancel-report">
-                                    <c:param name="page" value="${currentPage + 1}"/>
-                                    <c:param name="pageSize" value="${pageSize}"/>
-                                    <c:param name="startDate" value="${startDate}"/>
-                                    <c:param name="endDate" value="${endDate}"/>
-                                </c:url>
-                                <c:choose>
-                                    <c:when test="${currentPage < totalPages}">
-                                        <li><a href="${nextUrl}">Tiếp <i class="fas fa-chevron-right"></i></a></li>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <li class="disabled"><span>Tiếp <i class="fas fa-chevron-right"></i></span></li>
-                                    </c:otherwise>
-                                </c:choose>
-                            </ul>
-                        </div>
-                    </c:if>
-
-                </c:when>
-                <%-- KHI CHƯA CÓ DỮ LIỆU HOẶC CHƯA CHỌN NGÀY --%>
-                <c:otherwise>
-                    <c:if test="${empty requestScope.startDateParam}">
-                        <div style="background-color: #ffcccc; color: #cc0000; padding: 20px; border-radius: 5px; text-align: center; margin-top: 20px;">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <strong>Vui lòng chọn Ngày Bắt đầu và Ngày Kết thúc</strong> để xem dữ liệu hủy đặt bàn.
-                        </div>
-                    </c:if>
-                    <c:if test="${not empty requestScope.startDateParam and empty requestScope.cancellationData}">
-                        <p>Không có đặt bàn nào bị hủy hoặc đánh dấu là không đến trong khoảng thời gian đã chọn.</p>
-                    </c:if>
-                </c:otherwise>
-            </c:choose>
-
-            <hr/>
         </div>
     </div>
 </div>
@@ -667,22 +709,20 @@
 <div id="filterModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Bộ Lọc Báo Cáo (Ngày)</h3>
-            <span class="close" onclick="closeFilterModal()">&times;</span>
+            <h3>Lọc Báo Cáo Theo Ngày</h3>
+            <span class="close" onclick="closeModal()">&times;</span>
         </div>
         <form id="modalForm" class="modal-form">
             <div class="filter-item">
-                <label for="modalStartDate">Từ Ngày</label>
-                <input type="date" id="modalStartDate" name="startDate" value="${requestScope.startDateParam}">
+                <label for="modalStartDate">Ngày Bắt Đầu</label>
+                <input type="date" id="modalStartDate" name="startDate" value="${requestScope.startDateParam}" style="box-sizing: border-box;">
             </div>
             <div class="filter-item">
-                <label for="modalEndDate">Đến Ngày</label>
-                <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}">
+                <label for="modalEndDate">Ngày Kết Thúc</label>
+                <input type="date" id="modalEndDate" name="endDate" value="${requestScope.endDateParam}" style="box-sizing: border-box;">
             </div>
 
-            <button type="button" class="btn-apply" onclick="submitFilterForm()"><i class="fas fa-check"></i> Áp Dụng
-                Bộ Lọc
-            </button>
+            <button type="button" class="btn-apply" onclick="submitModalForm()">Áp Dụng Bộ Lọc</button>
         </form>
     </div>
 </div>
@@ -693,110 +733,292 @@
 </div>
 
 <script>
-    const TARGET_PAGE_SIZE = "${pageSize}";
-    const CURRENT_DATE = new Date().toISOString().split('T')[0];
-    const START_OF_BUSINESS_DATE = "2025-01-01";
+    const isInitialLoad = "${requestScope.isInitialLoad}" === "true";
+    const hasWarning = "${requestScope.warningMessage}" !== "";
+    const chartUnit = "${requestScope.chartUnitParam}" || "day";
+    const ctx = document.getElementById('timeTrendChart')?.getContext('2d');
+    let trendChart;
+    const chartContainer = document.getElementById('chartContainer');
 
-    // Khối ẩn đọc giá trị từ Controller
-    const errorMessage = document.getElementById('alertErrorHidden')?.textContent || '';
-    const warningMessage = document.getElementById('alertWarningHidden')?.textContent || '';
+    const trendData = [
+        <c:forEach var="item" items="${requestScope.timeTrendData}" varStatus="loop">
+        {
+            label: "${item.date}",
+            revenue: ${item.totalRevenue},
+            bookings: ${item.totalBookings},
+            cancellations: ${item.totalCancellations}
+        }<c:if test="${!loop.last}">,</c:if>
+        </c:forEach>
+    ];
 
+    const missingDateAlert = document.getElementById('missingDateAlert');
 
-    function showAlert(message, type = 'warning') {
-        const icon = type === 'error' ? '❌ Lỗi hệ thống: ' : '⚠️ Cảnh báo: ';
-        const messageDiv = document.getElementById('missingDateAlert');
-
-        messageDiv.textContent = icon + message.replace(/<br\/>/g, ' | ');
-
-        // Cập nhật CSS cho các loại lỗi khác nhau
-        if (type === 'error') {
-            messageDiv.style.backgroundColor = '#f8d7da';
-            messageDiv.style.color = '#721c24';
-            messageDiv.style.borderColor = '#f5c6cb';
-        } else {
-            messageDiv.style.backgroundColor = '#fff3e0';
-            messageDiv.style.color = '#B71C1C';
-            messageDiv.style.borderColor = 'var(--dark-red)';
-        }
-
-        messageDiv.style.display = 'block';
+    function showAlert(message) {
+        missingDateAlert.textContent = '⚠️ ' + message;
+        missingDateAlert.style.display = 'block';
 
         setTimeout(() => {
-            messageDiv.style.opacity = '1';
+            missingDateAlert.style.opacity = '1';
         }, 10);
 
         setTimeout(() => {
-            messageDiv.style.opacity = '0';
+            missingDateAlert.style.opacity = '0';
             setTimeout(() => {
-                messageDiv.style.display = 'none';
+                missingDateAlert.style.display = 'none';
             }, 300);
-        }, 8000); // Tăng thời gian hiển thị lên 8s
+        }, 5000);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // MỚI: Logic hiển thị popup cảnh báo/lỗi khi tải trang
-        if (errorMessage) {
-            showAlert(errorMessage, 'error');
-        } else if (warningMessage) {
-            showAlert(warningMessage, 'warning');
+    function updateTrendChart(chartType, showCancellations) {
+        if (!ctx) return;
+
+        if (trendChart) {
+            trendChart.destroy();
         }
 
-        // MỚI: Hiển thị thông báo yêu cầu ngày nếu Controller đã chặn (empty startDateParam)
-        if (!"${requestScope.startDateParam}") {
-            showAlert("Vui lòng chọn Ngày Bắt đầu và Ngày Kết thúc để xem báo cáo.", 'warning');
-        }
-    });
-
-    function openFilterModal() {
-        const modalStartDateInput = document.getElementById('modalStartDate');
-        const modalEndDateInput = document.getElementById('modalEndDate');
-
-
-        modalStartDateInput.min = START_OF_BUSINESS_DATE;
-        modalStartDateInput.max = CURRENT_DATE;
-        modalEndDateInput.max = CURRENT_DATE;
-
-        if (modalStartDateInput.value && modalStartDateInput.value < START_OF_BUSINESS_DATE) {
-            modalStartDateInput.value = START_OF_BUSINESS_DATE;
-        }
-
-        if (modalEndDateInput.value > CURRENT_DATE) {
-            modalEndDateInput.value = CURRENT_DATE;
-        }
-
-        document.getElementById('filterModal').style.display = 'block';
-    }
-
-    function closeFilterModal() {
-        document.getElementById('filterModal').style.display = 'none';
-    }
-
-    function submitFilterForm() {
-        const startDate = document.getElementById('modalStartDate').value;
-        const endDate = document.getElementById('modalEndDate').value;
-
-        // --- Bổ sung xác thực phía Client ---
-        if (!startDate || !endDate) {
-            showAlert("Lỗi: Vui lòng chọn Ngày Bắt đầu và Ngày Kết thúc cho báo cáo.");
+        if (trendData.length === 0) {
+            if (chartContainer) chartContainer.style.display = 'none';
             return;
         }
 
-        if (new Date(startDate) > new Date(endDate)) {
+        if (chartContainer) chartContainer.style.display = 'flex';
+
+        const labels = trendData.map(item => item.label);
+        const datasets = [];
+
+        const dataPointSize = chartUnit === 'day' ? 50 : 70;
+        const minRequiredWidth = labels.length * dataPointSize;
+        const containerWidth = chartContainer.clientWidth;
+        let canvasWidth = Math.max(containerWidth, minRequiredWidth);
+
+        ctx.canvas.style.width = '100%';
+        ctx.canvas.style.height = '100%';
+        ctx.canvas.width = canvasWidth;
+        ctx.canvas.height = 400;
+
+        datasets.push({
+            label: 'Tổng Doanh Thu (VND)',
+            data: trendData.map(item => item.revenue),
+            type: 'line',
+            borderColor: 'rgba(2, 119, 189, 1)',
+            backgroundColor: 'rgba(2, 119, 189, 0.2)',
+            fill: true,
+            yAxisID: 'yRevenue',
+            tension: 0.4,
+            pointRadius: 3,
+            borderWidth: 3,
+            order: 1
+        });
+
+        datasets.push({
+            label: 'Tổng Số Lượt Đặt Bàn',
+            data: trendData.map(item => item.bookings),
+            type: chartType,
+            backgroundColor: 'rgba(211, 47, 47, 0.9)',
+            borderColor: 'rgba(211, 47, 47, 1)',
+            yAxisID: 'yBookings',
+            borderWidth: chartType === 'bar' ? 0 : 2,
+            tension: chartType === 'line' ? 0.4 : 0,
+            pointRadius: chartType === 'line' ? 3 : 0,
+            order: 2
+        });
+
+        if (showCancellations) {
+            datasets.push({
+                label: 'Tổng Số Lượt Hủy',
+                data: trendData.map(item => item.cancellations),
+                type: chartType,
+                backgroundColor: 'rgba(96, 96, 96, 0.7)',
+                borderColor: 'rgba(96, 96, 96, 1)',
+                yAxisID: 'yBookings',
+                borderWidth: chartType === 'bar' ? 0 : 2,
+                tension: chartType === 'line' ? 0.4 : 0,
+                pointRadius: chartType === 'line' ? 3 : 0,
+                order: 3
+            });
+        }
+
+        let chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: { right: 20 }
+            },
+            plugins: {
+                legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) {
+                                if (context.dataset.yAxisID === 'yRevenue') {
+                                    if (context.parsed.y >= 1000000000) {
+                                        label += new Intl.NumberFormat('vi-VN', { style: 'decimal', maximumFractionDigits: 1 }).format(context.parsed.y / 1000000000) + ' Tỷ VND';
+                                    } else if (context.parsed.y >= 1000000) {
+                                        label += new Intl.NumberFormat('vi-VN', { style: 'decimal', maximumFractionDigits: 0 }).format(context.parsed.y / 1000000) + ' Triệu VND';
+                                    } else {
+                                        label += new Intl.NumberFormat('vi-VN', { style: 'decimal', maximumFractionDigits: 0 }).format(context.parsed.y) + ' VND';
+                                    }
+                                } else {
+                                    label += context.parsed.y.toLocaleString('vi-VN') + ' lượt';
+                                }
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: chartUnit === 'day' ? 'Ngày' : (chartUnit === 'week' ? 'Tuần' : 'Tháng'), color: '#B71C1C', font: { size: 14, weight: 'bold' } },
+                    ticks: { maxRotation: 45, minRotation: 45, color: '#333' },
+                    grid: { display: false }
+                },
+                yRevenue: {
+                    type: 'linear',
+                    position: 'left',
+                    title: { display: true, text: 'Tổng Doanh Thu (VND)', color: 'rgba(2, 119, 189, 1)', font: { size: 14, weight: 'bold' } },
+                    grid: { drawOnChartArea: true, color: 'rgba(0, 0, 0, 0.05)' },
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            if (value >= 1000000000) return (value / 1000000000).toFixed(1) + ' Tỷ';
+                            if (value >= 1000000) return (value / 1000000).toFixed(0) + ' Tr';
+                            return value.toLocaleString('vi-VN');
+                        }
+                    },
+                    beginAtZero: true
+                },
+                yBookings: {
+                    type: 'linear',
+                    position: 'right',
+                    title: { display: true, text: 'Đặt Bàn/Hủy (Lượt)', color: 'rgba(211, 47, 47, 1)', font: { size: 12, weight: 'bold' } },
+                    grid: { drawOnChartArea: false },
+                    ticks: { color: 'rgba(211, 47, 47, 1)', stepSize: 1, callback: function(value, index, ticks) { return value.toLocaleString('vi-VN'); } },
+                    beginAtZero: true
+                }
+            }
+        };
+
+        trendChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: datasets }, options: chartOptions });
+        if (chartContainer) chartContainer.scrollLeft = 0;
+    }
+
+
+    updateTrendChart('bar', false);
+
+    if (chartContainer) {
+        document.querySelectorAll('.chart-toggle-group button').forEach(button => {
+            button.addEventListener('click', function() {
+                const activeBtn = document.querySelector('.chart-toggle-group .active');
+                if (activeBtn) activeBtn.classList.remove('active');
+                this.classList.add('active');
+                const chartType = this.getAttribute('data-type');
+                const showCancellations = document.getElementById('display-cancellations').checked;
+                updateTrendChart(chartType, showCancellations);
+            });
+        });
+
+        document.getElementById('display-cancellations').addEventListener('change', function() {
+            const showCancellations = this.checked;
+            const chartType = document.querySelector('.chart-toggle-group .active').getAttribute('data-type');
+            updateTrendChart(chartType, showCancellations);
+        });
+    }
+
+    function getFilterParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let params = '';
+        const startDate = urlParams.get('startDate') || '';
+        const endDate = urlParams.get('endDate') || '';
+        // (CHỈNH SỬA) Lấy chartUnit từ requestScope (đã có sẵn trong JS)
+        const chartUnitParam = "${requestScope.chartUnitParam}" || 'day';
+
+        if (startDate) params += '&startDate=' + startDate;
+        if (endDate) params += '&endDate=' + endDate;
+        if (chartUnitParam) params += '&chartUnit=' + chartUnitParam;
+        return params;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnExportExcel = document.getElementById('btnExportExcel');
+        const btnExportPDF = document.getElementById('btnExportPDF');
+
+        const isSevereErrorInJs = () => {
+            const warningMsg = "${requestScope.warningMessage}";
+            return warningMsg.startsWith('Lỗi:') || warningMsg.startsWith('Hãy chọn Ngày Bắt đầu');
+        };
+
+        const handleExport = (type) => {
+            if ("${requestScope.errorMessage}" !== "" || isSevereErrorInJs()) {
+                alert("Lỗi: Không thể xuất báo cáo khi chưa có dữ liệu hoặc bộ lọc bị thiếu. Vui lòng kiểm tra lại cảnh báo.");
+                return;
+            }
+            if (window.confirm("Bạn có chắc chắn muốn xuất file " + type.toUpperCase() + " này không?")) {
+                const params = getFilterParams();
+                window.location.href = "ExportOverviewReportServlet?type=" + type + params;
+            }
+        };
+
+        if (btnExportExcel) {
+            btnExportExcel.addEventListener('click', function() {
+                handleExport('excel');
+            });
+        }
+
+        if (btnExportPDF) {
+            btnExportPDF.addEventListener('click', function() {
+                handleExport('pdf');
+            });
+        }
+    });
+
+    function openModal() {
+        document.getElementById('filterModal').style.display = 'flex';
+        document.getElementById('modalStartDate').value = "${requestScope.startDateParam}";
+        document.getElementById('modalEndDate').value = "${requestScope.endDateParam}";
+        // (ĐÃ XÓA) Không cần set giá trị cho modalChartUnit nữa
+    }
+
+    function closeModal() {
+        document.getElementById('filterModal').style.display = 'none';
+    }
+
+    // (CHỈNH SỬA) Hàm submitModalForm
+    function submitModalForm() {
+        const modalStartDateInput = document.getElementById('modalStartDate');
+        const modalEndDateInput = document.getElementById('modalEndDate');
+        const startDate = modalStartDateInput.value;
+        const endDate = modalEndDateInput.value;
+        // (ĐÃ XÓA) Không lấy chartUnit từ modal
+
+        if (!startDate || !endDate) {
+            showAlert("Vui lòng chọn đầy đủ Ngày Bắt đầu và Ngày Kết thúc.");
+            return;
+        }
+
+        let start = new Date(startDate);
+        let end = new Date(endDate);
+
+        if (start.getTime() > end.getTime()) {
             showAlert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc.");
             return;
         }
 
-        // SỬA: Sử dụng biến TARGET_PAGE_SIZE
-        let url = 'cancel-report?startDate=' + startDate + '&endDate=' + endDate + '&page=1' + '&pageSize=' + TARGET_PAGE_SIZE;
+        // Cập nhật giá trị vào form ẩn
+        document.getElementById('startDate').value = startDate;
+        document.getElementById('endDate').value = endDate;
+        // (ĐÃ XÓA) Không cập nhật chartUnit, vì nó đã có giá trị đúng từ requestScope
 
-        window.location.href = url;
-        closeFilterModal();
+        // Submit form ẩn
+        document.getElementById('filterForm').submit();
+        closeModal();
     }
 
-    window.onclick = function (event) {
-        const filterModal = document.getElementById('filterModal');
-        if (event.target == filterModal) {
-            closeFilterModal();
+    window.onclick = function(event) {
+        const modal = document.getElementById('filterModal');
+        if (event.target == modal) {
+            closeModal();
         }
     }
 </script>

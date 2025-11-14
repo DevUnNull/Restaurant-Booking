@@ -23,8 +23,6 @@ import java.util.Map;
 public class ServiceReportController extends HttpServlet {
 
     private final ServiceReportRepository serviceReportRepository = new ServiceReportRepository();
-
-    // === PHƯƠNG THỨC padTrendData (Giữ nguyên) ===
     private List<Map<String, Object>> padTrendData(List<Map<String, Object>> sparseReport,
                                                    LocalDate startDate,
                                                    LocalDate endDate,
@@ -47,7 +45,7 @@ public class ServiceReportController extends HttpServlet {
                 if (row != null) {
                     fullReport.add(row);
                 } else {
-                    fullReport.add(createEmptyTrendRow(dateKey)); // Sửa đổi ở hàm này
+                    fullReport.add(createEmptyTrendRow(dateKey));
                 }
                 currentDate = currentDate.plusDays(1);
             }
@@ -86,13 +84,10 @@ public class ServiceReportController extends HttpServlet {
         return fullReport;
     }
 
-    // === SỬA ĐỔI HÀM createEmptyTrendRow ===
     private Map<String, Object> createEmptyTrendRow(String dateKey) {
         Map<String, Object> emptyRow = new HashMap<>();
         emptyRow.put("report_date", dateKey);
         emptyRow.put("total_revenue", BigDecimal.ZERO);
-
-        // Thêm tất cả các trường đếm mới với giá trị 0
         emptyRow.put("total_bookings", 0);
         emptyRow.put("completed_bookings", 0);
         emptyRow.put("cancelled_bookings", 0);
@@ -103,8 +98,6 @@ public class ServiceReportController extends HttpServlet {
         return emptyRow;
     }
 
-    // === HÀM processRequest (Giữ nguyên) ===
-    // (Toàn bộ logic của processRequest không thay đổi so với code bạn cung cấp)
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -170,11 +163,9 @@ public class ServiceReportController extends HttpServlet {
                 }
 
                 topSellingItems = serviceReportRepository.getTopSellingItems(serviceType, status, parsedStartDate.toString(), parsedEndDate.toString(), 500);
-                // Hàm này giờ sẽ trả về dữ liệu chi tiết
                 trendReport = serviceReportRepository.getServiceTrendReport(serviceType, status, parsedStartDate.toString(), parsedEndDate.toString(), timeGrouping);
 
                 if (trendReport != null && !trendReport.isEmpty()) {
-                    // Hàm này giờ sẽ chèn 0 cho các trường chi tiết
                     trendReport = padTrendData(trendReport, parsedStartDate, parsedEndDate, timeGrouping);
                 }
 
@@ -223,7 +214,6 @@ public class ServiceReportController extends HttpServlet {
         request.setAttribute("reportRunAttempted", reportRunAttempted);
 
         request.setAttribute("topSellingItems", topSellingItems);
-        // trendReport này giờ đã chứa dữ liệu chi tiết mà JSP cần
         request.setAttribute("trendReport", trendReport);
 
         request.setAttribute("serviceTypesList", serviceTypesList);
@@ -232,7 +222,6 @@ public class ServiceReportController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/report/service-report.jsp").forward(request, response);
     }
 
-    // === doGet, doPost, getServletInfo (Giữ nguyên) ===
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

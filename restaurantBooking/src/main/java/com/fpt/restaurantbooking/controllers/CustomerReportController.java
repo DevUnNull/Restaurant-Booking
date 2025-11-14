@@ -48,7 +48,6 @@ public class CustomerReportController extends HttpServlet {
             return;
         }
 
-        // --- LẤY TẤT CẢ THAM SỐ ---
         String startDateParam = request.getParameter("startDate");
         String endDateParam = request.getParameter("endDate");
         String userIdParam = request.getParameter("userId");
@@ -59,21 +58,17 @@ public class CustomerReportController extends HttpServlet {
         LocalDate startDate = null;
         LocalDate endDate = null;
 
-        // MỚI/KHÔI PHỤC LOGIC: Nếu đang ở chế độ tổng quan và thiếu ngày, CHẶN và yêu cầu nhập.
         if (userIdParam == null || userIdParam.isEmpty()) {
             if (startDateParam == null || startDateParam.isEmpty() || endDateParam == null || endDateParam.isEmpty()) {
-                request.setAttribute("warningMessage", "Vui lòng chọn Ngày Bắt đầu và Ngày Kết thúc để xem báo cáo.");
-                request.setAttribute("isDateRequired", true); // Đánh dấu rằng cần chọn ngày
+                request.setAttribute("isDateRequired", true);
                 request.getRequestDispatcher("/WEB-INF/report/user-report.jsp").forward(request, response);
                 return;
             }
         }
 
-        // Gán giá trị ngày từ params
         startDate = safeParseDate(startDateParam, START_OF_BUSINESS);
         endDate = safeParseDate(endDateParam, currentDate);
 
-        // --- BẮT ĐẦU XÁC THỰC NGÀY ---
         if (startDate.isBefore(START_OF_BUSINESS)) {
             warningMessage = "Cảnh báo: Ngày bắt đầu (" + startDate.format(DATE_FORMATTER_VN) + ") đã được điều chỉnh về ngày bắt đầu kinh doanh (" + START_OF_BUSINESS.format(DATE_FORMATTER_VN) + ").";
             startDate = START_OF_BUSINESS;
@@ -92,26 +87,21 @@ public class CustomerReportController extends HttpServlet {
             }
         }
 
-        // Chuẩn bị tham số cho SQL
         String sqlStartDate = startDate.toString();
         String sqlEndDate = endDate.toString();
 
-        // MỚI: Chuyển LocalDate sang java.util.Date để tương thích JSTL (Fix lỗi 500)
         Date startDateUtil = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDateUtil = Date.from(endDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        // SỬA LỖI 500: Truyền object java.util.Date cho JSP
         request.setAttribute("startDateObject", startDateUtil);
         request.setAttribute("endDateObject", endDateUtil);
 
-        request.setAttribute("startDateParam", sqlStartDate); // Vẫn truyền String cho input value
-        request.setAttribute("endDateParam", sqlEndDate); // Vẫn truyền String cho input value
+        request.setAttribute("startDateParam", sqlStartDate);
+        request.setAttribute("endDateParam", sqlEndDate);
         request.setAttribute("warningMessage", warningMessage);
 
-        // --- RẼ NHÁNH LOGIC: CHI TIẾT hay TỔNG QUAN ---
         try {
             if (userIdParam != null && !userIdParam.isEmpty()) {
-                // *** CHẾ ĐỘ XEM CHI TIẾT ***
                 request.setAttribute("isDetailMode", true);
                 int userId = Integer.parseInt(userIdParam);
                 request.setAttribute("selectedUserId", userId);
@@ -124,12 +114,9 @@ public class CustomerReportController extends HttpServlet {
 
                 List<Map<String, Object>> reservations = reportRepository.getReservationsForCustomer(userId, sqlStartDate, sqlEndDate);
 
-                // XÓA LOGIC LẤY CHI TIẾT MÓN ĂN (Giữ nguyên danh sách Reservations)
-
                 request.setAttribute("customerReservations", reservations);
 
             } else {
-                // *** CHẾ ĐỘ XEM TỔNG QUAN ***
                 request.setAttribute("isDetailMode", false);
 
                 int currentPage = 1;

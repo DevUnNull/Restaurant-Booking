@@ -16,23 +16,23 @@
 
     <style>
         :root {
-            /* Biến Màu Sắc */
-            --main-color: #D32F2F; /* Đỏ - Nút Chính, Thanh Điều Hướng Trên Cùng, Viền Tiêu đề */
-            --light-red: #FFCDD2; /* Đỏ Nhạt - HR, Hover Bảng, Viền Biểu đồ */
-            --dark-red: #B71C1C; /* Đỏ Đậm - Tiêu đề, Văn bản Mạnh */
-            --menu-bg: #8B0000; /* Nền Menu - Thanh Bên */
-            --menu-hover: #A52A2A; /* Hover Menu */
+
+            --main-color: #D32F2F;
+            --light-red: #FFCDD2;
+            --dark-red: #B71C1C;
+            --menu-bg: #8B0000;
+            --menu-hover: #A52A2A;
             --text-light: #f8f8f8;
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3; /* Xanh Dương */
-            --revenue-color: #4CAF50; /* Xanh Lá */
-            --cancellation-color: #E91E63; /* Hồng/Đỏ */
-            --rate-color: #FF9800; /* Cam/Cảnh báo */
-            --staff-chart-color: #00897B; /* Xanh Lục Bảo */
+            --booking-color: #2196F3;
+            --revenue-color: #4CAF50;
+            --cancellation-color: #E91E63;
+            --rate-color: #FF9800;
+            --staff-chart-color: #00897B;
             --staff-border-color: #00897B;
-            --customer-color: #1976D2; /* Xanh Dương Khách hàng */
+            --customer-color: #1976D2;
         }
 
         /* Base & Layout */
@@ -53,7 +53,7 @@
 
         /* Filter Styles */
         .filter-section { background-color: #fff; padding: 15px 20px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .filter-item { display: flex; flex-direction: column; min-width: 120px; }
+        .filter-item { display: flex; flex-direction: column; min-width: 120px; margin-bottom: 15px; }
         .filter-item label { font-size: 0.9em; color: #555; margin-bottom: 5px; font-weight: bold; }
         .filter-item input[type="date"] { padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; min-width: 120px; font-size: 1em; }
         .btn-apply { background-color: var(--main-color); color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
@@ -62,7 +62,9 @@
         h1 { border-bottom: 2px solid var(--main-color); padding-bottom: 10px; }
         hr { border: none; height: 1px; background-color: var(--light-red); margin: 20px 0; }
 
-        /* CSS Thẻ Tóm Tắt */
+
+        .warning-box-yellow { background-color: #fff9c4; color: #5d4037; padding: 15px; border: 1px solid #fff59d; border-radius: 4px; margin-top: 20px; }
+
         .summary-container { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
         .summary-card { flex: 1; min-width: 250px; color: var(--text-light); padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 20px; }
         .summary-card .icon { font-size: 3em; opacity: 0.8; }
@@ -72,20 +74,18 @@
         .summary-card.total { background-color: var(--cancellation-color); }
         .summary-card.revenue { background-color: var(--revenue-color); }
 
-        /* SỬA: Sao chép style từ staff-report.jsp cho thẻ chi tiết */
         .staff-info-card {
             flex: 1;
             padding: 15px;
             border-radius: 8px;
             background-color: #fff;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid var(--customer-color); /* Đổi sang màu khách hàng */
-            min-width: 250px; /* Đảm bảo kích thước tối thiểu */
+            border-left: 5px solid var(--customer-color);
+            min-width: 250px;
         }
         .staff-info-card div { margin-bottom: 8px; font-size: 0.95em; }
         .staff-info-card strong { color: var(--dark-red); }
 
-        /* Customer Table Styles */
         .customer-table {
             width: 100%;
             border-collapse: collapse;
@@ -104,7 +104,6 @@
         }
         .customer-table tr:hover { background-color: #e3f2fd; }
 
-        /* SỬA: Thêm style cho link tên */
         .customer-table td a {
             color: var(--customer-color);
             font-weight: bold;
@@ -119,7 +118,6 @@
         .status-active { color: var(--revenue-color); font-weight: bold; }
         .status-inactive { color: var(--cancellation-color); font-weight: bold; }
 
-        /* SỬA: Thêm style cho các trạng thái đơn hàng (trong bảng chi tiết) */
         .status-completed { color: var(--revenue-color); font-weight: bold; }
         .status-pending { color: var(--rate-color); font-weight: bold; }
         .status-cancelled { color: var(--cancellation-color); font-weight: bold; }
@@ -137,10 +135,10 @@
         .filter-grid { display: flex; gap: 15px; align-items: flex-end; }
 
 
-        /* Pagination Styles (CHUẨN HÓA) */
+        /* Pagination Styles */
         .pagination-container {
             display: flex;
-            justify-content: flex-end; /* Căn lề phải */
+            justify-content: flex-end;
             margin-top: 25px;
         }
         .pagination {
@@ -183,7 +181,6 @@
             opacity: 0.6;
         }
 
-        /* === NEW POPUP STYLE (From Overview/Service Report) === */
         #missingDateAlert {
             position: fixed;
             top: 20px;
@@ -192,7 +189,7 @@
             padding: 20px 30px;
             min-width: 300px;
             max-width: 90%;
-            background-color: #E65100; /* Deep Orange/Rust */
+            background-color: #E65100;
             color: white;
             border-radius: 8px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
@@ -205,15 +202,11 @@
             font-size: 1.1em;
         }
 
-        /* MỚI: CSS cho bảng Chi tiết Món ăn đã được xóa */
 
-        /* ==================================================== */
     </style>
 </head>
 <body>
-<%-- SỬA: Đổi pageSize thành 5 --%>
 <c:set var="pageSize" value="5" scope="request"/>
-<%-- Thanh Điều Hướng Trên Cùng (Top Nav) --%>
 <div class="top-nav">
     <div class="restaurant-group">
         <a href="<%= request.getContextPath() %>/" class="home-button">
@@ -234,7 +227,6 @@
     </div>
 </div>
 
-<%-- Wrapper (Thanh Bên + Nội Dung Chính) --%>
 <div class="wrapper">
     <div class="sidebar">
         <ul>
@@ -249,20 +241,26 @@
     <div class="main-content-body">
         <div class="content-container">
 
-            <%-- SỬA: BẮT ĐẦU KHỐI C:CHOOSE ĐỂ PHÂN CHIA CHẾ ĐỘ XEM --%>
+            <%-- [THÊM] Form ẩn (từ lần sửa trước) --%>
+            <form action="user-report" method="GET" id="filterForm" style="display: none;">
+                <input type="hidden" id="formStartDate" name="startDate" value="${requestScope.startDateParam}">
+                <input type="hidden" id="formEndDate" name="endDate" value="${requestScope.endDateParam}">
+                <input type="hidden" name="page" value="1">
+                <input type="hidden" name="pageSize" value="${pageSize}">
+                <c:if test="${requestScope.isDetailMode}">
+                    <input type="hidden" name="userId" value="${requestScope.selectedUserId}">
+                </c:if>
+            </form>
+
             <c:choose>
-                <%-- CHẾ ĐỘ 1: XEM CHI TIẾT --%>
                 <c:when test="${requestScope.isDetailMode && not empty requestScope.selectedCustomerDetail}">
 
-                    <%-- Nút Quay Lại --%>
                     <a href="user-report?startDate=${requestScope.startDateParam}&endDate=${requestScope.endDateParam}" class="home-button" style="margin-bottom: 15px; display: inline-flex; background-color: #555; border-color: #555;"><i class="fas fa-arrow-left"></i> Quay lại Tổng quan</a>
 
                     <h1>Báo Cáo Chi Tiết Khách Hàng</h1>
 
-                    <%-- SỬA: Đã di chuyển bean 'today' lên đầu --%>
                     <fmt:formatDate value="${today}" pattern="yyyy" var="currentYear" />
 
-                    <%-- Thẻ Thông Tin Chi Tiết Khách Hàng --%>
                     <div class="summary-cards-staff">
                         <div class="staff-info-card">
                             <div><strong>Khách hàng:</strong> ${requestScope.selectedCustomerDetail.fullName} (ID: ${requestScope.selectedUserId})</div>
@@ -293,10 +291,9 @@
                     </div>
 
                     <hr/>
-                    <%-- SỬA LỖI HTTP 500: Sử dụng startDateObject và endDateObject --%>
+
                     <h2>Lịch sử Đơn hàng (trong kỳ <fmt:formatDate value="${requestScope.startDateObject}" pattern="dd/MM/yyyy"/> đến <fmt:formatDate value="${requestScope.endDateObject}" pattern="dd/MM/yyyy"/>)</h2>
 
-                    <%-- Bảng Lịch Sử Đơn Hàng (Đã xóa cột/logic chi tiết) --%>
                     <c:choose>
                         <c:when test="${not empty requestScope.customerReservations}">
                             <table class="customer-table">
@@ -340,24 +337,27 @@
 
                 </c:when>
 
-                <%-- CHẾ ĐỘ 2: XEM TỔNG QUAN (Code giữ nguyên) --%>
                 <c:otherwise>
                     <h1>Báo Cáo Tổng Quan Khách Hàng</h1>
 
-                    <%-- Phần Bộ Lọc (Giữ nguyên) --%>
                     <div class="filter-section">
                         <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Bộ Lọc Báo Cáo</h3>
                         <button type="button" class="btn-apply" onclick="openFilterModal()"><i class="fas fa-calendar"></i> Lọc theo Ngày</button>
+
+
+                        <c:if test="${requestScope.isDateRequired}">
+                            <div class="warning-box-yellow">Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.</div>
+                        </c:if>
                     </div>
 
-                    <%-- Thông Báo Cảnh Báo (Giữ nguyên) --%>
                     <c:if test="${not empty requestScope.warningMessage}">
-                        <div id="alertWarning" style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
-                            <i class="fas fa-exclamation-triangle"></i>${requestScope.warningMessage}
+                        <div id="alertWarning"
+                             style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Cảnh báo:</strong> ${requestScope.warningMessage}
                         </div>
                     </c:if>
 
-                    <%-- Thông Báo Lỗi (Giữ nguyên) --%>
                     <c:if test="${not empty requestScope.errorMessage}">
                         <div id="alertError" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px;">
                             <i class="fas fa-times-circle"></i>
@@ -365,24 +365,8 @@
                         </div>
                     </c:if>
 
-                    <%-- CHỈ HIỂN THỊ KHỐI NÀY NẾU CÓ THAM SỐ NGÀY HỢP LỆ --%>
-                    <c:if test="${empty requestScope.errorMessage}">
+                    <c:if test="${empty requestScope.errorMessage and not requestScope.isDateRequired}">
 
-                        <%-- Hiển thị tiêu đề Tóm tắt --%>
-                        <c:if test="${not empty requestScope.startDateParam}">
-                            <h2>Tóm Tắt Khách Hàng
-                                <c:if test="${not empty requestScope.startDateObject}">
-                                    (Từ <fmt:formatDate value="${requestScope.startDateObject}" pattern="dd/MM/yyyy"/> đến <fmt:formatDate value="${requestScope.endDateObject}" pattern="dd/MM/yyyy"/>)
-                                </c:if>
-                            </h2>
-                        </c:if>
-                        <c:if test="${empty requestScope.startDateParam}">
-                            <h2 style="color: #555;">Tóm Tắt Khách Hàng</h2>
-                        </c:if>
-
-
-
-                        <%-- KHỐI DỮ LIỆU CHỈ HIỂN THỊ KHI CÓ THAM SỐ NGÀY HỢP LỆ --%>
                         <c:if test="${not empty requestScope.startDateParam}">
 
                             <div class="summary-container">
@@ -479,7 +463,6 @@
                                 </c:otherwise>
                             </c:choose>
 
-                            <%-- PHẦN PHÂN TRANG (Giữ nguyên) --%>
                             <c:set var="currentPage" value="${requestScope.currentPage}"/>
                             <c:set var="totalPages" value="${requestScope.totalPages}"/>
                             <c:set var="startDateParam" value="${requestScope.startDateParam}"/>
@@ -582,7 +565,6 @@
     </div>
 </div>
 
-<%-- Modal Lọc (Giữ nguyên) --%>
 <div id="filterModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -590,7 +572,6 @@
             <span class="close" onclick="closeFilterModal()">&times;</span>
         </div>
         <form id="modalForm" class="modal-form">
-            <%-- SỬA: Thêm input ẩn cho userId nếu đang ở chế độ chi tiết --%>
             <c:if test="${requestScope.isDetailMode}">
                 <input type="hidden" id="modalUserId" name="userId" value="${requestScope.selectedUserId}">
             </c:if>
@@ -611,18 +592,27 @@
     <span id="missingDateAlertText"></span>
 </div>
 
-<%-- JavaScript (Giữ nguyên) --%>
 <script>
-    const START_OF_BUSINESS_DATE = "2025-09-01"; // SỬA: Cập nhật ngày bắt đầu kinh doanh
-    const TARGET_PAGE_SIZE = 5; // SỬA: Cập nhật page size
-    const isDetailMode = "${requestScope.isDetailMode}" === "true"; // SỬA: Thêm biến kiểm tra chế độ
+    const START_OF_BUSINESS_DATE = "2025-09-01";
+    const TARGET_PAGE_SIZE = 5;
+    const isDetailMode = "${requestScope.isDetailMode}" === "true";
+    const isDateRequired = "${requestScope.isDateRequired}" === "true"; // [THÊM] Lấy cờ
 
-    // --- KHAI BÁO CÁC BIẾN POPUP CẢNH BÁO ---
     const missingDateAlert = document.getElementById('missingDateAlert');
     const missingDateAlertText = document.getElementById('missingDateAlertText');
 
+    // [THÊM] Kích hoạt cảnh báo vàng khi tải trang (nếu cần)
+    document.addEventListener('DOMContentLoaded', function() {
+        if (isDateRequired) {
+            // Không dùng showAlert() vì nó tự ẩn, dùng DOM thao tác trực tiếp
+            const yellowBox = document.querySelector('.warning-box-yellow');
+            if (yellowBox) {
+                yellowBox.style.display = 'block';
+            }
+        }
+    });
+
     function showAlert(message) {
-        // (Hàm này giữ nguyên như code cũ)
         missingDateAlertText.textContent = message;
         missingDateAlert.style.display = 'block';
         setTimeout(() => { missingDateAlert.style.opacity = '1'; }, 10);
@@ -635,7 +625,6 @@
         }, 5000);
     }
 
-    // --- HÀM CHO MODAL LỌC NGÀY ---
     function openFilterModal() {
         const modalStartDateInput = document.getElementById('modalStartDate');
         modalStartDateInput.min = START_OF_BUSINESS_DATE;
@@ -649,36 +638,34 @@
         document.getElementById('filterModal').style.display = 'none';
     }
 
-    // SỬA: Cập nhật logic submit để giữ userId nếu có
     function submitFilterForm() {
         const startDate = document.getElementById('modalStartDate').value;
         const endDate = document.getElementById('modalEndDate').value;
 
-        // Khôi phục kiểm tra bắt buộc phải có ngày (theo logic cũ)
         if (!startDate || !endDate) {
-            closeFilterModal();
+            // closeFilterModal(); // <-- XÓA
             showAlert("Vui lòng chọn Ngày Bắt đầu và Ngày Kết thúc cho báo cáo.");
             return;
         }
 
-        // Tuy nhiên vẫn kiểm tra tính hợp lệ nếu người dùng nhập ngày không đúng thứ tự
         if (new Date(startDate) > new Date(endDate)) {
-            closeFilterModal();
+            // closeFilterModal(); // <-- XÓA
             showAlert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
             return;
         }
 
-        // Luôn reset về trang 1 khi lọc
-        let url = 'user-report?startDate=' + startDate + '&endDate=' + endDate + '&page=1&pageSize=' + TARGET_PAGE_SIZE;
+        // [SỬA] Sử dụng form ẩn
+        const formStartDate = document.getElementById('formStartDate');
+        const formEndDate = document.getElementById('formEndDate');
 
-        // SỬA: Nếu đang ở chế độ chi tiết, giữ lại userId
-        if (isDetailMode) {
-            const userId = document.getElementById('modalUserId').value;
-            url += '&userId=' + userId;
+        if (formStartDate && formEndDate) {
+            formStartDate.value = startDate;
+            formEndDate.value = endDate;
+            document.getElementById('filterForm').submit();
+            closeFilterModal();
+        } else {
+            showAlert("Lỗi DOM: Không tìm thấy form ẩn 'filterForm'.");
         }
-
-        window.location.href = url;
-        closeFilterModal();
     }
 
     window.onclick = function(event) {

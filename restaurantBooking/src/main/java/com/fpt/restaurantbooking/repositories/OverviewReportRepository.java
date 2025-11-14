@@ -23,7 +23,6 @@ public class OverviewReportRepository {
 
     private final DatabaseUtil db = new DatabaseUtil();
 
-    // *** CẬP NHẬT: Các hằng số này đã khớp với bảng 'Reservations' của bạn ***
     private static final String TBL_RESERVATIONS = "Reservations";
     private static final String COL_DATE = "reservation_date";
     private static final String COL_ID = "reservation_id";
@@ -35,10 +34,6 @@ public class OverviewReportRepository {
 
     public OverviewReportRepository() {}
 
-    /**
-     * FIX: Query đã được cập nhật để khớp với bảng 'Reservations'
-     * Cập nhật: Thêm 'NO_SHOW' vào tính toán 'total_cancellations'
-     */
     public Map<String, Object> getSummaryData(String startDate, String endDate) throws SQLException {
         Map<String, Object> summary = new HashMap<>();
 
@@ -53,9 +48,9 @@ public class OverviewReportRepository {
         """, COL_ID, COL_STATUS, COL_PRICE, COL_STATUS, COL_STATUS, TBL_RESERVATIONS);
 
         List<Object> params = new ArrayList<>();
-        params.add(STATUS_COMPLETED); // Tham số 1 (cho total_revenue)
-        params.add(STATUS_CANCELLED); // Tham số 2 (cho total_cancellations)
-        params.add(STATUS_NO_SHOW);   // Tham số 3 (cho total_cancellations)
+        params.add(STATUS_COMPLETED);
+        params.add(STATUS_CANCELLED);
+        params.add(STATUS_NO_SHOW);
 
         if (startDate != null && !startDate.isEmpty()) {
             query += String.format(" AND B.%s >= ? ", COL_DATE);
@@ -81,7 +76,6 @@ public class OverviewReportRepository {
 
                     double cancellationRate = 0.0;
                     if (totalBookings > 0) {
-                        // Tỷ lệ hủy = (Hủy + Không đến) / Tổng số đơn
                         cancellationRate = ((double) totalCancellations / totalBookings) * 100.0;
                     }
 
@@ -106,25 +100,19 @@ public class OverviewReportRepository {
         }};
     }
 
-    /**
-     * FIX: Cập nhật các tham số truyền vào query (thêm STATUS_NO_SHOW)
-     */
     public List<Map<String, Object>> getTimeTrendData(String startDateStr, String endDateStr, String unit) throws SQLException {
 
         DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Map<String, Map<String, Object>> dbDataMap = new HashMap<>();
 
-        // FIX: Hàm createTimeTrendQuery đã được sửa để trỏ đến bảng Reservations
         String query = createTimeTrendQuery(unit, startDateStr, endDateStr);
         List<Object> params = new ArrayList<>();
 
-        // Thêm các tham số (phải khớp thứ tự '?' trong createTimeTrendQuery)
-        params.add(STATUS_COMPLETED); // 1. Cho revenue
-        params.add(STATUS_CANCELLED); // 2. Cho cancellations
-        params.add(STATUS_NO_SHOW);   // 3. Cho cancellations
-        params.add(startDateStr);     // 4. Cho ngày bắt đầu
-        params.add(endDateStr);       // 5. Cho ngày kết thúc
-
+        params.add(STATUS_COMPLETED);
+        params.add(STATUS_CANCELLED);
+        params.add(STATUS_NO_SHOW);
+        params.add(startDateStr);
+        params.add(endDateStr);
         try (Connection con = db.getConnection();
              PreparedStatement stm = con.prepareStatement(query)) {
 
@@ -147,7 +135,6 @@ public class OverviewReportRepository {
             throw e;
         }
 
-        // Tạo chuỗi ngày đầy đủ và điền dữ liệu 0 (Không cần sửa)
         List<Map<String, Object>> finalTrendList = new ArrayList<>();
         LocalDate startDate = LocalDate.parse(startDateStr, dbFormatter);
         LocalDate endDate = LocalDate.parse(endDateStr, dbFormatter);
@@ -206,9 +193,6 @@ public class OverviewReportRepository {
         }
     }
 
-    /**
-     * FIX: Cập nhật query để khớp bảng Reservations và thêm 'NO_SHOW'
-     */
     private String createTimeTrendQuery(String unit, String startDate, String endDate) {
         String groupByColumn;
         String dateColumn = "B." + COL_DATE;
@@ -226,8 +210,6 @@ public class OverviewReportRepository {
                 break;
         }
 
-        // FIX: Cập nhật query để trỏ đến TBL_RESERVATIONS,
-        // và thêm (OR B.%s = ?) để tính cả NO_SHOW
         String query = String.format("""
             SELECT
                 %s AS date,

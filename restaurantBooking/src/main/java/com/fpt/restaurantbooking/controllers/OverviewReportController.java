@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +19,6 @@ import java.math.BigDecimal;
 public class OverviewReportController extends HttpServlet {
 
     private final OverviewReportRepository reportRepository = new OverviewReportRepository();
-    private static final LocalDate OFFICIAL_MIN_DATE = LocalDate.of(2025, 9, 1);
-    private static final LocalDate OFFICIAL_MAX_DATE = LocalDate.of(2025, 10, 31);
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -68,12 +65,6 @@ public class OverviewReportController extends HttpServlet {
                     shouldRunQuery = false;
                 } else {
                     shouldRunQuery = true;
-
-//                    if (startDate.isBefore(OFFICIAL_MIN_DATE) || endDate.isAfter(OFFICIAL_MAX_DATE)) {
-//                        warningMessage = "Lưu ý: Dữ liệu đặt bàn chính thức chỉ có từ " + OFFICIAL_MIN_DATE.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-//                                + " đến " + OFFICIAL_MAX_DATE.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-//                                + ". Các ngày ngoài phạm vi này sẽ hiển thị doanh thu 0.";
-//                    }
                 }
 
                 if (shouldRunQuery) {

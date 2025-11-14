@@ -88,25 +88,21 @@
         .status-active { color: var(--revenue-color); font-weight: bold; }
         .status-inactive { color: var(--cancellation-color); font-weight: bold; }
 
-        /* --- CHART CONTAINER (FIXED HEIGHT & SCROLL) --- */
         #chartContainer {
             position: relative;
             display: block;
             width: 100%;
             max-width: 100%;
-            height: 450px;   /* Cố định chiều cao */
+            height: 450px;
             margin: 20px 0;
             padding: 10px;
             border: 1px solid var(--light-red);
             background-color: #fffafa;
-            overflow-x: auto; /* KÍCH HOẠT CUỘN NGANG KHI CANVAS BỊ TRÀN */
             overflow-y: hidden;
             box-sizing: border-box;
         }
         #employeeBookingsChart {
             display: block;
-            height: 400px !important; /* Ép cứng chiều cao canvas */
-            /* Chiều rộng được set bởi JavaScript để chống nén */
         }
 
         /* Buttons Chart */
@@ -171,7 +167,6 @@
 
     <div class="main-content-body">
         <div class="content-container">
-            <%-- HIỂN THỊ THÔNG BÁO --%>
             <c:if test="${not empty sessionScope.sessionWarningMessage}">
                 <div id="alertWarning" style="background-color: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border: 1px solid #ffeeba; border-radius: 4px;">${sessionScope.sessionWarningMessage}</div>
                 <c:remove var="sessionWarningMessage" scope="session"/>
@@ -182,7 +177,6 @@
             </c:if>
 
             <c:choose>
-                <%-- VIEW 1: CHI TIẾT NHÂN VIÊN --%>
                 <c:when test="${requestScope.isDetailMode && not empty requestScope.selectedEmployeeDetail}">
                     <a href="staff-report?startDate=${requestScope.startDateParam}&endDate=${requestScope.endDateParam}" class="home-button" style="margin-bottom: 15px; display: inline-flex; background-color: #555; border-color: #555; font-weight: normal;"><i class="fas fa-arrow-left"></i> Quay lại Tổng quan</a>
                     <h1>Báo Cáo Hiệu Suất Chi Tiết</h1>
@@ -223,7 +217,6 @@
                     </div>
                 </c:when>
 
-                <%-- VIEW 2: TỔNG QUAN DANH SÁCH --%>
                 <c:otherwise>
                     <h1>Báo cáo hiệu suất làm việc của nhân viên</h1>
                     <div class="filter-container-styled">
@@ -303,7 +296,6 @@
     const START_OF_BUSINESS_DATE = "2025-09-01";
     let trendChart = null;
 
-    // --- ALERT ---
     const alertBox = document.getElementById('missingDateAlert');
     const alertText = document.getElementById('missingDateAlertText');
     function showAlert(msg) {
@@ -314,7 +306,6 @@
         setTimeout(()=> { alertBox.style.opacity = '0'; setTimeout(()=> alertBox.style.display='none', 300); }, 3000);
     }
 
-    // --- HELPER ---
     function changeChartUnit(unit) {
         const url = new URL(window.location.href);
         url.searchParams.set('chartUnit', unit);
@@ -336,14 +327,12 @@
         return label;
     }
 
-    // --- VẼ BIỂU ĐỒ (FIXED: Bị nén/quá khổ) ---
     <c:if test="${requestScope.isDetailMode}">
     function initChart() {
         const chartCanvas = document.getElementById('employeeBookingsChart');
         const chartContainer = document.getElementById('chartContainer');
         if (!chartCanvas) return;
 
-        // 1. Lấy dữ liệu từ JSTL
         const labels = [];
         const hoursData = [];
         <c:if test="${not empty requestScope.employeeTimeTrend}">
@@ -360,22 +349,6 @@
 
         const formattedLabels = labels.map(l => formatChartLabel(l, chartUnit));
         const ctx = chartCanvas.getContext('2d');
-
-        // 2. TÍNH TOÁN CHIỀU RỘNG TỐI ƯU ĐỂ NGĂN NÉN DỮ LIỆU
-
-        // Chiều rộng tối thiểu cho mỗi cột (data point). Tăng từ 150px lên 180px để thoáng hơn.
-        const minWidthPerDataPoint = 180;
-
-        // Tính toán chiều rộng tối thiểu cần thiết cho toàn bộ biểu đồ
-        const minRequiredChartWidth = formattedLabels.length * minWidthPerDataPoint;
-
-        // Lấy chiều rộng hiện tại của container (trừ padding)
-        const containerWidth = chartContainer ? (chartContainer.clientWidth - 20) : 800;
-
-        // Đặt chiều rộng Canvas là giá trị lớn nhất giữa container và chiều rộng tối thiểu
-        // Nếu minRequiredChartWidth > containerWidth, Canvas sẽ lớn hơn container và thanh cuộn sẽ xuất hiện
-        chartCanvas.width = Math.max(containerWidth, minRequiredChartWidth);
-        chartCanvas.height = 400; // Cố định chiều cao canvas
 
         if (trendChart) trendChart.destroy();
 
@@ -394,8 +367,8 @@
                 ]
             },
             options: {
-                responsive: false, // TẮT responsive mặc định của Chart.js
-                maintainAspectRatio: false, // TẮT duy trì tỉ lệ khung hình
+                responsive: true,
+                maintainAspectRatio: false,
                 animation: false,
                 layout: { padding: { right: 20, left: 10 } },
                 plugins: {
@@ -403,7 +376,13 @@
                     title: { display: true, text: 'Biểu đồ Giờ Làm Việc', font: { size: 16 } }
                 },
                 scales: {
-                    x: { grid: { display: false } },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            autoSkip: true,
+                            maxRotation: 0
+                        }
+                    },
                     yWorkingHours: {
                         type: 'linear',
                         position: 'left',
@@ -411,20 +390,14 @@
                         title: { display: true, text: 'Giờ làm (h)' },
                         grid: { drawOnChartArea: true }
                     }
-                },
-                // Sử dụng giá trị cố định để đảm bảo thanh bar có độ rộng vừa phải
-                barPercentage: 0.6,
-                categoryPercentage: 0.8
+                }
+
             }
         });
-
-        // Cuộn về đầu sau khi vẽ biểu đồ (tùy chọn)
-        if(chartContainer) chartContainer.scrollLeft = 0;
     }
     document.addEventListener('DOMContentLoaded', initChart);
     </c:if>
 
-    // --- MODAL ---
     function openFilterModal() {
         const m = document.getElementById('filterModal');
         const d = document.getElementById('modalStartDate');
