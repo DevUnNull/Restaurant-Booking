@@ -10,45 +10,104 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/theme.css">
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html {
             font-family: 'Montserrat', sans-serif;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)),
             url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop');
             background-position: center;
             background-size: cover;
             background-attachment: fixed;
-            color: #f0f0f0;
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
             padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
         }
         .container {
             width: 95%;
             max-width: 1200px;
-            background-color: rgba(20, 10, 10, 0.75);
+            background-color: var(--box-bg);
             backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--input-border);
             margin-bottom: 30px;
+            transition: background-color 0.3s ease;
         }
-        h2 {
-            text-align: center;
+
+        /* HEADER WITH NAVIGATION */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
-            color: #fff;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h2 {
+            color: var(--text-primary);
             font-size: 2.5em;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            flex: 1;
+            min-width: 300px;
+            transition: color 0.3s ease;
         }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Montserrat', sans-serif;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn-order {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-order:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #65408a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -56,55 +115,53 @@
             gap: 15px;
             margin-bottom: 30px;
             padding: 20px;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: var(--table-bg);
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
         .controls label {
             font-size: 1.1em;
             font-weight: 500;
-            color: #fff;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 8px;
         }
         .controls select, .controls input[type="number"] {
             padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--input-border);
             border-radius: 8px;
             font-size: 1em;
-            background: rgba(0, 0, 0, 0.4);
-            color: #fff;
+            background: var(--table-bg);
+            color: var(--text-primary);
             font-family: 'Montserrat', sans-serif;
             outline: none;
+            transition: all 0.3s ease;
+        }
+        .controls select option {
+            background: var(--box-bg);
+            color: var(--text-primary);
+        }
+        body.light-mode .controls select option {
+            background: #fff;
+            color: #2c3e50;
         }
         .controls select { min-width: 180px; }
-        .controls select:focus, .controls input[type="number"]:focus { border-color: #e74c3c; }
+        .controls select:focus, .controls input[type="number"]:focus { border-color: #667eea; }
         .controls input[type="number"]:invalid { border-color: #e74c3c; }
-        .btn-search {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-search:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
+
         .error-message {
             color: #e74c3c;
             font-size: 0.9em;
             text-align: center;
             margin-top: 10px;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(231, 76, 60, 0.4);
         }
+
         .legend {
             display: flex;
             flex-wrap: wrap;
@@ -112,9 +169,10 @@
             gap: 20px;
             margin-top: 20px;
             padding: 15px;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: var(--table-bg);
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--input-border);
+            transition: all 0.3s ease;
         }
         .legend-item {
             display: flex;
@@ -132,6 +190,7 @@
         .legend-color.green { background-color: #28a745; }
         .legend-color.yellow { background-color: #ffc107; }
         .legend-color.grey { background-color: #6c757d; }
+
         .restaurant-map {
             width: 100%;
             max-width: 900px;
@@ -310,18 +369,56 @@
             background: #6c757d;
             cursor: not-allowed;
         }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 1.8em;
+                text-align: center;
+            }
+            .header-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-buttons {
+                justify-content: center;
+            }
+            .btn-nav {
+                flex: 1;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <h2><i class="fas fa-map-marked-alt"></i> Sơ đồ Bàn Nhà hàng</h2>
+<!-- Theme Toggle Button -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <i class="fas fa-moon" id="themeIcon"></i>
+    <span id="themeText">Chế độ tối</span>
+</button>
 
+<div class="container">
+    <!-- HEADER WITH NAVIGATION -->
+    <div class="header-section">
+        <h2><i class="fas fa-map-marked-alt"></i> Sơ đồ Bàn Nhà hàng</h2>
+        <div class="nav-buttons">
+            <a href="findTable" class="btn-nav btn-back">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+            <a href="orderItems" class="btn-nav btn-order" id="orderItemsBtn">
+                <i class="fas fa-utensils"></i> Đặt món ăn
+            </a>
+        </div>
+    </div>
+
+    <!-- FLOOR SELECTION FORM -->
     <form action="findTableMap" method="get" class="controls">
         <input type="hidden" name="date" value="<%= request.getAttribute("requiredDate") %>">
         <input type="hidden" name="time" value="<%= request.getAttribute("requiredTime") %>">
+        <input type="hidden" name="floor" value="<%= request.getParameter("floor") != null ? request.getParameter("floor") : "all" %>">
 
         <label for="floorSelect"><i class="fas fa-layer-group"></i> Chọn tầng:</label>
-        <select name="floor" id="floorSelect" onchange="this.form.submit()">
+        <select id="floorSelect" disabled>
             <option value="all" <%= "all".equals(request.getParameter("floor")) ? "selected" : "" %>>Tất cả tầng</option>
             <option value="1" <%= "1".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 1</option>
             <option value="2" <%= "2".equals(request.getParameter("floor")) ? "selected" : "" %>>Tầng 2</option>
@@ -333,17 +430,14 @@
         <input type="number" name="guests" id="capacityInput" min="1" max="20"
                value="<%= request.getAttribute("guestCount") != null ? request.getAttribute("guestCount") : "2" %>"
                required readonly>
-
-    </form>
-    <form action="findViewTable" method="get">
-        <button  type="submit" class="btn-search"><i class="fas fa-search"></i> Quay lại</button>
     </form>
 
-
+    <!-- ERROR MESSAGE -->
     <div id="error-message" class="error-message" style="display: <%= request.getAttribute("errorMessage") != null ? "block" : "none" %>;">
         <%= request.getAttribute("errorMessage") != null ? request.getAttribute("errorMessage") : "" %>
     </div>
 
+    <!-- LEGEND -->
     <div class="legend">
         <div class="legend-item"><span class="legend-color red"></span> Đã có người đặt</div>
         <div class="legend-item"><span class="legend-color green"></span> Trống & phù hợp</div>
@@ -351,6 +445,7 @@
         <div class="legend-item"><span class="legend-color grey"></span> Trống (chưa chọn tầng/số người)</div>
     </div>
 
+    <!-- RESTAURANT MAP -->
     <div class="restaurant-map">
         <div class="dining-area indoor-dining">Tầng 1</div>
         <div class="dining-area upper-outdoor-dining">Tầng 2</div>
@@ -373,7 +468,6 @@
 
                     String tableClass = "table table-" + tableId;
 
-                    // Determine CSS class based on status and match
                     if ("booked".equals(status)) {
                         tableClass += " booked";
                     } else if (match) {
@@ -382,7 +476,6 @@
                         tableClass += " available-nomatch";
                     }
 
-                    // Check if the table should be displayed based on selected floor
                     boolean show = "all".equals(selectedFloorParam) || String.valueOf(floor).equals(selectedFloorParam);
 
                     if (show) {
@@ -400,7 +493,35 @@
 </div>
 
 <div class="table-tooltip" id="tableTooltip"></div>
+
+<%
+    // Tính số bàn đã chọn từ session cho JavaScript
+    int selectedTableCountFromSession = 0;
+    try {
+        List<Integer> __tableIds = (List<Integer>) session.getAttribute("selectedTableIds");
+        selectedTableCountFromSession = (__tableIds != null) ? __tableIds.size() : 0;
+    } catch (Exception __e) {
+        selectedTableCountFromSession = 0;
+    }
+%>
+
+<script src="${pageContext.request.contextPath}/js/theme-manager.js"></script>
 <script>
+    // Số bàn đã chọn (khởi tạo từ session)
+    var selectedTableCount = <%= selectedTableCountFromSession %>;
+
+    // Chặn đặt món nếu chưa chọn bàn
+    (function() {
+        var btn = document.getElementById('orderItemsBtn');
+        if (btn) {
+            btn.addEventListener('click', function(e) {
+                if (!selectedTableCount || selectedTableCount <= 0) {
+                    e.preventDefault();
+                    alert('Bạn phải chọn ít nhất 1 bàn trước khi đặt món.');
+                }
+            });
+        }
+    })();
     const tooltip = document.getElementById('tableTooltip');
     const tables = document.querySelectorAll('.table');
     let currentTable = null;
@@ -408,18 +529,15 @@
 
     tables.forEach(table => {
         table.addEventListener('mouseenter', function(e) {
-            // Hủy timeout ẩn nếu có
             if (hideTimeout) {
                 clearTimeout(hideTimeout);
                 hideTimeout = null;
             }
-
             currentTable = this;
             showTooltip(e, this);
         });
 
         table.addEventListener('mouseleave', function(e) {
-            // Delay trước khi ẩn để kiểm tra xem có di chuyển sang tooltip không
             hideTimeout = setTimeout(() => {
                 if (!tooltip.matches(':hover')) {
                     hideTooltip();
@@ -429,7 +547,6 @@
         });
     });
 
-    // Khi chuột vào tooltip, hủy việc ẩn
     tooltip.addEventListener('mouseenter', function() {
         if (hideTimeout) {
             clearTimeout(hideTimeout);
@@ -437,7 +554,6 @@
         }
     });
 
-    // Khi chuột rời khỏi tooltip
     tooltip.addEventListener('mouseleave', function() {
         hideTimeout = setTimeout(() => {
             if (!currentTable || !currentTable.matches(':hover')) {
@@ -453,12 +569,6 @@
         const status = tableElement.getAttribute('data-status');
         const requiredCapacity = tableElement.getAttribute('data-required-capacity');
 
-        // Debug - XÓA sau khi test xong
-        console.log('tableId:', tableId);
-        console.log('capacity:', capacity);
-        console.log('requiredCapacity:', requiredCapacity);
-
-        // Kiểm tra class thay vì status text
         const isBooked = tableElement.classList.contains('booked');
         const isAvailableMatch = tableElement.classList.contains('available-match');
         const isAvailableNoMatch = tableElement.classList.contains('available-nomatch');
@@ -466,76 +576,35 @@
         let content = '';
 
         if (isBooked) {
-            // Bàn đã đặt
             content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
                 '<div class="tooltip-info">' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-hashtag"></i>' +
-                '<span>Số bàn: ' + tableId + '</span>' +
-                '</div>' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-user-friends"></i>' +
-                '<span>Sức chứa: ' + capacity + ' người</span>' +
-                '</div>' +
-                '<div class="tooltip-row error">' +
-                '<i class="fas fa-exclamation-circle"></i>' +
-                '<span>Bàn này đã được đặt</span>' +
-                '</div>' +
+                '<div class="tooltip-row"><i class="fas fa-hashtag"></i><span>Số bàn: ' + tableId + '</span></div>' +
+                '<div class="tooltip-row"><i class="fas fa-user-friends"></i><span>Sức chứa: ' + capacity + ' người</span></div>' +
+                '<div class="tooltip-row error"><i class="fas fa-exclamation-circle"></i><span>Bàn này đã được đặt</span></div>' +
                 '</div>';
         } else if (isAvailableMatch) {
-            // Bàn phù hợp
             content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
                 '<div class="tooltip-info">' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-hashtag"></i>' +
-                '<span>Số bàn: ' + tableId + '</span>' +
-                '</div>' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-user-friends"></i>' +
-                '<span>Sức chứa: ' + capacity + ' người</span>' +
-                '</div>' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-check-circle"></i>' +
-                '<span>Phù hợp với yêu cầu ' + requiredCapacity + ' người</span>' +
-                '</div>' +
+                '<div class="tooltip-row"><i class="fas fa-hashtag"></i><span>Số bàn: ' + tableId + '</span></div>' +
+                '<div class="tooltip-row"><i class="fas fa-user-friends"></i><span>Sức chứa: ' + capacity + ' người</span></div>' +
+                '<div class="tooltip-row"><i class="fas fa-check-circle"></i><span>Phù hợp với yêu cầu ' + requiredCapacity + ' người</span></div>' +
                 '</div>' +
                 '<button class="tooltip-button" onclick="addTableToCart(' + tableId + ', ' + capacity + ')">' +
-                '<i class="fas fa-cart-plus"></i> THÊM BÀN' +
-                '</button>';
+                '<i class="fas fa-cart-plus"></i> THÊM BÀN</button>';
         } else if (isAvailableNoMatch) {
-            // Bàn không phù hợp nhưng vẫn cho phép thêm
             content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
                 '<div class="tooltip-info">' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-hashtag"></i>' +
-                '<span>Số bàn: ' + tableId + '</span>' +
-                '</div>' +
-                '<div class="tooltip-row error">' +
-                '<i class="fas fa-user-friends"></i>' +
-                '<span>Sức chứa: ' + capacity + ' người</span>' +
-                '</div>' +
-                '<div class="tooltip-row error">' +
-                '<i class="fas fa-exclamation-triangle"></i>' +
-                '<span>Không phù hợp (yêu cầu ' + requiredCapacity + ' người)</span>' +
-                '</div>' +
+                '<div class="tooltip-row"><i class="fas fa-hashtag"></i><span>Số bàn: ' + tableId + '</span></div>' +
+                '<div class="tooltip-row error"><i class="fas fa-user-friends"></i><span>Sức chứa: ' + capacity + ' người</span></div>' +
+                '<div class="tooltip-row error"><i class="fas fa-exclamation-triangle"></i><span>Không phù hợp (yêu cầu ' + requiredCapacity + ' người)</span></div>' +
                 '</div>' +
                 '<button class="tooltip-button" onclick="addTableToCart(' + tableId + ', ' + capacity + ')">' +
-                '<i class="fas fa-cart-plus"></i> VẪN THÊM BÀN' +
-                '</button>';
-        }
-
-        else {
-            // Bàn mặc định
+                '<i class="fas fa-cart-plus"></i> VẪN THÊM BÀN</button>';
+        } else {
             content = '<div class="tooltip-header">Bàn ' + tableId + '</div>' +
                 '<div class="tooltip-info">' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-hashtag"></i>' +
-                '<span>Số bàn: ' + tableId + '</span>' +
-                '</div>' +
-                '<div class="tooltip-row">' +
-                '<i class="fas fa-user-friends"></i>' +
-                '<span>Sức chứa: ' + capacity + ' người</span>' +
-                '</div>' +
+                '<div class="tooltip-row"><i class="fas fa-hashtag"></i><span>Số bàn: ' + tableId + '</span></div>' +
+                '<div class="tooltip-row"><i class="fas fa-user-friends"></i><span>Sức chứa: ' + capacity + ' người</span></div>' +
                 '</div>';
         }
 
@@ -546,7 +615,6 @@
         const rect = tableElement.getBoundingClientRect();
         const x = rect.right + 15;
         const y = rect.top;
-
         tooltip.style.left = x + 'px';
         tooltip.style.top = y + 'px';
     }
@@ -556,11 +624,37 @@
         tooltip.style.pointerEvents = 'none';
     }
 
-    function bookTable(tableId, capacity) {
-        alert('Đặt bàn ' + tableId + ' thành công!\\nSức chứa: ' + capacity + ' người');
-        // Có thể chuyển hướng đến trang xác nhận
-        // window.location.href = 'confirm-booking.jsp?tableId=' + tableId;
+    async function addTableToCart(tableId, capacity) {
+        try {
+            const response = await fetch('addTable', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'tableId=' + encodeURIComponent(tableId)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message || 'Thêm bàn thành công!');
+                const tableElem = document.querySelector(`.table[data-table-id='${tableId}']`);
+                if (tableElem) {
+                    tableElem.classList.remove('available-match', 'available-nomatch');
+                    tableElem.classList.add('booked');
+                    tableElem.style.cursor = 'not-allowed';
+                }
+                // Tăng đếm bàn đã chọn để cho phép đặt món
+                try { selectedTableCount = (selectedTableCount || 0) + 1; } catch(__e) {}
+            } else {
+                alert(result.message || 'Không thể thêm bàn.');
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+            alert('Có lỗi xảy ra khi thêm bàn.');
+        } finally {
+            hideTooltip();
+        }
     }
 </script>
+
 </body>
 </html>

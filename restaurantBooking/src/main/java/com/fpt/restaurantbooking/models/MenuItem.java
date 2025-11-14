@@ -25,8 +25,25 @@ public class MenuItem extends BaseEntity {
         super();
         this.status = "ACTIVE";
     }
+    public MenuItem(Integer itemId, String itemName) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+
+    }
     public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
-                    String status, String created_By, String updated_By, String created_At, String updated_At, String category_name) {
+                    String status,  int category_id, String category_name) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemCode = itemCode;
+        this.description = description;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.status = status;
+this.category_name=category_name;
+        this.category_id = category_id;
+    }
+    public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
+                    String status, String created_By, String updated_By, String created_At, String updated_At, String category_name, int category_id) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.itemCode = itemCode;
@@ -39,6 +56,7 @@ public class MenuItem extends BaseEntity {
         this.created_At = created_At;
         this.updated_At = updated_At;
         this.category_name = category_name;
+        this.category_id = category_id;
     }
     public MenuItem(Integer itemId, String itemName, String itemCode, String description, BigDecimal price, String imageUrl,
                     String status, String created_By, String updated_By, String created_At, String updated_At, int category_id) {
@@ -59,7 +77,13 @@ public class MenuItem extends BaseEntity {
 
     // Getters and Setters
 
+    public Integer getCategory_id() {
+        return category_id;
+    }
 
+    public void setCategory_id(Integer category_id) {
+        this.category_id = category_id;
+    }
     public String getCreated_By() {
         return created_By;
     }

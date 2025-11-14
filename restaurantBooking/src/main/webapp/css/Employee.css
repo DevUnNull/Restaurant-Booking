@@ -1,0 +1,381 @@
+/* Container chứa thanh tìm kiếm */
+.search-container {
+    display: flex;
+    justify-content: center;  /* căn giữa theo chiều ngang */
+    align-items: center;
+    margin: 20px 0;           /* tạo khoảng cách trên dưới */
+    gap: 10px;                /* cách đều input và nút */
+}
+
+/* Ô nhập từ khóa */
+.search-input {
+    padding: 10px 14px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 25px;      /* bo tròn đẹp */
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #b23627;
+    box-shadow: 0 0 5px #b23627;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column; /* input + span lỗi xếp theo cột */
+    width: 250px;
+}
+
+.search-error {
+    position: absolute;
+    top: 100%;           /* đặt ngay dưới container */
+    left: 50%;           /* căn giữa theo chiều ngang */
+    transform: translateX(-50%);
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
+/* Nút Search */
+.search-button {
+    background-color: #b23627;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-button:hover {
+    background-color: #922c1f;
+    transform: translateY(-2px);
+}
+
+.action-btn {
+    margin-right: 6px; /* tạo khoảng cách giữa 2 nút */
+}
+/* Nút thêm dịch vụ */
+.add-btn {
+    background-color: #c0392b; /* Đỏ đậm sang trọng */
+    color: #fff; /* Chữ trắng */
+    border: none;
+    padding: 10px 22px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    float: right; /* Đưa sang phải */
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(192, 57, 43, 0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+/* Hiệu ứng hover */
+.add-btn:hover {
+    background-color: #e74c3c;
+    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+/* Khi bấm giữ */
+.add-btn:active {
+    background-color: #a93226;
+    transform: translateY(0);
+    text-decoration: none;
+}
+a {
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 20px;
+    margin-right: 10px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.link1 {
+    background-color: #b23627; /* đỏ nâu */
+    color: white;
+}
+.link2 {
+    background-color: #1e90ff; /* xanh dương */
+    color: white;
+}
+.link3 {
+    background-color: #28a745; /* xanh lá */
+    color: white;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* Popup (modal) nền mờ */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+/* Hộp nội dung popup */
+.modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+/* Nút đóng (X) */
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* Form trong popup */
+.modal-content input, .modal-content select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Employee.css */
+#scheduleDetailPopup h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+#scheduleDetailPopup p {
+    font-size: 18px;
+    margin: 12px 0;
+    line-height: 1.5;
+    color: #555;
+}
+
+#scheduleDetailPopup strong {
+    color: #222;
+}
+
+#scheduleDetailPopup button {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+#scheduleDetailPopup button:hover {
+    background-color: #c0392b;
+}
+
+/* Nút Lưu & Hủy */
+.save-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+.save-btn:hover { background-color: #218838; }
+
+.cancel-btn {
+    background-color: #b23627;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.cancel-btn:hover { background-color: #922c1f; }
+
+/* === Phân trang === */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 25px auto 10px auto;
+    padding: 10px 0;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.pagination a {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 2px;
+    border-radius: 6px;
+    border: 1px solid #b23627;
+    color: #b23627;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    background-color: #fff;
+}
+.pagination a:hover {
+    background-color: #b23627;
+    color: white;
+    transform: scale(1.05);
+}
+.pagination a.active {
+    background-color: #b23627;
+    color: white;
+    font-weight: 600;
+    border: 1px solid #b23627;
+}
+
+    /* === Bộ lọc giới tính & trạng thái === */
+    .search-container select {
+        padding: 10px 14px;
+        border: 1px solid #ccc;
+        border-radius: 25px;
+        font-size: 15px;
+        outline: none;
+        background-color: #fff;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    /* Khi rê chuột hoặc focus vào select */
+    .search-container select:hover,
+    .search-container select:focus {
+        border-color: #b23627;
+        box-shadow: 0 0 5px rgba(178, 54, 39, 0.5);
+    }
+    /* Tạo khoảng cách giữa các phần tử trong search-container */
+    .search-container select,
+    .search-container .search-input,
+    .search-container .search-button {
+        margin-right: 10px;
+    }
+    /* Khi màn hình nhỏ (responsive) */
+    @media (max-width: 768px) {
+        .search-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-container select,
+        .search-container .search-input,
+        .search-container .search-button {
+            width: 100%;
+            margin-right: 0;
+        }
+    }
+
+/* thong bao popup */
+/* === Alert box góc trên phải === */
+.alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 250px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.6s ease, transform 0.4s ease;
+}
+/* Hai loại thông báo */
+.alert-success { background-color: #28a745; }   /* xanh lá */
+.alert-danger  { background-color: #dc3545; }   /* đỏ */
+/* Dấu X */
+.alert .close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+/* Hiệu ứng biến mất */
+.alert.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+/* --- Nội dung chi tiết --- */
+.detail-info {
+    text-align: center;
+}
+
+.detail-info img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #b23627;
+    margin-bottom: 15px;
+}
+
+.detail-info h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 600;
+}
+
+.detail-info p {
+    font-size: 15px;
+    color: #444;
+    margin: 6px 0;
+    text-align: left;
+    line-height: 1.4;
+}
+
+.detail-info strong {
+    color: #b23627;
+    width: 120px;
+    display: inline-block;
+}
+
+/* --- Hiệu ứng mở modal --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-msg {
+    margin-top: 3px;
+}
+
+

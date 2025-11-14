@@ -1,18 +1,23 @@
 package com.fpt.restaurantbooking.services;
 
+import com.fpt.restaurantbooking.dto.OrderManagementDTO;
 import com.fpt.restaurantbooking.models.EmailVerification;
 import com.fpt.restaurantbooking.models.User;
 import com.fpt.restaurantbooking.utils.EmailUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Service for sending email verification related emails
  */
 public class EmailService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-    
+
     /**
      * Send OTP verification email to user
      */
@@ -20,30 +25,30 @@ public class EmailService {
         try {
             String subject = "Xác Thực Email - Hệ Thống Đặt Bàn Nhà Hàng";
             String htmlBody = buildOTPEmailTemplate(user.getFullName(), otpCode);
-            
+
             boolean sent = EmailUtil.sendHtmlEmail(user.getEmail(), subject, htmlBody);
-            
+
             if (sent) {
                 logger.info("OTP verification email sent successfully to: {}", user.getEmail());
             } else {
                 logger.error("Failed to send OTP verification email to: {}", user.getEmail());
             }
-            
+
             return sent;
-            
+
         } catch (Exception e) {
             logger.error("Error sending OTP verification email to: {}", user.getEmail(), e);
             return false;
         }
     }
-    
+
     /**
      * Send OTP verification email using EmailVerification object
      */
     public boolean sendOTPVerificationEmail(User user, EmailVerification verification) {
         return sendOTPVerificationEmail(user, verification.getOtpCode());
     }
-    
+
     /**
      * Send email verification success notification
      */
@@ -51,23 +56,23 @@ public class EmailService {
         try {
             String subject = "Xác Thực Email Thành Công - Hệ Thống Đặt Bàn Nhà Hàng";
             String htmlBody = buildVerificationSuccessTemplate(user.getFullName());
-            
+
             boolean sent = EmailUtil.sendHtmlEmail(user.getEmail(), subject, htmlBody);
-            
+
             if (sent) {
                 logger.info("Verification success email sent successfully to: {}", user.getEmail());
             } else {
                 logger.error("Failed to send verification success email to: {}", user.getEmail());
             }
-            
+
             return sent;
-            
+
         } catch (Exception e) {
             logger.error("Error sending verification success email to: {}", user.getEmail(), e);
             return false;
         }
     }
-    
+
     /**
      * Send OTP resend notification email
      */
@@ -75,23 +80,56 @@ public class EmailService {
         try {
             String subject = "Mã OTP Mới - Hệ Thống Đặt Bàn Nhà Hàng";
             String htmlBody = buildOTPResendTemplate(user.getFullName(), otpCode);
-            
+
             boolean sent = EmailUtil.sendHtmlEmail(user.getEmail(), subject, htmlBody);
-            
+
             if (sent) {
                 logger.info("OTP resend email sent successfully to: {}", user.getEmail());
             } else {
                 logger.error("Failed to send OTP resend email to: {}", user.getEmail());
             }
-            
+
             return sent;
-            
+
         } catch (Exception e) {
             logger.error("Error sending OTP resend email to: {}", user.getEmail(), e);
             return false;
         }
     }
-    
+
+    /**
+     * Send order status change notification email
+     */
+    public boolean sendOrderStatusChangeEmail(OrderManagementDTO order, String newStatus) {
+        try {
+            if (order.getCustomerEmail() == null || order.getCustomerEmail().isEmpty()) {
+                logger.warn("No email found for order {}, cannot send status change notification",
+                        order.getReservationId());
+                return false;
+            }
+
+            String subject = "Thông Báo Thay Đổi Trạng Thái Đơn Hàng - Hệ Thống Đặt Bàn Nhà Hàng";
+            String htmlBody = buildOrderStatusChangeTemplate(order, newStatus);
+
+            boolean sent = EmailUtil.sendHtmlEmail(order.getCustomerEmail(), subject, htmlBody);
+
+            if (sent) {
+                logger.info("Order status change email sent successfully to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            } else {
+                logger.error("Failed to send order status change email to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            }
+
+            return sent;
+
+        } catch (Exception e) {
+            logger.error("Error sending order status change email for order {}",
+                    order.getReservationId(), e);
+            return false;
+        }
+    }
+
     /**
      * Build OTP verification email template
      */
@@ -142,7 +180,7 @@ public class EmailService {
                 "</body>" +
                 "</html>";
     }
-    
+
     /**
      * Build verification success email template
      */
@@ -184,7 +222,7 @@ public class EmailService {
                 "</body>" +
                 "</html>";
     }
-    
+
     /**
      * Build OTP resend email template
      */
@@ -226,6 +264,236 @@ public class EmailService {
                 "            </ul>" +
                 "        </div>" +
                 "        <p>Nhập mã này trên trang xác thực để kích hoạt tài khoản của bạn.</p>" +
+                "    </div>" +
+                "    <div class='footer'>" +
+                "        <p>Trân trọng,<br>Đội Ngũ Hệ Thống Đặt Bàn Nhà Hàng</p>" +
+                "        <p><small>Đây là email tự động. Vui lòng không trả lời email này.</small></p>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    /**
+     * Build order status change email template
+     */
+    private String buildOrderStatusChangeTemplate(OrderManagementDTO order, String newStatus) {
+        // Map status to Vietnamese
+        String statusText = mapStatusToVietnamese(newStatus);
+
+        // Format date and time
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String formattedDate = order.getReservationDate() != null
+                ? order.getReservationDate().format(dateFormatter) : "N/A";
+        String formattedTime = order.getReservationTime() != null
+                ? order.getReservationTime().format(timeFormatter) : "N/A";
+
+        // Format amount
+        String formattedAmount = formatAmount(order.getTotalAmount());
+
+        // Get table names
+        String tableNames = order.getTableNames() != null && !order.getTableNames().isEmpty()
+                ? order.getTableNames() : "Chưa xác định";
+
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "    <meta charset='UTF-8'>" +
+                "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "    <title>Thông Báo Trạng Thái Đơn Hàng</title>" +
+                "    <style>" +
+                "        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                "        .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                "        .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }" +
+                "        .status-box { background-color: #fff; border: 2px solid #dc3545; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px; }" +
+                "        .status-text { font-size: 24px; font-weight: bold; color: #dc3545; }" +
+                "        .details { background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0; }" +
+                "        .details p { margin: 10px 0; }" +
+                "        .details strong { color: #333; }" +
+                "        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }" +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class='header'>" +
+                "        <h1>Hệ Thống Đặt Bàn Nhà Hàng</h1>" +
+                "        <h2>Thông Báo Thay Đổi Trạng Thái</h2>" +
+                "    </div>" +
+                "    <div class='content'>" +
+                "        <h3>Xin chào " + (order.getCustomerName() != null ? order.getCustomerName() : "Quý khách") + ",</h3>" +
+                "        <p>Chúng tôi xin thông báo rằng trạng thái đơn đặt bàn của bạn đã được cập nhật.</p>" +
+                "        <div class='status-box'>" +
+                "            <p>Trạng thái mới:</p>" +
+                "            <div class='status-text'>" + statusText + "</div>" +
+                "        </div>" +
+                "        <div class='details'>" +
+                "            <p><strong>Mã đơn hàng:</strong> #" + order.getReservationId() + "</p>" +
+                "            <p><strong>Ngày:</strong> " + formattedDate + "</p>" +
+                "            <p><strong>Giờ:</strong> " + formattedTime + "</p>" +
+                "            <p><strong>Bàn:</strong> " + tableNames + "</p>" +
+                "            <p><strong>Số khách:</strong> " + order.getGuestCount() + " người</p>" +
+                "            <p><strong>Tổng tiền:</strong> " + formattedAmount + "</p>" +
+                "        </div>" +
+                "        <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>" +
+                "        <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua số hotline hoặc email hỗ trợ.</p>" +
+                "    </div>" +
+                "    <div class='footer'>" +
+                "        <p>Trân trọng,<br>Đội Ngũ Hệ Thống Đặt Bàn Nhà Hàng</p>" +
+                "        <p><small>Đây là email tự động. Vui lòng không trả lời email này.</small></p>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    /**
+     * Map order status to Vietnamese text
+     */
+    private String mapStatusToVietnamese(String status) {
+        if (status == null) {
+            return "Không xác định";
+        }
+
+        switch (status.toUpperCase()) {
+            case "PENDING":
+                return "Chờ Xác Nhận";
+            case "CONFIRMED":
+                return "Đã Xác Nhận";
+            case "COMPLETED":
+                return "Hoàn Thành";
+            case "CANCELLED":
+                return "Đã Hủy";
+            case "NO_SHOW":
+                return "Không Đến";
+            default:
+                return status;
+        }
+    }
+
+    /**
+     * Format amount to Vietnamese currency format
+     */
+    private String formatAmount(java.math.BigDecimal amount) {
+        if (amount == null) {
+            return "0 VNĐ";
+        }
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setGroupingSeparator(',');
+        DecimalFormat formatter = new DecimalFormat("#,###", symbols);
+        return formatter.format(amount) + " VNĐ";
+    }
+
+    /**
+     * Send refund notification email to customer
+     */
+    public boolean sendRefundNotificationEmail(OrderManagementDTO order, 
+                                               java.math.BigDecimal refundAmount, 
+                                               String refundReason, 
+                                               boolean isDepositRefund) {
+        try {
+            if (order.getCustomerEmail() == null || order.getCustomerEmail().isEmpty()) {
+                logger.warn("No email found for order {}, cannot send refund notification",
+                        order.getReservationId());
+                return false;
+            }
+
+            String subject = isDepositRefund 
+                    ? "Thông Báo Hoàn Tiền Cọc - Hệ Thống Đặt Bàn Nhà Hàng"
+                    : "Thông Báo Hoàn Tiền - Hệ Thống Đặt Bàn Nhà Hàng";
+            String htmlBody = buildRefundNotificationTemplate(order, refundAmount, refundReason, isDepositRefund);
+
+            boolean sent = EmailUtil.sendHtmlEmail(order.getCustomerEmail(), subject, htmlBody);
+
+            if (sent) {
+                logger.info("Refund notification email sent successfully to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            } else {
+                logger.error("Failed to send refund notification email to: {} for order {}",
+                        order.getCustomerEmail(), order.getReservationId());
+            }
+
+            return sent;
+
+        } catch (Exception e) {
+            logger.error("Error sending refund notification email for order {}",
+                    order.getReservationId(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Build refund notification email template
+     */
+    private String buildRefundNotificationTemplate(OrderManagementDTO order, 
+                                                   java.math.BigDecimal refundAmount,
+                                                   String refundReason,
+                                                   boolean isDepositRefund) {
+        // Format date and time
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String formattedDate = order.getReservationDate() != null
+                ? order.getReservationDate().format(dateFormatter) : "N/A";
+        String formattedTime = order.getReservationTime() != null
+                ? order.getReservationTime().format(timeFormatter) : "N/A";
+
+        // Format amounts
+        String formattedRefundAmount = formatAmount(refundAmount);
+        String formattedTotalAmount = formatAmount(order.getTotalAmount());
+
+        // Get table names
+        String tableNames = order.getTableNames() != null && !order.getTableNames().isEmpty()
+                ? order.getTableNames() : "Chưa xác định";
+
+        String title = isDepositRefund ? "Hoàn Tiền Cọc" : "Hoàn Tiền";
+        String headerColor = isDepositRefund ? "#ffc107" : "#28a745";
+
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "    <meta charset='UTF-8'>" +
+                "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "    <title>Thông Báo Hoàn Tiền</title>" +
+                "    <style>" +
+                "        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                "        .header { background-color: " + headerColor + "; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                "        .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }" +
+                "        .refund-box { background-color: #fff; border: 2px solid " + headerColor + "; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px; }" +
+                "        .refund-amount { font-size: 28px; font-weight: bold; color: " + headerColor + "; margin: 10px 0; }" +
+                "        .details { background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0; }" +
+                "        .details p { margin: 10px 0; }" +
+                "        .details strong { color: #333; }" +
+                "        .reason-box { background-color: #e8f5e9; border-left: 4px solid " + headerColor + "; padding: 15px; margin: 20px 0; border-radius: 5px; }" +
+                "        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }" +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class='header'>" +
+                "        <h1>Hệ Thống Đặt Bàn Nhà Hàng</h1>" +
+                "        <h2>" + title + "</h2>" +
+                "    </div>" +
+                "    <div class='content'>" +
+                "        <h3>Xin chào " + (order.getCustomerName() != null ? order.getCustomerName() : "Quý khách") + ",</h3>" +
+                "        <p>Chúng tôi xin thông báo về việc hoàn tiền cho đơn đặt bàn của bạn.</p>" +
+                "        <div class='refund-box'>" +
+                "            <p>Số tiền được hoàn:</p>" +
+                "            <div class='refund-amount'>" + formattedRefundAmount + "</div>" +
+                "        </div>" +
+                "        <div class='details'>" +
+                "            <p><strong>Mã đơn hàng:</strong> #" + order.getReservationId() + "</p>" +
+                "            <p><strong>Ngày đặt:</strong> " + formattedDate + "</p>" +
+                "            <p><strong>Giờ đặt:</strong> " + formattedTime + "</p>" +
+                "            <p><strong>Bàn:</strong> " + tableNames + "</p>" +
+                "            <p><strong>Tổng tiền đơn hàng:</strong> " + formattedTotalAmount + "</p>" +
+                "        </div>" +
+                "        <div class='reason-box'>" +
+                "            <p><strong>Lý do hoàn tiền:</strong></p>" +
+                "            <p>" + (refundReason != null ? refundReason : "Theo quy định của nhà hàng") + "</p>" +
+                "        </div>" +
+                (isDepositRefund ? 
+                "        <p><strong>Lưu ý:</strong> Tiền cọc đã được hoàn lại vào tài khoản của bạn. " +
+                "Vui lòng kiểm tra số dư tài khoản trong vòng 3-5 ngày làm việc.</p>" :
+                "        <p><strong>Lưu ý:</strong> Số tiền hoàn sẽ được chuyển vào tài khoản của bạn. " +
+                "Vui lòng kiểm tra số dư tài khoản trong vòng 3-5 ngày làm việc.</p>") +
+                "        <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua số hotline hoặc email hỗ trợ.</p>" +
                 "    </div>" +
                 "    <div class='footer'>" +
                 "        <p>Trân trọng,<br>Đội Ngũ Hệ Thống Đặt Bàn Nhà Hàng</p>" +

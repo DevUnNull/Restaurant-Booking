@@ -229,7 +229,7 @@ nav a:hover {
 
 /* Giúp nội dung không bị che bởi header cố định */
 body {
-    padding-top: 80px;
+    padding-top: 0px;
 }
 
 /* === HERO CÓ ẢNH NỀN === */

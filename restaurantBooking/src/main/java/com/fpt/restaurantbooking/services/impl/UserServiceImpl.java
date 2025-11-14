@@ -7,6 +7,7 @@ import com.fpt.restaurantbooking.repositories.UserRepository;
 import com.fpt.restaurantbooking.services.EmailService;
 import com.fpt.restaurantbooking.services.OTPService;
 import com.fpt.restaurantbooking.services.UserService;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +23,7 @@ public class UserServiceImpl implements UserService {
     private EmailVerificationRepository emailVerificationRepository;
     private OTPService otpService;
     private EmailService emailService;
-    
+
     // Constructor for dependency injection
     public UserServiceImpl(UserRepository userRepository,
                            EmailVerificationRepository emailVerificationRepository,
@@ -33,9 +34,17 @@ public class UserServiceImpl implements UserService {
         this.otpService = otpService;
         this.emailService = emailService;
     }
-    
+
     private final SecureRandom secureRandom = new SecureRandom();
-    
+
+    public UserServiceImpl() {
+
+    }
+
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
     public User create(User user) {
         if (user != null) {
@@ -45,87 +54,87 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
-    
+
     @Override
     public User update(User user) {
         user.setUpdatedAt(LocalDateTime.now());
         return userRepository.update(user);
     }
-    
+
     @Override
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
-    
+
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
     }
-    
+
     @Override
     public List<User> findAllActive() {
         return userRepository.findAllActive();
     }
-    
+
     @Override
     public boolean deleteById(Long id) {
         return userRepository.deleteById(id);
     }
-    
+
     @Override
     public boolean softDeleteById(Long id) {
         return userRepository.softDeleteById(id);
     }
-    
+
     @Override
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
-    
+
     @Override
     public long getTotalCount() {
         return userRepository.count();
     }
-    
+
     @Override
     public long getActiveCount() {
         return userRepository.countActive();
     }
-    
+
     @Override
     public boolean validate(User entity) {
         if (entity == null) {
             return false;
         }
-        
+
         // Basic validation
         if (entity.getEmail() == null || entity.getEmail().trim().isEmpty()) {
             return false;
         }
-        
+
         if (entity.getFullName() == null || entity.getFullName().trim().isEmpty()) {
             return false;
         }
-        
+
         // Email format validation (basic)
         if (!entity.getEmail().contains("@")) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     @Override
     public User register(User user, String password) {
         // Hash password
         user.setPassword(hashPassword(password));
-        
+
         // Set default values
-        user.setStatus("ACTIVE");
-        user.setRoleId(3);
+        user.setStatus("PENDING");
+//        user.setRole("CUSTOMER");
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        
+
         // Save user
         User savedUser = userRepository.save(user);
 
@@ -134,28 +143,28 @@ public class UserServiceImpl implements UserService {
 
         return savedUser;
     }
-    
+
     @Override
     public Optional<User> authenticate(String email, String password) {
         // Find user by email only
         Optional<User> userOpt = userRepository.findByEmail(email);
-        
+
         if (userOpt.isPresent() && verifyPassword(password, userOpt.get().getPassword())) {
             return userOpt;
         }
         return Optional.empty();
     }
-    
+
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-    
+
     @Override
     public boolean isEmailAvailable(String email) {
         return !userRepository.existsByEmail(email);
     }
-    
+
     @Override
     public boolean updatePassword(Long userId, String currentPassword, String newPassword) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -165,7 +174,7 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-    
+
     @Override
     public boolean resetPassword(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -173,7 +182,7 @@ public class UserServiceImpl implements UserService {
             String newPassword = generateTemporaryPassword();
             String hashedPassword = hashPassword(newPassword);
             boolean updated = userRepository.updatePassword(userOpt.get().getUserId().longValue(), hashedPassword);
-            
+
             if (updated) {
                 // Send password reset email using EmailService
                 User user = userOpt.get();
@@ -183,7 +192,7 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-    
+
     @Override
     public boolean verifyEmail(String verificationToken) {
         // Since email verification is now handled by Email_Verification table,
@@ -191,7 +200,7 @@ public class UserServiceImpl implements UserService {
         // For now, return false to avoid errors
         return false;
     }
-    
+
     @Override
     public boolean sendVerificationEmail(User user) {
         // Since verification_token has been removed and email verification
@@ -199,7 +208,7 @@ public class UserServiceImpl implements UserService {
         // For now, return false to avoid errors
         return false;
     }
-    
+
     @Override
     public boolean sendOTPVerificationEmail(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -212,7 +221,7 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-    
+
     @Override
     public boolean verifyOTPCode(Long userId, String otpCode) {
         boolean isValid = otpService.validateOTP(userId, otpCode);
@@ -223,7 +232,7 @@ public class UserServiceImpl implements UserService {
                 User user = userOpt.get();
                 user.setStatus("ACTIVE");
                 userRepository.update(user);
-                
+
                 // Send verification success email
                 emailService.sendVerificationSuccessEmail(user);
                 return true;
@@ -231,18 +240,18 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-    
+
     @Override
     public boolean resendOTPVerificationEmail(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            
+
             // Check if user already active
             if ("ACTIVE".equals(user.getStatus())) {
                 return false;
             }
-            
+
             // Generate and send new OTP
             EmailVerification verification = otpService.generateOTPForUser(userId);
             if (verification != null) {
@@ -251,35 +260,35 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-    
+
     @Override
     public boolean hasPendingOTPVerification(Long userId) {
         return otpService.hasValidPendingOTP(userId);
     }
-    
+
     @Override
     public long getOTPRemainingTime(Long userId) {
         return otpService.getRemainingTimeMinutes(userId);
     }
-    
+
     @Override
     public boolean isEmailVerified(Long userId) {
         // Check if user has any successful email verification
         List<EmailVerification> verifications = emailVerificationRepository.findByUserIdAndStatus(userId, "VERIFIED");
         return !verifications.isEmpty();
     }
-    
+
     @Override
     public User updateProfile(User user) {
         user.setUpdatedAt(LocalDateTime.now());
         return userRepository.update(user);
     }
-    
+
     @Override
     public List<User> findByRole(User.UserRole role) {
         return userRepository.findByRole(role);
     }
-    
+
     @Override
     public boolean toggleUserStatus(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -293,37 +302,33 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-    
+
     @Override
     public String generateVerificationToken() {
         return UUID.randomUUID().toString();
     }
-    
+
     @Override
     public String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
-        }
-    }
-    
-    @Override
-    public boolean verifyPassword(String password, String hashedPassword) {
-        return hashPassword(password).equals(hashedPassword);
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
+    @Override
+    public boolean verifyPassword(String password, String hashedPassword) {
+        if (password == null || hashedPassword == null) {
+            return false;
+        }
+        try {
+            return BCrypt.checkpw(password, hashedPassword);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
     @Override
     public UserRepository getUserRepository() {
         return userRepository;
     }
-    
+
     private String generateTemporaryPassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder password = new StringBuilder();
@@ -332,4 +337,33 @@ public class UserServiceImpl implements UserService {
         }
         return password.toString();
     }
+
+    @Override
+    public boolean updateUser(User user) {
+        if (user == null) return false;
+        return userRepository.updateInfo(user);
+    }
+
+    @Override
+    public boolean changePassword(int userId, String currentPassword, String newPassword) {
+        String storedHashedPassword = userRepository.findPasswordById(userId);
+
+        if (storedHashedPassword == null) {
+            return false;
+        }
+
+        if (verifyPassword(currentPassword, storedHashedPassword)) {
+            String newHashedPassword = hashPassword(newPassword);
+            return userRepository.changePassword(userId, newHashedPassword);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean updateAvatar(int userId, String avatarBase64) {
+        return userRepository.updateAvatar(userId, avatarBase64);
+    }
+
+
 }

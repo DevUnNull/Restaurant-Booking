@@ -9,14 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="35bce3f7-41c0-48fb-9a80-609f150a99f2" name="Changes" comment="">
- feature/BlogAndMenu
-      <change afterPath="$PROJECT_DIR$/.idea/data_source_mapping.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/MenuItemDAO.java" afterDir="false" />
-
-      <change afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/BookTable/chooseDish.jsp" afterDir="false" />
- main
+    <list default="true" id="174435c8-542b-4177-87b7-e2426fcf2677" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/ReservationDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/java/com/fpt/restaurantbooking/repositories/impl/ReservationDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/orderManagement.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/restaurantBooking/src/main/webapp/WEB-INF/views/management/orderManagement.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +22,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="JavaScript File" />
+        <option value="CSS File" />
         <option value="Jsp File" />
         <option value="Class" />
         <option value="Jsp File" />
@@ -63,33 +61,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
- feature/BlogAndMenu
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Tomcat Server.Tomcat 10.1.34.executor": "Run",
-    "git-widget-placeholder": "dev",
-
-    "Tomcat Server.Tomcat 10.1.34.executor": "Run",
-    "git-widget-placeholder": "feature/findTableChooseDish",
- main
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Artifacts",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;TomEE Server.TomEE 10.1.34.executor&quot;: &quot;Run&quot;,
+    &quot;Tomcat Server.Tomcat 10.1.34.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
+    ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Restaurant\Restaurant-Booking\restaurantBooking\src\main\webapp\WEB-INF\views\customer" />
       <recent name="D:\FPT\FPT\Ki5\SWP391\Project\Restaurant-Booking\restaurantBooking\src\main\webapp\WEB-INF\BookTable" />
     </key>
   </component>
@@ -118,6 +116,7 @@
       </deployment>
       <server-settings>
         <option name="BASE_DIRECTORY_NAME" value="23d7551b-e020-4aef-b27e-78c04448a7a2" />
+        <option name="HTTP_PORT" value="8080" />
       </server-settings>
       <predefined_log_file enabled="true" id="Tomcat" />
       <predefined_log_file enabled="true" id="Tomcat Catalina" />
@@ -205,7 +204,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="35bce3f7-41c0-48fb-9a80-609f150a99f2" name="Changes" comment="" />
+      <changelist id="174435c8-542b-4177-87b7-e2426fcf2677" name="Changes" comment="" />
       <created>1760188003573</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -217,12 +216,37 @@
       <workItem from="1760332237669" duration="6390000" />
       <workItem from="1760349328737" duration="3778000" />
       <workItem from="1760362669888" duration="2865000" />
- feature/BlogAndMenu
       <workItem from="1760603865951" duration="6433000" />
       <workItem from="1760631760663" duration="1393000" />
-
       <workItem from="1760603865951" duration="6073000" />
- main
+      <workItem from="1760878785921" duration="1211000" />
+      <workItem from="1760951689870" duration="6223000" />
+      <workItem from="1761048801470" duration="5014000" />
+      <workItem from="1761265915419" duration="992000" />
+      <workItem from="1761270417930" duration="10877000" />
+      <workItem from="1761434289991" duration="3174000" />
+      <workItem from="1761508789845" duration="738000" />
+      <workItem from="1761516653627" duration="4624000" />
+      <workItem from="1761561494632" duration="5672000" />
+      <workItem from="1761567676016" duration="4034000" />
+      <workItem from="1761614874897" duration="964000" />
+      <workItem from="1761623486039" duration="1453000" />
+      <workItem from="1761639740569" duration="8843000" />
+      <workItem from="1761665290712" duration="5826000" />
+      <workItem from="1761826561687" duration="5140000" />
+      <workItem from="1761861086273" duration="4415000" />
+      <workItem from="1761872716879" duration="2237000" />
+      <workItem from="1761914050309" duration="1018000" />
+      <workItem from="1762149258162" duration="7546000" />
+      <workItem from="1762304043387" duration="2846000" />
+      <workItem from="1762349780916" duration="1324000" />
+      <workItem from="1762400392253" duration="595000" />
+      <workItem from="1762476105440" duration="2399000" />
+      <workItem from="1762485840804" duration="1918000" />
+      <workItem from="1762506971988" duration="5781000" />
+      <workItem from="1762589639891" duration="1928000" />
+      <workItem from="1762686547307" duration="134000" />
+      <workItem from="1762962562947" duration="657000" />
     </task>
     <servers />
   </component>

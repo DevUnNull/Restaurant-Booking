@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý Voucher</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
   <style>
     body {
       background-color: #f8f9fa;
@@ -58,7 +59,7 @@
       width: 250px;
       background-color: #8c2a1f;
       position: fixed;
-      top: 65px;
+      top: 98px;
       bottom: 0;
       left: 0;
       color: #fff;
@@ -96,7 +97,7 @@
     }
     .content {
       margin-left: 250px;
-      margin-top: 70px;
+      margin-top: 0px;
       padding: 20px;
     }
 
@@ -105,16 +106,47 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #fff;
+      position: relative;
+
+      /* Ảnh nền */
+      background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80');
+      background-size: cover;
+      background-position: center;
+
+      /* Bo góc & đổ bóng */
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+      /* Padding & margin */
       padding: 15px 20px;
       margin-bottom: 25px;
+
+      /* Màu chữ mặc định sáng để nổi trên nền đỏ */
+      color: #fff;
+      overflow: hidden;
     }
+
+    /* Lớp phủ màu đỏ mờ lên trên ảnh nền */
+    .filter-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(139, 0, 0, 0.55); /* đỏ đậm, mờ 55% */
+      border-radius: 8px;
+      z-index: 0;
+    }
+
+    /* Nội dung hiển thị phía trên lớp phủ */
+    .filter-section > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Tiêu đề Voucher */
     .filter-section h3 {
       margin: 0;
-      color: #8b0000;
       font-weight: 600;
+      color: #fff; /* đổi từ đỏ sang trắng cho dễ đọc */
     }
     .voucher-select {
       position: relative;
@@ -208,17 +240,8 @@
 <%--    <a href="#" style="color:#fff; text-decoration:none;">Voucher</a>--%>
 <%--  </div>--%>
 <%--</div>--%>
-<div class="header">
-  <div class="logo">Restaurant_Booking</div>
-  <nav>
-    <ul>
-      <li><a href="#">Trang chủ</a></li>
-      <li><a href="#">Đặt bàn</a></li>
-      <li><a href="#">Menu</a></li>
-      <li><a href="Voucher" class="active">Voucher</a></li>
-    </ul>
-  </nav>
-</div>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
+
 
 <%--<ul>--%>
 <%--  <li><a href="#">Dashboard</a></li>--%>
@@ -234,15 +257,14 @@
 <%--</ul>--%>
 <!-- Sidebar -->
 <div class="sidebar">
-  <h2>Staff Panel</h2>
+
   <ul>
-    <li><a href="#">Dashboard</a></li>
-    <li><a href="ServiceList">Dịch vụ</a></li>
+
     <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-    <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
-    <li><a href="#">Quản lý Menu</a></li>
-    <li><a href="Voucher" class="active">Quản lý Voucher khuyến mãi</a></li>
-    <li><a href="#">Quản lý khách hàng thân thiết</a></li>
+    <li><a href="Menu_manage">Quản lý Menu</a></li>
+    <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+    <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+    <li><a href="Timedirect">Quản lý khung giờ </a></li>
   </ul>
 </div>
 
@@ -350,6 +372,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <span class="badge bg-success badge-status">${o.status}</span>
               <small class="text-muted">${o.discount_percentage}%</small>
+
             </div>
             <div class="mt-3 d-flex justify-content-between">
               <button class="btn btn-sm btn-primary btn-edit"
@@ -358,7 +381,8 @@
                       data-desc="${o.description}"
                       data-discount="${o.discount_percentage}"
                       data-start="${o.start_date}"
-                      data-end="${o.end_date}">
+                      data-end="${o.end_date}"
+                      data-level="${o.promotion_level_id}">
                 Sửa
               </button>
               <button class="btn btn-sm btn-danger btn-delete"
@@ -375,91 +399,8 @@
 
 
 </div>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const editButtons = document.querySelectorAll(".btn-edit");
-    const deleteButtons = document.querySelectorAll(".btn-delete");
 
-    const editModal = new bootstrap.Modal(document.getElementById('editVoucherModal'));
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteVoucherModal'));
 
-    // Nút SỬA
-    editButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.getElementById("voucherId").value = btn.dataset.id;
-        document.getElementById("voucherName").value = btn.dataset.name;
-        document.getElementById("voucherDescription").value = btn.dataset.desc;
-        document.getElementById("voucherDiscount").value = btn.dataset.discount;
-        document.getElementById("voucherStart").value = btn.dataset.start;
-        document.getElementById("voucherEnd").value = btn.dataset.end;
-
-        editModal.show();
-      });
-    });
-
-    // Nút XÓA
-    deleteButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.getElementById("deleteVoucherId").value = btn.dataset.id;
-        document.getElementById("deleteVoucherName").textContent = btn.dataset.name;
-        deleteModal.show();
-      });
-    });
-  });
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // JavaScript thay đổi nội dung khi chọn cấp voucher
-  document.getElementById("voucherLevel").addEventListener("change", function() {
-    const selected = this.value;
-    // TODO: thêm code load danh sách voucher tương ứng cấp
-    console.log("Đang chọn:", selected);
-  });
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // Modal thêm voucher
-    const addModal = new bootstrap.Modal(document.getElementById("addVoucherModal"));
-    document.querySelector(".btn-add").addEventListener("click", () => {
-      addModal.show();
-    });
-  });
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    <% if (request.getAttribute("errorMessageee") != null) { %>
-    const errorMsg = "<%= request.getAttribute("errorMessageee") %>";
-    const errorDiv = document.getElementById("addErrorMsg");
-
-    // Gỡ class ẩn và hiển thị lỗi
-    errorDiv.classList.remove("d-none");
-    errorDiv.textContent = errorMsg;
-
-    // Mở lại modal "Thêm voucher"
-    const addModal = new bootstrap.Modal(document.getElementById('addVoucherModal'));
-    addModal.show();
-    <% } %>
-  });
-</script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // Modal sửa voucher
-    const editModal = new bootstrap.Modal(document.getElementById("editVoucherModal"));
-
-    // Nếu có lỗi từ server, hiển thị lỗi và mở modal
-    <% if (request.getAttribute("errorMessage") != null) { %>
-    const errorMsg = "<%= request.getAttribute("errorMessage") %>";
-    const errorDiv = document.getElementById("editErrorMsg");
-
-    // Hiển thị thông báo lỗi
-    errorDiv.classList.remove("d-none");
-    errorDiv.textContent = errorMsg;
-
-    // Mở modal
-    editModal.show();
-    <% } %>
-  });
-</script>
 
 <!-- Modal Sửa Voucher -->
 <div class="modal fade" id="editVoucherModal" tabindex="-1" aria-labelledby="editVoucherLabel" aria-hidden="true">
@@ -493,12 +434,21 @@
             <input type="number" class="form-control" id="voucherDiscount" name="discount_percentage" min="0" max="100" value="${param.discount_percentage != null ? param.discount_percentage : ''}">
           </div>
 <input type="hidden" name="updated_by" value="${sessionScope.userId}">
+
           <div class="mb-3">
             <label class="form-label">Thời gian hiệu lực</label>
             <div class="d-flex gap-2">
               <input type="date" class="form-control" id="voucherStart" name="start_date"value="${param.start_date != null ? param.start_date : ''}">
               <input type="date" class="form-control" id="voucherEnd" name="end_date" value="${param.end_date != null ? param.end_date : ''}">
             </div>
+          </div>
+          <div class="mb-3">
+            <label for="editVoucherLevel" class="form-label">Cấp độ Voucher</label>
+            <select class="form-select" id="editVoucherLevel" name="promotion_level_id">
+              <option value="1">Cấp 1</option>
+              <option value="2">Cấp 2</option>
+              <option value="3">Cấp 3</option>
+            </select>
           </div>
 
         </div>
@@ -556,5 +506,151 @@
     </ul>
   </nav>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+
+    // ✅ Chỉ tạo 1 instance modal duy nhất
+    const editModal = new bootstrap.Modal(document.getElementById("editVoucherModal"));
+
+    // ====== 1️⃣ Xử lý nút “Sửa” ======
+    document.querySelectorAll(".btn-edit").forEach(btn => {
+      btn.addEventListener("click", () => {
+        // Gán dữ liệu vào form
+        document.getElementById("voucherId").value = btn.dataset.id;
+        document.getElementById("voucherName").value = btn.dataset.name;
+        document.getElementById("voucherDescription").value = btn.dataset.desc;
+        document.getElementById("voucherDiscount").value = btn.dataset.discount;
+        document.getElementById("voucherStart").value = btn.dataset.start;
+        document.getElementById("voucherEnd").value = btn.dataset.end;
+
+        const levelSelect = document.getElementById("editVoucherLevel");
+        if (levelSelect) {
+          levelSelect.value = btn.dataset.level; // chọn đúng option
+        }
+        // Mở modal
+        editModal.show();
+      });
+    });
+
+    // ====== 2️⃣ Nếu có lỗi từ servlet ======
+    <% if (request.getAttribute("errorMessage") != null) { %>
+    const errorMsg = "<%= request.getAttribute("errorMessage") %>";
+    const errorDiv = document.getElementById("editErrorMsg");
+    errorDiv.classList.remove("d-none");
+    errorDiv.textContent = errorMsg;
+    // ⚡ Mở lại modal để hiển thị lỗi
+    editModal.show();
+    <% } %>
+
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const editButtons = document.querySelectorAll(".btn-edit");
+    const deleteButtons = document.querySelectorAll(".btn-delete");
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteVoucherModal'));
+
+    // Nút SỬA
+    editButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.getElementById("voucherId").value = btn.dataset.id;
+        document.getElementById("voucherName").value = btn.dataset.name;
+        document.getElementById("voucherDescription").value = btn.dataset.desc;
+        document.getElementById("voucherDiscount").value = btn.dataset.discount;
+        document.getElementById("voucherStart").value = btn.dataset.start;
+        document.getElementById("voucherEnd").value = btn.dataset.end;
+        editModal.show();
+      });
+    });
+
+    // Nút XÓA
+    deleteButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.getElementById("deleteVoucherId").value = btn.dataset.id;
+        document.getElementById("deleteVoucherName").textContent = btn.dataset.name;
+        deleteModal.show();
+      });
+    });
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // JavaScript thay đổi nội dung khi chọn cấp voucher
+  document.getElementById("voucherLevel").addEventListener("change", function() {
+    const selected = this.value;
+    // TODO: thêm code load danh sách voucher tương ứng cấp
+    console.log("Đang chọn:", selected);
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Modal thêm voucher
+    const addModal = new bootstrap.Modal(document.getElementById("addVoucherModal"));
+    document.querySelector(".btn-add").addEventListener("click", () => {
+      addModal.show();
+    });
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    <% if (request.getAttribute("errorMessageee") != null) { %>
+    const errorMsg = "<%= request.getAttribute("errorMessageee") %>";
+    const errorDiv = document.getElementById("addErrorMsg");
+
+    // Gỡ class ẩn và hiển thị lỗi
+    errorDiv.classList.remove("d-none");
+    errorDiv.textContent = errorMsg;
+
+    // Mở lại modal "Thêm voucher"
+    const addModal = new bootstrap.Modal(document.getElementById('addVoucherModal'));
+    addModal.show();
+    <% } %>
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // ====== 🟢 Form thêm voucher ======
+    const addForm = document.querySelector("#addVoucherModal form");
+    const addModalEl = document.getElementById("addVoucherModal");
+    const addModal = new bootstrap.Modal(addModalEl);
+    const addErrorDiv = document.getElementById("addErrorMsg");
+
+    addForm.addEventListener("submit", function(e) {
+      const start = document.getElementById("addVoucherStart").value;
+      const end = document.getElementById("addVoucherEnd").value;
+
+      if (start && end && new Date(end) < new Date(start)) {
+        e.preventDefault(); // ❌ Ngăn gửi form
+        addErrorDiv.classList.remove("d-none");
+        addErrorDiv.textContent = "⚠️ Thời gian kết thúc phải sau hoặc bằng thời gian bắt đầu.";
+        addModal.show(); // 🔁 Giữ popup mở lại
+        return false;
+      } else {
+        addErrorDiv.classList.add("d-none"); // Ẩn lỗi nếu hợp lệ
+      }
+    });
+
+    // ====== 🟠 Form sửa voucher ======
+    const editForm = document.querySelector("#editVoucherModal form");
+    const editModalEl = document.getElementById("editVoucherModal");
+    const editModal = new bootstrap.Modal(editModalEl);
+    const editErrorDiv = document.getElementById("editErrorMsg");
+
+    editForm.addEventListener("submit", function(e) {
+      const start = document.getElementById("voucherStart").value;
+      const end = document.getElementById("voucherEnd").value;
+
+      if (start && end && new Date(end) < new Date(start)) {
+        e.preventDefault(); // ❌ Ngăn gửi form
+        editErrorDiv.classList.remove("d-none");
+        editErrorDiv.textContent = "⚠️ Thời gian kết thúc phải sau hoặc bằng thời gian bắt đầu.";
+        editModal.show(); // 🔁 Giữ popup mở lại
+        return false;
+      } else {
+        editErrorDiv.classList.add("d-none");
+      }
+    });
+  });
+</script>
 </body>
 </html>

@@ -1,608 +1,339 @@
-/* Menu Page Specific Styles */
+/**
+ * Theme CSS Variables - Dùng chung cho tất cả các trang
+ * Dark Mode (mặc định) & Light Mode
+ */
 
-/* Banner Slideshow */
-.banner-slideshow {
-    width: 100%;
-    max-width: 1200px;
-    height: 400px;
-    position: relative;
-    margin: 0 auto 40px;
-    overflow: hidden;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+:root {
+    /* === DARK MODE (DEFAULT) === */
+    --bg-overlay: rgba(0, 0, 0, 0.6);
+    --bg-overlay-heavy: rgba(0, 0, 0, 0.75);
+    --text-primary: #ffffff;
+    --text-secondary: #dddddd;
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --box-bg: rgba(20, 10, 10, 0.75);
+    --box-bg-alt: rgba(94, 23, 23, 0.85);
+    --input-border: rgba(255, 255, 255, 0.2);
+    --input-border-focus: rgba(255, 255, 255, 0.5);
+    --table-border: rgba(255, 255, 255, 0.15);
+    --table-bg: rgba(255, 255, 255, 0.08);
+    --table-hover: rgba(255, 255, 255, 0.05);
+    --error-bg: rgba(231, 76, 60, 0.2);
+    --error-text: #e74c3c;
+    --success-bg: rgba(40, 167, 69, 0.2);
+    --success-text: #28a745;
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --button-text: #ffffff;
+    --border-visible: rgba(255, 255, 255, 0.3);
 }
 
-.slides {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.5s ease-in-out;
+html.light-mode,
+body.light-mode {
+    /* === LIGHT MODE - Red & White Theme === */
+    --bg-overlay: rgba(255, 255, 255, 0.92);
+    --bg-overlay-heavy: rgba(255, 255, 255, 0.98);
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-muted: rgba(0, 0, 0, 0.6);
+    --box-bg: rgba(255, 255, 255, 0.98);
+    --box-bg-alt: rgba(255, 255, 255, 0.98);
+    --input-border: rgba(231, 76, 60, 0.4);
+    --input-border-focus: rgba(231, 76, 60, 0.8);
+    --table-border: rgba(231, 76, 60, 0.3);
+    --table-bg: rgba(255, 255, 255, 0.95);
+    --table-hover: rgba(231, 76, 60, 0.05);
+    --error-bg: rgba(231, 76, 60, 0.1);
+    --error-text: #c0392b;
+    --success-bg: rgba(40, 167, 69, 0.1);
+    --success-text: #1e7e34;
+    --shadow: 0 8px 32px 0 rgba(231, 76, 60, 0.2);
+    --button-text: #000000;
+    --border-visible: rgba(231, 76, 60, 0.5);
 }
 
-.banner-slide {
-    min-width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.banner-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.banner-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
-    z-index: 2;
-}
-
-.banner-content::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: -20px;
-    right: -20px;
-    bottom: -20px;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 10px;
-    z-index: -1;
-}
-
-.banner-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
-    font-family: 'Playfair Display', serif;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-}
-
-.banner-content p {
-    font-size: 1.1rem;
-    margin-bottom: 20px;
-    opacity: 0.9;
-}
-
-.order-btn {
-    padding: 12px 24px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.order-btn:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.dots {
-    text-align: center;
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-    z-index: 3;
-}
-
-.dot {
-    height: 12px;
-    width: 12px;
-    margin: 0 5px;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
-    display: inline-block;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.dot.active,
-.dot:hover {
-    background-color: var(--primary-color);
-    transform: scale(1.2);
-}
-
-/* Menu Container */
-.menu-container {
-    display: flex;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 280px;
-    flex-shrink: 0;
-}
-
-.dropdown {
-    position: relative;
-}
-
-.dropdown-btn {
-    width: 100%;
-    padding: 15px 20px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 600;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
-.arrow {
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 6px solid white;
-    transition: transform 0.3s ease;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-    margin-top: 5px;
-    overflow: hidden;
-}
-
-.dropdown-content a {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    text-decoration: none;
-    color: #333;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.dropdown-content a:last-child {
-    border-bottom: none;
-}
-
-.dropdown-content a:hover {
-    background: #f8f9fa;
-    color: var(--primary-color);
-    transform: translateX(5px);
-}
-
-.food-icon {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-right: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Content Area */
-.content {
-    flex: 1;
-    min-height: 500px;
-}
-
-.content h2 {
-    color: var(--primary-color);
-    margin-bottom: 30px;
-    font-family: 'Playfair Display', serif;
-    font-size: 2.2rem;
-}
-
-.menu-instruction {
-    color: #666;
-    font-size: 1.1rem;
-    text-align: center;
-    margin-top: 100px;
-    line-height: 1.6;
-}
-
-/* Menu Items Grid */
-.menu-items {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    margin-bottom: 40px;
-}
-
-.menu-item {
-    perspective: 1000px;
-}
-
-.menu-card {
-    position: relative;
-    width: 100%;
-    height: 350px;
-    transform-style: preserve-3d;
-    transition: transform 0.6s;
-    cursor: pointer;
-}
-
-.menu-card:hover {
-    transform: rotateY(180deg);
-}
-
-.menu-front,
-.menu-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-.menu-front {
-    background: white;
-    display: flex;
-    flex-direction: column;
-}
-
-.menu-front img {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-}
-
-.menu-front h3 {
-    padding: 20px;
-    margin: 0;
-    font-size: 1.2rem;
-    text-align: center;
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #333;
-    font-weight: 600;
-}
-
-.menu-back {
-    transform: rotateY(180deg);
-    background: white;
-    color: #333;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    text-align: center;
-}
-
-.menu-back h3 {
-    margin-bottom: 15px;
-    color: var(--primary-color);
-    font-size: 1.3rem;
-}
-
-.menu-back p {
-    line-height: 1.6;
-    margin-bottom: 20px;
-    color: #666;
-}
-
-.price {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 20px !important;
-}
-
-.best-seller {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: #ff6b35;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    z-index: 2;
-}
-
-.unavailable {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #dc3545;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    z-index: 2;
-}
-
-/* Food Buttons */
-.food-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: auto;
-}
-
-.food-buttons button {
-    flex: 1;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-}
-
-.add-to-cart {
-    background: var(--primary-color);
-    color: white;
-}
-
-.add-to-cart:hover {
-    background: var(--secondary-color);
-    transform: translateY(-2px);
-}
-
-.buy-now {
-    background: #28a745;
-    color: white;
-}
-
-.buy-now:hover {
-    background: #218838;
-    transform: translateY(-2px);
-}
-
-.add-to-cart:disabled,
-.buy-now:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Cart Modal */
-.modal {
-    display: none;
+/* === THEME TOGGLE BUTTON === */
+.theme-toggle {
     position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-    background-color: white;
-    margin: 5% auto;
-    padding: 0;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideIn 0.3s ease;
-}
-
-.modal-header {
-    padding: 20px 30px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h3 {
-    margin: 0;
-    color: var(--primary-color);
-}
-
-.close {
-    font-size: 28px;
-    font-weight: bold;
+    top: 100px;
+    right: 20px;
+    z-index: 10000;
+    background: var(--box-bg);
+    border: 2px solid var(--input-border);
+    padding: 12px 20px;
+    border-radius: 50px;
     cursor: pointer;
-    color: #aaa;
-    transition: color 0.3s ease;
-}
-
-.close:hover {
-    color: #333;
-}
-
-.modal-body {
-    padding: 30px;
-}
-
-.modal-footer {
-    padding: 20px 30px;
-    border-top: 1px solid #eee;
-    display: flex;
-    gap: 15px;
-    justify-content: flex-end;
-}
-
-#cartItemDetails {
-    margin-bottom: 25px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-
-.quantity-selector {
-    margin-bottom: 25px;
-}
-
-.quantity-selector label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: #333;
-}
-
-.quantity-controls {
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.quantity-controls button {
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--primary-color);
-    background: white;
-    color: var(--primary-color);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-.quantity-controls button:hover {
-    background: var(--primary-color);
-    color: white;
-}
-
-.quantity-controls input {
-    width: 80px;
-    height: 40px;
-    text-align: center;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
-.special-instructions label {
-    display: block;
-    margin-bottom: 10px;
     font-weight: 600;
-    color: #333;
+    color: var(--text-primary);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
 }
 
-.special-instructions textarea {
-    width: 100%;
-    height: 80px;
-    padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    resize: vertical;
-    font-family: inherit;
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+body.light-mode .theme-toggle:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
 }
 
-@keyframes slideIn {
-    from { 
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-    to { 
-        opacity: 1;
-        transform: translateY(0);
-    }
+.theme-toggle i {
+    font-size: 1.2em;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .menu-container {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .sidebar {
-        width: 100%;
-    }
-    
-    .banner-slideshow {
-        height: 300px;
-        margin-bottom: 30px;
-    }
-    
-    .banner-content h1 {
-        font-size: 2rem;
-    }
-    
-    .menu-items {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .modal-content {
-        width: 95%;
-        margin: 10% auto;
-    }
-    
-    .modal-body {
-        padding: 20px;
-    }
-    
-    .modal-footer {
-        flex-direction: column;
-    }
-    
-    .food-buttons {
-        flex-direction: column;
-    }
+/* === GENERAL TRANSITIONS === */
+body,
+.container,
+.booking-box,
+table,
+.message,
+.btn {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-@media (max-width: 480px) {
-    .banner-slideshow {
-        height: 250px;
-    }
-    
-    .banner-content h1 {
-        font-size: 1.5rem;
-    }
-    
-    .banner-content p {
-        font-size: 1rem;
-    }
-    
-    .dropdown-btn {
-        font-size: 1rem;
-        padding: 12px 15px;
-    }
-    
-    .dropdown-content a {
-        padding: 12px 15px;
-    }
-    
-    .food-icon {
-        width: 35px;
-        height: 35px;
-    }
+/* === LIGHT MODE SPECIFIC OVERRIDES - RED & WHITE THEME === */
+
+/* Input placeholders trong light mode */
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
 }
+
+/* Table hover trong light mode */
+body.light-mode table tbody tr:hover {
+    background-color: rgba(231, 76, 60, 0.05) !important;
+}
+
+/* Table text - BLACK for visibility */
+body.light-mode table tbody td {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+/* Price columns - RED highlight */
+body.light-mode .price-col {
+    color: #e74c3c !important;
+    font-weight: 700 !important;
+    font-size: 1.05em !important;
+}
+
+/* Buttons - giữ text trắng cho contrast tốt */
+body.light-mode .btn-detail,
+body.light-mode .btn-delete,
+body.light-mode .sort-btn.active,
+body.light-mode .btn-filter,
+body.light-mode .remove-btn,
+body.light-mode .update-btn,
+body.light-mode .qty-btn,
+body.light-mode button[type="submit"],
+body.light-mode .action-btn,
+body.light-mode .btn-primary {
+    color: white !important;
+}
+
+/* +/- Buttons cho số khách (findTable.jsp) */
+body.light-mode #minus-btn,
+body.light-mode #plus-btn {
+    background: white !important;
+    border: 2px solid #e74c3c !important;
+    color: #e74c3c !important;
+    font-weight: bold !important;
+}
+
+body.light-mode #minus-btn:hover,
+body.light-mode #plus-btn:hover {
+    background: #e74c3c !important;
+    color: white !important;
+}
+
+/* Quantity input trong light mode */
+body.light-mode .qty-input {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+    font-weight: 700 !important;
+}
+
+/* Cart summary và total summary trong light mode - WHITE BG, RED BORDER */
+body.light-mode .total-summary {
+    background-color: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode .total-summary p {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .total-summary p strong {
+    color: #e74c3c !important;
+    font-weight: 800 !important;
+}
+
+body.light-mode .final-total {
+    color: #e74c3c !important;
+    border-top: 3px solid #e74c3c !important;
+    font-weight: 900 !important;
+}
+
+/* Discount section trong light mode - WHITE BG, RED BORDER */
+body.light-mode .discount-section {
+    background: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+body.light-mode .discount-header h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .discount-input input {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+}
+
+/* Note text và special text */
+body.light-mode .note-text,
+body.light-mode .special-request {
+    color: #000000 !important;
+    background: white !important;
+    border-left: 4px solid #e74c3c !important;
+}
+
+/* Cart item hover trong light mode */
+body.light-mode .item-row:hover {
+    background-color: rgba(231, 76, 60, 0.03) !important;
+}
+
+/* Sort buttons trong light mode */
+body.light-mode .sort-btn {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .sort-btn:hover,
+body.light-mode .sort-btn.active {
+    background: #e74c3c !important;
+    color: white !important;
+}
+
+/* Cart summary link */
+body.light-mode .cart-summary a {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .cart-summary a:hover {
+    color: #e74c3c !important;
+}
+
+/* Note input */
+body.light-mode .note-input {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+}
+
+body.light-mode .note-input::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Sticky footer */
+body.light-mode .sticky-footer {
+    background: white !important;
+    border-top: 3px solid #e74c3c !important;
+}
+
+body.light-mode .footer-content h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+/* Payment method select */
+body.light-mode .payment-method select {
+    background: white !important;
+    color: #000000 !important;
+    border: 2px solid #e74c3c !important;
+}
+
+/* Border cho các element cần nổi bật hơn - WHITE BG, RED BORDER */
+body.light-mode .container,
+body.light-mode .booking-box,
+body.light-mode .menu-item,
+body.light-mode .filter-section {
+    background: white !important;
+    border: 3px solid #e74c3c !important;
+}
+
+/* mapTable.jsp - Dining areas & floors - WHITE BG, RED BORDER */
+body.light-mode .dining-area,
+body.light-mode .office,
+body.light-mode .kitchen,
+body.light-mode .sushi-bar {
+    background-color: white !important;
+    border: 3px solid #e74c3c !important;
+    color: #e74c3c !important;
+    font-weight: 800 !important;
+}
+
+/* Item name & details - BLACK TEXT in checkout */
+body.light-mode .item-details h3,
+body.light-mode .item-name {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .item-details p {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .item-price,
+body.light-mode .price {
+    color: #e74c3c !important;
+    font-weight: 700 !important;
+}
+
+/* Checkout order item styling - BLACK TEXT */
+body.light-mode .order-item .item-name {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 1.15em !important;
+}
+
+body.light-mode .order-item .item-quantity {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+
+body.light-mode .order-item .item-price {
+    color: #e74c3c !important;
+    font-weight: 700 !important;
+    font-size: 1.15em !important;
+}
+
+/* Selected table section - WHITE BG, RED BORDER */
+body.light-mode .selected-tables-section,
+body.light-mode .table-list,
+body.light-mode .table-item {
+    background: white !important;
+    border: 2px solid #e74c3c !important;
+    color: #000000 !important;
+}
+
+body.light-mode .selected-tables-section h3 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+body.light-mode .table-item span {
+    color: #000000 !important;
+    font-weight: 600 !important;
+}
+

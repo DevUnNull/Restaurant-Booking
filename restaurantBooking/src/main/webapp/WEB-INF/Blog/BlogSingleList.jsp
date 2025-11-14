@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Blog - Tica's Tacos</title>
     <link rel="stylesheet" href="css/BlogList.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
     <style>
         /* Tổng thể */
         body {
@@ -189,19 +190,7 @@
 </head>
 <body>
 <!-- HEADER -->
-<header class="topbar">
-    <div class="container">
-        <h1 class="logo">Tica's Tacos</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Trang chủ</a></li>
-                <li><a href="#">Đặt bàn</a></li>
-                <li><a href="#">Menu</a></li>
-                <li><a href="#">Liên hệ</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <!-- HERO (CÓ ẢNH NỀN) -->
 <section class="hero" style="background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80');">
@@ -230,15 +219,12 @@
 
     <!-- Bài đăng 1 -->
     <c:forEach var="o" items="${postList}">
-        <div class="blog-post">
+        <div class="blog-post" data-id="${o.idBlogSingle}">
             <div class="blog-img" style="background-image: url('${o.imgUrl}');"></div>
             <div class="blog-content">
                 <span class="blog-meta">${o.createdDate} | ${o.createdBy}</span>
                 <h3>${o.titleBlogSingle}</h3>
-                <p>
-                    ${o.contentBlogSingle}
-                </p>
-
+                <p>${o.contentBlogSingle}</p>
             </div>
         </div>
     </c:forEach>
@@ -248,10 +234,19 @@
 
 
 </main>
-
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const posts = document.querySelectorAll(".blog-post");
+        posts.forEach(post => {
+            post.addEventListener("click", () => {
+                const id = post.dataset.id;
+                window.location.href = "DetailBlogSingle?id=" + id;
+            });
+        });
+    });
+</script>
 <!-- FOOTER -->
-<footer class="footer">
-    <p>© 2025 Tica's Tacos. All rights reserved.</p>
-</footer>
+<!-- Footer -->
+<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 </body>
 </html>

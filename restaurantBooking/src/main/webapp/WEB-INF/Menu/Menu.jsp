@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,6 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Voucher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
+
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -18,7 +22,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 40px;
+            padding: 25px 40px;
+            margin: 8px 10px 10px 1px;
             position: fixed;
             top: 0;
             left: 0;
@@ -58,11 +63,11 @@
             width: 250px;
             background-color: #8c2a1f;
             position: fixed;
-            top: 65px;
+            top: 99px;
             bottom: 0;
             left: 0;
             color: #fff;
-            padding-top: 20px;
+            padding-top: 44px;
             overflow-y: auto;
         }
 
@@ -96,12 +101,16 @@
         }
         .content {
             margin-left: 250px;
-            margin-top: 70px;
+            margin-top: -43px;
             padding: 20px;
         }
 
         /* Bộ lọc dạng select */
         .filter-section {
+            position: relative;
+            background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -110,16 +119,31 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             padding: 15px 20px;
             margin-bottom: 25px;
+            margin-top: 37px;
+        }
+        .filter-section::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(140,0,0,0.5); /* 0.5 = mờ 50%, chỉnh tùy ý */
+            z-index: 0;
+            border-radius: 8px;
+        }
+
+        /* đảm bảo nội dung nằm trên lớp mờ */
+        .filter-section > * {
+            position: relative;
+            z-index: 1;
         }
         .filter-section h3 {
             margin: 0;
-            color: #8b0000;
+            color: white;
             font-weight: 600;
         }
         .voucher-select {
             position: relative;
             top: -9px;
-            left: 27px;
+            left: 8px;
             border: 2px solid #a52a2a;
             border-radius: 6px;
             padding: 8px 12px;
@@ -194,10 +218,15 @@
             color: #8b0000;
             margin-bottom: 10px;
         }
+        .card-voucher {
+            cursor: pointer;
+        }
+        .card-voucher:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
-
 <!-- Header -->
 <%--<div class="header">--%>
 <%--  <h1>Restaurant Booking - Quản lý Voucher</h1>--%>
@@ -208,17 +237,7 @@
 <%--    <a href="#" style="color:#fff; text-decoration:none;">Voucher</a>--%>
 <%--  </div>--%>
 <%--</div>--%>
-<div class="header">
-    <div class="logo">Restaurant_Booking</div>
-    <nav>
-        <ul>
-            <li><a href="#">Trang chủ</a></li>
-            <li><a href="#">Đặt bàn</a></li>
-            <li><a href="#">Menu</a></li>
-            <li><a href="Voucher" class="active">Voucher</a></li>
-        </ul>
-    </nav>
-</div>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <%--<ul>--%>
 <%--  <li><a href="#">Dashboard</a></li>--%>
@@ -234,15 +253,14 @@
 <%--</ul>--%>
 <!-- Sidebar -->
 <div class="sidebar">
-    <h2>Staff Panel</h2>
+
     <ul>
-        <li><a href="#">Dashboard</a></li>
-        <li><a href="ServiceList">Dịch vụ</a></li>
+
         <li><a href="ServiceManage">Quản lý dịch vụ</a></li>
-        <li><a href="Comment">Quản lý đánh giá bình luận</a></li>
-        <li><a href="#">Quản lý Menu</a></li>
-        <li><a href="Voucher" class="active">Quản lý Voucher khuyến mãi</a></li>
-        <li><a href="#">Quản lý khách hàng thân thiết</a></li>
+        <li><a href="Menu_manage">Quản lý Menu</a></li>
+        <li><a href="Voucher">Quản lý Voucher khuyến mãi </a></li>
+        <li><a href="Promotion_level">Quản lý khách hàng thân thiết </a></li>
+        <li><a href="Timedirect">Quản lý khung giờ </a></li>
     </ul>
 </div>
 
@@ -250,7 +268,7 @@
 <div class="content">
 
     <!-- Bộ lọc voucher -->
-    <div class="filter-section">
+    <div class="filter-section" >
         <h3>Danh sách Voucher</h3>
 
         <div>
@@ -271,59 +289,56 @@
     <div class="modal fade" id="addMenuModal" tabindex="-1" aria-labelledby="addVoucherLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="AddMenu" method="post" >
+                <form action="AddMenu" method="post" enctype="multipart/form-data">
                     <div class="modal-header">
                         <h5 class="modal-title" id="addVoucherLabel">Thêm Món Mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                     </div>
                     <div class="modal-body">
-                        <c:if test="${not empty errorMessageee}">
-                            <div id="addErrorMsg" class="alert alert-danger">${errorMessageee}</div>
-                        </c:if>
-                        <c:if test="${empty errorMessageee}">
-                            <div id="addErrorMsg" class="alert alert-danger d-none"></div>
-                        </c:if>
-                    <input type="hidden" name="action" value="add">
-                    <div class="mb-3">
-                        <label for="addMenuName" class="form-label">Tên món</label>
-                        <input type="text" class="form-control" id="addMenuName" name="itemName" value="${param.itemName != null ? param.itemName : ''}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="addDishCode" class="form-label">Mã món</label>
-                        <input type="text" class="form-control" id="addDishCode" name="code_dish" value="${param.code_dish != null ? param.code_dish : ''}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="addMenuDescription" class="form-label">Mô tả</label>
-                        <textarea class="form-control" id="menuDescription" name="description" rows="2">${param.description != null ? param.description : ''}</textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addMenuPrice" class="form-label">Giá</label>
-                        <input type="number" class="form-control" id="addMenuPrice" name="price" min="0" value="${param.price != null ? param.price : ''}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="addDishImage" class="form-label">Ảnh món ăn</label>
-                        <div class="mb-2 text-center">
-                            <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
+                        <div id="addErrorMsg" class="alert alert-danger d-none"></div>
+                        <input type="hidden" name="action" value="add">
+                        <div class="mb-3">
+                            <label for="addMenuName" class="form-label">Tên món</label>
+                            <input type="text" class="form-control" id="addMenuName" name="itemName" value="${param.itemName != null ? param.itemName : ''}">
                         </div>
-                        <input type="file" class="form-control" id="addDishImage" name="imageFile" accept="image/*" onchange="previewImage(event)">
-                    </div>
-                    <div class="mb-3">
-                        <label for="addMenuStatus" class="form-label">Trạng thái</label>
-                        <select class="form-select" id="addMenuStatus" name="status">
-                            <option value="AVAILABLE" ${param.status == 'AVAILABLE' ? 'selected' : ''}>AVAILABLE</option>
-                            <option value="UNAVAILABLE" ${param.status == 'UNAVAILABLE' ? 'selected' : ''}>UNAVAILABLE</option>
-                            <option value="ARCHIVED" ${param.status == 'ARCHIVED' ? 'selected' : ''}>ARCHIVED</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="addMenuCategory" class="form-label">Thể loại</label>
-                        <select class="form-select" id="addMenuCategory" name="categoryId">
-                            <c:forEach var="o" items="${listMenuCategory}">
-                                <option value="${o.id_menuCategory}">${o.categoryName}</option>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <input type="hidden" name="created_by" value="${sessionScope.userId}">
+                        <div class="mb-3">
+                            <label for="addDishCode" class="form-label">Mã món</label>
+                            <input type="text" class="form-control" id="addDishCode" name="code_dish" value="${param.code_dish != null ? param.code_dish : ''}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMenuDescription" class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="menuDescription" name="description" rows="2">${param.description != null ? param.description : ''}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMenuPrice" class="form-label">Giá</label>
+                            <input type="number" class="form-control" id="addMenuPrice" name="price" min="0" value="${param.price != null ? param.price : ''}">
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="addDishImageUrl" class="form-label">Ảnh món ăn</label>
+                            <input type="file" class="form-control" id="addDishImageUrl" name="imageFile" accept="image/*" onchange="previewImage(event)">
+                            <img id="imagePreview" src="/images/no-image.png" alt="Xem trước ảnh" style="max-height:150px; margin-top:10px;">
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="addMenuStatus" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="addMenuStatus" name="status">
+                                <option value="AVAILABLE" ${param.status == 'AVAILABLE' ? 'selected' : ''}>AVAILABLE</option>
+                                <option value="UNAVAILABLE" ${param.status == 'UNAVAILABLE' ? 'selected' : ''}>UNAVAILABLE</option>
+                                <option value="ARCHIVED" ${param.status == 'ARCHIVED' ? 'selected' : ''}>ARCHIVED</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMenuCategory" class="form-label">Thể loại</label>
+                            <select class="form-select" id="addMenuCategory" name="categoryId">
+                                <c:forEach var="o" items="${listMenuCategory}">
+                                    <option value="${o.id_menuCategory}">${o.categoryName}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <input type="hidden" name="created_by" value="${sessionScope.userId}">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -334,52 +349,85 @@
         </div>
     </div>
 
-        <div class="row g-4" id="voucherList">
-            <c:forEach var="o" items="${menuList}">
-                <div class="col-md-4 col-sm-6">
-                    <div class="card-voucher h-100">
-                        <!-- Hình ảnh voucher -->
-                        <img src="${pageContext.request.contextPath}/images/${o.imageUrl != null ? o.imageUrl : 'no-image.png'}"
-                             class="card-img-top"
-                             alt="Voucher Image"
-                             style="height:180px; object-fit:cover;">
+    <div class="row g-4" id="voucherList">
+        <c:forEach var="o" items="${menuList}">
+            <!-- xây sẵn đường dẫn ảnh an toàn (bao gồm context path) -->
+            <c:choose>
+                <c:when test="${not empty o.imageUrl}">
+                    <c:set var="imgPath" value="${o.imageUrl}" />
+                </c:when>
+                <c:otherwise>
+                    <c:set var="imgPath" value="${pageContext.request.contextPath}/images/no-image.png" />
+                </c:otherwise>
+            </c:choose>
 
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">${o.itemName}</h5>
-                            <h6 class="card-title">Mã món: ${o.itemCode}</h6>
-                            <p class="card-text flex-grow-1">
-                                    ${o.description}.  Thời gian tạo:  ${o.created_At}
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-success badge-status">${o.status}</span>
-                                <small class="text-muted">Giá: <strong>${o.price}</strong> </small>
-                            </div>
-                            <div class="mt-3 d-flex justify-content-between">
-                                <button class="btn btn-sm btn-primary btn-edit"
-                                        data-id="${o.id}"
-                                        data-name="${o.itemName}"
-                                        data-desc="${o.description}"
-                                        data-price="${o.price}"
-                                        data-code="${o.itemCode}"
-                                        data-image="${o.imageUrl}"
-                                        data-status="${o.status}"
-                                        data-category="${o.category_name}">
-                                    Sửa
-                                </button>
-                                <button class="btn btn-sm btn-danger btn-delete"
-                                        data-id="${o.id}"
-                                        data-name="${o.itemName}">
-                                    Xóa
-                                </button>
-                            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="card-voucher h-100 card-detail"
+                     data-id="${o.itemId}"
+                     data-name="${o.itemName}"
+                     data-code="${o.itemCode}"
+                     data-desc="${o.description}"
+                     data-price="${o.price}"
+                     data-status="${o.status}"
+                     data-created="${o.created_At}"
+                     data-image="${imgPath}">  <!-- <-- dùng imgPath ở đây -->
+
+                    <!-- Hình ảnh món: dùng luôn imgPath để tránh chênh lệch -->
+                    <img src="${imgPath}"
+                         class="card-img-top"
+                         alt="Voucher Image"
+                         style="height:180px; object-fit:cover;">
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">${o.itemName}</h5>
+                        <h6 class="card-title">Mã món: ${o.itemCode}</h6>
+                        <p class="card-text flex-grow-1">Mô tả: ...</p>
+                        <p class="card-text flex-grow-1">Thời gian tạo: ${o.created_At}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-success badge-status">${o.status}</span>
+                            <small class="text-muted">Giá: <strong>${o.price}</strong></small>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-between">
+                            <button class="btn btn-sm btn-primary btn-edit"
+                                    data-id="${o.itemId}"
+                                    data-name="${o.itemName}"
+                                    data-desc="${o.description}"
+                                    data-price="${o.price}"
+                                    data-code="${o.itemCode}"
+
+                                    data-status="${o.status}"
+                                    data-category="${o.category_id}"
+                                    data-category-name="${o.category_name}">
+                                Sửa
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-delete"
+                                    data-id="${o.itemId}"
+                                    data-name="${o.itemName}">
+                                Xóa
+                            </button>
                         </div>
                     </div>
                 </div>
-            </c:forEach>
-        </div>
+            </div>
+        </c:forEach>
+    </div>
 
 
 </div>
+
+<script>
+    function previewImageFromUrl(url) {
+        const img = document.getElementById("imagePreview");
+        if (url && url.startsWith("http")) {
+            img.src = url;
+        } else {
+            img.src = "/images/no-image.png"; // ảnh mặc định khi không hợp lệ
+        }
+    }
+</script>
+
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const editButtons = document.querySelectorAll(".btn-edit");
@@ -391,9 +439,6 @@
         // Nút SỬA
         editButtons.forEach(btn => {
             btn.addEventListener("click", () => {
-                const ctx = "${pageContext.request.contextPath}";
-
-                // Lấy dữ liệu từ data-*
                 const id = btn.dataset.id || '';
                 const name = btn.dataset.name || '';
                 const desc = btn.dataset.desc || '';
@@ -401,49 +446,40 @@
                 const code = btn.dataset.code || '';
                 const image = btn.dataset.image || '';
                 const status = btn.dataset.status || 'AVAILABLE';
-                const category = btn.dataset.category || '';
+                const categoryId = btn.dataset.category || '';
+                const categoryName = btn.dataset.categoryName || ''; // ✅ lấy tên thể loại
 
-                // Điền vào form
-                document.getElementById("menuId").value = id;
-                document.getElementById("menuName").value = name;
-                document.getElementById("menuDescription").value = desc;
-                document.getElementById("price").value = price;
-                // trường mã
-                const codeField = document.getElementById("menuCode");
-                if (codeField) codeField.value = code;
+                // --- Gán giá trị vào modal ---
+                document.getElementById("menuIdEdit").value = id;
+                document.getElementById("menuNameEdit").value = name;
+                document.getElementById("menuDescriptionEdit").value = desc;
+                document.getElementById("priceEdit").value = price;
+                document.getElementById("menuCodeEdit").value = code;
+                document.getElementById("menuStatusEdit").value = status;
 
-                // existingImage hidden
-                const existingImgField = document.getElementById("existingImage");
-                if (existingImgField) existingImgField.value = image;
 
-                // set trạng thái select
-                const statusSelect = document.getElementById("addMenuStatus");
-                if (statusSelect) {
-                    statusSelect.value = status;
+
+                const imageInput = document.getElementById("menuImageEditUrl");
+                if (imageInput) imageInput.value = image;
+                // document.querySelector('#editForm [name="imageUrl"]').value = image;                // ✅ chọn đúng option theo category_id
+                const categorySelect = document.getElementById("menuCategoryEdit");
+                if (categorySelect) categorySelect.value = categoryId;
+
+                // ✅ hiển thị tên thể loại hiện tại
+                const currentCategory = document.getElementById("currentCategoryName");
+                if (currentCategory) {
+                    currentCategory.textContent = `Thể loại hiện tại: ${categoryName}`;
                 }
 
-                // set category select
-                const categorySelect = document.getElementById("addMenuCategory");
-                if (categorySelect) {
-                    // nếu option có tương ứng value, set; nếu không, bỏ chọn
-                    for (let opt of categorySelect.options) {
-                        if (opt.value === category || opt.text === category) {
-                            opt.selected = true;
-                            break;
-                        }
-                    }
-                }
-
-
-
-                // Reset input file (nếu có) để tránh giữ file cũ
-                const fileInput = document.getElementById("addDishImage");
-                if (fileInput) {
-                    fileInput.value = "";
+                // ✅ xử lý ảnh xem trước
+                const preview = document.getElementById("imagePreviewEdit");
+                if (preview && image) {
+                    preview.src = image.startsWith("http") ? image : `${ctx}/images/${image}`;
                 }
 
                 editModal.show();
             });
+
         });
 
         // Nút XÓA
@@ -451,6 +487,7 @@
             btn.addEventListener("click", () => {
                 document.getElementById("deleteMenuId").value = btn.dataset.id;
                 document.getElementById("deleteMenuName").textContent = btn.dataset.name;
+
                 deleteModal.show();
             });
         });
@@ -487,20 +524,77 @@
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        <% if (request.getAttribute("errorMessageee") != null) { %>
-        const errorMsg = "<%= request.getAttribute("errorMessageee") %>";
-        const errorDiv = document.getElementById("addErrorMsg");
+        const cards = document.querySelectorAll(".card-detail");
+        const detailModal = new bootstrap.Modal(document.getElementById("viewDetailModal"));
 
-        // Gỡ class ẩn và hiển thị lỗi
-        errorDiv.classList.remove("d-none");
-        errorDiv.textContent = errorMsg;
+        cards.forEach(card => {
+            card.addEventListener("click", function(e) {
+                if (e.target.classList.contains("btn-edit") || e.target.classList.contains("btn-delete")) return;
 
-        // Mở lại modal "Thêm voucher"
-        const addModal = new bootstrap.Modal(document.getElementById('addMenuModal'));
-        addModal.show();
-        <% } %>
+                // lấy dữ liệu
+                const name = card.dataset.name || "";
+                const code = card.dataset.code || "";
+                const desc = card.dataset.desc || "Không có mô tả";
+                const price = card.dataset.price || "0";
+                const status = card.dataset.status || "AVAILABLE";
+                const created = card.dataset.created || "";
+                // data-image đã là đường dẫn đầy đủ (imgPath) theo bước JSTL
+                let imageFullPath = card.dataset.image || `${window.location.pathname.split("/")[1] ? "/" + window.location.pathname.split("/")[1] : ""}/images/no-image.png`;
+
+                // gán text
+                document.getElementById("detailName").textContent = name;
+                document.getElementById("detailCode").textContent = code;
+                document.getElementById("detailCreated").textContent = created;
+                document.getElementById("detailDesc").textContent = desc;
+                document.getElementById("detailPrice").textContent = price + " VNĐ";
+
+                const statusBadge = document.getElementById("detailStatus");
+                statusBadge.textContent = status;
+                statusBadge.className = "badge " + (status === "AVAILABLE" ? "bg-success" :
+                    status === "UNAVAILABLE" ? "bg-warning text-dark" : "bg-secondary");
+
+                // gán ảnh: data-image là đường dẫn hoàn chỉnh -> gán thẳng
+                const img = document.getElementById("detailImage");
+                img.src = imageFullPath;
+                img.onerror = function() {
+                    // fallback nếu file mất
+                    const ctx = window.location.pathname.split("/")[1] ? "/" + window.location.pathname.split("/")[1] : "";
+                    this.src = `${ctx}/images/no-image.png`;
+                };
+
+                detailModal.show();
+            });
+        });
     });
 </script>
+<!-- Modal Xem Chi Tiết -->
+<div class="modal fade" id="viewDetailModal" tabindex="-1" aria-labelledby="viewDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="viewDetailLabel">Chi tiết món ăn</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-5 text-center">
+                        <img id="detailImage" src="/images/no-image.png" alt="Ảnh món ăn" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-7">
+                        <h5 id="detailName" class="fw-bold text-danger mb-2"></h5>
+                        <p><strong>Mã món:</strong> <span id="detailCode"></span></p>
+                        <p><strong>Thời gian tạo:</strong> <span id="detailCreated"></span></p>
+                        <p><strong>Giá:</strong> <span id="detailPrice" class="text-success fw-bold"></span></p>
+                        <p><strong>Trạng thái:</strong> <span id="detailStatus" class="badge bg-success"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Sửa Voucher -->
 <div class="modal fade" id="editMenuModal" tabindex="-1" aria-labelledby="editVoucherLabel" aria-hidden="true">
@@ -508,7 +602,7 @@
         <div class="modal-content">
 
             <!-- CHÚ Ý: enctype để upload file -->
-            <form action="Menu_manage" method="post" >
+            <form action="Menu_manage" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editVoucherLabel">Sửa món ăn</h5>
                     <c:if test="${not empty errorMessage}">
@@ -528,42 +622,40 @@
                     <div id="editErrorMsg" class="alert alert-danger d-none"></div>
 
                     <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="id" id="menuId" value="${param.id != null ? param.id : ''}">
+                    <input type="hidden" name="id" id="menuIdEdit" value="${param.id != null ? param.id : ''}">
 
 
 
                     <div class="mb-3">
                         <label for="menuCode" class="form-label">Mã món</label>
-                        <input type="text" class="form-control" id="menuCode" name="itemCode" value="${param.itemCode != null ? param.itemCode : ''}">
+                        <input type="text" class="form-control" id="menuCodeEdit" name="itemCode" value="${param.itemCode != null ? param.itemCode : ''}" readonly>
                     </div>
 
                     <div class="mb-3">
                         <label for="menuName" class="form-label">Tên món</label>
-                        <input type="text" class="form-control" id="menuName" name="menuName" value="${param.menuName != null ? param.menuName : ''}" >
+                        <input type="text" class="form-control" id="menuNameEdit" name="menuName" value="${param.menuName != null ? param.menuName : ''}" >
                     </div>
 
                     <div class="mb-3">
                         <label for="menuDescription" class="form-label">Mô tả</label>
-                        <textarea class="form-control" id="menuDescription" name="description" rows="2">${param.description != null ? param.description : ''}</textarea>
+                        <textarea class="form-control" id="menuDescriptionEdit" name="description" rows="2">${param.description != null ? param.description : ''}</textarea>
                     </div>
 
                     <div class="mb-3">
                         <label for="price" class="form-label">Giá</label>
-                        <input type="number" class="form-control" id="price" name="price"  value="${param.price != null ? param.price : ''}">
+                        <input type="number" class="form-control" id="priceEdit" name="price"  value="${param.price != null ? param.price : ''}">
                     </div>
 
                     <div class="mb-3">
-                        <label for="addDishImage" class="form-label">Ảnh món ăn</label>
-                        <div class="mb-2 text-center">
-                            <img id="imagePreview" src="${param.imageUrl != null ? param.imageUrl : '/images/no-image.png'}" alt="Xem trước ảnh" class="img-thumbnail" style="max-width:200px; max-height:200px;">
-                        </div>
-                        <input type="file" class="form-control" id="addDishImage" name="imageFile" accept="image/*" onchange="previewImage(event)">
-                        <small class="text-muted">Nếu không chọn file mới, ảnh cũ sẽ được giữ.</small>
+                        <label for="menuImageEditUrl" class="form-label">Ảnh món ăn</label>
+                        <input type="file" class="form-control" id="menuImageEditUrl" name="imageFile" accept="image/*" onchange="previewImageEdit(event)">
+                        <input type="hidden" name="oldImageUrl" id="oldImageUrl">
+                        <img id="imagePreviewEdit" src="/images/no-image.png" alt="Xem trước ảnh" style="max-height:150px; margin-top:10px;">
                     </div>
 
                     <div class="mb-3">
                         <label for="addMenuStatus" class="form-label">Trạng thái</label>
-                        <select class="form-select" id="addMenuStatus" name="status">
+                        <select class="form-select" id="menuStatusEdit" name="status">
                             <option value="AVAILABLE">AVAILABLE</option>
                             <option value="UNAVAILABLE">UNAVAILABLE</option>
                             <option value="ARCHIVED">ARCHIVED</option>
@@ -572,7 +664,8 @@
 
                     <div class="mb-3">
                         <label for="addMenuCategory" class="form-label">Thể loại</label>
-                        <select class="form-select" id="addMenuCategory" name="categoryId">
+                        <div id="currentCategoryName" class="mb-2 text-muted fst-italic"></div>
+                        <select class="form-select" id="menuCategoryEdit" name="categoryId">
                             <c:forEach var="o" items="${listMenuCategory}">
                                 <option value="${o.id_menuCategory}">${o.categoryName}</option>
                             </c:forEach>
@@ -589,13 +682,34 @@
         </div>
     </div>
 </div>
-
+<script>
+    function previewImageFromUrlEdit(url) {
+        const img = document.getElementById("imagePreview");
+        if (url && url.startsWith("http")) {
+            img.src = url;
+        } else {
+            img.src = "/images/no-image.png"; // ảnh mặc định
+        }
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('hidden.bs.modal', function () {
+                document.querySelectorAll('.modal-backdrop').forEach(e => e.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+            });
+        });
+    });
+</script>
 
 <!-- Modal Xóa Voucher -->
 <div class="modal fade" id="deleteMenuModal" tabindex="-1" aria-labelledby="deleteVoucherLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form action="DeleteVoucher" method="post">
+            <form action="DeleteMenu" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title text-danger" id="deleteVoucherLabel">Xác nhận xóa voucher</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
@@ -636,5 +750,89 @@
         </ul>
     </nav>
 </div>
+<script>
+    // ✅ Hàm sinh mã món ngẫu nhiên
+    function generateDishCode() {
+        const randomNum = Math.floor(10000 + Math.random() * 90000);
+        return "MON" + randomNum;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const addModalElement = document.getElementById("addMenuModal");
+        if (!addModalElement) return;
+
+        const addModal = new bootstrap.Modal(addModalElement);
+        const codeInput = document.getElementById("addDishCode");
+        const form = addModalElement.querySelector("form");
+        const addButton = document.querySelector(".btn-add"); // nút "Thêm món mới"
+
+        // ✅ Khi modal mở → reset form + ẩn lỗi cũ + sinh mã mới
+        addModalElement.addEventListener("show.bs.modal", function () {
+
+
+            // Sinh mã món mới
+            if (codeInput) {
+                codeInput.value = generateDishCode();
+            }
+        });
+
+        // ✅ Khi modal đóng → dọn dẹp
+        addModalElement.addEventListener("hidden.bs.modal", function () {
+            if (form) form.reset();
+            if (codeInput) codeInput.value = "";
+            const err = document.getElementById("addErrorMsg");
+            if (err) {
+                err.classList.add("d-none");
+                err.textContent = "";
+            }
+            // Loại bỏ backdrop dư (fix lỗi modal bị đen mờ)
+            document.querySelectorAll('.modal-backdrop').forEach(e => e.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+        });
+
+        // ✅ Nút “Thêm món mới” mở modal
+        if (addButton) {
+            addButton.addEventListener("click", function (e) {
+                e.preventDefault();
+                addModal.show();
+            });
+        }
+    });
+
+
+</script>
+
+<%
+    String errorMsg = (String) request.getAttribute("errorMessageee");
+    if (errorMsg != null && !errorMsg.trim().isEmpty()) {
+%>
+<script>
+    window.addEventListener("load", function() {
+        const modalElement = document.getElementById("addMenuModal");
+        const addModal = new bootstrap.Modal(modalElement);
+        const errorDiv = document.getElementById("addErrorMsg");
+
+        if (errorDiv) {
+            errorDiv.classList.remove("d-none");
+            errorDiv.textContent = "<%= errorMsg.replace("\"", "\\\"") %>";
+        }
+
+        addModal.show();
+    });
+</script>
+<% } %>
+<script>
+    function previewImage(event) {
+        const output = document.getElementById('imagePreview');
+        output.src = URL.createObjectURL(event.target.files[0]);
+    }
+
+    function previewImageEdit(event) {
+        const output = document.getElementById('imagePreviewEdit');
+        output.src = URL.createObjectURL(event.target.files[0]);
+    }
+</script>
+
 </body>
 </html>

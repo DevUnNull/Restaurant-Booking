@@ -11,12 +11,19 @@ public class Review extends BaseEntity {
     private String comment;
     private String status;
     private Integer approvedBy;
+    private String userName;
 
     public Review() {
         super();
         this.status = "PENDING";
     }
 
+    public String getUserName() {
+        return userName;
+    }
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
     // Getters and Setters
     public Integer getReviewId() {
         return reviewId;

@@ -16,6 +16,8 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,6 +82,16 @@ public class ServiceAdd extends HttpServlet {
                 return;
             }else{
                 dao.addService(serviceName,serviceCode, description, price, status, startDate, endDate, id);
+                int id_service= dao.getIdService(serviceCode);
+                String[] selectedItems = request.getParameterValues("menuItems");
+
+
+                    List<Integer> menuItemIds = new ArrayList<>();
+                    for (String ide : selectedItems) {
+                        menuItemIds.add(Integer.parseInt(ide));
+                    }
+                    dao.insertComboItems(id_service, menuItemIds);
+
                 response.sendRedirect("ServiceManage");
                 return;
             }

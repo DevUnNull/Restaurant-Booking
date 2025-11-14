@@ -8,44 +8,22 @@
     <meta charset="UTF-8">
     <title>Blog - Tica's Tacos</title>
     <link rel="stylesheet" href="css/BlogList.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/common.css">
 </head>
 <body>
 <!-- HEADER -->
-<header class="topbar">
-    <div class="container">
-        <h1 class="logo">Tica's Tacos</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Trang chủ</a></li>
-                <li><a href="#">Đặt bàn</a></li>
-                <li><a href="#">Menu</a></li>
-                <li><a href="#">Liên hệ</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 <!-- HERO (CÓ ẢNH NỀN) -->
 <section class="hero" style="background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=80');">
     <div class="overlay"></div>
     <div class="hero-content">
         <h2>Blog & Tin tức</h2>
-        <p>Khám phá những câu chuyện, sự kiện và món ăn hấp dẫn tại Tica’s Tacos</p>
+        <p>Khám phá những câu chuyện, sự kiện và món ăn hấp dẫn tại nhà hàng</p>
     </div>
 </section>
 
-<!-- CATEGORY FILTER -->
-<section class="category-nav">
-    <div class="container">
-        <ul class="category-list">
-            <li class="active"><a href="#">Tất cả</a></li>
-            <li><a href="#">Ẩm thực</a></li>
-            <li><a href="#">Sự kiện</a></li>
-            <li><a href="#">Ưu đãi</a></li>
-            <li><a href="#">Tin tức</a></li>
-        </ul>
-    </div>
-</section>
+
 
 <!-- BLOG GRID -->
 <main class="container blog-section">
@@ -72,10 +50,8 @@
     </div>
 </main>
 
-<!-- FOOTER -->
-<footer class="footer">
-    <p>© 2025 Tica's Tacos. All rights reserved.</p>
-</footer>
+<!-- Footer -->
+<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 </body>
 </html>
 

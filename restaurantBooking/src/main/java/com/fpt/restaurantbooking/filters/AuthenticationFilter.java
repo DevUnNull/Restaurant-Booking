@@ -20,17 +20,22 @@ import java.util.List;
  */
 @WebFilter("/*")
 public class AuthenticationFilter implements Filter {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
-    
+
     private UserService userService;
-    
+
+    // KHAI BÁO VAI TRÒ VÀ REPORT_URLS ĐÚNG VỊ TRÍ
+    private static final int ADMIN_ROLE_ID = 1;
+    private static final int MANAGER_ROLE_ID = 4;
+
     // URLs that don't require authentication
     private static final List<String> PUBLIC_URLS = Arrays.asList(
             "/login",
             "/register",
             "/",
             "/home",
+            "/menu",
             "/forgot-password",
             "/reset-password",
             "/email-verification",
@@ -48,36 +53,45 @@ public class AuthenticationFilter implements Filter {
             "/uploads/",
             "/error"
     );
-    
+
     // URLs that require admin role
     private static final List<String> ADMIN_URLS = Arrays.asList(
-        "/admin/",
-        "/api/admin/"
+            "/admin/",
+            "/api/admin/"
     );
-    
+
     // URLs that require staff or admin role
     private static final List<String> STAFF_URLS = Arrays.asList(
-        "/staff/",
-        "/api/staff/"
+            "/staff/",
+            "/api/staff/"
     );
-    
+
+    // URLs that require manager or admin role
+    private static final List<String> REPORT_URLS = Arrays.asList(
+            "/overview-report",
+            "/service-report",
+            "/staff-report",
+            "/user-report",
+            "/cancel-report"
+    );
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         logger.info("AuthenticationFilter initialized");
 
     }
-    
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        
+
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-        
+
         String requestURI = httpRequest.getRequestURI();
         String contextPath = httpRequest.getContextPath();
         String path = requestURI.substring(contextPath.length());
-        
+
         logger.info("Processing request - URI: {}, ContextPath: {}, Path: {}", requestURI, contextPath, path);
         logger.info("isPublicUrl('/profile'): {}", isPublicUrl("/profile"));
 
@@ -86,15 +100,26 @@ public class AuthenticationFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
-        
+
         // Check authentication
         HttpSession session = httpRequest.getSession(false);
         User currentUser = null;
-        
+        Integer userRoleId = null;
+
         if (session != null) {
             currentUser = (User) session.getAttribute("currentUser");
+            // ADD: Get Role ID from Session
+            Object roleObj = session.getAttribute("userRole");
+            if (roleObj != null) {
+                try {
+                    // Convert the Object to Integer (using toString() is safer)
+                    userRoleId = (roleObj instanceof Integer) ? (Integer) roleObj : Integer.parseInt(roleObj.toString());
+                } catch (NumberFormatException e) {
+                    logger.error("Error converting Role ID from session: {}", roleObj, e);
+                }
+            }
         }
-        
+
         // If user is not authenticated, redirect to login
         if (currentUser == null) {
             logger.debug("User not authenticated, redirecting to login");
@@ -110,7 +135,18 @@ public class AuthenticationFilter implements Filter {
             }
             return;
         }
-        
+
+        // KIỂM TRA ỦY QUYỀN CHO URL BÁO CÁO
+        if (isReportUrl(path) && !isManagerOrAdmin(userRoleId)) {
+            logger.warn("User {} (Role ID: {}) attempted to access report URL: {}", currentUser.getEmail(), userRoleId, path);
+            if (isApiRequest(path)) {
+                sendJsonError(httpResponse, HttpServletResponse.SC_FORBIDDEN, "Admin or Manager access required for reports");
+            } else {
+                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+            }
+            return;
+        }
+
         // Check authorization for admin URLs
         if (isAdminUrl(path) && !isAdmin(currentUser)) {
             logger.warn("User {} attempted to access admin URL: {}", currentUser.getEmail(), path);
@@ -121,7 +157,7 @@ public class AuthenticationFilter implements Filter {
             }
             return;
         }
-        
+
         // Check authorization for staff URLs
         if (isStaffUrl(path) && !isStaffOrAdmin(currentUser)) {
             logger.warn("User {} attempted to access staff URL: {}", currentUser.getEmail(), path);
@@ -132,7 +168,7 @@ public class AuthenticationFilter implements Filter {
             }
             return;
         }
-        
+
         // Check if user account is active
         if (!currentUser.getIsActive()) {
             logger.warn("Inactive user {} attempted to access: {}", currentUser.getEmail(), path);
@@ -144,22 +180,22 @@ public class AuthenticationFilter implements Filter {
             }
             return;
         }
-        
+
         // Note: Email verification is now handled by LoginController
         // The LoginController will redirect PENDING users to email verification
         // This removes the database call for better performance
-        
+
         // Set user in request attribute for easy access in controllers
         httpRequest.setAttribute("currentUser", currentUser);
-        
+
         chain.doFilter(request, response);
     }
-    
+
     @Override
     public void destroy() {
         logger.info("AuthenticationFilter destroyed");
     }
-    
+
     /**
      * Check if URL is public (doesn't require authentication)
      */
@@ -176,43 +212,57 @@ public class AuthenticationFilter implements Filter {
         logger.info("isPublicUrl check for path '{}': {}", path, result);
         return result;
     }
-    
+
     /**
      * Check if URL requires admin role
      */
     private boolean isAdminUrl(String path) {
         return ADMIN_URLS.stream().anyMatch(adminUrl -> path.startsWith(adminUrl));
     }
-    
+
     /**
      * Check if URL requires staff or admin role
      */
     private boolean isStaffUrl(String path) {
         return STAFF_URLS.stream().anyMatch(staffUrl -> path.startsWith(staffUrl));
     }
-    
+
     /**
      * Check if request is an API request
      */
     private boolean isApiRequest(String path) {
         return path.startsWith("/api/") || path.endsWith(".json") || path.endsWith(".xml");
     }
-    
+
     /**
      * Check if user has admin role
      */
     private boolean isAdmin(User user) {
         return user != null && User.UserRole.ADMIN.equals(user.getRole());
     }
-    
+
     /**
      * Check if user has staff or admin role
      */
     private boolean isStaffOrAdmin(User user) {
         return user != null && (User.UserRole.STAFF.equals(user.getRole()) || User.UserRole.ADMIN.equals(user.getRole()));
     }
-    
-    
+
+    /**
+     * Check if URL requires Admin or Manager role (reports)
+     */
+    private boolean isReportUrl(String path) {
+        // So khớp chính xác các URL báo cáo (giả định URL không có / ở cuối)
+        return REPORT_URLS.stream().anyMatch(reportUrl -> path.equalsIgnoreCase(reportUrl));
+    }
+
+    /**
+     * Kiểm tra xem người dùng có vai trò Admin HOẶC Manager hay không (ID 1 HOẶC 4)
+     */
+    private boolean isManagerOrAdmin(Integer roleId) {
+        return roleId != null && (roleId == ADMIN_ROLE_ID || roleId == MANAGER_ROLE_ID);
+    }
+
     /**
      * Send JSON error response
      */
@@ -220,12 +270,12 @@ public class AuthenticationFilter implements Filter {
         response.setStatus(statusCode);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        
+
         String jsonError = String.format(
-            "{\"error\": true, \"message\": \"%s\", \"statusCode\": %d}",
-            message, statusCode
+                "{\"error\": true, \"message\": \"%s\", \"statusCode\": %d}",
+                message, statusCode
         );
-        
+
         response.getWriter().write(jsonError);
     }
 }

@@ -1,5 +1,8 @@
 package com.fpt.restaurantbooking.models;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 /**
  * User entity representing customers and staff
  */
@@ -7,12 +10,30 @@ public class User extends BaseEntity {
     private Integer userId;
     private Integer roleId;
     private String fullName;
+    private String gender;
     private String email;
     private String phoneNumber;
     private String password;
     private String avatar;
     private String status;
     private String role;
+    private LocalDate dateOfBirth;
+    private String promotion_level_id;
+
+    public User(int userId, String fullName) {
+        this.userId = userId;
+        this.fullName = fullName;
+    }
+
+    public User(Integer userId, Integer roleId, String fullName, String gender, String email, String phoneNumber, String status) {
+        this.userId = userId;
+        this.roleId = roleId;
+        this.fullName = fullName;
+        this.gender = gender;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.status = status;
+    }
 
     public enum UserRole {
         CUSTOMER, STAFF, ADMIN
@@ -23,10 +44,44 @@ public class User extends BaseEntity {
         this.role = "CUSTOMER";
         this.status = "ACTIVE";
     }
+    public User(Integer userId, Integer roleId, String fullName, String email, String phoneNumber, String promotion_level_id, LocalDate dateOfBirth, String gender) {
+        this.userId = userId;
+        this.roleId = roleId;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.promotion_level_id = promotion_level_id;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+    }
 
     // Getters and Setters
     public Integer getUserId() {
         return userId;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String  getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getPromotion_level_id() {
+        return promotion_level_id;
+    }
+
+    public void setPromotion_level_id(String promotion_level_id) {
+        this.promotion_level_id = promotion_level_id;
     }
 
     public void setUserId(Integer userId) {
@@ -97,26 +152,15 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
+    public String getCreatedAtString() {
+        return getCreatedAt() != null ? getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "";
+    }
 
+    public String getUpdatedAtString() {
+        return getUpdatedAt() != null ? getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "";
+    }
 
     public boolean getIsActive() {
         return isActive();
     }
-
-
-    public String toString() {
-        return "User{" +
-                "userId=" + userId +
-                "Pass= "+ password +
-                ", roleId=" + roleId +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", status='" + status + '\'' +
-                ", role='" + role + '\'' +
-                '}';
-    }
-
-
 }

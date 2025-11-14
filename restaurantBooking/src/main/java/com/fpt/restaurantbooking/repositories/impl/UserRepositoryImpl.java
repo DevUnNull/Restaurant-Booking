@@ -2,6 +2,7 @@ package com.fpt.restaurantbooking.repositories.impl;
 
 import com.fpt.restaurantbooking.models.User;
 import com.fpt.restaurantbooking.repositories.UserRepository;
+import com.fpt.restaurantbooking.utils.DatabaseUtil;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -14,44 +15,60 @@ import java.util.Optional;
  * Implementation of UserRepository interface
  */
 public class UserRepositoryImpl implements UserRepository {
-    
+
     private Connection connection;
-    
+
     public UserRepositoryImpl(Connection connection) {
         this.connection = connection;
     }
-    
+
+    public UserRepositoryImpl() {
+
+    }
+
     @Override
     public User save(User user) {
-        String sql = "INSERT INTO users (full_name, email, password, phone_number, role_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";        
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, user.getFullName());
-            stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getPassword());
-            stmt.setString(4, user.getPhoneNumber());
-            stmt.setInt(5, user.getRoleId());
-            stmt.setString(6, user.getStatus());
-            stmt.setTimestamp(7, Timestamp.valueOf(user.getCreatedAt()));
-            stmt.setTimestamp(8, Timestamp.valueOf(user.getUpdatedAt()));
-            
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows > 0) {
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        user.setUserId(generatedKeys.getInt(1));
-                    }
+        String sql = "INSERT INTO Users (full_name, email, phone_number, password, role_id, status, date_of_birth, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPhoneNumber());
+            ps.setString(4, user.getPassword());
+            ps.setInt(5, user.getRoleId());
+            ps.setString(6, user.getStatus());
+
+            if (user.getDateOfBirth() != null) {
+                ps.setObject(7, user.getDateOfBirth());
+            } else {
+                ps.setNull(7, java.sql.Types.DATE);
+            }
+            ps.setString(8, user.getGender());
+
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Tạo user thất bại, không có dòng nào được thêm.");
+            }
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    user.setUserId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Tạo user thất bại, không lấy được ID.");
                 }
             }
             return user;
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving user", e);
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lưu user", e);
         }
     }
-    
+
     @Override
     public User update(User user) {
         String sql = "UPDATE users SET full_name = ?, email = ?, password = ?, phone_number = ?, role_id = ?, status = ?, updated_at = ?, avatar = ? WHERE user_id = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, user.getFullName());
             stmt.setString(2, user.getEmail());
@@ -62,34 +79,6 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
             stmt.setString(8, user.getAvatar());
             stmt.setInt(9, user.getUserId());
-            
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0 ? user : null;
-        } catch (SQLException e) {
-            throw new RuntimeException("Error updating user", e);
-        }
-    }
-
-
-    public User update1(User user) {
-        String sql = "UPDATE users SET full_name = ?, email = ?, password = ?, phone_number = ?, role_id = ?, status = ?, updated_at = ?, avatar = ?, gender = ?, dateOfBirth = ? WHERE user_id = ?";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, user.getFullName());
-            stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getPassword());
-            stmt.setString(4, user.getPhoneNumber());
-            stmt.setInt(5, user.getRoleId());
-            stmt.setString(6, user.getStatus());
-            stmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            stmt.setString(8, user.getAvatar());
-            stmt.setString(9, user.getGender());
-            if (user.getDateOfBirth() != null) {
-                stmt.setDate(10, java.sql.Date.valueOf(user.getDateOfBirth()));
-            } else {
-                stmt.setNull(10, java.sql.Types.DATE);
-            }
-            stmt.setInt(11, user.getUserId());
 
             int affectedRows = stmt.executeUpdate();
             return affectedRows > 0 ? user : null;
@@ -97,14 +86,14 @@ public class UserRepositoryImpl implements UserRepository {
             throw new RuntimeException("Error updating user", e);
         }
     }
-    
+
     @Override
     public Optional<User> findById(Long id) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, id);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(mapResultSetToUser(rs));
@@ -113,17 +102,17 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error finding user by id", e);
         }
-        
+
         return Optional.empty();
     }
-    
+
     @Override
     public Optional<User> findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, email);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(mapResultSetToUser(rs));
@@ -132,10 +121,10 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error finding user by email", e);
         }
-        
+
         return Optional.empty();
     }
-    
+
     @Override
     public Optional<User> findByVerificationToken(String token) {
         // Since verification_token column has been removed and email verification
@@ -143,14 +132,14 @@ public class UserRepositoryImpl implements UserRepository {
         // For now, return empty to avoid SQL errors
         return Optional.empty();
     }
-    
+
     @Override
     public boolean existsByEmail(String email) {
         String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, email);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
@@ -159,18 +148,18 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error checking email existence", e);
         }
-        
+
         return false;
     }
-    
+
     @Override
     public List<User> findByRole(User.UserRole role) {
-        String sql = "SELECT * FROM users WHERE role = ?";
+        String sql = "SELECT * FROM users WHERE role_id = ?";
         List<User> users = new ArrayList<>();
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, role.name());
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     users.add(mapResultSetToUser(rs));
@@ -179,10 +168,10 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error finding users by role", e);
         }
-        
+
         return users;
     }
-    
+
     @Override
     public List<User> findVerifiedUsers() {
         // Since email verification is now handled by Email_Verification table,
@@ -190,7 +179,7 @@ public class UserRepositoryImpl implements UserRepository {
         // For now, return empty list to avoid SQL errors
         return new ArrayList<>();
     }
-    
+
     @Override
     public List<User> findUnverifiedUsers() {
         // Since email verification is now handled by Email_Verification table,
@@ -198,22 +187,22 @@ public class UserRepositoryImpl implements UserRepository {
         // For now, return empty list to avoid SQL errors
         return new ArrayList<>();
     }
-    
+
     @Override
     public boolean updatePassword(Long userId, String newPassword) {
         String sql = "UPDATE users SET password = ?, updated_at = ? WHERE user_id = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, newPassword);
             stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
             stmt.setLong(3, userId);
-            
+
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Error updating password", e);
         }
     }
-    
+
     @Override
     public boolean verifyEmail(String verificationToken) {
         // Since email verification is now handled by Email_Verification table,
@@ -239,12 +228,12 @@ public class UserRepositoryImpl implements UserRepository {
 
         return users;
     }
-    
+
     @Override
     public List<User> findAllActive() {
         String sql = "SELECT * FROM users WHERE status = 'ACTIVE'";
         List<User> users = new ArrayList<>();
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -254,14 +243,14 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error finding active users", e);
         }
-        
+
         return users;
     }
-    
+
     @Override
     public boolean deleteById(Long id) {
         String sql = "DELETE FROM users WHERE user_id = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, id);
             return stmt.executeUpdate() > 0;
@@ -269,11 +258,11 @@ public class UserRepositoryImpl implements UserRepository {
             throw new RuntimeException("Error deleting user", e);
         }
     }
-    
+
     @Override
     public boolean softDeleteById(Long id) {
         String sql = "UPDATE users SET status = 'DELETED', updated_at = ? WHERE user_id = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             stmt.setLong(2, id);
@@ -282,14 +271,14 @@ public class UserRepositoryImpl implements UserRepository {
             throw new RuntimeException("Error soft deleting user", e);
         }
     }
-    
+
     @Override
     public boolean existsById(Long id) {
         String sql = "SELECT COUNT(*) FROM users WHERE user_id = ?";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, id);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;
@@ -298,14 +287,14 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error checking user existence", e);
         }
-        
+
         return false;
     }
-    
+
     @Override
     public long count() {
         String sql = "SELECT COUNT(*) FROM users";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -315,14 +304,14 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error counting users", e);
         }
-        
+
         return 0;
     }
-    
+
     @Override
     public long countActive() {
         String sql = "SELECT COUNT(*) FROM users WHERE status = 'ACTIVE'";
-        
+
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -332,10 +321,10 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Error counting active users", e);
         }
-        
+
         return 0;
     }
-    
+
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setUserId(rs.getInt("user_id"));
@@ -346,64 +335,99 @@ public class UserRepositoryImpl implements UserRepository {
         user.setPhoneNumber(rs.getString("phone_number"));
         user.setPassword(rs.getString("password"));
         user.setAvatar(rs.getString("avatar"));
-
-        Date dateOfBirth = rs.getDate("date_of_birth");
-        if (dateOfBirth != null) {
-            user.setDateOfBirth(dateOfBirth.toLocalDate());
+        user.setGender(rs.getString("gender"));
+        Date dob = rs.getDate("date_of_birth");
+        if (dob != null) {
+            user.setDateOfBirth(dob.toLocalDate());
+        } else {
+            user.setDateOfBirth(null);
         }
-
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
             user.setCreatedAt(createdAt.toLocalDateTime());
         }
-        
+
         Timestamp updatedAt = rs.getTimestamp("updated_at");
         if (updatedAt != null) {
             user.setUpdatedAt(updatedAt.toLocalDateTime());
         }
-        
-        user.setStatus(rs.getString("status"));
 
-        
+        user.setStatus(rs.getString("status"));
+//        user.setRole(rs.getString("role"));
+
         return user;
     }
 
-    public List<User> searchEmployees(String keyword, int offset, int limit) {
-        String sql = "SELECT * FROM users WHERE (full_name LIKE ? OR email LIKE ?) LIMIT ?, ?";
-        List<User> users = new ArrayList<>();
+    @Override
+    public boolean updateInfo(User user) {
+        // Thêm 2 cột mới vào câu SQL
+        String sql = "UPDATE Users SET full_name = ?, phone_number = ?, email = ?, date_of_birth = ?, gender = ? WHERE user_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            String searchPattern = "%" + keyword + "%";
-            stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
-            stmt.setInt(3, offset);
-            stmt.setInt(4, limit);
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getPhoneNumber());
+            ps.setString(3, user.getEmail());
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    users.add(mapResultSetToUser(rs));
+            if (user.getDateOfBirth() != null) {
+                ps.setObject(4, user.getDateOfBirth());
+            } else {
+                ps.setNull(4, java.sql.Types.DATE);
+            }
+            ps.setString(5, user.getGender());
+
+            ps.setInt(6, user.getUserId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    @Override
+    public boolean changePassword(int userId, String newPassword) {
+        String sql = "UPDATE Users SET password = ? WHERE user_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPassword);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateAvatar(int userId, String avatarBase64) {
+        String sql = "UPDATE Users SET avatar = ? WHERE user_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, avatarBase64);
+            ps.setInt(2, userId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public String findPasswordById(int userId) {
+        String sql = "SELECT password FROM Users WHERE user_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password");
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error searching employees", e);
+            e.printStackTrace();
         }
-
-        return users;
-    }
-    public long countSearchEmployees(String keyword) {
-        String sql = "SELECT COUNT(*) FROM users WHERE (full_name LIKE ? OR email LIKE ?) ";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            String searchPattern = "%" + keyword + "%";
-            stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return rs.getLong(1);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error counting search results", e);
-        }
-        return 0;
+        return null;
     }
 
     public List<User> findEmployeesByPage(int offset, int limit) {

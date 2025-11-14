@@ -1,3 +1,4 @@
+/*
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.services.TableService;
@@ -80,3 +81,4 @@ public class TableServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/BookTable/mapTable.jsp").forward(request, response);
     }
 }
+*/
