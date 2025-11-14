@@ -1,4 +1,3 @@
-<%-- File: service-report.jsp (Đã cập nhật) --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -15,7 +14,6 @@
 
     <style>
         :root {
-            /* Color Variables */
             --main-color: #D32F2F;
             --light-red: #FFCDD2;
             --dark-red: #B71C1C;
@@ -25,8 +23,8 @@
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3; /* Blue */
-            --revenue-color: #4CAF50; /* Green */
+            --booking-color: #2196F3;
+            --revenue-color: #4CAF50;
 
             /* THÊM MÀU MỚI CHO KPI */
             --completed-color: #4CAF50;
@@ -50,8 +48,6 @@
             min-height: calc(100vh - var(--top-nav-height));
             position: relative;
         }
-
-        /* ============== TOP NAV (Giữ nguyên) ============== */
         .top-nav {
             position: fixed;
             top: 0;
@@ -99,7 +95,6 @@
             font-weight: bold;
         }
 
-        /* ============== SIDEBAR (Giữ nguyên) ============== */
         .sidebar {
             width: var(--sidebar-width);
             position: fixed;
@@ -131,7 +126,6 @@
             color: white;
         }
 
-        /* ============== MAIN CONTENT (Giữ nguyên) ============== */
         .main-content-body {
             margin-left: var(--sidebar-width);
             flex-grow: 1;
@@ -157,7 +151,6 @@
             overflow: hidden;
         }
 
-        /* ============== COMPONENTS (Giữ nguyên) ============== */
         .filter-section {
             background-color: #fff;
             padding: 15px 20px;
@@ -269,7 +262,6 @@
             margin-left: 5px;
         }
 
-        /* Table CSS (Giữ nguyên) */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -360,7 +352,6 @@
             margin: 20px 0;
         }
 
-        /* Chart Container (Giữ nguyên) */
         #trendChartContainer {
             width: 100%;
             max-width: 100%;
@@ -379,7 +370,6 @@
             height: 100%;
         }
 
-        /* === THÊM CSS CHO KPI CARDS === */
         .kpi-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -416,8 +406,6 @@
         .kpi-card.checked_in { border-color: var(--checkedin-color); }
         .kpi-card.checked_in .kpi-value { color: var(--checkedin-color); }
 
-
-        /* Modal Popup Styles (Giữ nguyên) */
         .modal {
             display: none;
             position: fixed;
@@ -470,7 +458,6 @@
             width: 100%;
         }
 
-        /* Popup Cảnh Báo (Giữ nguyên) */
         #missingDateAlert {
             position: fixed;
             top: 20px;
@@ -493,7 +480,6 @@
             border: 1px solid #FF9800;
         }
 
-        /* Table Widths (Giữ nguyên) */
         table th:nth-child(1), table td:nth-child(1) { width: 10%; min-width: 60px; text-align: center; }
         table th:nth-child(2), table td:nth-child(2) { width: 40%; min-width: 200px; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         table th:nth-child(3), table td:nth-child(3) { width: 25%; min-width: 120px; text-align: right; }
@@ -546,7 +532,6 @@
             .checkbox-option {
                 padding-left: 5px;
             }
-            /* THÊM: Cho KPI cards xuống 2 cột trên di động */
             .kpi-container {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -555,7 +540,6 @@
 </head>
 <body>
 
-<%-- TOP NAV (Giữ nguyên) --%>
 <div class="top-nav">
     <div class="restaurant-group">
         <a href="<%= request.getContextPath() %>/" class="home-button">
@@ -576,7 +560,6 @@
     </div>
 </div>
 
-<%-- WRAPPER VÀ SIDEBAR (Giữ nguyên) --%>
 <div class="wrapper">
     <div class="sidebar">
         <ul>
@@ -596,7 +579,6 @@
                 <div class="filter-section">
                     <h3 style="color: #555; margin-top: 0; margin-bottom: 15px;">Bộ Lọc Báo Cáo</h3>
 
-                    <%-- KHU VỰC NÚT LỌC VÀ FORM (Giữ nguyên) --%>
                     <div class="filter-grid" style="margin-bottom: 20px;">
                         <div class="filter-item" style="min-width: unset;">
                             <button class="btn-apply" onclick="openModal()"><i class="fas fa-filter"></i> Mở Bộ Lọc</button>
@@ -619,7 +601,6 @@
                         <input type="hidden" name="timeGrouping" id="hiddenTimeGrouping" value="${requestScope.selectedTimeGrouping}">
                     </form>
 
-                    <%-- KHU VỰC HIỂN THỊ LỖI VÀ CẢNH BÁO (Giữ nguyên) --%>
                     <c:if test="${not empty requestScope.errorMessage}">
                         <div id="alertError" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px;">
                             <i class="fas fa-times-circle"></i>
@@ -632,11 +613,8 @@
                         </div>
                     </c:if>
 
-
-                    <%-- KHỐI HIỂN THỊ BÁO CÁO (Logic <c:if> giữ nguyên) --%>
                     <c:if test="${empty requestScope.errorMessage and requestScope.reportRunAttempted}">
 
-                        <%-- KHU VỰC BIỂU ĐỒ (Layout HTML giữ nguyên) --%>
                         <div class="chart-options">
                             <h2 style="margin: 0; color: var(--main-color);">Xu Hướng Doanh Thu & Đặt Bàn</h2>
                             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px;">
@@ -649,10 +627,6 @@
                                     <button data-type="line" class="active"><i class="fas fa-chart-line"></i> Đường</button>
                                     <button data-type="bar"><i class="fas fa-chart-bar"></i> Cột</button>
                                 </div>
-                                <div class="checkbox-option" style="margin-left: 10px;">
-                                    <input type="checkbox" id="trend-show-bookings" checked>
-                                    <label for="trend-show-bookings">Hiển Thị Lượt Đặt</label>
-                                </div>
                             </div>
                         </div>
 
@@ -660,8 +634,6 @@
                             <canvas id="trendChart"></canvas>
                         </div>
 
-                        <%-- === THÊM KHU VỰC KPI CARDS === --%>
-                        <%-- Chỉ hiển thị các thẻ này nếu đang lọc "All" --%>
                         <c:if test="${requestScope.selectedStatus eq 'All'}">
                             <div class="kpi-container">
                                 <div class="kpi-card completed">
@@ -689,7 +661,6 @@
 
                         <hr/>
 
-                        <%-- KHU VỰC BẢNG (Giữ nguyên) --%>
                         <div class="report-card">
                             <h2>Chi Tiết: Các Món Bán Chạy Nhất</h2>
                             <div class="table-controls">
@@ -729,7 +700,6 @@
                         </div>
 
                     </c:if>
-                    <%-- === KẾT THÚC KHỐI <c:if> === --%>
                 </div>
                 <hr/>
             </div>
@@ -737,7 +707,6 @@
     </div>
 </div>
 
-<%-- MODAL LỌC (Giữ nguyên) --%>
 <div id="filterModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -777,26 +746,19 @@
     </div>
 </div>
 
-<%-- POPUP CẢNH BÁO (Giữ nguyên) --%>
 <div id="missingDateAlert">
     <i class="fas fa-exclamation-triangle"></i>
     Vui lòng chọn đầy đủ Ngày Bắt đầu và Ngày Kết thúc!
 </div>
 
-<%-- ================================================= --%>
-<%--                PHẦN JAVASCRIPT (Đã sửa)           --%>
-<%-- ================================================= --%>
 <script>
-    // === SỬA ĐỔI 1: Lấy TOÀN BỘ dữ liệu chi tiết ===
-    // ĐÃ SỬA LỖI: Ánh xạ đúng các trường từ Java (requestScope.trendReport)
     const trendData = [
         <c:forEach var="item" items="${requestScope.trendReport}" varStatus="loop">
         {
             date: "${item.report_date}",
             revenue: ${item.total_revenue},
-            total_bookings: ${item.total_bookings}, // Dùng cho biểu đồ cột
+            total_bookings: ${item.total_bookings},
 
-            // Dữ liệu chi tiết cho KPI cards (ĐÃ SỬA)
             completed: ${item.completed_bookings},
             cancelled: ${item.cancelled_bookings},
             no_show: ${item.no_show_bookings},
@@ -810,15 +772,11 @@
     const ctxTrend = document.getElementById('trendChart')?.getContext('2d');
     let trendChart;
 
-    // Màu cho biểu đồ
     const REVENUE_COLOR = 'rgba(211, 47, 47, 0.9)'; // Đỏ đậm
     const BOOKING_COLOR = 'rgba(33, 150, 243, 0.7)'; // Xanh (Booking)
     const BOOKING_BORDER_COLOR = 'rgba(33, 150, 243, 1)';
 
 
-    // ===================================
-    // HÀM VẼ BIỂU ĐỒ XU HƯỚNG
-    // ===================================
     function updateTrendChart(revenueChartType = 'line', showBookings = true) {
         if (!ctxTrend) return;
         if (trendChart) trendChart.destroy();
@@ -826,12 +784,9 @@
         const labels = trendData.map(item => item.date);
         const revenueValues = trendData.map(item => item.revenue);
 
-        // Lấy 'total_bookings' cho biểu đồ
         const bookingValues = trendData.map(item => item.total_bookings);
 
-        // Chỉ còn 2 datasets
         let datasets = [
-            // 1. Dataset Doanh thu (Y-axis 1)
             {
                 type: revenueChartType,
                 label: 'Tổng Doanh Thu (VND)',
@@ -843,7 +798,6 @@
                 tension: 0.1,
                 fill: revenueChartType === 'line'
             },
-            // 2. Dataset Lượt đặt (Y-axis 2)
             {
                 type: 'bar',
                 label: 'Tổng Lượt Đặt',
@@ -913,20 +867,17 @@
         });
     }
 
-    // === HÀM MỚI: Tính toán và cập nhật KPI Cards ===
     function updateKPICards() {
-        // Chỉ chạy nếu các thẻ KPI tồn tại (tức là đang lọc "All")
+
         const kpiElement = document.getElementById('kpi-completed');
         if (!kpiElement) return;
 
-        // Tính tổng
         const totalCompleted = trendData.reduce((acc, item) => acc + item.completed, 0);
         const totalCancelled = trendData.reduce((acc, item) => acc + item.cancelled, 0);
         const totalNoShow = trendData.reduce((acc, item) => acc + item.no_show, 0);
         const totalPending = trendData.reduce((acc, item) => acc + item.pending, 0);
         const totalCheckedIn = trendData.reduce((acc, item) => acc + item.checked_in, 0);
 
-        // Cập nhật DOM
         kpiElement.textContent = totalCompleted;
         document.getElementById('kpi-cancelled').textContent = totalCancelled;
         document.getElementById('kpi-no_show').textContent = totalNoShow;
@@ -935,17 +886,12 @@
     }
 
 
-    // ===================================
-    // KHỞI TẠO VÀ GẮN SỰ KIỆN
-    // ===================================
     document.addEventListener('DOMContentLoaded', () => {
-        // Chỉ khởi tạo nếu biểu đồ tồn tại (reportRunAttempted == true)
         if (ctxTrend) {
             updateTrendChart('line', true);
-            updateKPICards(); // <<< Chạy hàm KPI
+            updateKPICards();
         }
 
-        // Sự kiện cho Biểu đồ XU HƯỚNG
         document.querySelectorAll('#trendChartToggle button').forEach(button => {
             button.addEventListener('click', function() {
                 document.querySelector('#trendChartToggle .active').classList.remove('active');
@@ -961,7 +907,6 @@
             updateTrendChart(chartType, this.checked);
         });
 
-        // Sự kiện cho Nút Ngày/Tuần/Tháng
         document.querySelectorAll('#timeGroupingToggle button').forEach(button => {
             button.addEventListener('click', function() {
                 if (this.classList.contains('active')) return;
@@ -974,7 +919,6 @@
             });
         });
 
-        // ==================== PAGINATION & SEARCH ====================
         const tableBody = document.querySelector('table tbody');
         const paginationContainer = document.querySelector('.pagination');
         const searchInput = document.getElementById('searchInput');
@@ -1103,7 +1047,6 @@
             setupPagination();
         }
 
-        // ==================== EXPORT LOGIC ====================
         const btnExportExcel_Top = document.getElementById('btnExportExcel_Top');
         const btnExportPDF_Top = document.getElementById('btnExportPDF_Top');
         function getFilterParams() {
@@ -1140,8 +1083,6 @@
         btnExportPDF_Top?.addEventListener('click', () => handleExport('pdf'));
     });
 
-    // ==================== MODAL FUNCTIONS ====================
-    // Đặt các hàm này bên ngoài DOMContentLoaded để onclick="" có thể thấy chúng
     function openModal() {
         document.getElementById('filterModal').style.display = 'flex';
         document.getElementById('modalServiceType').value = document.getElementById('hiddenServiceType').value;

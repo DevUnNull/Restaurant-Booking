@@ -21,7 +21,6 @@ public class CustomerReportRepository {
 
 
     public int getTotalActiveCustomerCount() throws SQLException {
-        // (Hàm này giữ nguyên code cũ)
         String query = "SELECT COUNT(user_id) FROM Users WHERE role_id = 3;";
         try (Connection con = db.getConnection();
              PreparedStatement stm = con.prepareStatement(query)) {
@@ -39,7 +38,6 @@ public class CustomerReportRepository {
 
 
     public long getGrandTotalSpending(String startDate, String endDate) throws SQLException {
-        // (Hàm này giữ nguyên code cũ)
         String query = """
             SELECT IFNULL(SUM(R.total_amount), 0) AS grand_total
             FROM Reservations R
@@ -69,7 +67,6 @@ public class CustomerReportRepository {
 
 
     public int getNewCustomerCount(String startDate, String endDate) throws SQLException {
-        // (Logic này đã được sửa để chỉ lấy từ Users)
         int count = 0;
 
         String query = """
@@ -100,7 +97,6 @@ public class CustomerReportRepository {
 
 
     public List<Map<String, Object>> getCustomerOverviewData(String startDate, String endDate, int limit, int offset) throws SQLException {
-        // (Hàm này giữ nguyên code cũ)
         List<Map<String, Object>> customerList = new ArrayList<>();
         String query = """
             SELECT
@@ -162,7 +158,6 @@ public class CustomerReportRepository {
         return customerList;
     }
 
-    // (Các hàm chi tiết khác giữ nguyên)
     public Map<String, Object> getCustomerDetails(int userId) throws SQLException {
         Map<String, Object> customerDetail = new HashMap<>();
         String query = """
@@ -234,5 +229,4 @@ public class CustomerReportRepository {
         return reservationList;
     }
 
-    // XÓA: Hàm getOrderItemsForReservation đã được loại bỏ khỏi file này.
 }

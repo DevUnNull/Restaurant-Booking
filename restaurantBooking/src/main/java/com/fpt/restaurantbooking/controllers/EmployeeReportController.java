@@ -1,8 +1,6 @@
 package com.fpt.restaurantbooking.controllers;
 
 import com.fpt.restaurantbooking.repositories.EmployeeReportRepository;
-// [ĐÃ XÓA] import com.fasterxml.jackson.databind.ObjectMapper; -> Không dùng nữa
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +29,6 @@ public class EmployeeReportController extends HttpServlet {
         try { return LocalDate.parse(dateStr); } catch (Exception e) { return null; }
     }
 
-    // Hàm lấp đầy ngày trống (Zero-fill)
     private List<Map<String, Object>> zeroFillTimeTrend(List<Map<String, Object>> rawData, LocalDate startDate, LocalDate endDate, String unit) {
         Map<String, Map<String, Object>> dataMap = new HashMap<>();
         for (Map<String, Object> item : rawData) {
@@ -71,11 +67,9 @@ public class EmployeeReportController extends HttpServlet {
                 zeroRow.put("totalServes", 0);
                 zeroRow.put("totalWorkingHours", 0.0f);
                 filledData.add(zeroRow);
-                // Để tránh lặp vô tận nếu logic unit sai, ta put vào map để check
                 dataMap.put(label, zeroRow);
             }
 
-            // Tăng thời gian
             if ("month".equals(unit)) current = labelDate.plusMonths(1);
             else if ("week".equals(unit)) current = labelDate.plusWeeks(1);
             else current = current.plusDays(1);
@@ -95,7 +89,6 @@ public class EmployeeReportController extends HttpServlet {
         String employeeIdParam = request.getParameter("employeeId");
         String searchStaffNameParam = request.getParameter("searchStaffName");
 
-        // Mặc định chartUnit
         String chartUnitParam = request.getParameter("chartUnit");
         if (chartUnitParam == null || chartUnitParam.isEmpty()) chartUnitParam = "day";
         request.setAttribute("chartUnitParam", chartUnitParam);
@@ -103,7 +96,6 @@ public class EmployeeReportController extends HttpServlet {
         LocalDate startDate = safeParseDate(startDateParam);
         LocalDate endDate = safeParseDate(endDateParam);
 
-        // Nếu chưa có ngày -> Trả về trang rỗng ngay
         if (startDate == null || endDate == null) {
             request.setAttribute("isDetailMode", false);
             request.getRequestDispatcher("/WEB-INF/report/staff-report.jsp").forward(request, response);
@@ -124,7 +116,6 @@ public class EmployeeReportController extends HttpServlet {
         int offset = (currentPage - 1) * pageSize;
 
         try {
-            // Xử lý tìm kiếm tên
             if (searchStaffNameParam != null && !searchStaffNameParam.trim().isEmpty()) {
                 Integer foundId = reportRepository.findEmployeeIdByName(searchStaffNameParam);
                 if (foundId != null) {
@@ -135,7 +126,6 @@ public class EmployeeReportController extends HttpServlet {
                 }
             }
 
-            // --- 1. CHẾ ĐỘ CHI TIẾT ---
             if (employeeIdParam != null && !employeeIdParam.isEmpty()) {
                 int empId = Integer.parseInt(employeeIdParam);
                 Map<String, Object> detail = reportRepository.getEmployeeDetailById(empId);
@@ -146,15 +136,11 @@ public class EmployeeReportController extends HttpServlet {
                             empId, startDate.toString(), nextDay, chartUnitParam);
 
                     if (trendData != null) {
-                        // Ép kiểu float để tránh lỗi JS
                         for(Map<String, Object> item : trendData) {
                             Object val = item.get("totalWorkingHours");
                             if (val instanceof Double) item.put("totalWorkingHours", ((Double) val).floatValue());
                         }
-                        // Lấp đầy dữ liệu
                         trendData = zeroFillTimeTrend(trendData, startDate, endDate, chartUnitParam);
-
-                        // [THAY ĐỔI Ở ĐÂY: Gửi thẳng List sang JSP, không convert JSON nữa]
                         request.setAttribute("employeeTimeTrend", trendData);
                     }
                     request.setAttribute("selectedEmployeeDetail", detail);
@@ -164,14 +150,12 @@ public class EmployeeReportController extends HttpServlet {
                     request.setAttribute("isDetailMode", false);
                 }
             }
-            // --- 2. CHẾ ĐỘ TỔNG QUAN ---
             else {
                 int totalRecords = reportRepository.getTotalFilteredEmployees(startDate.toString(), endDate.toString());
                 int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
                 List<Map<String, Object>> list = reportRepository.getEmployeeOverviewData(
                         startDate.toString(), endDate.toString(), null, offset, pageSize);
 
-                // Null check
                 if(list != null) {
                     for(Map<String, Object> i : list) {
                         if(i.get("totalServes") == null) i.put("totalServes", 0);

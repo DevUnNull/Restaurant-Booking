@@ -16,23 +16,23 @@
 
     <style>
         :root {
-            /* Biến Màu Sắc */
-            --main-color: #D32F2F; /* Đỏ - Nút Chính, Thanh Điều Hướng Trên Cùng, Viền Tiêu đề */
-            --light-red: #FFCDD2; /* Đỏ Nhạt - HR, Hover Bảng, Viền Biểu đồ */
-            --dark-red: #B71C1C; /* Đỏ Đậm - Tiêu đề, Văn bản Mạnh */
-            --menu-bg: #8B0000; /* Nền Menu - Thanh Bên */
-            --menu-hover: #A52A2A; /* Hover Menu */
+
+            --main-color: #D32F2F;
+            --light-red: #FFCDD2;
+            --dark-red: #B71C1C;
+            --menu-bg: #8B0000;
+            --menu-hover: #A52A2A;
             --text-light: #f8f8f8;
             --text-dark: #333;
             --sidebar-width: 250px;
             --top-nav-height: 60px;
-            --booking-color: #2196F3; /* Xanh Dương */
-            --revenue-color: #4CAF50; /* Xanh Lá */
-            --cancellation-color: #E91E63; /* Hồng/Đỏ - Đánh dấu Hủy */
-            --rate-color: #FF9800; /* Cam/Cảnh báo */
-            --staff-chart-color: #00897B; /* Xanh Lục Bảo */
+            --booking-color: #2196F3;
+            --revenue-color: #4CAF50;
+            --cancellation-color: #E91E63;
+            --rate-color: #FF9800;
+            --staff-chart-color: #00897B;
             --staff-border-color: #00897B;
-            --customer-color: #1976D2; /* Xanh Dương Khách hàng */
+            --customer-color: #1976D2;
         }
 
         body {
@@ -72,13 +72,6 @@
             gap: 15px;
             flex-shrink: 0;
         }
-
-        /*.top-nav .restaurant-name {*/
-        /* font-size: 1.2em;*/
-        /* font-weight: bold;*/
-        /* color: white;*/
-        /* white-space: nowrap;*/
-        /*}*/
 
         .home-button {
             background-color: var(--main-color);
@@ -156,7 +149,6 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
             width: 100%;
-            max-width: 100%;
             margin: 0 auto;
             box-sizing: border-box;
         }
@@ -222,7 +214,8 @@
             margin: 20px 0;
         }
 
-        /* ----- PHONG CÁCH BẢNG HỦY ĐẶT BÀN ----- */
+        .warning-box-yellow { background-color: #fff9c4; color: #5d4037; padding: 15px; border: 1px solid #fff59d; border-radius: 4px; margin-top: 20px; }
+
         .cancellation-table {
             width: 100%;
             border-collapse: collapse;
@@ -409,17 +402,37 @@
             margin-top: 20px;
             width: 100%;
         }
+
+        /* [THÊM] CSS cho thanh thông báo lỗi (giống user-report) */
+        #missingDateAlert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 30px;
+            min-width: 300px;
+            max-width: 90%;
+            background-color: #E65100;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            z-index: 1002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
-<%-- SỬA: Đặt pageSize = 5 --%>
 <c:set var="pageSize" value="5" scope="request"/>
 <div class="top-nav">
     <div class="restaurant-group">
         <a href="<%= request.getContextPath() %>/" class="home-button">
             <i class="fas fa-home"></i> Trang Chủ
         </a>
-        <%--        <span class="restaurant-name">Đặt Bàn Nhà Hàng</span>--%>
     </div>
     <div class="user-info">
     <span>Người dùng:
@@ -448,6 +461,14 @@
 
     <div class="main-content-body">
         <div class="content-container">
+
+            <form action="cancel-report" method="GET" id="filterForm" style="display: none;">
+                <input type="hidden" id="formStartDate" name="startDate" value="${requestScope.startDateParam}">
+                <input type="hidden" id="formEndDate" name="endDate" value="${requestScope.endDateParam}">
+                <input type="hidden" name="page" value="1">
+                <input type="hidden" name="pageSize" value="${pageSize}">
+            </form>
+
             <h1>Báo Cáo Chi Tiết Hủy Đặt Bàn & Không Đến </h1>
 
             <div class="filter-section">
@@ -474,7 +495,6 @@
             </c:if>
 
             <c:choose>
-                <%-- KHI CÓ DỮ LIỆU ĐỂ HIỂN THỊ (Sau khi submit ngày) --%>
                 <c:when test="${not empty requestScope.cancellationData}">
                     <table class="cancellation-table">
                         <thead>
@@ -537,7 +557,6 @@
                         </tbody>
                     </table>
 
-                    <%-- PHẦN HIỂN THỊ PHÂN TRANG --%>
                     <c:set var="currentPage" value="${requestScope.currentPage}"/>
                     <c:set var="totalPages" value="${requestScope.totalPages}"/>
                     <c:set var="totalRecords" value="${requestScope.totalRecords}"/>
@@ -547,7 +566,7 @@
                     <c:if test="${totalRecords > 0 and totalPages > 1}">
                         <div class="pagination-container">
                             <ul class="pagination">
-                                    <%-- Nút Previous --%>
+
                                 <c:url var="prevUrl" value="cancel-report">
                                     <c:param name="page" value="${currentPage - 1}"/>
                                     <c:param name="pageSize" value="${pageSize}"/>
@@ -563,7 +582,6 @@
                                     </c:otherwise>
                                 </c:choose>
 
-                                    <%-- Hiển thị các số trang (tối đa 5 trang) --%>
                                 <c:set var="startPage" value="${(currentPage - 2) > 1 ? (currentPage - 2) : 1}"/>
                                 <c:set var="endPage" value="${(currentPage + 2) < totalPages ? (currentPage + 2) : totalPages}"/>
 
@@ -606,7 +624,6 @@
                                     <li><a href="${lastPageUrl}"><c:out value="${totalPages}"/></a></li>
                                 </c:if>
 
-                                    <%-- Nút Next --%>
                                 <c:url var="nextUrl" value="cancel-report">
                                     <c:param name="page" value="${currentPage + 1}"/>
                                     <c:param name="pageSize" value="${pageSize}"/>
@@ -626,13 +643,12 @@
                     </c:if>
 
                 </c:when>
-                <%-- KHI CHƯA CÓ DỮ LIỆU HOẶC CHƯA CHỌN NGÀY --%>
+
+                <%-- [SỬA] Thay thế hộp cảnh báo màu đỏ bằng hộp màu vàng --%>
                 <c:otherwise>
                     <c:if test="${empty requestScope.startDateParam}">
-                        <div style="background-color: #ffcccc; color: #cc0000; padding: 20px; border-radius: 5px; text-align: center; margin-top: 20px;">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <strong>Vui lòng chọn Ngày Bắt đầu và Ngày Kết thúc</strong> để xem dữ liệu hủy đặt bàn.
-                        </div>
+                        <%-- Khối này đã được SỬA --%>
+                        <div class="warning-box-yellow">Vui lòng chọn cả ngày bắt đầu và ngày kết thúc để xem báo cáo chi tiết.</div>
                     </c:if>
                     <c:if test="${not empty requestScope.startDateParam and empty requestScope.cancellationData}">
                         <p>Không có đặt bàn nào bị hủy hoặc đánh dấu là không đến trong khoảng thời gian đã chọn.</p>
@@ -667,12 +683,34 @@
         </form>
     </div>
 </div>
+
+<div id="missingDateAlert">
+    <span id="missingDateAlertText"></span>
+</div>
+
 <script>
     const START_OF_BUSINESS_DATE = "2025-01-01";
     const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
-    // SỬA: Lấy giá trị pageSize từ JSTL (đã set là 5)
     const TARGET_PAGE_SIZE = "${pageSize}";
+
+    // [THÊM] Lấy thẻ HTML của thanh thông báo lỗi
+    const missingDateAlert = document.getElementById('missingDateAlert');
+    const missingDateAlertText = document.getElementById('missingDateAlertText');
+
+    // [THÊM] Hàm showAlert (giống hệt user-report)
+    function showAlert(message) {
+        missingDateAlertText.textContent = message;
+        missingDateAlert.style.display = 'block';
+        setTimeout(() => { missingDateAlert.style.opacity = '1'; }, 10);
+        setTimeout(() => {
+            missingDateAlert.style.opacity = '0';
+            setTimeout(() => {
+                missingDateAlert.style.display = 'none';
+                missingDateAlertText.textContent = '';
+            }, 300);
+        }, 5000); // Tự động đóng sau 5s
+    }
 
     function openFilterModal() {
         const modalStartDateInput = document.getElementById('modalStartDate');
@@ -687,8 +725,6 @@
             modalStartDateInput.value = START_OF_BUSINESS_DATE;
         }
 
-        // SỬA: Sửa lại logic: nếu chưa có ngày cuối (lần đầu tải trang)
-        // thì không set, nếu có mà lớn hơn ngày hiện tại thì set về hôm nay
         if (modalEndDateInput.value > CURRENT_DATE) {
             modalEndDateInput.value = CURRENT_DATE;
         }
@@ -700,36 +736,44 @@
         document.getElementById('filterModal').style.display = 'none';
     }
 
+    // [SỬA] Cập nhật hàm submitFilterForm
     function submitFilterForm() {
         const startDate = document.getElementById('modalStartDate').value;
         const endDate = document.getElementById('modalEndDate').value;
 
-        // --- Bổ sung xác thực phía Client ---
+        // --- [SỬA] Sử dụng showAlert thay vì alert() ---
         if (!startDate) {
-            alert("Lỗi: Vui lòng chọn Ngày Bắt đầu (Từ Ngày) cho báo cáo.");
-            return; // Ngăn không cho form gửi đi
+            showAlert("Lỗi: Vui lòng chọn Ngày Bắt đầu (Từ Ngày) cho báo cáo.");
+            return;
         }
         if (!endDate) {
-            alert("Lỗi: Vui lòng chọn Ngày Kết thúc (Đến Ngày) cho báo cáo.");
-            return; // Ngăn không cho form gửi đi
+            showAlert("Lỗi: Vui lòng chọn Ngày Kết thúc (Đến Ngày) cho báo cáo.");
+            return;
         }
 
         if (new Date(startDate) > new Date(endDate)) {
-            alert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
+            showAlert("Lỗi: Ngày Bắt đầu không được lớn hơn Ngày Kết thúc. Vui lòng kiểm tra lại.");
             return;
         }
 
         if (startDate > CURRENT_DATE || endDate > CURRENT_DATE) {
-            alert("Lỗi: Vui lòng không chọn Ngày Bắt đầu hoặc Ngày Kết thúc là ngày trong tương lai.");
-            // Giữ logic tiếp theo, nhưng thông báo đã cảnh báo người dùng.
+            showAlert("Lỗi: Vui lòng không chọn Ngày Bắt đầu hoặc Ngày Kết thúc là ngày trong tương lai.");
+            return;
         }
-        // --- Kết thúc xác thực ---
 
-        // SỬA: Sử dụng biến TARGET_PAGE_SIZE
-        let url = 'cancel-report?startDate=' + startDate + '&endDate=' + endDate + '&page=1' + '&pageSize=' + TARGET_PAGE_SIZE;
+        // [SỬA] Sử dụng form ẩn
+        const formStartDate = document.getElementById('formStartDate');
+        const formEndDate = document.getElementById('formEndDate');
 
-        window.location.href = url;
-        closeFilterModal();
+        if (formStartDate && formEndDate) {
+            formStartDate.value = startDate;
+            formEndDate.value = endDate;
+
+            document.getElementById('filterForm').submit();
+            closeFilterModal();
+        } else {
+            showAlert("Lỗi DOM: Không tìm thấy form ẩn 'filterForm'.");
+        }
     }
 
     window.onclick = function (event) {

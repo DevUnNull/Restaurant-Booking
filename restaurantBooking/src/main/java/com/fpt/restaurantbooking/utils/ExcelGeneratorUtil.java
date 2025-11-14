@@ -12,10 +12,11 @@ public class ExcelGeneratorUtil {
 
     /**
      * Tạo báo cáo Excel cho danh sách món ăn bán chạy nhất. (Hàm này có vẻ cũ, giữ lại)
+     * (Đã cập nhật xử lý kiểu số an toàn)
      */
     public void generate(List<Map<String, Object>> data, OutputStream outputStream,
                          String serviceType, String status, String startDate, String endDate) throws IOException {
-        // ... (Giữ nguyên code của hàm này, không thay đổi) ...
+
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("BaoCaoMonBanChayNhat");
         CellStyle headerStyle = workbook.createCellStyle();
@@ -44,14 +45,16 @@ public class ExcelGeneratorUtil {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(rowNum - 5);
             row.createCell(1).setCellValue((String) rowData.get("item_name"));
+
+            // === SỬA LỖI AN TOÀN KIỂU DỮ LIỆU ===
             Object quantityObj = rowData.get("total_quantity_sold");
             int quantity = 0;
-            if (quantityObj instanceof Long) {
-                quantity = ((Long) quantityObj).intValue();
-            } else if (quantityObj instanceof Integer) {
-                quantity = (Integer) quantityObj;
+            if (quantityObj instanceof Number) {
+                quantity = ((Number) quantityObj).intValue();
             }
             row.createCell(2).setCellValue(quantity);
+            // === KẾT THÚC SỬA LỖI ===
+
             BigDecimal revenue = (BigDecimal) rowData.get("total_revenue_from_item");
             Cell revenueCell = row.createCell(3);
             revenueCell.setCellValue(revenue != null ? revenue.doubleValue() : 0.0);
@@ -96,6 +99,8 @@ public class ExcelGeneratorUtil {
             revenueValue = ((Long) revenueObj).doubleValue();
         } else if (revenueObj instanceof BigDecimal) {
             revenueValue = ((BigDecimal) revenueObj).doubleValue();
+        } else if (revenueObj instanceof Number) { // Thêm để an toàn
+            revenueValue = ((Number) revenueObj).doubleValue();
         }
         revenueCell.setCellValue(revenueValue);
         revenueCell.setCellStyle(currencyStyle);
@@ -129,6 +134,8 @@ public class ExcelGeneratorUtil {
                     trendRevenueValue = ((Long) trendRevenueObj).doubleValue();
                 } else if (trendRevenueObj instanceof BigDecimal) {
                     trendRevenueValue = ((BigDecimal) trendRevenueObj).doubleValue();
+                } else if (trendRevenueObj instanceof Number) { // Thêm để an toàn
+                    trendRevenueValue = ((Number) trendRevenueObj).doubleValue();
                 }
                 trendRevenueCell.setCellValue(trendRevenueValue);
                 trendRevenueCell.setCellStyle(currencyStyle);
@@ -143,11 +150,12 @@ public class ExcelGeneratorUtil {
         workbook.close();
     }
 
-// Trong file: ExcelGeneratorUtil.java
 
-// ... (Hàm generateOverviewReport và các import giữ nguyên) ...
-
-    // === SỬA ĐỔI PHƯƠNG THỨC NÀY ===
+    /**
+     * === PHIÊN BẢN ĐÃ SỬA LỖI CHO BÁO CÁO DỊCH VỤ ===
+     * Tạo báo cáo Excel cho cả top selling và trend.
+     * (Đã cập nhật xử lý kiểu số an toàn)
+     */
     public void generateServiceReport(List<Map<String, Object>> topSellingItems,
                                       List<Map<String, Object>> trendData, // Thêm tham số này
                                       OutputStream outputStream,
@@ -203,13 +211,22 @@ public class ExcelGeneratorUtil {
                 row.createCell(0).setCellValue(rowNumTop - 5); // Rank
                 row.createCell(1).setCellValue((String) rowData.get("item_name"));
 
+                // === SỬA LỖI AN TOÀN KIỂU DỮ LIỆU ===
                 Object quantityObj = rowData.get("total_quantity_sold");
-                int quantity = (quantityObj instanceof Long) ? ((Long) quantityObj).intValue() : (Integer) quantityObj;
+                int quantity = 0;
+                if (quantityObj instanceof Number) {
+                    quantity = ((Number) quantityObj).intValue();
+                }
                 row.createCell(2).setCellValue(quantity);
+                // === KẾT THÚC SỬA LỖI ===
 
-                BigDecimal revenue = (BigDecimal) rowData.get("total_revenue_from_item");
+                Object revenueObj = rowData.get("total_revenue_from_item");
+                double revenue = 0.0;
+                if (revenueObj instanceof Number) {
+                    revenue = ((Number) revenueObj).doubleValue();
+                }
                 Cell revenueCell = row.createCell(3);
-                revenueCell.setCellValue(revenue != null ? revenue.doubleValue() : 0.0);
+                revenueCell.setCellValue(revenue);
                 revenueCell.setCellStyle(currencyStyle);
             }
         }
@@ -254,16 +271,23 @@ public class ExcelGeneratorUtil {
                 Row row = trendSheet.createRow(rowNumTrend++);
                 row.createCell(0).setCellValue(rowData.get("report_date").toString());
 
+                // Xử lý Doanh thu (an toàn)
+                Object revenueObj = rowData.get("total_revenue");
+                double revenue = 0.0;
+                if (revenueObj instanceof Number) {
+                    revenue = ((Number) revenueObj).doubleValue();
+                }
                 Cell revenueCell = row.createCell(1);
-                revenueCell.setCellValue(((BigDecimal) rowData.get("total_revenue")).doubleValue());
+                revenueCell.setCellValue(revenue);
                 revenueCell.setCellStyle(currencyStyle);
 
-                row.createCell(2).setCellValue((Integer) rowData.get("total_bookings"));
-                row.createCell(3).setCellValue((Integer) rowData.get("completed_bookings"));
-                row.createCell(4).setCellValue((Integer) rowData.get("cancelled_bookings"));
-                row.createCell(5).setCellValue((Integer) rowData.get("no_show_bookings"));
-                row.createCell(6).setCellValue((Integer) rowData.get("pending_bookings"));
-                row.createCell(7).setCellValue((Integer) rowData.get("checked_in_bookings"));
+                // Xử lý các kiểu Integer (an toàn)
+                row.createCell(2).setCellValue(getIntegerFromMap(rowData, "total_bookings"));
+                row.createCell(3).setCellValue(getIntegerFromMap(rowData, "completed_bookings"));
+                row.createCell(4).setCellValue(getIntegerFromMap(rowData, "cancelled_bookings"));
+                row.createCell(5).setCellValue(getIntegerFromMap(rowData, "no_show_bookings"));
+                row.createCell(6).setCellValue(getIntegerFromMap(rowData, "pending_bookings"));
+                row.createCell(7).setCellValue(getIntegerFromMap(rowData, "checked_in_bookings"));
             }
         }
         for (int i = 0; i < headersTrend.length; i++) {
@@ -273,6 +297,15 @@ public class ExcelGeneratorUtil {
         // Kết thúc và ghi workbook
         workbook.write(outputStream);
         workbook.close();
+    }
+
+    // Hàm tiện ích private để lấy số nguyên từ Map một cách an toàn
+    private int getIntegerFromMap(Map<String, Object> map, String key) {
+        Object obj = map.get(key);
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+        return 0; // Trả về 0 nếu null hoặc không phải là số
     }
 
 }

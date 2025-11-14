@@ -16,7 +16,6 @@ public class ServiceReportRepository {
 
     DatabaseUtil db = new DatabaseUtil();
 
-    // === Hàm getAvailableServiceTypes (Giữ nguyên) ===
     public List<String> getAvailableServiceTypes() throws SQLException {
         List<String> serviceTypes = new ArrayList<>();
         String query = "SELECT DISTINCT service_name FROM Services WHERE status = 'ACTIVE' ORDER BY service_name;";
@@ -35,7 +34,6 @@ public class ServiceReportRepository {
         return serviceTypes;
     }
 
-    // === Hàm getTopSellingItems (Giữ nguyên) ===
     public List<Map<String, Object>> getTopSellingItems(String serviceType, String status, String startDate, String endDate, int limit) throws SQLException {
         List<Map<String, Object>> reportList = new ArrayList<>();
 
@@ -113,7 +111,6 @@ public class ServiceReportRepository {
         return reportList;
     }
 
-    // === SỬA ĐỔI HÀM getServiceTrendReport ===
     public List<Map<String, Object>> getServiceTrendReport(String serviceType, String status, String startDate, String endDate, String timeGrouping) throws SQLException {
         List<Map<String, Object>> trendList = new ArrayList<>();
 
@@ -137,8 +134,6 @@ public class ServiceReportRepository {
                 break;
         }
 
-        // === SỬA ĐỔI CÂU TRUY VẤN SQL ===
-        // Thêm 6 cột COUNT(DISTINCT CASE...) để lấy dữ liệu cho KPI
         String query = """
             SELECT
                 %s,
@@ -211,7 +206,6 @@ public class ServiceReportRepository {
                     row.put("report_date", LocalDate.parse(rs.getString("report_date")).toString());
                     row.put("total_revenue", rs.getBigDecimal("total_revenue"));
 
-                    // === SỬA ĐỔI: Lấy tất cả các cột đếm mới ===
                     row.put("total_bookings", rs.getInt("total_bookings"));
                     row.put("completed_bookings", rs.getInt("completed_bookings"));
                     row.put("cancelled_bookings", rs.getInt("cancelled_bookings"));
