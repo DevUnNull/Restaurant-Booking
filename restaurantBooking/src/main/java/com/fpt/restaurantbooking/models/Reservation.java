@@ -24,6 +24,11 @@ public class Reservation extends BaseEntity {
         PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
     }
 
+    // Default constructor
+    public Reservation() {
+        super();
+    }
+
     public Reservation(int reservationId, int userId, int tableId, int guestCount, LocalDateTime createdAt, String status, int guestCountDuplicate) {
         super();
         this.reservationId = reservationId;

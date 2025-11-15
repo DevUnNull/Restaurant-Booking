@@ -20,10 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * Servlet for STAFF to view order details
@@ -169,6 +172,9 @@ public class StaffOrderDetailsServlet extends HttpServlet {
 
             logger.info("Staff viewing order details for reservation {}", reservationId);
 
+            // Load all available menu items for adding to order
+            List<MenuItem> allMenuItems = menuItemDAO.getAllAvailableMenuItems();
+
             // Set attributes for JSP
             request.setAttribute("reservation", reservation);
             request.setAttribute("tables", tables);
@@ -178,6 +184,7 @@ public class StaffOrderDetailsServlet extends HttpServlet {
             request.setAttribute("payment", payment);
             request.setAttribute("calculatedTotal", calculatedTotal);
             request.setAttribute("reservationId", reservationId);
+            request.setAttribute("allMenuItems", allMenuItems);
 
             // Forward to staff-specific JSP
             request.getRequestDispatcher("/WEB-INF/views/management/staffOrderDetails.jsp")
@@ -187,6 +194,166 @@ public class StaffOrderDetailsServlet extends HttpServlet {
             logger.error("Error loading staff order details", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Lỗi tải chi tiết đơn hàng");
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        Gson gson = new Gson();
+        JsonObject jsonResponse = new JsonObject();
+
+        try {
+            // Check authentication
+            if (session == null || session.getAttribute("userId") == null) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            // Check authorization - only STAFF (role = 2) can access
+            Integer userRole = (Integer) session.getAttribute("userRole");
+            if (userRole == null || userRole != 2) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Không có quyền truy cập.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            String action = request.getParameter("action");
+            if (action == null || !action.equals("addOrderItem")) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Hành động không hợp lệ.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            // Get parameters
+            String reservationIdStr = request.getParameter("reservationId");
+            String itemIdStr = request.getParameter("itemId");
+            String quantityStr = request.getParameter("quantity");
+            String specialInstructions = request.getParameter("specialInstructions");
+
+            // Validate parameters
+            if (reservationIdStr == null || itemIdStr == null || quantityStr == null) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Thiếu thông tin bắt buộc.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            int reservationId, itemId, quantity;
+            try {
+                reservationId = Integer.parseInt(reservationIdStr);
+                itemId = Integer.parseInt(itemIdStr);
+                quantity = Integer.parseInt(quantityStr);
+            } catch (NumberFormatException e) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Thông tin không hợp lệ.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            if (quantity <= 0) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Số lượng phải lớn hơn 0.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            // Check if reservation exists
+            Reservation reservation = reservationDAO.getReservationById(reservationId);
+            if (reservation == null) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Không tìm thấy đơn hàng.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            // Check if menu item exists and get price
+            MenuItem menuItem = menuItemDAO.getMenuItemById(itemId);
+            if (menuItem == null) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Không tìm thấy món ăn.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            if (!"AVAILABLE".equals(menuItem.getStatus())) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Món ăn hiện không khả dụng.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            // Create order item
+            OrderItem orderItem = new OrderItem();
+            orderItem.setReservationId(reservationId);
+            orderItem.setItemId(itemId);
+            orderItem.setQuantity(quantity);
+            orderItem.setUnitPrice(menuItem.getPrice());
+            orderItem.setStatus("PENDING");
+            if (specialInstructions != null && !specialInstructions.trim().isEmpty()) {
+                orderItem.setSpecialInstructions(specialInstructions.trim());
+            }
+
+            // Add order item to database
+            int orderItemId = orderItemDAO.addOrderItem(orderItem);
+            if (orderItemId <= 0) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Không thể thêm món vào đơn hàng.");
+                out.print(gson.toJson(jsonResponse));
+                out.flush();
+                return;
+            }
+
+            // Calculate new total amount
+            List<OrderItem> allOrderItems = orderItemDAO.getOrderItemsByReservationId(reservationId);
+            BigDecimal newTotal = BigDecimal.ZERO;
+            for (OrderItem item : allOrderItems) {
+                if (item.getUnitPrice() != null && item.getQuantity() != null) {
+                    BigDecimal itemTotal = item.getUnitPrice()
+                            .multiply(BigDecimal.valueOf(item.getQuantity()));
+                    newTotal = newTotal.add(itemTotal);
+                }
+            }
+
+            // Update reservation total amount
+            boolean updateSuccess = reservationDAO.updateTotalAmount(reservationId, newTotal);
+            if (!updateSuccess) {
+                logger.warn("Failed to update total amount for reservation {}", reservationId);
+            }
+
+            logger.info("Added order item {} (itemId={}, quantity={}) to reservation {}",
+                    orderItemId, itemId, quantity, reservationId);
+
+            jsonResponse.addProperty("success", true);
+            jsonResponse.addProperty("message", "Đã thêm món vào đơn hàng thành công.");
+            jsonResponse.addProperty("orderItemId", orderItemId);
+            jsonResponse.addProperty("newTotal", newTotal.toString());
+            out.print(gson.toJson(jsonResponse));
+            out.flush();
+
+        } catch (Exception e) {
+            logger.error("Error adding order item", e);
+            jsonResponse.addProperty("success", false);
+            jsonResponse.addProperty("message", "Lỗi hệ thống: " + e.getMessage());
+            out.print(gson.toJson(jsonResponse));
+            out.flush();
         }
     }
 }

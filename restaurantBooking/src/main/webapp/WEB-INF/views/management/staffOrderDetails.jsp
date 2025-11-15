@@ -69,6 +69,241 @@
             box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
         }
 
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-add-item {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .btn-add-item:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #dc3545;
+        }
+
+        .modal-header h2 {
+            color: #000000;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #dc3545;
+        }
+
+        .menu-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .menu-item-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #ffffff;
+        }
+
+        .menu-item-card:hover {
+            border-color: #dc3545;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.2);
+        }
+
+        .menu-item-card.selected {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .menu-item-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .menu-item-card h3 {
+            font-size: 1em;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 8px;
+        }
+
+        .menu-item-card .price {
+            color: #dc3545;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #dc3545;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .quantity-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background: #c82333;
+        }
+
+        .quantity-input {
+            width: 80px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .btn-modal {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-modal-primary {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-modal-primary:hover {
+            background: #c82333;
+        }
+
+        .btn-modal-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-modal-secondary:hover {
+            background: #5a6268;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -297,9 +532,14 @@
             <i class="fas fa-file-invoice"></i>
             Chi Tiết Đơn Hàng #${reservation.reservationId}
         </h1>
-        <a href="${pageContext.request.contextPath}/OrderManagement" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Quay lại
-        </a>
+        <div class="header-actions">
+            <button class="btn-add-item" onclick="openAddItemModal()">
+                <i class="fas fa-plus"></i> Thêm món
+            </button>
+            <a href="${pageContext.request.contextPath}/OrderManagement" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
     </div>
 
     <!-- Summary Cards -->
@@ -664,6 +904,260 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Add Menu Item -->
+<div id="addItemModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-utensils"></i> Thêm món vào đơn hàng</h2>
+            <span class="close-modal" onclick="closeAddItemModal()">&times;</span>
+        </div>
+
+        <div class="form-group">
+            <label>Tìm kiếm món ăn:</label>
+            <input type="text" id="searchMenuItem" placeholder="Nhập tên món ăn..."
+                   onkeyup="filterMenuItems()">
+        </div>
+
+        <div class="menu-items-grid" id="menuItemsGrid">
+            <c:forEach var="menuItem" items="${allMenuItems}">
+                <div class="menu-item-card" data-item-id="${menuItem.itemId}"
+                     data-item-name="${menuItem.itemName}"
+                     data-item-price="${menuItem.price}"
+                     data-item-image="${menuItem.imageUrl}">
+                    <c:if test="${menuItem.imageUrl != null && !menuItem.imageUrl.isEmpty()}">
+                        <img src="${pageContext.request.contextPath}${menuItem.imageUrl}"
+                             alt="${menuItem.itemName}"
+                             onerror="this.src='${pageContext.request.contextPath}/images/default-food.jpg'">
+                    </c:if>
+                    <c:if test="${menuItem.imageUrl == null || menuItem.imageUrl.isEmpty()}">
+                        <img src="${pageContext.request.contextPath}/images/default-food.jpg"
+                             alt="${menuItem.itemName}">
+                    </c:if>
+                    <h3>${menuItem.itemName}</h3>
+                    <div class="price">
+                        <fmt:formatNumber value="${menuItem.price}" pattern="#,###"/> VNĐ
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+
+        <c:if test="${empty allMenuItems}">
+            <p style="text-align: center; padding: 40px; color: #6c757d;">
+                <i class="fas fa-info-circle"></i> Không có món ăn nào khả dụng.
+            </p>
+        </c:if>
+
+        <div id="selectedItemSection" style="display: none;">
+            <div class="form-group">
+                <label>Món đã chọn:</label>
+                <div style="padding: 15px; background: #f7fafc; border-radius: 8px; margin-bottom: 15px;">
+                    <strong id="selectedItemName"></strong>
+                    <div class="price" id="selectedItemPrice"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Số lượng:</label>
+                <div class="quantity-controls">
+                    <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                    <input type="number" id="itemQuantity" class="quantity-input"
+                           value="1" min="1" onchange="validateQuantity()">
+                    <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Ghi chú đặc biệt (tùy chọn):</label>
+                <textarea id="specialInstructions"
+                          placeholder="Ví dụ: Không cay, ít đường, không hành..."
+                          rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="loading-spinner" id="loadingSpinner">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>Đang thêm món...</p>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-modal btn-modal-secondary" onclick="closeAddItemModal()">
+                Hủy
+            </button>
+            <button class="btn-modal btn-modal-primary" id="addItemBtn"
+                    onclick="addItemToOrder()" disabled>
+                <i class="fas fa-check"></i> Thêm vào đơn hàng
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedItemId = null;
+    let selectedItemPrice = null;
+
+    function openAddItemModal() {
+        document.getElementById('addItemModal').style.display = 'block';
+        resetModal();
+    }
+
+    function closeAddItemModal() {
+        document.getElementById('addItemModal').style.display = 'none';
+        resetModal();
+    }
+
+    function resetModal() {
+        selectedItemId = null;
+        selectedItemPrice = null;
+        document.getElementById('selectedItemSection').style.display = 'none';
+        document.getElementById('addItemBtn').disabled = true;
+        document.getElementById('itemQuantity').value = 1;
+        document.getElementById('specialInstructions').value = '';
+        document.getElementById('searchMenuItem').value = '';
+
+        // Reset all cards
+        document.querySelectorAll('.menu-item-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Show all items
+        filterMenuItems();
+    }
+
+
+    function selectMenuItem(itemId, itemName, price, cardElement) {
+        selectedItemId = itemId;
+        selectedItemPrice = price;
+
+        // Update UI
+        document.getElementById('selectedItemName').textContent = itemName;
+        document.getElementById('selectedItemPrice').innerHTML =
+            new Intl.NumberFormat('vi-VN').format(price) + ' VNĐ';
+        document.getElementById('selectedItemSection').style.display = 'block';
+        document.getElementById('addItemBtn').disabled = false;
+
+        // Highlight selected card
+        document.querySelectorAll('.menu-item-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        if (cardElement) {
+            cardElement.classList.add('selected');
+        }
+    }
+
+    function increaseQuantity() {
+        const quantityInput = document.getElementById('itemQuantity');
+        quantityInput.value = parseInt(quantityInput.value) + 1;
+    }
+
+    function decreaseQuantity() {
+        const quantityInput = document.getElementById('itemQuantity');
+        const currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+            quantityInput.value = currentValue - 1;
+        }
+    }
+
+    function validateQuantity() {
+        const quantityInput = document.getElementById('itemQuantity');
+        const value = parseInt(quantityInput.value);
+        if (isNaN(value) || value < 1) {
+            quantityInput.value = 1;
+        }
+    }
+
+    function filterMenuItems() {
+        const searchTerm = document.getElementById('searchMenuItem').value.toLowerCase();
+        const cards = document.querySelectorAll('.menu-item-card');
+
+        cards.forEach(card => {
+            const itemName = card.querySelector('h3').textContent.toLowerCase();
+            if (itemName.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function addItemToOrder() {
+        if (!selectedItemId) {
+            alert('Vui lòng chọn món ăn');
+            return;
+        }
+
+        const quantity = parseInt(document.getElementById('itemQuantity').value);
+        const specialInstructions = document.getElementById('specialInstructions').value.trim();
+        const reservationId = ${reservation.reservationId};
+
+        if (quantity < 1) {
+            alert('Số lượng phải lớn hơn 0');
+            return;
+        }
+
+        // Show loading
+        document.getElementById('loadingSpinner').classList.add('active');
+        document.getElementById('addItemBtn').disabled = true;
+
+        // Prepare form data
+        const formData = new URLSearchParams();
+        formData.append('action', 'addOrderItem');
+        formData.append('reservationId', reservationId);
+        formData.append('itemId', selectedItemId);
+        formData.append('quantity', quantity);
+        if (specialInstructions) {
+            formData.append('specialInstructions', specialInstructions);
+        }
+
+        // Send AJAX request
+        fetch('${pageContext.request.contextPath}/staffOrderDetails', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            body: formData.toString()
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').classList.remove('active');
+
+                if (data.success) {
+                    alert(data.message);
+                    // Reload page to show new item
+                    window.location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                    document.getElementById('addItemBtn').disabled = false;
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').classList.remove('active');
+                document.getElementById('addItemBtn').disabled = false;
+                console.error('Error:', error);
+                alert('Lỗi khi thêm món: ' + error.message);
+            });
+    }
+
+    // Use event delegation for menu item cards
+    document.addEventListener('click', function(event) {
+        const card = event.target.closest('.menu-item-card');
+        if (card && document.getElementById('addItemModal').style.display === 'block') {
+            const itemId = parseInt(card.getAttribute('data-item-id'));
+            const itemName = card.getAttribute('data-item-name');
+            const price = parseFloat(card.getAttribute('data-item-price'));
+
+            selectMenuItem(itemId, itemName, price, card);
+        }
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('addItemModal');
+        if (event.target == modal) {
+            closeAddItemModal();
+        }
+    }
+</script>
 </body>
 </html>
 
