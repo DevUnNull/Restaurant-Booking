@@ -897,7 +897,7 @@
                 document.querySelector('#trendChartToggle .active').classList.remove('active');
                 this.classList.add('active');
                 const chartType = this.getAttribute('data-type');
-                const showBookings = document.getElementById('trend-show-bookings').checked;
+                const showBookings = true;
                 updateTrendChart(chartType, showBookings);
             });
         });
