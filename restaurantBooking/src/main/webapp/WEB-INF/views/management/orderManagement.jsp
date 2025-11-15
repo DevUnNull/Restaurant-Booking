@@ -569,11 +569,18 @@
 <div class="container">
     <!-- Header -->
     <div class="header">
-        <h1>
-            <i class="fas fa-clipboard-list"></i>
-            Quản lý đơn hàng
-        </h1>
-        <p>Xem và quản lý tất cả các đơn đặt bàn của khách hàng</p>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>
+                    <i class="fas fa-clipboard-list"></i>
+                    Quản lý đơn hàng
+                </h1>
+                <p>Xem và quản lý tất cả các đơn đặt bàn của khách hàng</p>
+            </div>
+            <button onclick="openCreateOrderModal()" class="btn-create-order" style="padding: 12px 24px; background: #dc3545; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1em; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-plus"></i> Tạo đơn hàng mới
+            </button>
+        </div>
     </div>
 
     <!-- Statistics Cards -->
@@ -876,6 +883,394 @@
     // Auto-submit on filter change
     document.getElementById('statusFilter').addEventListener('change', function() {
         document.getElementById('filterForm').submit();
+    });
+
+    // Create Order Modal
+    function openCreateOrderModal() {
+        document.getElementById('createOrderModal').style.display = 'flex';
+    }
+
+    function closeCreateOrderModal() {
+        document.getElementById('createOrderModal').style.display = 'none';
+        document.getElementById('createOrderForm').reset();
+
+        // Reset slot selection
+        document.querySelectorAll('.slot-btn-create').forEach(btn => {
+            btn.style.borderColor = '#e2e8f0';
+            btn.style.background = 'transparent';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        });
+        document.getElementById('createOrderSlot').value = '';
+        document.getElementById('createOrderTime').value = '';
+
+        // Reset slot time displays
+        document.getElementById('morningTimeCreate').textContent = '--:-- - --:--';
+        document.getElementById('afternoonTimeCreate').textContent = '--:-- - --:--';
+        document.getElementById('eveningTimeCreate').textContent = '--:-- - --:--';
+    }
+
+    // Handle form submission - Wait for DOM to be ready
+    function initCreateOrderForm() {
+        const createOrderForm = document.getElementById('createOrderForm');
+        if (!createOrderForm) {
+            console.error('createOrderForm not found! Retrying...');
+            setTimeout(initCreateOrderForm, 100);
+            return;
+        }
+
+        console.log('createOrderForm found, attaching event listener');
+
+        createOrderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('=== FORM SUBMIT START ===');
+
+            // Get all form values
+            const formDataObj = {
+                action: 'createReservation',
+                customerName: this.querySelector('[name="customerName"]').value,
+                customerPhone: this.querySelector('[name="customerPhone"]').value,
+                customerEmail: this.querySelector('[name="customerEmail"]').value || '',
+                reservationDate: this.querySelector('[name="reservationDate"]').value,
+                slot: document.getElementById('createOrderSlot').value,
+                reservationTime: document.getElementById('createOrderTime').value,
+                guestCount: this.querySelector('[name="guestCount"]').value,
+                specialRequests: this.querySelector('[name="specialRequests"]').value || ''
+            };
+
+            // Get selected table IDs
+            const selectedTables = Array.from(document.querySelectorAll('input[name="tableIds"]:checked'))
+                .map(cb => cb.value);
+
+            console.log('Selected tables:', selectedTables);
+
+            if (selectedTables.length === 0) {
+                alert('Vui lòng chọn ít nhất một bàn');
+                return;
+            }
+
+            // Check slot is selected
+            if (!formDataObj.slot || !formDataObj.reservationTime) {
+                alert('Vui lòng chọn slot thời gian');
+                return;
+            }
+
+            formDataObj.tableIds = selectedTables.join(',');
+
+            // Debug: Log all form data
+            console.log('Form data object:', formDataObj);
+
+            // Convert to URLSearchParams (application/x-www-form-urlencoded)
+            const formData = new URLSearchParams();
+            for (const [key, value] of Object.entries(formDataObj)) {
+                formData.append(key, value);
+                console.log(key + ': ' + value);
+            }
+
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
+
+            const url = '${pageContext.request.contextPath}/OrderManagement';
+            console.log('Sending request to:', url);
+
+            // Ensure action is set correctly
+            console.log('Action before send:', formData.get('action'));
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: formData.toString()
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.text(); // Get as text first to see what we get
+                })
+                .then(text => {
+                    console.log('Response text:', text);
+                    try {
+                        const data = JSON.parse(text);
+                        console.log('Parsed JSON:', data);
+                        if (data.success) {
+                            alert(data.message);
+                            closeCreateOrderModal();
+                            // Reload page to show new order in list
+                            window.location.reload();
+                        } else {
+                            alert('Lỗi: ' + data.message);
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing JSON:', e);
+                        console.error('Response was:', text);
+                        alert('Lỗi: Không thể xử lý phản hồi từ server. Vui lòng kiểm tra console.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert('Có lỗi xảy ra khi tạo đơn hàng: ' + error.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                });
+        });
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCreateOrderForm);
+    } else {
+        initCreateOrderForm();
+    }
+</script>
+
+<!-- Create Order Modal -->
+<div id="createOrderModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #dc3545; font-size: 1.8em; margin: 0;">
+                <i class="fas fa-plus-circle"></i> Tạo đơn hàng mới
+            </h2>
+            <button onclick="closeCreateOrderModal()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: #666;">&times;</button>
+        </div>
+
+        <form id="createOrderForm">
+            <div style="display: grid; gap: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-user"></i> Tên khách hàng <span style="color: red;">*</span>
+                    </label>
+                    <input type="text" name="customerName" required
+                           style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;"
+                           placeholder="Nhập tên khách hàng">
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-phone"></i> Số điện thoại <span style="color: red;">*</span>
+                    </label>
+                    <input type="tel" name="customerPhone" required
+                           style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;"
+                           placeholder="Nhập số điện thoại">
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" name="customerEmail"
+                           style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;"
+                           placeholder="Nhập email (tùy chọn)">
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-calendar"></i> Ngày đặt <span style="color: red;">*</span>
+                    </label>
+                    <input type="date" id="createOrderDate" name="reservationDate" required
+                           style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;"
+                           onchange="loadSlotsForCreateOrder(this.value)">
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-clock"></i> Chọn Slot <span style="color: red;">*</span>
+                    </label>
+                    <div id="slotSelectionCreateOrder" style="display: flex; flex-direction: column; gap: 10px;">
+                        <button type="button" class="slot-btn-create" data-slot="MORNING" id="slotMorningCreate"
+                                style="padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 8px; background: transparent; color: #333; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-sun"></i> Slot Sáng <span class="slot-time-text" id="morningTimeCreate">--:-- - --:--</span></span>
+                        </button>
+                        <button type="button" class="slot-btn-create" data-slot="AFTERNOON" id="slotAfternoonCreate"
+                                style="padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 8px; background: transparent; color: #333; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-cloud-sun"></i> Slot Chiều <span class="slot-time-text" id="afternoonTimeCreate">--:-- - --:--</span></span>
+                        </button>
+                        <button type="button" class="slot-btn-create" data-slot="EVENING" id="slotEveningCreate"
+                                style="padding: 12px 20px; border: 2px solid #e2e8f0; border-radius: 8px; background: transparent; color: #333; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-moon"></i> Slot Tối <span class="slot-time-text" id="eveningTimeCreate">--:-- - --:--</span></span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="createOrderSlot" name="slot" required>
+                    <input type="hidden" id="createOrderTime" name="reservationTime">
+                    <input type="hidden" name="action" value="createReservation">
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-users"></i> Số lượng khách <span style="color: red;">*</span>
+                    </label>
+                    <input type="number" name="guestCount" required min="1"
+                           style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;"
+                           placeholder="Nhập số lượng khách">
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-table"></i> Chọn bàn <span style="color: red;">*</span>
+                    </label>
+                    <div style="max-height: 200px; overflow-y: auto; border: 2px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+                        <c:forEach var="table" items="${allTables}">
+                            <label style="display: flex; align-items: center; gap: 10px; padding: 8px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: background 0.2s;"
+                                   onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" name="tableIds" value="${table.tableId}"
+                                       style="width: 18px; height: 18px; cursor: pointer;">
+                                <span style="font-weight: 600;">${table.tableName}</span>
+                                <span style="color: #666; font-size: 0.9em;">(Tầng ${table.floor}, ${table.capacity} người)</span>
+                            </label>
+                        </c:forEach>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        <i class="fas fa-comment"></i> Ghi chú đặc biệt
+                    </label>
+                    <textarea name="specialRequests" rows="3"
+                              style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em; resize: vertical;"
+                              placeholder="Nhập ghi chú (nếu có)"></textarea>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end;">
+                <button type="button" onclick="closeCreateOrderModal()"
+                        style="padding: 12px 24px; background: #e2e8f0; color: #333; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    Hủy
+                </button>
+                <button type="submit"
+                        style="padding: 12px 24px; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-check"></i> Tạo đơn hàng
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // === SLOT MANAGEMENT FOR CREATE ORDER ===
+    let currentSlotDataCreateOrder = null;
+
+    function formatTime(timeStr) {
+        if (!timeStr) return '--:--';
+        return timeStr.substring(0, 5);
+    }
+
+    function loadSlotsForCreateOrder(date) {
+        if (!date) return;
+
+        fetch('${pageContext.request.contextPath}/findTable?date=' + encodeURIComponent(date))
+            .then(response => response.json())
+            .then(data => {
+                currentSlotDataCreateOrder = data;
+
+                // Update morning slot
+                const morningBtn = document.getElementById('slotMorningCreate');
+                const morningTime = document.getElementById('morningTimeCreate');
+                if (data.morning && !data.morning.blocked) {
+                    morningTime.textContent = formatTime(data.morning.startTime) + ' - ' + formatTime(data.morning.endTime);
+                    morningBtn.style.borderColor = '#e2e8f0';
+                    morningBtn.style.cursor = 'pointer';
+                    morningBtn.style.opacity = '1';
+                    morningBtn.onclick = () => selectSlotCreateOrder('MORNING', data.morning.startTime);
+                } else {
+                    morningTime.textContent = 'Không khả dụng';
+                    morningBtn.style.borderColor = '#ccc';
+                    morningBtn.style.cursor = 'not-allowed';
+                    morningBtn.style.opacity = '0.5';
+                    morningBtn.onclick = null;
+                }
+
+                // Update afternoon slot
+                const afternoonBtn = document.getElementById('slotAfternoonCreate');
+                const afternoonTime = document.getElementById('afternoonTimeCreate');
+                if (data.afternoon && !data.afternoon.blocked) {
+                    afternoonTime.textContent = formatTime(data.afternoon.startTime) + ' - ' + formatTime(data.afternoon.endTime);
+                    afternoonBtn.style.borderColor = '#e2e8f0';
+                    afternoonBtn.style.cursor = 'pointer';
+                    afternoonBtn.style.opacity = '1';
+                    afternoonBtn.onclick = () => selectSlotCreateOrder('AFTERNOON', data.afternoon.startTime);
+                } else {
+                    afternoonTime.textContent = 'Không khả dụng';
+                    afternoonBtn.style.borderColor = '#ccc';
+                    afternoonBtn.style.cursor = 'not-allowed';
+                    afternoonBtn.style.opacity = '0.5';
+                    afternoonBtn.onclick = null;
+                }
+
+                // Update evening slot
+                const eveningBtn = document.getElementById('slotEveningCreate');
+                const eveningTime = document.getElementById('eveningTimeCreate');
+                if (data.evening && !data.evening.blocked) {
+                    eveningTime.textContent = formatTime(data.evening.startTime) + ' - ' + formatTime(data.evening.endTime);
+                    eveningBtn.style.borderColor = '#e2e8f0';
+                    eveningBtn.style.cursor = 'pointer';
+                    eveningBtn.style.opacity = '1';
+                    eveningBtn.onclick = () => selectSlotCreateOrder('EVENING', data.evening.startTime);
+                } else {
+                    eveningTime.textContent = 'Không khả dụng';
+                    eveningBtn.style.borderColor = '#ccc';
+                    eveningBtn.style.cursor = 'not-allowed';
+                    eveningBtn.style.opacity = '0.5';
+                    eveningBtn.onclick = null;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading slots:', error);
+            });
+    }
+
+    function selectSlotCreateOrder(slotType, startTime) {
+        console.log('Selecting slot:', slotType, 'Time:', startTime);
+
+        // Remove previous selection
+        document.querySelectorAll('.slot-btn-create').forEach(btn => {
+            btn.style.borderColor = '#e2e8f0';
+            btn.style.background = 'transparent';
+        });
+
+        // Add selection
+        const slotId = 'slot' + slotType.charAt(0) + slotType.slice(1).toLowerCase() + 'Create';
+        const btn = document.getElementById(slotId);
+        if (btn) {
+            btn.style.borderColor = '#dc3545';
+            btn.style.background = 'rgba(220, 53, 69, 0.1)';
+
+            // Normalize time format: ensure it's HH:mm:ss format for server
+            let normalizedTime = startTime;
+            if (normalizedTime && normalizedTime.length === 5) {
+                // If format is "08:00", convert to "08:00:00"
+                normalizedTime = normalizedTime + ':00';
+            }
+
+            document.getElementById('createOrderSlot').value = slotType;
+            document.getElementById('createOrderTime').value = normalizedTime;
+
+            console.log('Slot selected:', slotType, 'Normalized time:', normalizedTime);
+        } else {
+            console.error('Button not found for slot:', slotId);
+        }
+    }
+
+    // Set min date to today and initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('createOrderDate');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+            // Load slots if date is already set
+            if (dateInput.value) {
+                loadSlotsForCreateOrder(dateInput.value);
+            }
+        }
     });
 </script>
 </body>
